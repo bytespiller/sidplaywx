@@ -1,0 +1,2 @@
+add_library(libstilview STATIC IMPORTED)
+set_target_properties(libstilview PROPERTIES IMPORTED_LOCATION C:/msys64/mingw64/lib/libstilview.a)

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Theme displayName="Default">
+  <Images>
+    <Image type="svg" offset="0,10" scale="1.0" name="icon_chip" path="svg/chip-memory.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_copyright" path="svg/copyright-line.svg"/>
+    <Image type="svg" offset="3,3" scale="0.8" name="btn_eq" path="svg/equalizer-fill.svg"/>
+    <Image type="svg" offset="25,55" scale="0.7" name="btn_infinite" path="svg/infinity-loop.svg"/> <!-- weird one, requires huge offsets -->
+    <Image type="svg" offset="3,3" scale="0.8" name="btn_playonce" path="svg/lock-line.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_music" path="svg/music-fill.svg"/>
+    <Image type="svg" offset="3,3" scale="0.8" name="btn_sequential" path="svg/order-play-line.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="btn_pause" path="svg/pause-fill.svg"/>
+    <Image type="svg" offset="-2,0" scale="1.0" name="btn_play" path="svg/play-fill.svg"/>
+    <Image type="svg" offset="3,3" scale="0.8" name="btn_repeatall" path="svg/repeat-line.svg"/>
+    <Image type="svg" offset="3,3" scale="0.8" name="btn_repeatone" path="svg/repeat-one-line.svg"/>
+    <Image type="svg" offset="5,5" scale="0.7" name="btn_prevsubsong" path="svg/rewind-fill.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="btn_skipback" path="svg/skip-back-fill.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="btn_skipforward" path="svg/skip-forward-fill.svg"/>
+    <Image type="svg" offset="5,5" scale="0.7" name="btn_nextsubsong" path="svg/speed-fill.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="btn_stop" path="svg/stop-fill.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_author" path="svg/user-3-fill.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_defaultsubsong" path="svg/vip-crown-2-line.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_skipshort" path="svg/timer-fill.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_removesong" path="svg/dislike-fill.svg"/>
+  </Images>
+  <GuiElements>
+    <GuiElement name="Seekbar">
+      <Colors>
+        <Color type="wxSYS" value="wxSYS_COLOUR_HIGHLIGHT" property="thumbColor"/>
+        <Color type="wxSYS" value="wxSYS_COLOUR_BTNHIGHLIGHT" property="thumbPressedColor"/>
+        <Color type="wxSYS" value="wxSYS_COLOUR_WINDOW" property="fillColorBackground"/>
+        <Color type="wxSYS" value="wxSYS_COLOUR_HIGHLIGHT" property="fillColorBarDefault"/>
+        <Color type="wxSYS" value="wxSYS_COLOUR_HIGHLIGHT" property="fillColorBarSeeking"/>
+        <Color type="wxSYS" value="wxSYS_COLOUR_3DDKSHADOW" property="fillColorBarPreviewDiscard"/>
+        <Color type="wxSYS" value="wxSYS_COLOUR_ACTIVECAPTION" property="fillColorBarSeekingRemaining"/>
+        <Color type="wxSYS" value="wxSYS_COLOUR_WINDOW" property="thumbDisabledColor"/>
+      </Colors>
+    </GuiElement>
+  </GuiElements>
+</Theme>

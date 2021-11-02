@@ -1,0 +1,125 @@
+/*
+ * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
+ * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+#pragma once
+
+#include <wx/wxprec.h>
+#ifndef WX_PRECOMP
+    #include <wx/wx.h>
+#endif
+
+#include "../Theme/ThemeData/ThemeData.h"
+#include "../UIElements/CompositeSeekBar.h"
+#include "../UIElements/MenuBar.h"
+#include "../UIElements/PlayPauseButton.h"
+#include "../UIElements/RepeatModeButton.h"
+#include "../UIElements/Playlist/Playlist.h"
+
+namespace Settings
+{
+	class Options;
+}
+
+namespace FrameElements
+{
+	enum class PlaylistIconId : int
+	{
+		NoIcon = UIElements::Playlist::PlaylistIcons::ICON_ID_NO_ICON,
+		DefaultSubsongIndicator,
+		ChipIcon,
+		SkipShort,
+		RemoveSong
+	};
+
+	class ElementsPlayer
+	{
+	public:
+		enum class PopupMenuItemId_VolumeSlider : int
+		{
+			ResetVolume = 0,
+			DisableControl,
+			EnableControl
+		};
+
+		enum class MenuItemId_Player : int
+		{
+			Undefined = UIElements::MenuBar::MENU_ID_UNDEFINED,
+
+			// File
+			OpenFiles,
+			OpenFolders,
+			EnqueueFiles,
+			EnqueueFolders,
+			Exit,
+
+			// Edit
+			PlaybackMods,
+			Preferences,
+
+			// Help
+			About,
+		};
+
+	public:
+		ElementsPlayer() = delete;
+		ElementsPlayer(const ElementsPlayer&) = delete;
+		ElementsPlayer& operator=(const ElementsPlayer&) = delete;
+
+	    explicit ElementsPlayer(wxPanel& panel, Settings::AppSettings& appSettings, const ThemeData::ThemeData& themeData);
+
+	public:
+		void EnablePlaybackControls(bool enabled);
+
+	private: // Event handlers
+		void OnVolumeSliderContextMenuOpen(wxContextMenuEvent& evt);
+		void OnVolumeSliderPopupMenuItemClick(wxCommandEvent& evt);
+
+		void OnPanelContextMenuOpen(wxContextMenuEvent& evt);
+
+	public:
+		// Menu
+		UIElements::MenuBar* menuBar;
+
+		// Labels
+		wxStaticText* labelTitle;
+		wxStaticText* labelAuthor;
+		wxStaticText* labelCopyright;
+		wxStaticText* labelSubsong;
+		wxStaticText* labelTime;
+
+		// Always enabled
+		UIElements::RepeatModeButton* btnRepeatMode;
+	    wxSlider* sliderVolume;
+
+		// Playback controls
+		wxButton* btnPrevTrack;
+		wxButton* btnPrevSubsong;
+		wxButton* btnStop;
+		UIElements::PlayPauseButton* btnPlayPause;
+		wxButton* btnNextSubsong;
+		wxButton* btnNextTrack;
+		wxButton* btnPlaybackMod;
+
+		// Other disableable
+	    UIElements::CompositeSeekBar* compositeSeekbar;
+	    UIElements::Playlist::Playlist* treePlaylist;
+
+	private:
+		wxPanel& _parentPanel;
+	};
+}

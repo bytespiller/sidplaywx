@@ -1,0 +1,2 @@
+include_directories("C:/wxWidgets/include")
+include_directories("C:/wxWidgets/gcc_lib/mswu")

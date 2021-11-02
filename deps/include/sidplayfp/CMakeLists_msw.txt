@@ -1,0 +1,1 @@
+include_directories(C:/msys64/mingw64/include)

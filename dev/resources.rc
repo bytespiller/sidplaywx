@@ -1,0 +1,7 @@
+#define wxUSE_DPI_AWARE_MANIFEST 1
+
+#ifdef WIN32
+#include <wx/msw/wx.rc>
+#endif
+
+appicon ICON "icon_src/icon.ico"
