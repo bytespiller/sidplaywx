@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,50 +24,46 @@
 #endif
 
 #include <string>
+#include <variant>
 
 namespace Settings
 {
 	class Option
 	{
 	public:
-		enum class TypeSerialized
+		enum class TypeSerialized : size_t
 		{
-			Undefined,
+			Undefined = 0,
 			Int,
 			Double,
 			String
 		};
 
+		using Var = std::variant<std::monostate, int, double, wxString>;
+
 	public:
 		Option() = delete;
+		Option(const std::string& aName, Var value);
+
 		virtual ~Option() = default;
 
-		// Use this for initializing with an empty string value.
-		explicit Option(const std::string& aName);
-
-		// Use this also for storing a bool value.
-		Option(const std::string& aName, int value);
-
-		Option(const std::string& aName, double value);
-		Option(const std::string& aName, const wxString& value);
-
 	public:
-		void UpdateValue(int value);
-		void UpdateValue(double value);
-		void UpdateValue(float value);
-		void UpdateValue(const wxString& value);
-
+		void UpdateValue(const Var& newValue);
 		void UpdateValue(const Option& other);
 
 	public:
 		bool HasValue() const;
 		TypeSerialized GetValueType() const;
+		Var GetValue() const;
 
-		bool GetValueAsBool() const;
 		int GetValueAsInt() const;
 		double GetValueAsDouble() const;
-		float GetValueAsFloat() const;
 		const wxString& GetValueAsString() const;
+
+#pragma region Fungible getters
+		bool GetValueAsBool() const;
+		float GetValueAsFloat() const;
+#pragma endregion
 
 		bool ShouldSerialize() const;
 
@@ -78,11 +74,7 @@ namespace Settings
 		bool _shouldSerialize = true;
 
 	private:
-		void InternalUpdateValue(const wxString& value, TypeSerialized type);
-
-	private:
-		wxString _valueString;
-		TypeSerialized _valueType{};
+		Var _value = std::monostate{};
 	};
 
 	// RuntimeOption is an Option which is not serialized to disk.
@@ -90,32 +82,12 @@ namespace Settings
 	{
 	public:
 		RuntimeOption() = delete;
+		RuntimeOption(const std::string& aName, Option::Var value) :
+			Option(aName, value)
+		{
+			_shouldSerialize = false;
+		}
+
 		~RuntimeOption() = default;
-
-		// Use this for initializing with an empty string value.
-		explicit RuntimeOption(const std::string& aName) :
-			Option(aName)
-		{
-			_shouldSerialize = false;
-		}
-
-		// Use this also for storing a bool value.
-		RuntimeOption(const std::string& aName, int value) :
-			Option(aName, value)
-		{
-			_shouldSerialize = false;
-		}
-
-		RuntimeOption(const std::string& aName, double value) :
-			Option(aName, value)
-		{
-			_shouldSerialize = false;
-		}
-
-		RuntimeOption(const std::string& aName, const wxString& value) :
-			Option(aName, value)
-		{
-			_shouldSerialize = false;
-		}
 	};
 }

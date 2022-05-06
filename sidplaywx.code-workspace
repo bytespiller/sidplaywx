@@ -73,7 +73,8 @@
 			"climits": "cpp",
 			"ios": "cpp",
 			"queue": "cpp",
-			"codecvt": "cpp"
+			"codecvt": "cpp",
+			"variant": "cpp"
 		}
 	}
 }

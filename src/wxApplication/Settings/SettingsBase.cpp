@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,12 +81,12 @@ namespace Settings
 			const Option::TypeSerialized type = detail::StringAsType(strType);
 			switch (type)
 			{
-				case Option::TypeSerialized::Double:
-					TryUpdateOption(Option(name, stod(strValue.ToStdString())));
-					break;
-
 				case Option::TypeSerialized::Int:
 					TryUpdateOption(Option(name, stoi(strValue.ToStdString())));
+					break;
+
+				case Option::TypeSerialized::Double:
+					TryUpdateOption(Option(name, stod(strValue.ToStdString())));
 					break;
 
 				case Option::TypeSerialized::String:
@@ -115,8 +115,23 @@ namespace Settings
 				continue;
 			}
 
+			wxXmlAttribute* attrValue = nullptr;
+			switch (option.GetValueType())
+			{
+				case Option::TypeSerialized::Int:
+					attrValue = new wxXmlAttribute(detail::ATTR_VALUE, std::to_string(option.GetValueAsInt()));
+					break;
+				case Option::TypeSerialized::Double:
+					attrValue = new wxXmlAttribute(detail::ATTR_VALUE, std::to_string(option.GetValueAsDouble()));
+					break;
+				case Option::TypeSerialized::String:
+					attrValue = new wxXmlAttribute(detail::ATTR_VALUE, option.GetValueAsString());
+					break;
+				default:
+					throw std::runtime_error(Strings::Internal::UNHANDLED_SWITCH_CASE);
+			}
+
 			wxXmlNode* settingNode = new wxXmlNode(wxXML_ELEMENT_NODE, option.name);
-			wxXmlAttribute* attrValue = new wxXmlAttribute(detail::ATTR_VALUE, option.GetValueAsString());
 			settingNode->SetAttributes(new wxXmlAttribute(detail::ATTR_TYPE, detail::TypeAsString(option.GetValueType()), attrValue));
 
 			root->AddChild(settingNode);

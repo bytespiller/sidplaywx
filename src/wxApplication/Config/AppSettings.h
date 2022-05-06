@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,7 +115,7 @@ namespace Settings
 			return
 			{
 				// Prefs
-				Option(ID::AudioOutputDevice),
+				Option(ID::AudioOutputDevice, ""),
 				Option(ID::LowLatency, true),
 				Option(ID::ForceMono, false),
 
@@ -132,7 +132,7 @@ namespace Settings
 				Option(ID::AutoExpandSubsongs, true),
 				Option(ID::TaskbarProgress, static_cast<int>(UIElements::CompositeSeekBar::TaskbarProgressOption::Enabled)),
 
-				Option(ID::SonglengthsPath),
+				Option(ID::SonglengthsPath, ""),
 				Option(ID::SonglengthsTrim, 0),
 
 				Option(ID::DefaultC64Model, static_cast<int>(DefaultC64Model::Prefer_PAL)),
@@ -144,9 +144,9 @@ namespace Settings
 
 				Option(ID::DigiBoost, false),
 
-				Option(ID::RomKernalPath),
-				Option(ID::RomBasicPath),
-				Option(ID::RomChargenPath),
+				Option(ID::RomKernalPath, ""),
+				Option(ID::RomBasicPath, ""),
+				Option(ID::RomChargenPath, ""),
 
 				Option(ID::MediaKeys, true),
 				Option(ID::SingleInstance, 1),

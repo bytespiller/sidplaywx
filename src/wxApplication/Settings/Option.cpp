@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,106 +17,92 @@
  */
 
 #include "Option.h"
+#include "../Config/UIStrings.h"
 
 namespace Settings
 {
-	Option::Option(const std::string& aName) :
-		name(aName)
-	{
-	}
-
-	Option::Option(const std::string& aName, int value) :
+	Option::Option(const std::string& aName, Var value) :
 		name(aName)
 	{
 		UpdateValue(value);
 	}
 
-	Option::Option(const std::string& aName, double value) :
-		name(aName)
+	void Option::UpdateValue(const Var& newValue)
 	{
-		UpdateValue(value);
-	}
+		const bool initialized = HasValue();
+		const Settings::Option::TypeSerialized& canonicalType = (initialized) ? GetValueType() : static_cast<TypeSerialized>(newValue.index());
 
-	Option::Option(const std::string& aName, const wxString& value) :
-		name(aName)
-	{
-		UpdateValue(value);
-	}
-
-	void Option::UpdateValue(int value)
-	{
-		InternalUpdateValue(std::to_wstring(value), TypeSerialized::Int);
-	}
-
-	void Option::UpdateValue(double value)
-	{
-		InternalUpdateValue(std::to_wstring(value), TypeSerialized::Double);
-	}
-
-	void UpdateValue(float value)
-	{
-		UpdateValue(static_cast<double>(value));
-	}
-
-	void Option::UpdateValue(const wxString& value)
-	{
-		InternalUpdateValue(value, TypeSerialized::String);
-	}
-
-	bool Option::HasValue() const
-	{
-		return !_valueString.empty();
-	}
-
-	Option::TypeSerialized Option::GetValueType() const
-	{
-		return _valueType;
-	}
-
-	bool Option::GetValueAsBool() const
-	{
-		return !!stoi(_valueString.ToStdString());
-	}
-
-	int Option::GetValueAsInt() const
-	{
-		return stoi(_valueString.ToStdString());
-	}
-
-	double Option::GetValueAsDouble() const
-	{
-		return stod(_valueString.ToStdString());
-	}
-
-	float Option::GetValueAsFloat() const
-	{
-		return stof(_valueString.ToStdString());
-	}
-
-	const wxString& Option::GetValueAsString() const
-	{
-		return _valueString;
-	}
-
-	bool Option::ShouldSerialize() const
-	{
-		return _shouldSerialize;
+		assert(!initialized || (newValue.index() == _value.index())); // Type mismatch.
+		switch (canonicalType)
+		{
+			case TypeSerialized::Int:
+				_value = std::get<int>(newValue);
+				break;
+			case TypeSerialized::Double:
+				_value = std::get<double>(newValue);
+				break;
+			case TypeSerialized::String:
+				_value = std::get<wxString>(newValue);
+				break;
+			default:
+				throw std::runtime_error(Strings::Internal::UNHANDLED_SWITCH_CASE);
+		}
 	}
 
 	void Option::UpdateValue(const Option& other)
 	{
 		assert(other.name == name);
-		InternalUpdateValue(other._valueString, other._valueType);
+		UpdateValue(other._value);
 	}
 
-	void Option::InternalUpdateValue(const wxString& value, TypeSerialized type)
+	bool Option::HasValue() const
 	{
-		if (_valueType == TypeSerialized::Undefined)
-		{
-			_valueType = type;
-		}
+		return GetValueType() != Settings::Option::TypeSerialized::Undefined;
+	}
 
-		assert(type == _valueType);
-		_valueString = value;
+	Option::TypeSerialized Option::GetValueType() const
+	{
+		return static_cast<TypeSerialized>(_value.index());
+	}
+
+	Option::Var Option::GetValue() const
+	{
+		return _value;
+	}
+
+	int Option::GetValueAsInt() const
+	{
+		assert(HasValue());
+		assert(GetValueType() == Option::TypeSerialized::Int);
+		return std::get<int>(_value);
+	}
+
+	double Option::GetValueAsDouble() const
+	{
+		assert(HasValue());
+		assert(GetValueType() == Option::TypeSerialized::Double);
+		return std::get<double>(_value);
+	}
+
+	const wxString& Option::GetValueAsString() const
+	{
+		assert(HasValue());
+		assert(GetValueType() == Option::TypeSerialized::String);
+		return std::get<wxString>(_value);
+	}
+
+	bool Option::GetValueAsBool() const
+	{
+		return !!GetValueAsInt();
+	}
+
+	float Option::GetValueAsFloat() const
+	{
+		return static_cast<float>(GetValueAsDouble());
+	}
+
+	bool Option::ShouldSerialize() const
+	{
+		return _shouldSerialize;
 	}
 }
