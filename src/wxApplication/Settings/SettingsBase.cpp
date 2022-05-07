@@ -27,23 +27,23 @@ namespace Settings
 {
 	namespace detail
 	{
-		constexpr const char* const NODE_SETTINGS = "Settings";
-		constexpr const char* const ATTR_TYPE = "type";
-		constexpr const char* const ATTR_VALUE = "value";
+		constexpr const char* const XML_NODE_SETTINGS = "Settings";
+		constexpr const char* const XML_ATTR_TYPE = "type";
+		constexpr const char* const XML_ATTR_VALUE = "value";
 
-		inline const std::map<Option::TypeSerialized, const std::string> typeToStringMap
+		const std::map<Option::TypeSerialized, const wxString> typeToStringMap
 		{
 			{Option::TypeSerialized::Int, "Int"},
 			{Option::TypeSerialized::Double, "Double"},
 			{Option::TypeSerialized::String, "String"}
 		};
 
-		inline const std::string& TypeAsString(Option::TypeSerialized type)
+		inline const wxString& TypeAsString(Option::TypeSerialized type)
 		{
 			return detail::typeToStringMap.at(type);
 		}
 
-		inline Option::TypeSerialized StringAsType(const std::string& type)
+		inline Option::TypeSerialized StringAsType(const wxString& type)
 		{
 			const auto it = std::find_if(detail::typeToStringMap.begin(), detail::typeToStringMap.end(), [&type](const auto& pair)
 			{
@@ -74,9 +74,9 @@ namespace Settings
 		wxXmlNode* child = doc->GetRoot()->GetChildren();
 		while (child)
 		{
-			const std::string& name = child->GetName().ToStdString();
-			const std::string& strType = child->GetAttribute(detail::ATTR_TYPE).ToStdString();
-			const wxString& strValue = child->GetAttribute(detail::ATTR_VALUE).ToStdWstring();
+			const wxString& name = child->GetName();
+			const wxString& strType = child->GetAttribute(detail::XML_ATTR_TYPE);
+			const wxString& strValue = child->GetAttribute(detail::XML_ATTR_VALUE);
 
 			const Option::TypeSerialized type = detail::StringAsType(strType);
 			switch (type)
@@ -106,7 +106,7 @@ namespace Settings
 	bool SettingsBase::TrySave()
 	{
 		std::unique_ptr<wxXmlDocument> doc = std::make_unique<wxXmlDocument>();
-		wxXmlNode* root = new wxXmlNode(wxXML_ELEMENT_NODE, detail::NODE_SETTINGS);
+		wxXmlNode* root = new wxXmlNode(wxXML_ELEMENT_NODE, detail::XML_NODE_SETTINGS);
 
 		for (const Option& option : _options)
 		{
@@ -119,20 +119,20 @@ namespace Settings
 			switch (option.GetValueType())
 			{
 				case Option::TypeSerialized::Int:
-					attrValue = new wxXmlAttribute(detail::ATTR_VALUE, std::to_string(option.GetValueAsInt()));
+					attrValue = new wxXmlAttribute(detail::XML_ATTR_VALUE, std::to_string(option.GetValueAsInt()));
 					break;
 				case Option::TypeSerialized::Double:
-					attrValue = new wxXmlAttribute(detail::ATTR_VALUE, std::to_string(option.GetValueAsDouble()));
+					attrValue = new wxXmlAttribute(detail::XML_ATTR_VALUE, std::to_string(option.GetValueAsDouble()));
 					break;
 				case Option::TypeSerialized::String:
-					attrValue = new wxXmlAttribute(detail::ATTR_VALUE, option.GetValueAsString());
+					attrValue = new wxXmlAttribute(detail::XML_ATTR_VALUE, option.GetValueAsString());
 					break;
 				default:
 					throw std::runtime_error(Strings::Internal::UNHANDLED_SWITCH_CASE);
 			}
 
 			wxXmlNode* settingNode = new wxXmlNode(wxXML_ELEMENT_NODE, option.name);
-			settingNode->SetAttributes(new wxXmlAttribute(detail::ATTR_TYPE, detail::TypeAsString(option.GetValueType()), attrValue));
+			settingNode->SetAttributes(new wxXmlAttribute(detail::XML_ATTR_TYPE, detail::TypeAsString(option.GetValueType()), attrValue));
 
 			root->AddChild(settingNode);
 		}
@@ -141,7 +141,7 @@ namespace Settings
 		return doc->Save(_filename);
 	}
 
-	Option* SettingsBase::GetOption(const std::string& name)
+	Option* SettingsBase::GetOption(const wxString& name)
 	{
 		auto it = std::find_if(_options.begin(), _options.end(), [&name](const Option& cOption)
 		{

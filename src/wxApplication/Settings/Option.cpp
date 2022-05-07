@@ -21,7 +21,7 @@
 
 namespace Settings
 {
-	Option::Option(const std::string& aName, Var value) :
+	Option::Option(const wxString& aName, Var value) :
 		name(aName)
 	{
 		UpdateValue(value);

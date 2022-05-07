@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,7 @@
 #pragma once
 
 #include "Option.h"
-
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-	#include <wx/wx.h>
-#endif
-
-#include <string>
+#include <wx/string.h>
 #include <vector>
 
 namespace Settings
@@ -42,7 +36,7 @@ namespace Settings
 		bool TryLoad(const std::vector<Option>& defaults);
 		bool TrySave();
 
-		Option* GetOption(const std::string& name);
+		Option* GetOption(const wxString& name);
 		void AddOption(const Option& option);
 
 		void ResetTo(const std::vector<Option>& newOptions);

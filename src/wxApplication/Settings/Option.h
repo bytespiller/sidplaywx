@@ -23,7 +23,6 @@
 	#include <wx/wx.h>
 #endif
 
-#include <string>
 #include <variant>
 
 namespace Settings
@@ -43,7 +42,7 @@ namespace Settings
 
 	public:
 		Option() = delete;
-		Option(const std::string& aName, Var value);
+		Option(const wxString& aName, Var value);
 
 		virtual ~Option() = default;
 
@@ -68,7 +67,7 @@ namespace Settings
 		bool ShouldSerialize() const;
 
 	public:
-		const std::string name;
+		const wxString name;
 
 	protected:
 		bool _shouldSerialize = true;
