@@ -63,7 +63,7 @@ namespace Settings
 
 	bool SettingsBase::TryLoad(const std::vector<Option>& defaults)
 	{
-		ResetTo(defaults);
+		ResetTo(defaults); // Defaults are a base on which the values from the config file are applied. Any Options in the config file which don't exist in the defaults (e.g., deprecated Options in the config file) will be ignored.
 
 		std::unique_ptr<wxXmlDocument> doc = std::make_unique<wxXmlDocument>();
 		if (!wxFileExists(_filename) || !doc->Load(_filename))
@@ -110,7 +110,7 @@ namespace Settings
 
 		for (const Option& option : _options)
 		{
-			if (!option.ShouldSerialize() || !option.HasValue())
+			if (!option.ShouldSerialize() || option.IsUnchangedDefault() || !option.HasValue())
 			{
 				continue;
 			}

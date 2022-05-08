@@ -24,6 +24,8 @@
 
 namespace Settings
 {
+	static const bool DEFAULT = true;
+
 	class AppSettings : public SettingsBase
 	{
 	public:
@@ -115,46 +117,46 @@ namespace Settings
 			return
 			{
 				// Prefs
-				Option(ID::AudioOutputDevice, ""),
-				Option(ID::LowLatency, true),
-				Option(ID::ForceMono, false),
+				DefaultOption(ID::AudioOutputDevice, ""),
+				DefaultOption(ID::LowLatency, true),
+				DefaultOption(ID::ForceMono, false),
 
-				Option(ID::AutoPlay, true),
-				Option(ID::RepeatMode, static_cast<int>(UIElements::RepeatModeButton::RepeatMode::Normal)),
-				Option(ID::RepeatModeIncludeSubsongs, false),
-				Option(ID::RepeatModeDefaultSubsong, true),
-				Option(ID::SongFallbackDuration, 180),
-				Option(ID::SkipShorter, 0),
-				Option(ID::PopSilencer, 100),
-				Option(ID::DragDropMode, static_cast<int>(DragDropMode::Dual)),
+				DefaultOption(ID::AutoPlay, true),
+				DefaultOption(ID::RepeatMode, static_cast<int>(UIElements::RepeatModeButton::RepeatMode::Normal)),
+				DefaultOption(ID::RepeatModeIncludeSubsongs, false),
+				DefaultOption(ID::RepeatModeDefaultSubsong, true),
+				DefaultOption(ID::SongFallbackDuration, 180),
+				DefaultOption(ID::SkipShorter, 0),
+				DefaultOption(ID::PopSilencer, 100),
+				DefaultOption(ID::DragDropMode, static_cast<int>(DragDropMode::Dual)),
 
-				Option(ID::SelectionFollowsPlayback, true),
-				Option(ID::AutoExpandSubsongs, true),
-				Option(ID::TaskbarProgress, static_cast<int>(UIElements::CompositeSeekBar::TaskbarProgressOption::Enabled)),
+				DefaultOption(ID::SelectionFollowsPlayback, true),
+				DefaultOption(ID::AutoExpandSubsongs, true),
+				DefaultOption(ID::TaskbarProgress, static_cast<int>(UIElements::CompositeSeekBar::TaskbarProgressOption::Enabled)),
 
-				Option(ID::SonglengthsPath, ""),
-				Option(ID::SonglengthsTrim, 0),
+				DefaultOption(ID::SonglengthsPath, ""),
+				DefaultOption(ID::SonglengthsTrim, 0),
 
-				Option(ID::DefaultC64Model, static_cast<int>(DefaultC64Model::Prefer_PAL)),
-				Option(ID::DefaultSidModel, static_cast<int>(DefaultSidModel::Prefer_MOS6581)),
+				DefaultOption(ID::DefaultC64Model, static_cast<int>(DefaultC64Model::Prefer_PAL)),
+				DefaultOption(ID::DefaultSidModel, static_cast<int>(DefaultSidModel::Prefer_MOS6581)),
 
-				Option(ID::FilterEnabled, true),
-				Option(ID::FilterCurve6581, 0.5),
-				Option(ID::FilterCurve8580, 0.5),
+				DefaultOption(ID::FilterEnabled, true),
+				DefaultOption(ID::FilterCurve6581, 0.5),
+				DefaultOption(ID::FilterCurve8580, 0.5),
 
-				Option(ID::DigiBoost, false),
+				DefaultOption(ID::DigiBoost, false),
 
-				Option(ID::RomKernalPath, ""),
-				Option(ID::RomBasicPath, ""),
-				Option(ID::RomChargenPath, ""),
+				DefaultOption(ID::RomKernalPath, ""),
+				DefaultOption(ID::RomBasicPath, ""),
+				DefaultOption(ID::RomChargenPath, ""),
 
-				Option(ID::MediaKeys, true),
-				Option(ID::SingleInstance, 1),
-				RuntimeOption(ID::RestoreDefaults, false),
+				DefaultOption(ID::MediaKeys, true),
+				DefaultOption(ID::SingleInstance, 1),
+				RuntimeOption(ID::RestoreDefaults, false, DEFAULT),
 
 				// Internal
-				Option(ID::Volume, 100),
-				Option(ID::VolumeControlEnabled, true),
+				DefaultOption(ID::Volume, 100),
+				DefaultOption(ID::VolumeControlEnabled, true),
 			};
 		}
 	};

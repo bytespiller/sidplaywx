@@ -21,8 +21,9 @@
 
 namespace Settings
 {
-	Option::Option(const wxString& aName, Var value) :
-		name(aName)
+	Option::Option(const wxString& aName, Var value, bool valueIsDefault) :
+		name(aName),
+		_valueIsDefault(valueIsDefault)
 	{
 		UpdateValue(value);
 	}
@@ -46,6 +47,11 @@ namespace Settings
 				break;
 			default:
 				throw std::runtime_error(Strings::Internal::UNHANDLED_SWITCH_CASE);
+		}
+
+		if (initialized)
+		{
+			_valueIsDefault = false;
 		}
 	}
 
@@ -104,5 +110,10 @@ namespace Settings
 	bool Option::ShouldSerialize() const
 	{
 		return _shouldSerialize;
+	}
+
+	bool Option::IsUnchangedDefault() const
+	{
+		return _valueIsDefault;
 	}
 }

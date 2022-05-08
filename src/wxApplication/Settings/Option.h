@@ -42,7 +42,7 @@ namespace Settings
 
 	public:
 		Option() = delete;
-		Option(const wxString& aName, Var value);
+		Option(const wxString& aName, Var value, bool valueIsDefault = false);
 
 		virtual ~Option() = default;
 
@@ -65,6 +65,7 @@ namespace Settings
 #pragma endregion
 
 		bool ShouldSerialize() const;
+		bool IsUnchangedDefault() const;
 
 	public:
 		const wxString name;
@@ -74,6 +75,7 @@ namespace Settings
 
 	private:
 		Var _value = std::monostate{};
+		bool _valueIsDefault = false;
 	};
 
 	// RuntimeOption is an Option which is not serialized to disk.
@@ -81,12 +83,25 @@ namespace Settings
 	{
 	public:
 		RuntimeOption() = delete;
-		RuntimeOption(const std::string& aName, Option::Var value) :
-			Option(aName, value)
+		RuntimeOption(const std::string& aName, Option::Var value, bool valueIsDefault = false) :
+			Option(aName, value, valueIsDefault)
 		{
 			_shouldSerialize = false;
 		}
 
 		~RuntimeOption() = default;
+	};
+
+	// Syntactic sugar to avoid the need to pass an unsightly additional parameter for the default-value Options.
+	class DefaultOption : public Option
+	{
+	public:
+		DefaultOption() = delete;
+		DefaultOption(const std::string& aName, Option::Var value) :
+			Option(aName, value, true)
+		{
+		}
+
+		~DefaultOption() = default;
 	};
 }
