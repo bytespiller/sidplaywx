@@ -209,8 +209,11 @@ namespace Strings
 		inline constexpr const char* const OPT_FILTER_CURVE_8580("Filter curve (SID 8580)");
 		inline constexpr const char* const DESC_FILTER_CURVE_COMMON("Adjust the center frequency value from 0.0 (high/light) to 1.0 (low/dark), default is 0.5.\nNote: ongoing playback will stop when changing this setting.");
 
+		inline constexpr const char* const OPT_BOOSTVOLUME8580("Volume boost (SID 8580)");
+		inline constexpr const char* const DESC_BOOSTVOLUME8580("Boost the output volume when the SID 8580 is used so that it plays with approximately the same loudness as a SID 6581.\n\nThe emulated 8580 is around half the loudness of a 6581. No idea why that is, but the libsidplayfp works that way. This option shouldn't cause clipping.");
+
 		inline constexpr const char* const OPT_DIGIBOOST("DigiBoost (SID 8580)");
-		inline constexpr const char* const DESC_DIGIBOOST("The 8580 performs volume changes silently. Some tunes are using the volume register to play digitized sounds on the older 6581. These sounds are very silent (effectively missing!) on a 8580. DigiBoost hack enables a loud volume changing on 8580 (but may have side effects with \"normal\" tunes made for 8580).\nNote: ongoing playback will stop when enabling, but requires app restart to disable.");
+		inline constexpr const char* const DESC_DIGIBOOST("The SID 8580 performs volume changes silently. Some tunes are using the volume register to play digitized sounds on the older SID 6581. These sounds are very silent (effectively missing!) on a 8580. DigiBoost hack enables a loud volume changing on 8580 (but may have side effects with \"normal\" tunes made for 8580).\nNote: ongoing playback will stop when enabling, but requires app restart to disable.");
 
 		inline constexpr const char* const OPT_ROM_KERNAL_PATH("Path to KERNAL ROM");
 		inline constexpr const char* const DESC_ROM_KERNAL_PATH("Some advanced tunes require KERNAL ROM to play. If unavailable, those tunes are indicated with a RED crossout text.\nFor more info see category description.");

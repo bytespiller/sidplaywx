@@ -24,6 +24,9 @@
 #include <iostream>
 #include <map>
 
+static const float VOLUME_MULTIPLIER_DISABLED = 1.0f;
+static const float VOLUME_MULTIPLIER_ENABLED = 2.6f;
+
 // StateHolder inner class ------------------------------------
 
 PlaybackController::StateHolder::StateHolder(PlaybackController& playbackController) :
@@ -404,6 +407,35 @@ std::string PlaybackController::GetCurrentTuneSpeedDescription() const
     return _sidDecoder->GetEngineInfo().speedString();
 }
 
+SidConfig::sid_model_t PlaybackController::GetCurrentlyEffectiveSidModel() const
+{
+    const SidConfig& cSidConfig = _sidDecoder->GetSidConfig();
+    SidConfig::sid_model_t effectiveSidChipModel = cSidConfig.defaultSidModel;
+
+    if (!cSidConfig.forceSidModel)
+    {
+        const SidTuneInfo& tuneInfo = _sidDecoder->GetCurrentSongInfo();
+        switch (tuneInfo.sidModel(0))
+        {
+            case SidTuneInfo::model_t::SIDMODEL_6581:
+                effectiveSidChipModel = SidConfig::sid_model_t::MOS6581;
+                break;
+            case SidTuneInfo::model_t::SIDMODEL_8580:
+                effectiveSidChipModel = SidConfig::sid_model_t::MOS8580;
+                break;
+            case SidTuneInfo::model_t::SIDMODEL_ANY:
+                // fall-through
+            case SidTuneInfo::model_t::SIDMODEL_UNKNOWN:
+                // leave existing value (effectiveSidChipModel)
+                break;
+            default:
+                throw std::runtime_error("Unhandled switch case!");
+        }
+    }
+
+    return effectiveSidChipModel;
+}
+
 std::string PlaybackController::GetCurrentTuneSidDescription() const
 {
     const SidTuneInfo& tuneInfo = _sidDecoder->GetCurrentSongInfo();
@@ -444,27 +476,8 @@ std::string PlaybackController::GetCurrentTuneSidDescription() const
     {
         // Determine effective SID model
         const SidConfig& cSidConfig = _sidDecoder->GetSidConfig();
-        SidConfig::sid_model_t effectiveSidChipModel = cSidConfig.defaultSidModel;
         const SidTuneInfo::model_t tuneSidModel = tuneInfo.sidModel(0);
-        if (!cSidConfig.forceSidModel)
-        {
-            switch (tuneInfo.sidModel(0))
-            {
-                case SidTuneInfo::model_t::SIDMODEL_6581:
-                    effectiveSidChipModel = SidConfig::sid_model_t::MOS6581;
-                    break;
-                case SidTuneInfo::model_t::SIDMODEL_8580:
-                    effectiveSidChipModel = SidConfig::sid_model_t::MOS8580;
-                    break;
-                case SidTuneInfo::model_t::SIDMODEL_ANY:
-                    // fall-through
-                case SidTuneInfo::model_t::SIDMODEL_UNKNOWN:
-                    // leave existing value (effectiveSidChipModel)
-                    break;
-                default:
-                    throw std::runtime_error("Unhandled switch case!");
-            }
-        }
+        SidConfig::sid_model_t effectiveSidChipModel = GetCurrentlyEffectiveSidModel();
 
         // Indicate effective SID model (if differs from tune specification)
         const bool anySidModel = tuneSidModel == SidTuneInfo::model_t::SIDMODEL_ANY || tuneSidModel == SidTuneInfo::model_t::SIDMODEL_UNKNOWN;
@@ -560,6 +573,16 @@ float PlaybackController::GetVolume() const
 void PlaybackController::SetVolume(float volume)
 {
     _portAudioOutput->SetVolume(volume);
+}
+
+void PlaybackController::EnableVolumeBoost()
+{
+    _portAudioOutput->SetVolumeMultiplier(VOLUME_MULTIPLIER_ENABLED);
+}
+
+void PlaybackController::DisableVolumeBoost()
+{
+    _portAudioOutput->SetVolumeMultiplier(VOLUME_MULTIPLIER_DISABLED);
 }
 
 bool PlaybackController::ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable)

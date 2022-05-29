@@ -24,6 +24,7 @@ namespace runtimeSettings
 {
     double sampleRate = 0.0;
     float volume = 0.0f;
+    float volumeMultiplier = 1.0f;
 }
 
 PortAudioOutput::~PortAudioOutput()
@@ -39,10 +40,21 @@ float PortAudioOutput::GetVolume()
     return runtimeSettings::volume;
 }
 
+float PortAudioOutput::GetVolumeMultiplier()
+{
+    return runtimeSettings::volumeMultiplier;
+}
+
 void PortAudioOutput::SetVolume(float volume)
 {
     assert(volume >= 0.0f && volume <= 1.0f);
     runtimeSettings::volume = volume;
+}
+
+void PortAudioOutput::SetVolumeMultiplier(float multiplier)
+{
+    assert(multiplier >= 1.0f);
+    runtimeSettings::volumeMultiplier = multiplier;
 }
 
 bool PortAudioOutput::PreInitPortAudioLibrary()
@@ -154,6 +166,6 @@ int PortAudioOutput::PlaybackCallback(const void* /*inputBuffer*/, void* outputB
                                       void* userData)
 {
     IBufferWriter* externalSource = static_cast<IBufferWriter*>(userData);
-    bool successful = externalSource->TryFillBuffer(outputBuffer, framesPerBuffer, runtimeSettings::volume);
+    bool successful = externalSource->TryFillBuffer(outputBuffer, framesPerBuffer, runtimeSettings::volume * runtimeSettings::volumeMultiplier);
     return (successful) ? paContinue : paAbort; // Reminder: there is also paComplete, so see about it when we reach the end maybe
 }

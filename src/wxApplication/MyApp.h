@@ -58,6 +58,7 @@ public:
     void PlaySubsong(int subsong);
 
     void SetVolume(float volume);
+    bool ImmediatelyUpdateVolumeBoost8580();
     void SeekTo(uint_least32_t timeMs);
 
     void SetPlaybackSpeed(double factor);
@@ -78,6 +79,8 @@ private:
     void OnSeekingCeased();
 
     void RunOnMainThread(std::function<void()> fn);
+
+    void FinalizePlaybackStarted();
     void PopSilencer();
 
 public:

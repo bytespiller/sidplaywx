@@ -163,6 +163,8 @@ public:
     int GetCurrentTuneSidChipsRequired() const;
     bool IsValidSongLoaded() const;
 
+    SidConfig::sid_model_t GetCurrentlyEffectiveSidModel() const;
+
     SidDecoder::SongRequirement GetCurrentSongRomRequirement() const;
     bool IsRomLoaded(SidDecoder::SongRequirement requirement) const;
 
@@ -174,6 +176,9 @@ public:
 
     float GetVolume() const;
     void SetVolume(float volume);
+
+    void EnableVolumeBoost();
+    void DisableVolumeBoost();
 
     bool ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable);
     bool IsVoiceEnabled(unsigned int sidNum, unsigned int voice) const;

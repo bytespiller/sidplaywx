@@ -264,22 +264,24 @@ void MyApp::Play(const wxString& filename, unsigned int subsong)
         success = (bufferHolder == nullptr) ? false : _playback->TryPlayFromBuffer(filename.ToStdWstring(), bufferHolder, subsong);
     }
 
-    if (!success)
-    {
-        wxMessageBox(wxString::Format("%s\n%s", Strings::Error::MSG_ERR_TUNE_FILE, filename), Strings::FramePlayer::WINDOW_TITLE, wxICON_WARNING);
-    }
-
     if (success)
     {
-        PopSilencer();
+        FinalizePlaybackStarted();
+    }
+    else
+    {
+        wxMessageBox(wxString::Format("%s\n%s", Strings::Error::MSG_ERR_TUNE_FILE, filename), Strings::FramePlayer::WINDOW_TITLE, wxICON_WARNING);
     }
 }
 
 void MyApp::ReplayLoadedTune()
 {
     StopPlayback();
-    PopSilencer();
-    _playback->TryReplayCurrentSong();
+    const bool success = _playback->TryReplayCurrentSong();
+    if (success)
+    {
+        FinalizePlaybackStarted();
+    }
 }
 
 void MyApp::PausePlayback()
@@ -309,6 +311,21 @@ void MyApp::PlaySubsong(int subsong)
 void MyApp::SetVolume(float volume)
 {
     _playback->SetVolume(volume);
+}
+
+bool MyApp::ImmediatelyUpdateVolumeBoost8580()
+{
+    const bool shouldBoost = currentSettings->GetOption(Settings::AppSettings::ID::VolumeBoost8580)->GetValueAsBool() && _playback->GetCurrentlyEffectiveSidModel() == SidConfig::sid_model_t::MOS8580;
+    if (shouldBoost)
+    {
+        _playback->EnableVolumeBoost();
+    }
+    else
+    {
+        _playback->DisableVolumeBoost();
+    }
+
+    return shouldBoost;
 }
 
 void MyApp::SeekTo(uint_least32_t timeMs)
@@ -399,6 +416,12 @@ void MyApp::RunOnMainThread(std::function<void()> fn)
     {
         CallAfter(fn);
     }
+}
+
+void MyApp::FinalizePlaybackStarted()
+{
+    PopSilencer();
+    ImmediatelyUpdateVolumeBoost8580();
 }
 
 void MyApp::PopSilencer()

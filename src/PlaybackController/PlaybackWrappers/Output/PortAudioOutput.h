@@ -37,7 +37,9 @@ public:
 
 public:
     static float GetVolume();
+    static float GetVolumeMultiplier();
     static void SetVolume(float volume);
+    static void SetVolumeMultiplier(float multiplier);
 
 public:
     bool PreInitPortAudioLibrary();

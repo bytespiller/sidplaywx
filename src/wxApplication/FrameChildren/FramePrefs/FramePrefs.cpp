@@ -246,6 +246,9 @@ void FramePrefs::FillPropertyGrid()
             AddWrappedProp(Settings::AppSettings::ID::FilterCurve6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE_COMMON, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
             AddWrappedProp(Settings::AppSettings::ID::FilterCurve8580, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_8580), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE_COMMON, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
 
+            // Boost volume (8580)
+            AddWrappedProp(Settings::AppSettings::ID::VolumeBoost8580, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_BOOSTVOLUME8580), *page, Effective::Immediately, Strings::Preferences::DESC_BOOSTVOLUME8580);
+
             // DigiBoost
             AddWrappedProp(Settings::AppSettings::ID::DigiBoost, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_DIGIBOOST), *page, Effective::Immediately, Strings::Preferences::DESC_DIGIBOOST);
 
@@ -391,6 +394,10 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     {
                         const int opt = _app.currentSettings->GetOption(Settings::AppSettings::ID::TaskbarProgress)->GetValueAsInt();
 	                    _framePlayer.GetUIElements({}).compositeSeekbar->SetTaskbarProgressOption(static_cast<UIElements::CompositeSeekBar::TaskbarProgressOption>(opt));
+                    }
+                    else if (prop.first == Settings::AppSettings::ID::VolumeBoost8580)
+                    {
+                        _app.ImmediatelyUpdateVolumeBoost8580();
                     }
                     else if (prop.first == Settings::AppSettings::ID::DigiBoost)
                     {
