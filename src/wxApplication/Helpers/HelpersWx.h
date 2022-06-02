@@ -41,7 +41,8 @@ namespace Helpers
 		namespace Files
 		{
 			static const std::string FILE_EXTENSION_ZIP = ".zip";
-			static const std::string DEFAULT_PLAYLIST_NAME = "default.m3u8";
+			static const std::string FILE_EXTENSION_PLAYLIST = ".m3u8";
+			static const std::string DEFAULT_PLAYLIST_NAME = "default" + FILE_EXTENSION_PLAYLIST;
 
 			std::wstring AsAbsolutePathIfPossible(const std::wstring& relPath);
 			std::wstring AsRelativePathIfPossible(const std::wstring& absPath);

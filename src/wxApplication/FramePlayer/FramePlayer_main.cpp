@@ -229,6 +229,10 @@ void FramePlayer::DeferredInit()
                 {
                     const int targetSubsongIndex = _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSubsongIndex)->GetValueAsInt();
                     targetItemData = _ui->treePlaylist->FindPlaylistSubsongItem(parentItemData->GetId(), targetSubsongIndex);
+                    if (targetItemData == nullptr)
+                    {
+                        targetItemData = parentItemData; // No subsong.
+                    }
                 }
             }
 

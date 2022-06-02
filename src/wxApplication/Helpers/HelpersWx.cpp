@@ -138,8 +138,14 @@ namespace Helpers
 						if (IsZipFile(fileOrFolder))
 						{
 							const wxArrayString& result = GetFilesInZip(fileOrFolder); // Files are obtained in a "flat" manner (no need for recursion for folders).
-							filesChecked.reserve(result.size());
+							filesChecked.reserve(filesChecked.GetCount() + result.GetCount());
 							std::copy(result.begin(), result.end(), std::back_inserter(filesChecked));
+						}
+						else if (fileOrFolder.EndsWith(Helpers::Wx::Files::FILE_EXTENSION_PLAYLIST)) // Playlist file
+						{
+							const wxArrayString& filesInPlaylist = Helpers::Wx::Files::LoadPathsFromPlaylist(fileOrFolder);
+							filesChecked.reserve(filesChecked.GetCount() + filesInPlaylist.GetCount());
+							std::copy(filesInPlaylist.begin(), filesInPlaylist.end(), std::back_inserter(filesChecked));
 						}
 						else // Plain file
 						{
@@ -164,7 +170,7 @@ namespace Helpers
 						wxDir::GetAllFiles(fileOrFolder, &filesInFolder);
 						filesInFolder = GetValidFiles(filesInFolder);
 
-						filesChecked.reserve(filesInFolder.size());
+						filesChecked.reserve(filesChecked.GetCount() + filesInFolder.GetCount());
 						std::copy(filesInFolder.begin(), filesInFolder.end(), std::back_inserter(filesChecked));
 					}
 				}
