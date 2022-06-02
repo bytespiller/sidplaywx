@@ -35,7 +35,10 @@ namespace
 		fs.ChangePathTo(path); // Prevent OpenFile from trying relative scope first (always in vain). This yields huuuge speed boost.
 		wxString filenameOnly = path;
 		filenameOnly.Replace("\\", "/");
-		filenameOnly.Replace(fs.GetPath(), "");
+		if (!fs.GetPath().IsEmpty())
+		{
+			filenameOnly.Replace(fs.GetPath(), "");
+		}
 
 		wxFSFile* fsFile = fs.OpenFile(filenameOnly, wxFS_READ);
 		if (fsFile != NULL)
@@ -202,7 +205,10 @@ namespace Helpers
 				fs.ChangePathTo(archiveAndFile.first); // Prevent OpenFile from trying relative scope first (always in vain). This yields some speed boost.
 				wxString filenameOnly = archiveAndFile.first;
 				filenameOnly.Replace("\\", "/");
-				filenameOnly.Replace(fs.GetPath(), "");
+				if (!fs.GetPath().IsEmpty())
+				{
+					filenameOnly.Replace(fs.GetPath(), "");
+				}
 
 				wxFSFile* zip = fs.OpenFile(wxString::Format("%s#zip:%s", filenameOnly, archiveAndFile.second), wxFS_READ);
 				if (zip != NULL)
