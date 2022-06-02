@@ -25,7 +25,6 @@
 
 #include "../Theme/ThemeData/ThemeData.h"
 #include "../UIElements/CompositeSeekBar.h"
-#include "../UIElements/MenuBar.h"
 #include "../UIElements/PlayPauseButton.h"
 #include "../UIElements/RepeatModeButton.h"
 #include "../UIElements/Playlist/Playlist.h"
@@ -58,13 +57,17 @@ namespace FrameElements
 
 		enum class MenuItemId_Player : int
 		{
-			Undefined = UIElements::MenuBar::MENU_ID_UNDEFINED,
-
 			// File
 			OpenFiles,
 			OpenFolders,
+			// ----------------
 			EnqueueFiles,
 			EnqueueFolders,
+			// Playlist submenu
+			PlaylistOpen,
+			PlaylistSave,
+			PlaylistClear,
+			// ----------------
 			Exit,
 
 			// Edit
@@ -93,7 +96,7 @@ namespace FrameElements
 
 	public:
 		// Menu
-		UIElements::MenuBar* menuBar;
+		wxMenuBar* menuBar;
 
 		// Labels
 		wxStaticText* labelTitle;

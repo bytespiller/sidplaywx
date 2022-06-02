@@ -88,6 +88,7 @@ private: // visual
     void SetRefreshTimerThrottled(bool throttle);
 
 public: // playlist (iodetail)
+    std::vector<wxString> GetCurrentPlaylistFilePaths();
     void DiscoverFilesAndSendToPlaylist(const wxArrayString& rawPaths, bool clearPrevious = true, bool autoPlayFirstImmediately = true);
 private:
     void SendFilesToPlaylist(const wxArrayString& files, bool clearPrevious = true, bool autoPlayFirstImmediately = true);
@@ -96,6 +97,8 @@ private:
 private: // input
     void BrowseFilesAndAddToPlaylist(bool enqueue);
     void BrowseFoldersAndAddToPlaylist(bool enqueue);
+    void OpenNewPlaylist(bool autoPlayFirstImmediately);
+    bool TrySaveCurrentPlaylist();
 
 private: // transport
     bool TryPlayPlaylistItem(const SongTreeItemData& itemData);
@@ -125,6 +128,8 @@ private: // wx Event handlers
     void OnTreePlaylistKeyPressed(wxTreeEvent& evt);
     void OnDropFilesFramePlayer(wxDropFilesEvent& evt);
     void OnDropFilesPlaylist(wxDropFilesEvent& evt);
+
+    void OnMenuOpening(wxMenuEvent& evt);
     void OnMenuItemSelected(wxCommandEvent& evt);
 
     void OnTimer(wxTimerEvent& evt);

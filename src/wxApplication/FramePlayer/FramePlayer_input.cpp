@@ -18,10 +18,12 @@
 
 #include "FramePlayer.h"
 #include "../Config/UIStrings.h"
+#include "../Helpers/HelpersWx.h"
 #include <wx/filedlg.h>
 
 static const wxString WILDCARD_SID = "*.sid;*.c64;*.prg;*.p00;*.str;*.mus";
 static const wxString WILDCARD_ZIP = "*.zip";
+static const wxString WILDCARD_M3U8 = "*.m3u8";
 static const wxString WILDCARD_ALL = "*.*";
 
 void FramePlayer::BrowseFilesAndAddToPlaylist(bool enqueue)
@@ -56,4 +58,38 @@ void FramePlayer::BrowseFoldersAndAddToPlaylist(bool enqueue)
     wxArrayString rawPaths;
     openDirDialog.GetPaths(rawPaths);
     DiscoverFilesAndSendToPlaylist(rawPaths, !enqueue, !enqueue);
+}
+
+void FramePlayer::OpenNewPlaylist(bool autoPlayFirstImmediately)
+{
+    wxFileDialog openFileDialog(this);
+    openFileDialog.SetWindowStyle(wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+    openFileDialog.SetWildcard(wxString::Format("%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_M3U8, WILDCARD_M3U8, WILDCARD_M3U8) +\
+                               wxString::Format("|%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_ALL, WILDCARD_ALL, WILDCARD_ALL)
+                               );
+
+    if (openFileDialog.ShowModal() == wxID_CANCEL)
+    {
+        return;
+    }
+
+    const wxString& playlistPath = openFileDialog.GetPath();
+    const wxArrayString& rawPaths = Helpers::Wx::Files::LoadPathsFromPlaylist(playlistPath);
+    DiscoverFilesAndSendToPlaylist(rawPaths, true, autoPlayFirstImmediately);
+}
+
+bool FramePlayer::TrySaveCurrentPlaylist()
+{
+    wxFileDialog saveFileDialog(this);
+    saveFileDialog.SetWindowStyle(wxFD_SAVE);
+    saveFileDialog.SetWildcard(wxString::Format("%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_M3U8, WILDCARD_M3U8, WILDCARD_M3U8));
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL)
+    {
+        return true;
+    }
+
+    const wxString& playlistSavePath = saveFileDialog.GetPath();
+    const std::vector<wxString>& filePaths = GetCurrentPlaylistFilePaths();
+    return Helpers::Wx::Files::TrySavePlaylist(playlistSavePath, filePaths);
 }

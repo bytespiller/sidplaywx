@@ -21,6 +21,7 @@
 #include "../../Util/HelpersGeneral.h"
 #include <wx/dir.h>
 #include <wx/stdpaths.h>
+#include <wx/textfile.h>
 #include <portaudio.h>
 #include <filesystem>
 
@@ -245,6 +246,61 @@ namespace Helpers
 				}
 
 				return bufferHolder;
+			}
+
+			bool TrySavePlaylist(const wxString& fullpath, const std::vector<wxString>& fileList)
+			{
+				// If new file list is empty, just delete the old playlist file...
+				if (fileList.empty())
+				{
+					if (wxFileExists(fullpath))
+					{
+						return wxRemoveFile(fullpath);
+					}
+					return true;
+				}
+
+				// Save to playlist...
+				wxTextFile file;
+				bool success = wxFileExists(fullpath) ? file.Open(fullpath) : file.Create(fullpath);
+				if (success)
+				{
+					file.Clear();
+					file.AddLine("#");
+
+					for (const wxString& path : fileList)
+					{
+						file.AddLine(path);
+					}
+
+					success = file.Write();
+					file.Close();
+				}
+
+				return success;
+			}
+
+			wxArrayString LoadPathsFromPlaylist(const wxString& fullpath)
+			{
+				wxArrayString retFileList;
+
+				wxTextFile file;
+				bool success = file.Open(fullpath);
+				if (success)
+				{
+					retFileList.reserve(file.GetLineCount() - 1); // The very first line in the file (which is '#') is always skipped (because we only ever use the GetNextLine method).
+					while (!file.Eof())
+					{
+						const wxString& line = file.GetNextLine();
+						if (line.StartsWith("#") || line.IsEmpty())
+						{
+							continue;
+						}
+						retFileList.Add(line);
+					}
+				}
+
+				return retFileList;
 			}
 		}
 

@@ -273,8 +273,9 @@ void FramePrefs::FillPropertyGrid()
     }
 
     // System
-    page->Append(new wxPropertyCategory(Strings::Preferences::CATEGORY_SYSTEM));
+    page->Append(new wxPropertyCategory(Strings::Preferences::CATEGORY_APPLICATION));
     {
+        AddWrappedProp(Settings::AppSettings::ID::RememberPlaylist, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_REMEMBER_PLAYLIST), *page, Effective::Immediately, Strings::Preferences::DESC_REMEMBER_PLAYLIST);
         AddWrappedProp(Settings::AppSettings::ID::MediaKeys, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_MEDIA_KEYS), *page, Effective::Immediately, Strings::Preferences::DESC_MEDIA_KEYS);
         AddWrappedProp(Settings::AppSettings::ID::SingleInstance, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SINGLE_INSTANCE), *page, Effective::Immediately, Strings::Preferences::DESC_SINGLE_INSTANCE);
         AddWrappedProp(Settings::AppSettings::ID::RestoreDefaults, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_RESTORE_DEFAULTS), *page, Effective::Immediately, Strings::Preferences::DESC_RESTORE_DEFAULTS);
@@ -402,6 +403,15 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     else if (prop.first == Settings::AppSettings::ID::DigiBoost)
                     {
                         requiresAppRestart = propertyValueInt == 0 && _app.GetPlaybackInfo().IsDigiBoostStuckEnabled();
+                    }
+                    else if (prop.first == Settings::AppSettings::ID::RememberPlaylist)
+                    {
+                        if (propertyValueInt == 0)
+                        {
+                            Helpers::Wx::Files::TrySavePlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME, {}); // Immediately delete the default playlist file if it exists.
+                            _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongName)->UpdateValue("");
+                            _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSubsongIndex)->UpdateValue(0);
+                        }
                     }
                     else if (prop.first == Settings::AppSettings::ID::RestoreDefaults)
                     {

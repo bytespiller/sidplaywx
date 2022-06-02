@@ -41,6 +41,7 @@ namespace Helpers
 		namespace Files
 		{
 			static const std::string FILE_EXTENSION_ZIP = ".zip";
+			static const std::string DEFAULT_PLAYLIST_NAME = "default.m3u8";
 
 			std::wstring AsAbsolutePathIfPossible(const std::wstring& relPath);
 			std::wstring AsRelativePathIfPossible(const std::wstring& absPath);
@@ -60,6 +61,9 @@ namespace Helpers
 
 			// Like GetFileContentFromZip but for regular files, supporting unicode paths (can't just naively load them directly via libsidplayfp's loader unfortunately due to lack of unicode paths support there).
 			std::unique_ptr<BufferHolder> GetFileContentFromDisk(const wxString& filename);
+
+			bool TrySavePlaylist(const wxString& fullpath, const std::vector<wxString>& fileList);
+			wxArrayString LoadPathsFromPlaylist(const wxString& fullpath);
 		}
 
 		namespace Audio

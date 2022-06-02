@@ -277,9 +277,19 @@ void FramePlayer::OnDropFilesPlaylist(wxDropFilesEvent& evt)
     }
 }
 
+void FramePlayer::OnMenuOpening(wxMenuEvent& evt)
+{
+    if (evt.GetMenu()->GetTitle().IsSameAs(Strings::FramePlayer::MENU_FILE)) // TODO: try to find a better way to detect which menu is opened (e.g., "File" in this case).
+    {
+        const bool playlistEmpty = _ui->treePlaylist->IsEmpty();
+        evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::PlaylistSave), !playlistEmpty);
+        evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::PlaylistClear), !playlistEmpty);
+    }
+}
+
 void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
 {
-    const MenuItemId_Player id = static_cast<MenuItemId_Player>(_ui->menuBar->GetWrappedMenuId(evt.GetId()));
+    const MenuItemId_Player id = static_cast<MenuItemId_Player>(evt.GetId());
     switch (id)
     {
         // File
@@ -299,6 +309,25 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             BrowseFoldersAndAddToPlaylist(true);
             break;
 
+        // Playlist submenu
+        case MenuItemId_Player::PlaylistOpen:
+        {
+            const bool autoPlayFirstImmediately = _app.currentSettings->GetOption(Settings::AppSettings::ID::AutoPlay)->GetValueAsBool();
+            OpenNewPlaylist(autoPlayFirstImmediately);
+            break;
+        }
+
+        case MenuItemId_Player::PlaylistSave:
+            TrySaveCurrentPlaylist();
+            break;
+
+        case MenuItemId_Player::PlaylistClear:
+            OnButtonStop();
+            _ui->treePlaylist->ClearPlaylist();
+            UpdateUiState();
+            break;
+        // **
+
         case MenuItemId_Player::Exit:
             CloseApplication();
             break;
@@ -317,10 +346,8 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             DisplayAboutBox();
             break;
 
-        case MenuItemId_Player::Undefined:
-            // fall-through
         default:
-            std::runtime_error(Strings::Internal::UNHANDLED_SWITCH_CASE);
+            throw std::runtime_error(Strings::Internal::UNHANDLED_SWITCH_CASE);
             break;
     }
 }

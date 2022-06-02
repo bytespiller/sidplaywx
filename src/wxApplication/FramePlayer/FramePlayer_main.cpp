@@ -21,6 +21,7 @@
 #include "../Config/AppSettings.h"
 #include "../Config/UIStrings.h"
 #include "../Helpers/DpiSize.h"
+#include "../Helpers/HelpersWx.h"
 #include "../FrameChildren/FramePlaybackMods/FramePlaybackMods.h"
 #include "../FrameChildren/FramePrefs/FramePrefs.h"
 #include <wx/aboutdlg.h>
@@ -183,7 +184,8 @@ void FramePlayer::SetupUiElements()
     Bind(wxEVT_TIMER, &OnTimer, this);
 
     // Menu
-    SetMenuBar(_ui->menuBar->GetWxMenuBarPtr());
+    SetMenuBar(_ui->menuBar);
+    Bind(wxEVT_MENU_OPEN, &OnMenuOpening, this);
     Bind(wxEVT_COMMAND_MENU_SELECTED, &OnMenuItemSelected, this);
 
     // Other
@@ -204,6 +206,38 @@ void FramePlayer::DeferredInit()
     if (_app.argc > 1)
     {
         DiscoverFilesAndSendToPlaylist(_app.argv.GetArguments());
+    }
+    else if (_app.currentSettings->GetOption(Settings::AppSettings::ID::RememberPlaylist)->GetValueAsBool())
+    {
+        if (wxFileExists(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME))
+        {
+            // Load default playlist from file
+            const wxArrayString& playlistFiles = Helpers::Wx::Files::LoadPathsFromPlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME);
+            DiscoverFilesAndSendToPlaylist(playlistFiles, true, false);
+
+            // Restore last song selection
+            const FramePlayer::SongTreeItemData* targetItemData = nullptr;
+            // scope
+            {
+                const wxString& targetFilePath = _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongName)->GetValueAsString();
+                const FramePlayer::SongTreeItemData* const parentItemData = _ui->treePlaylist->FindSiblingIf([&targetFilePath = std::as_const(targetFilePath)](SongTreeItemData& cItemData)
+                {
+                    return cItemData.GetFilePath().IsSameAs(targetFilePath);
+                }, _ui->treePlaylist->GetRootItem());
+
+                if (parentItemData != nullptr)
+                {
+                    const int targetSubsongIndex = _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSubsongIndex)->GetValueAsInt();
+                    targetItemData = _ui->treePlaylist->FindPlaylistSubsongItem(parentItemData->GetId(), targetSubsongIndex);
+                }
+            }
+
+            if (targetItemData != nullptr)
+            {
+                TryPlayPlaylistItem(*targetItemData);
+                OnButtonStop();
+            }
+        }
     }
 }
 
@@ -228,6 +262,21 @@ void FramePlayer::CloseApplication()
     // TODO: save window settings etc.
     _app.currentSettings->GetOption(Settings::AppSettings::ID::Volume)->UpdateValue(_ui->sliderVolume->GetValue());
     _app.currentSettings->GetOption(Settings::AppSettings::ID::VolumeControlEnabled)->UpdateValue(_ui->sliderVolume->IsEnabled());
+
+    // Save the current playlist or delete it if empty...
+    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::RememberPlaylist)->GetValueAsBool())
+    {
+        // Save playlist...
+        const std::vector<wxString>& fileList = GetCurrentPlaylistFilePaths();
+        Helpers::Wx::Files::TrySavePlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME, fileList);
+
+        // Store the last played song & subsong as an internal option...
+        const UIElements::Playlist::SongTreeItemData* const cSongData = _ui->treePlaylist->TryGetCurrentSongTreeItemData();
+        const wxString& cSongName = (cSongData == nullptr) ? "" : cSongData->GetFilePath();
+        const int cSongIndex = (cSongData == nullptr) ? 0 : cSongData->GetDefaultSubsong();
+        _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongName)->UpdateValue(cSongName);
+        _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSubsongIndex)->UpdateValue(cSongIndex);
+    }
 
     _app.currentSettings->TrySave();
 
@@ -278,9 +327,9 @@ void FramePlayer::DisplayAboutBox()
 {
     wxAboutDialogInfo aboutInfo;
     aboutInfo.SetName(Strings::FramePlayer::WINDOW_TITLE);
-    aboutInfo.SetVersion("0.6.0"); // TODO
+    aboutInfo.SetVersion("0.6.1"); // TODO
     aboutInfo.SetDescription(Strings::About::DESCRIPTION);
-    aboutInfo.SetCopyright(L"(C) 2021 Jasmin Rutić"); // TODO
+    aboutInfo.SetCopyright(L"(C) 2021-2022 Jasmin Rutić"); // TODO
     aboutInfo.SetWebSite("https://github.com/bytespiller/sidplaywx");
 
     aboutInfo.SetLicense(Strings::About::LICENSE);

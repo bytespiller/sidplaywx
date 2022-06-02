@@ -72,42 +72,49 @@ namespace FrameElements // Player class
 	ElementsPlayer::ElementsPlayer(wxPanel& panel, Settings::AppSettings& appSettings, const ThemeData::ThemeData& themeData) :
 		_parentPanel(panel)
 	{
-		menuBar = new UIElements::MenuBar;
+		menuBar = new wxMenuBar();
 
 		{
 			// File menu
 			{
 				wxMenu* fileMenu = new wxMenu();
 
-				menuBar->AppendItem(static_cast<int>(MenuItemId_Player::OpenFiles), wxString::Format("%s\tCtrl+O",Strings::FramePlayer::MENU_ITEM_OPEN_FILES), fileMenu);
-				menuBar->AppendItem(static_cast<int>(MenuItemId_Player::OpenFolders), wxString::Format("%s\tCtrl+D", Strings::FramePlayer::MENU_ITEM_OPEN_FOLDERS), fileMenu);
+				fileMenu->Append(static_cast<int>(MenuItemId_Player::OpenFiles), wxString::Format("%s\tCtrl+O",Strings::FramePlayer::MENU_ITEM_OPEN_FILES));
+				fileMenu->Append(static_cast<int>(MenuItemId_Player::OpenFolders), wxString::Format("%s\tCtrl+D", Strings::FramePlayer::MENU_ITEM_OPEN_FOLDERS));
 				fileMenu->AppendSeparator();
-				menuBar->AppendItem(static_cast<int>(MenuItemId_Player::EnqueueFiles), wxString::Format("%s\tCtrl+Shift+O",Strings::FramePlayer::MENU_ITEM_ENQUEUE_FILES), fileMenu);
-				menuBar->AppendItem(static_cast<int>(MenuItemId_Player::EnqueueFolders), wxString::Format("%s\tCtrl+Shift+D", Strings::FramePlayer::MENU_ITEM_ENQUEUE_FOLDERS), fileMenu);
+				fileMenu->Append(static_cast<int>(MenuItemId_Player::EnqueueFiles), wxString::Format("%s\tCtrl+Shift+O",Strings::FramePlayer::MENU_ITEM_ENQUEUE_FILES));
+				fileMenu->Append(static_cast<int>(MenuItemId_Player::EnqueueFolders), wxString::Format("%s\tCtrl+Shift+D", Strings::FramePlayer::MENU_ITEM_ENQUEUE_FOLDERS));
 				fileMenu->AppendSeparator();
-				menuBar->AppendItem(static_cast<int>(MenuItemId_Player::Exit), wxString::Format("%s\tAlt+F4", Strings::FramePlayer::MENU_ITEM_EXIT), fileMenu);
+				// Playlist submenu
+				wxMenu* playlistSubMenu = new wxMenu();
+				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistOpen), Strings::FramePlayer::MENU_ITEM_PLAYLIST_OPEN);
+				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistSave), Strings::FramePlayer::MENU_ITEM_PLAYLIST_SAVE);
+				playlistSubMenu->AppendSeparator();
+				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistClear), Strings::FramePlayer::MENU_ITEM_PLAYLIST_CLEAR);
+				fileMenu->AppendSubMenu(playlistSubMenu, Strings::FramePlayer::MENU_ITEM_SUBMENU_PLAYLIST);
+				// **
+				fileMenu->AppendSeparator();
+				fileMenu->Append(static_cast<int>(MenuItemId_Player::Exit), wxString::Format("%s\tAlt+F4", Strings::FramePlayer::MENU_ITEM_EXIT));
 
-				menuBar->AppendMenu(fileMenu, Strings::FramePlayer::MENU_FILE);
+				menuBar->Append(fileMenu, Strings::FramePlayer::MENU_FILE);
 			}
 
 			// Edit menu
 			{
 				wxMenu* editMenu = new wxMenu();
 
-				menuBar->AppendItem(static_cast<int>(MenuItemId_Player::PlaybackMods), wxString::Format("%s\tF5", Strings::FramePlayer::MENU_ITEM_PLAYBACK_MODS), editMenu);
+				editMenu->Append(static_cast<int>(MenuItemId_Player::PlaybackMods), wxString::Format("%s\tF5", Strings::FramePlayer::MENU_ITEM_PLAYBACK_MODS));
 				editMenu->AppendSeparator();
-				menuBar->AppendItem(static_cast<int>(MenuItemId_Player::Preferences), Strings::FramePlayer::MENU_ITEM_PREFERENCES, editMenu);
+				editMenu->Append(static_cast<int>(MenuItemId_Player::Preferences), Strings::FramePlayer::MENU_ITEM_PREFERENCES);
 
-				menuBar->AppendMenu(editMenu, Strings::FramePlayer::MENU_EDIT);
+				menuBar->Append(editMenu, Strings::FramePlayer::MENU_EDIT);
 			}
 
 			// Help menu
 			{
 				wxMenu* helpMenu = new wxMenu();
-
-				menuBar->AppendItem(static_cast<int>(MenuItemId_Player::About), wxString::Format("%s", Strings::FramePlayer::MENU_ITEM_ABOUT), helpMenu);
-
-				menuBar->AppendMenu(helpMenu, Strings::FramePlayer::MENU_HELP);
+				helpMenu->Append(static_cast<int>(MenuItemId_Player::About), wxString::Format("%s", Strings::FramePlayer::MENU_ITEM_ABOUT));
+				menuBar->Append(helpMenu, Strings::FramePlayer::MENU_HELP);
 			}
 		}
 

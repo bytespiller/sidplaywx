@@ -67,6 +67,7 @@ namespace Settings
 			static constexpr const char* const RomBasicPath = "RomBasicPath";
 			static constexpr const char* const RomChargenPath = "RomChargenPath";
 
+			static constexpr const char* const RememberPlaylist = "RememberPlaylist";
 			static constexpr const char* const MediaKeys = "MediaKeys";
 			static constexpr const char* const SingleInstance = "SingleInstance";
 
@@ -74,6 +75,8 @@ namespace Settings
 			static constexpr const char* const Volume = "Volume";
 			static constexpr const char* const VolumeControlEnabled = "VolumeControlEnabled";
 			static constexpr const char* const RestoreDefaults = "RestoreDefaults";
+			static constexpr const char* const LastSongName = "LastSongName";
+			static constexpr const char* const LastSubsongIndex = "LastSubsongIndex";
 		};
 
 		enum class DragDropMode
@@ -152,6 +155,7 @@ namespace Settings
 				DefaultOption(ID::RomBasicPath, ""),
 				DefaultOption(ID::RomChargenPath, ""),
 
+				DefaultOption(ID::RememberPlaylist, true),
 				DefaultOption(ID::MediaKeys, true),
 				DefaultOption(ID::SingleInstance, 1),
 				RuntimeOption(ID::RestoreDefaults, false, DEFAULT),
@@ -159,6 +163,8 @@ namespace Settings
 				// Internal
 				DefaultOption(ID::Volume, 100),
 				DefaultOption(ID::VolumeControlEnabled, true),
+				DefaultOption(ID::LastSongName, ""),
+				DefaultOption(ID::LastSubsongIndex, 0),
 			};
 		}
 	};

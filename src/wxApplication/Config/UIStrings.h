@@ -39,6 +39,11 @@ namespace Strings
 		inline constexpr const char* const MENU_ITEM_ENQUEUE_FILES("&Enqueue Files...");
 		inline constexpr const char* const MENU_ITEM_ENQUEUE_FOLDERS("En&queue Folders...");
 
+		inline constexpr const char* const MENU_ITEM_SUBMENU_PLAYLIST("Playlist");
+		inline constexpr const char* const MENU_ITEM_PLAYLIST_OPEN("Open...");
+		inline constexpr const char* const MENU_ITEM_PLAYLIST_SAVE("Save As...");
+		inline constexpr const char* const MENU_ITEM_PLAYLIST_CLEAR("Clear");
+
 		inline constexpr const char* const MENU_ITEM_EXIT("E&xit");
 
 		inline constexpr const char* const MENU_EDIT("&Edit");
@@ -62,6 +67,7 @@ namespace Strings
 		inline constexpr const char* const BROWSE_FILES_SUPPORTED("All Supported");
 		inline constexpr const char* const BROWSE_FILES_SID("SID Files");
 		inline constexpr const char* const BROWSE_FILES_ZIP("Zip Archives");
+		inline constexpr const char* const BROWSE_FILES_M3U8("Multimedia Playlist");
 		inline constexpr const char* const BROWSE_FILES_ALL("All Files");
 
 		inline constexpr const char* const STATUS_DISCOVERING_FILES("Discovering files...");
@@ -224,8 +230,11 @@ namespace Strings
 		inline constexpr const char* const OPT_ROM_CHARGEN_PATH("Path to CHARGEN ROM");
 		inline constexpr const char* const DESC_ROM_CHARGEN_PATH("Character generator ROM file. Not sure how relevant for tune playback, here for completeness since libsidplayfp accepts it.\nFor more info see category description.");
 
-		// System
-		inline constexpr const char* const CATEGORY_SYSTEM("System");
+		// Application
+		inline constexpr const char* const CATEGORY_APPLICATION("Application");
+
+		inline constexpr const char* const OPT_REMEMBER_PLAYLIST("Remember playlist");
+		inline constexpr const char* const DESC_REMEMBER_PLAYLIST("Restore the previous song list on app launch.");
 
 		inline constexpr const char* const OPT_MEDIA_KEYS("Use Media Keys");
 		inline constexpr const char* const DESC_MEDIA_KEYS("Use the Media Keys to control the playback.\nIf you don't have Media Keys on your keyboard, you can use an utility such as AutoHotkey to emulate them with hotkeys of your choice.");
