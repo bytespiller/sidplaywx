@@ -34,15 +34,22 @@ static const int iconDefaultSong = static_cast<int>(FrameElements::PlaylistIconI
 static const int iconChipIcon = static_cast<int>(FrameElements::PlaylistIconId::ChipIcon);
 static const int iconSkipShortIcon = static_cast<int>(FrameElements::PlaylistIconId::SkipShort);
 
-std::vector<wxString> FramePlayer::GetCurrentPlaylistFilePaths()
+std::vector<wxString> FramePlayer::GetCurrentPlaylistFilePaths(bool includeSkippedSongs)
 {
     const size_t fileItemsCount = _ui->treePlaylist->GetBase().GetChildrenCount(_ui->treePlaylist->GetRootItem());
     std::vector<wxString> fileList;
     fileList.reserve(fileItemsCount);
 
-    _ui->treePlaylist->ForEachSibling([&fileList](const SongTreeItemData& songData)
+    _ui->treePlaylist->ForEachSibling([&fileList, includeSkippedSongs](const SongTreeItemData& songData)
     {
-        fileList.emplace_back(songData.GetFilePath());
+        if (!includeSkippedSongs && songData.GetStatus() == ItemStatus::IgnoredPlayable)
+        {
+            // skipped
+        }
+        else
+        {
+            fileList.emplace_back(songData.GetFilePath());
+        }
     }, _ui->treePlaylist->GetRootItem().GetID());
 
     return fileList;

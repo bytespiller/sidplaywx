@@ -90,6 +90,6 @@ bool FramePlayer::TrySaveCurrentPlaylist()
     }
 
     const wxString& playlistSavePath = saveFileDialog.GetPath();
-    const std::vector<wxString>& filePaths = GetCurrentPlaylistFilePaths();
+    const std::vector<wxString>& filePaths = GetCurrentPlaylistFilePaths(false);
     return Helpers::Wx::Files::TrySavePlaylist(playlistSavePath, filePaths);
 }

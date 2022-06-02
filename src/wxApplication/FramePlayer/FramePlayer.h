@@ -88,7 +88,7 @@ private: // visual
     void SetRefreshTimerThrottled(bool throttle);
 
 public: // playlist (iodetail)
-    std::vector<wxString> GetCurrentPlaylistFilePaths();
+    std::vector<wxString> GetCurrentPlaylistFilePaths(bool includeSkippedSongs);
     void DiscoverFilesAndSendToPlaylist(const wxArrayString& rawPaths, bool clearPrevious = true, bool autoPlayFirstImmediately = true);
 private:
     void SendFilesToPlaylist(const wxArrayString& files, bool clearPrevious = true, bool autoPlayFirstImmediately = true);

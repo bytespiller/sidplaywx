@@ -271,7 +271,7 @@ void FramePlayer::CloseApplication()
     if (_app.currentSettings->GetOption(Settings::AppSettings::ID::RememberPlaylist)->GetValueAsBool())
     {
         // Save playlist...
-        const std::vector<wxString>& fileList = GetCurrentPlaylistFilePaths();
+        const std::vector<wxString>& fileList = GetCurrentPlaylistFilePaths(false);
         Helpers::Wx::Files::TrySavePlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME, fileList);
 
         // Store the last played song & subsong as an internal option...
