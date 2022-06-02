@@ -22,17 +22,23 @@
 #include <wx/filedlg.h>
 
 static const wxString WILDCARD_SID = "*.sid;*.c64;*.prg;*.p00;*.str;*.mus";
-static const wxString WILDCARD_ZIP = "*.zip";
-static const wxString WILDCARD_M3U8 = "*.m3u8";
+static const wxString WILDCARD_ZIP = wxString::Format("*%s", Helpers::Wx::Files::FILE_EXTENSION_ZIP);
+static const wxString WILDCARD_M3U8 = wxString::Format("*%s", Helpers::Wx::Files::FILE_EXTENSION_PLAYLIST);
 static const wxString WILDCARD_ALL = "*.*";
 
 void FramePlayer::BrowseFilesAndAddToPlaylist(bool enqueue)
 {
     wxFileDialog openFileDialog(this);
     openFileDialog.SetWindowStyle(wxFD_OPEN | wxFD_MULTIPLE | wxFD_FILE_MUST_EXIST);
-    openFileDialog.SetWildcard(wxString::Format("%s (%s;%s)|%s;%s", Strings::FramePlayer::BROWSE_FILES_SUPPORTED, WILDCARD_SID, WILDCARD_ZIP, WILDCARD_SID, WILDCARD_ZIP) +\
+    openFileDialog.SetWildcard(wxString::Format("%s (%s;%s;%s)|%s;%s;%s", Strings::FramePlayer::BROWSE_FILES_SUPPORTED, WILDCARD_SID, // Description
+                                                                                                                        WILDCARD_ZIP,
+                                                                                                                        WILDCARD_M3U8,
+                                                                                                                        WILDCARD_SID, // Extensions
+                                                                                                                        WILDCARD_ZIP,
+                                                                                                                        WILDCARD_M3U8) +\
                                wxString::Format("|%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_SID, WILDCARD_SID, WILDCARD_SID) +\
                                wxString::Format("|%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_ZIP, WILDCARD_ZIP, WILDCARD_ZIP) +\
+                               wxString::Format("|%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_M3U8, WILDCARD_M3U8, WILDCARD_M3U8) +\
                                wxString::Format("|%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_ALL, WILDCARD_ALL, WILDCARD_ALL)
                                );
 
