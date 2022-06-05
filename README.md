@@ -30,7 +30,7 @@ While the project uses GCC and CMake, at the moment the focus is on the Windows 
 
 ## Planned features for v1.0
 The current version of the sidplaywx is 0.x.x, so in addition to bugfixes and common sense updates, I consider at least _these_ features are needed before the sidplaywx can graduate to version 1.0:
-- Playlist improvements such as duration columns, reordering, remembering last state and playlist file save/load etc.
+- Playlist improvements such as duration columns, reordering<del>, remembering last state and playlist file save/load</del> etc.
 - Misc. necessary features such as remembering window size & position etc.
 - Exporting tunes to WAV
 - [STIL](https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/STIL.txt) support for displaying tune comments
