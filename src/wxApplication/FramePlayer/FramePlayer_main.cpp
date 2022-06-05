@@ -196,6 +196,7 @@ void FramePlayer::SetupUiElements()
 
     _ui->treePlaylist->GetBase().DragAcceptFiles(true);
     _ui->treePlaylist->GetBase().Bind(wxEVT_DROP_FILES, &OnDropFilesPlaylist, this);
+    _ui->treePlaylist->GetBase().SetFocus(); // Playlist should have the focus on app start for easy keyboard navigation.
 }
 
 void FramePlayer::DeferredInit()
