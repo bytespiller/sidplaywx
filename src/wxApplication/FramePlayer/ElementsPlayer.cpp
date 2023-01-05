@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -264,11 +264,21 @@ namespace FrameElements // Player class
 
 	void ElementsPlayer::OnVolumeSliderContextMenuOpen(wxContextMenuEvent& /*evt*/)
 	{
-		const std::string strVol = std::to_string(sliderVolume->GetValue());
-		wxMenu menu(wxString::Format("%s %s%", Strings::FramePlayer::VOL_MENU_PREFIX, strVol));
+		wxMenu menu;
 
+		// Title (don't use the built-in title functionality, it crashes on selection)
+		{
+			const std::string strVol = std::to_string(sliderVolume->GetValue());
+			wxMenuItem* title = new wxMenuItem(&menu, wxID_ANY, wxString::Format("%s %s%", Strings::FramePlayer::VOL_MENU_PREFIX, strVol));
+			title->SetFont(title->GetFont().MakeBold());
+			menu.Append(title);
+			menu.AppendSeparator();
+		}
+
+		// Set max volume
 		menu.Append(static_cast<int>(PopupMenuItemId_VolumeSlider::ResetVolume), Strings::FramePlayer::VOL_SET_MAX);
 
+		// Toggle slider
 		if (sliderVolume->IsEnabled())
 		{
 			menu.Append(static_cast<int>(PopupMenuItemId_VolumeSlider::DisableControl), Strings::FramePlayer::VOL_SLIDER_DISABLE);
@@ -278,6 +288,7 @@ namespace FrameElements // Player class
 			menu.Append(static_cast<int>(PopupMenuItemId_VolumeSlider::EnableControl), Strings::FramePlayer::VOL_SLIDER_ENABLE);
 		}
 
+		// Bind & show
 		menu.Bind(wxEVT_COMMAND_MENU_SELECTED, &OnVolumeSliderPopupMenuItemClick, this);
 		sliderVolume->PopupMenu(&menu);
 	}
