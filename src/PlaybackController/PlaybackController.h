@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -183,8 +183,6 @@ public:
     bool ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable);
     bool IsVoiceEnabled(unsigned int sidNum, unsigned int voice) const;
     bool AreAllRelevantVoicesEnabled() const;
-
-    bool IsDigiBoostStuckEnabled() const;
 
     void UnloadActiveTune();
 

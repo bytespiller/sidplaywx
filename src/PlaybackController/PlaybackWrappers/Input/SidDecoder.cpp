@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -186,11 +186,6 @@ bool SidDecoder::TrySetSubsong(unsigned int subsong)
 void SidDecoder::Stop()
 {
     _sidEngine.stop();
-}
-
-bool SidDecoder::IsDigiBoostStuckEnabled() const
-{
-    return _digiboostStuckEnabled;
 }
 
 uint_least32_t SidDecoder::GetTime() const

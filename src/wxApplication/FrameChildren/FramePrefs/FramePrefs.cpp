@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -399,10 +399,6 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     else if (prop.first == Settings::AppSettings::ID::VolumeBoost8580)
                     {
                         _app.ImmediatelyUpdateVolumeBoost8580();
-                    }
-                    else if (prop.first == Settings::AppSettings::ID::DigiBoost)
-                    {
-                        requiresAppRestart = propertyValueInt == 0 && _app.GetPlaybackInfo().IsDigiBoostStuckEnabled();
                     }
                     else if (prop.first == Settings::AppSettings::ID::RememberPlaylist)
                     {

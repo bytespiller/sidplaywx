@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,7 +134,7 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
                                      (newConfig.sidConfig.defaultSidModel != _sidDecoder->GetSidConfig().defaultSidModel) ||
                                      (newConfig.sidConfig.forceC64Model != _sidDecoder->GetSidConfig().forceC64Model) ||
                                      (newConfig.sidConfig.forceSidModel != _sidDecoder->GetSidConfig().forceSidModel) ||
-                                     (newConfig.sidConfig.digiBoost && !_sidDecoder->GetSidConfig().digiBoost) || // Only when *enabling* DigiBoost
+                                     (newConfig.sidConfig.digiBoost != _sidDecoder->GetSidConfig().digiBoost) ||
                                      (newConfig.filterConfig.filterEnabled != _sidDecoder->GetFilterConfig().filterEnabled) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Curve, _sidDecoder->GetFilterConfig().filter6581Curve)) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve));
@@ -491,7 +491,7 @@ std::string PlaybackController::GetCurrentTuneSidDescription() const
         }
 
         // Indicate DigiBoost
-        const bool digiBoostEffective = _sidDecoder->IsDigiBoostStuckEnabled() && effectiveSidChipModel == SidConfig::sid_model_t::MOS8580;
+        const bool digiBoostEffective = cSidConfig.digiBoost && effectiveSidChipModel == SidConfig::sid_model_t::MOS8580;
         if (digiBoostEffective)
         {
             retString += " [DigiBoost]";
@@ -613,11 +613,6 @@ bool PlaybackController::AreAllRelevantVoicesEnabled() const
     {
         return std::all_of(cSidVoices.begin(), cSidVoices.end(), [](const bool enabled){return enabled;});
     });
-}
-
-bool PlaybackController::IsDigiBoostStuckEnabled() const
-{
-    return _sidDecoder->IsDigiBoostStuckEnabled();
 }
 
 void PlaybackController::UnloadActiveTune()
