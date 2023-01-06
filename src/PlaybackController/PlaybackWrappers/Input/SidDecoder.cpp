@@ -84,8 +84,6 @@ bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig
     _sidConfigCache = sidConfig;
     _sidConfigCache.sidEmulation = &_rs;
 
-    _digiboostStuckEnabled |= _sidConfigCache.digiBoost;
-
     if (!_sidEngine.config(_sidConfigCache))
     {
         std::cerr << _sidEngine.error() << std::endl;
