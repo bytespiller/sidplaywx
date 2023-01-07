@@ -713,12 +713,23 @@ void FramePlayer::OnFindSong(UIElements::SignalsSearchBar signalId)
     const wxString& query = _ui->searchBar->GetQuery();
     if (!query.IsEmpty())
     {
-        const bool forwardDirection = signalId != UIElements::SignalsSearchBar::SIGNAL_FIND_PREV;
-        const wxTreeItemId& currentSelection = _ui->treePlaylist->GetBase().GetSelection();
-        bool wrapAround = false;
+        wxTreeItemId currentSelection = _ui->treePlaylist->GetBase().GetSelection();
 
+        // Ensure search point is a main song and not a subsong
+        {
+            wxTreeItemId parentId = _ui->treePlaylist->GetBase().GetItemParent(currentSelection);
+            if (parentId.GetID() != _ui->treePlaylist->GetRootItem().GetID())
+            {
+                currentSelection = parentId;
+            }
+        }
+
+        // Find next/prev
+        const bool forwardDirection = signalId != UIElements::SignalsSearchBar::SIGNAL_FIND_PREV;
+        bool wrapAround = false;
         const SongTreeItemData* targetItem = DoFindSong(query, currentSelection, forwardDirection);
-        if (targetItem == nullptr)
+
+        if (targetItem == nullptr) // Next/prev result not found, try to wrap around
         {
             targetItem = DoFindSong(query, nullptr, forwardDirection); // Wrap around.
             wrapAround = true;
