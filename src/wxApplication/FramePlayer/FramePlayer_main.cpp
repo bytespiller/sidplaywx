@@ -48,6 +48,9 @@ FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize
     SubscribeMe(_app.GetPlaybackSignalProvider(), SignalsPlaybackController::SIGNAL_VOICE_TOGGLED, std::bind(&UpdateUiState, this));
     SubscribeMe(_app.GetPlaybackSignalProvider(), SignalsPlaybackController::SIGNAL_AUDIO_DEVICE_CHANGED, std::bind(&OnAudioDeviceChanged, this, std::placeholders::_1));
 
+    SubscribeMe(*_ui->searchBar, UIElements::SignalsSearchBar::SIGNAL_FIND_NEXT, std::bind(&OnFindSong, this, UIElements::SignalsSearchBar::SIGNAL_FIND_NEXT));
+    SubscribeMe(*_ui->searchBar, UIElements::SignalsSearchBar::SIGNAL_FIND_PREV, std::bind(&OnFindSong, this, UIElements::SignalsSearchBar::SIGNAL_FIND_PREV));
+
     // Final
     UpdateUiState();
     CallAfter(&DeferredInit);
@@ -290,6 +293,11 @@ void FramePlayer::CloseApplication()
 #endif
 
     wxExit();
+}
+
+void FramePlayer::OpenSearchBar()
+{
+    _ui->searchBar->ToggleVisibility();
 }
 
 void FramePlayer::OpenPlaybackModFrame()

@@ -74,7 +74,9 @@
 			"ios": "cpp",
 			"queue": "cpp",
 			"codecvt": "cpp",
-			"variant": "cpp"
+			"variant": "cpp",
+			"numbers": "cpp",
+			"semaphore": "cpp"
 		}
 	}
 }

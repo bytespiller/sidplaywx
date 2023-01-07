@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ namespace UIElements
 			void ForEachSibling(const ForEachPredicate& predicate, const wxTreeItemId& idParent, const wxTreeItemId& startSiblingId = wxTreeItemId());
 
 			using FindIfPredicate = std::function<bool(SongTreeItemData&)>;
-			const SongTreeItemData* FindSiblingIf(const FindIfPredicate& predicate, const wxTreeItemId& idParent, const wxTreeItemId& startSiblingId = wxTreeItemId());
+			const SongTreeItemData* FindSiblingIf(const FindIfPredicate& predicate, const wxTreeItemId& idParent, const wxTreeItemId& startSiblingId = wxTreeItemId(), bool forwardDirection = true);
 
 		public:
 			void OnContextMenuOpen(wxContextMenuEvent& evt);

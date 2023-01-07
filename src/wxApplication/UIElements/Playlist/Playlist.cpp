@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -382,10 +382,19 @@ namespace UIElements
 			}
 		}
 
-		const SongTreeItemData* Playlist::FindSiblingIf(const FindIfPredicate& predicate, const wxTreeItemId& idParent, const wxTreeItemId& startSiblingId)
+		const SongTreeItemData* Playlist::FindSiblingIf(const FindIfPredicate& predicate, const wxTreeItemId& idParent, const wxTreeItemId& startSiblingId, bool forwardDirection)
 		{
 			wxTreeItemIdValue cookie;
-			wxTreeItemId id = (startSiblingId.IsOk()) ? GetNextSibling(startSiblingId) : GetFirstChild(idParent, cookie);
+			wxTreeItemId id;
+
+			if (forwardDirection)
+			{
+				id = (startSiblingId.IsOk()) ? GetNextSibling(startSiblingId) : GetFirstChild(idParent, cookie);
+			}
+			else
+			{
+				id = (startSiblingId.IsOk()) ? GetPrevSibling(startSiblingId) : GetLastChild(idParent);
+			}
 
 			while (id.IsOk())
 			{
@@ -396,7 +405,7 @@ namespace UIElements
 				}
 				else
 				{
-					id = GetNextSibling(id);
+					id = (forwardDirection) ? GetNextSibling(id) : GetPrevSibling(id);
 				}
 			}
 

@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -333,6 +333,18 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             break;
 
         // Edit
+        case MenuItemId_Player::Find:
+            OpenSearchBar();
+            break;
+
+        case MenuItemId_Player::FindNext:
+            OnFindSong(UIElements::SignalsSearchBar::SIGNAL_FIND_NEXT);
+            break;
+
+        case MenuItemId_Player::FindPrev:
+            OnFindSong(UIElements::SignalsSearchBar::SIGNAL_FIND_PREV);
+            break;
+
         case MenuItemId_Player::PlaybackMods:
             OpenPlaybackModFrame();
             break;
@@ -682,4 +694,44 @@ void FramePlayer::OnAudioDeviceChanged(bool success)
     }
 
     audioDeviceRevertCount = 0;
+}
+
+const FramePlayer::SongTreeItemData* const FramePlayer::DoFindSong(const wxString& query, const wxTreeItemId& startPosition, bool forwardDirection)
+{
+    return _ui->treePlaylist->FindSiblingIf([&](const SongTreeItemData& cSongData)
+    {
+        return cSongData.GetTitle().Lower().Contains(query);
+    }, _ui->treePlaylist->GetRootItem(), startPosition, forwardDirection);
+}
+
+void FramePlayer::OnFindSong(UIElements::SignalsSearchBar signalId)
+{
+    const char* COLOR_HIT = "#D1FFC0";
+    const char* COLOR_WRAPPED = "#F3FFB3";
+    const char* COLOR_MISS = "#FFCCCB";
+
+    const wxString& query = _ui->searchBar->GetQuery();
+    if (!query.IsEmpty())
+    {
+        const bool forwardDirection = signalId != UIElements::SignalsSearchBar::SIGNAL_FIND_PREV;
+        const wxTreeItemId& currentSelection = _ui->treePlaylist->GetBase().GetSelection();
+        bool wrapAround = false;
+
+        const SongTreeItemData* targetItem = DoFindSong(query, currentSelection, forwardDirection);
+        if (targetItem == nullptr)
+        {
+            targetItem = DoFindSong(query, nullptr, forwardDirection); // Wrap around.
+            wrapAround = true;
+        }
+
+        if (targetItem == nullptr)
+        {
+            _ui->searchBar->FlashInputBox(wxColour(COLOR_MISS));
+        }
+        else
+        {
+            _ui->treePlaylist->SelectItem(targetItem->GetId());
+            _ui->searchBar->FlashInputBox((wrapAround) ? wxColour(COLOR_WRAPPED) : wxColour(COLOR_HIT));
+        }
+    }
 }

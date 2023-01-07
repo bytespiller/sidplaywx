@@ -103,8 +103,11 @@ namespace FrameElements // Player class
 			{
 				wxMenu* editMenu = new wxMenu();
 
-				editMenu->Append(static_cast<int>(MenuItemId_Player::PlaybackMods), wxString::Format("%s\tF5", Strings::FramePlayer::MENU_ITEM_PLAYBACK_MODS));
+				editMenu->Append(static_cast<int>(MenuItemId_Player::Find), wxString::Format("%s\tCtrl+F", Strings::FramePlayer::MENU_ITEM_FIND));
+				editMenu->Append(static_cast<int>(MenuItemId_Player::FindNext), wxString::Format("%s\tF3", Strings::FramePlayer::MENU_ITEM_FIND_NEXT));
+				editMenu->Append(static_cast<int>(MenuItemId_Player::FindPrev), wxString::Format("%s\tShift+F3", Strings::FramePlayer::MENU_ITEM_FIND_PREV));
 				editMenu->AppendSeparator();
+				editMenu->Append(static_cast<int>(MenuItemId_Player::PlaybackMods), wxString::Format("%s\tF5", Strings::FramePlayer::MENU_ITEM_PLAYBACK_MODS));
 				editMenu->Append(static_cast<int>(MenuItemId_Player::Preferences), Strings::FramePlayer::MENU_ITEM_PREFERENCES);
 
 				menuBar->Append(editMenu, Strings::FramePlayer::MENU_EDIT);
@@ -239,6 +242,11 @@ namespace FrameElements // Player class
 
 			treePlaylist = new UIElements::Playlist::Playlist(_parentPanel, playlistIcons, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_FULL_ROW_HIGHLIGHT | wxTR_HAS_BUTTONS | wxTR_HIDE_ROOT | wxTR_NO_LINES | wxTR_ROW_LINES | wxTR_SINGLE | wxTR_TWIST_BUTTONS, appSettings);
 			sizerMain->Add(&treePlaylist->GetBase(), 1, wxEXPAND | wxALL, 0);
+		}
+
+		{ // Search bar
+			searchBar = new UIElements::SearchBar(&_parentPanel, false);
+			sizerMain->Add(searchBar->GetPanel(), 0, wxEXPAND, 0);
 		}
 
 		// Setup

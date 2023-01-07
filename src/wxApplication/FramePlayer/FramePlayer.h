@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,14 +39,16 @@ enum class SignalsPlaybackController;
 namespace UIElements
 {
     enum class SignalsRepeatModeButton;
+    enum class SignalsSearchBar;
 }
 
-class FramePlayer : public wxFrame, private SimpleSignalListener<SignalsMyApp>, private SimpleSignalListener<SignalsPlaybackController>, private SimpleSignalListener<UIElements::SignalsRepeatModeButton>
+class FramePlayer : public wxFrame, private SimpleSignalListener<SignalsMyApp>, private SimpleSignalListener<SignalsPlaybackController>, private SimpleSignalListener<UIElements::SignalsRepeatModeButton>, private SimpleSignalListener<UIElements::SignalsSearchBar>
 {
 private:
     using SimpleSignalListener<SignalsMyApp>::SubscribeMe;
     using SimpleSignalListener<SignalsPlaybackController>::SubscribeMe;
     using SimpleSignalListener<UIElements::SignalsRepeatModeButton>::SubscribeMe;
+    using SimpleSignalListener<UIElements::SignalsSearchBar>::SubscribeMe;
 
 private:
     static constexpr int TIMER_REFRESH_INTERVAL_HIGH = 10;
@@ -76,6 +78,7 @@ private: // main
     void SetRefreshTimerInterval(int desiredInterval);
     void CloseApplication();
 
+    void OpenSearchBar();
     void OpenPlaybackModFrame();
     void OpenPrefsFrame();
     void DisplayAboutBox();
@@ -149,6 +152,9 @@ private: // Non-wx events
     void OnRepeatModeExtraOptionToggled(ExtraOptionId extraOptionId);
 
     void OnAudioDeviceChanged(bool success);
+
+    const SongTreeItemData* const DoFindSong(const wxString& query, const wxTreeItemId& startPosition, bool forwardDirection);
+    void OnFindSong(UIElements::SignalsSearchBar signalId);
 
 private:
     bool _initialized = false;
