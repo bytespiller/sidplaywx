@@ -62,7 +62,7 @@ void SimpleTimer::Restart()
 
 	_thread = std::thread([this]()
 	{
-		while ((_elapsedMs < _delayMs) || _aborting)
+		while ((_elapsedMs < _delayMs) && !_aborting)
 		{
 			Sleep(10);
 			_elapsedMs += 10;
