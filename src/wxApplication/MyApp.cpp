@@ -124,9 +124,11 @@ namespace
 
     PlaybackController::FilterConfig LoadFilterConfig(Settings::AppSettings& settings)
     {
-        return {settings.GetOption(Settings::AppSettings::ID::FilterEnabled)->GetValueAsBool(),
-                settings.GetOption(Settings::AppSettings::ID::FilterCurve6581)->GetValueAsDouble(),
-                settings.GetOption(Settings::AppSettings::ID::FilterCurve8580)->GetValueAsDouble()};
+        return {
+            settings.GetOption(Settings::AppSettings::ID::FilterEnabled)->GetValueAsBool(),
+            settings.GetOption(Settings::AppSettings::ID::FilterCurve6581)->GetValueAsDouble(),
+            settings.GetOption(Settings::AppSettings::ID::FilterCurve8580)->GetValueAsDouble()
+        };
     }
 }
 

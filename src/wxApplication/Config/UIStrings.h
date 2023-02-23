@@ -261,8 +261,8 @@ namespace Strings
 	{
 		inline constexpr const char* const ERR_INIT_PLAYBACK("Fatal error: failed to initialize playback subsystems.");
 
-		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_RECOVERY("Critical init failure.\nDo you want to reset all the settings to defaults?\n(Selecting No will close the application.)");
-		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_EXIT("Critical init failure.\nDo you want to reset all the settings to defaults?\n(Note: you will have to relaunch the application.)");
+		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_RECOVERY("Critical init failure.\nDo you want to reset all settings to defaults?\n(Selecting No will close the application.)");
+		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_EXIT("Critical init failure.\nDo you want to reset all settings to defaults?\n(Note: you will have to relaunch the application.)");
 
 		inline constexpr const char* const MSG_ERR_SONGLENGTHS_NOT_FOUND("Songlengths database not found. Note: we use relative paths, so if you've moved the executable that could be the reason.");
 		inline constexpr const char* const MSG_ERR_SONGLENGTHS_INIT_FAILED("Songlengths database is corrupted.");

@@ -39,6 +39,9 @@ namespace UIElements
 	public:
 		explicit SearchBar(wxWindow* parent, bool visible = true);
 
+		SearchBar(SearchBar&) = delete; // Just to silence the Cppcheck.
+		SearchBar& operator=(const SearchBar&) = delete; // Just to silence the Cppcheck.
+
 		wxPanel* const GetPanel() const;
 
 		bool IsShown() const;

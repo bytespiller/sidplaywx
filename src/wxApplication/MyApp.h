@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ public:
     std::unique_ptr<Settings::AppSettings> currentSettings;
 
 private:
-    FramePlayer* _framePlayer;
+    FramePlayer* _framePlayer = nullptr;
     std::unique_ptr<PlaybackController> _playback;
     std::unique_ptr<SingleInstanceManager> _instanceManager;
     std::unique_ptr<SimpleTimer> _popSilencer;

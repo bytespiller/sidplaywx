@@ -115,7 +115,11 @@ RomUtil::RomStatus SidDecoder::TrySetRoms(const std::wstring& pathKernal, const 
     status.Mark(RomUtil::RomType::Basic, basic != 0);
     status.Mark(RomUtil::RomType::Chargen, chargen != 0);
 
-    _sidEngine.setRoms((const uint8_t*)kernal, (const uint8_t*)basic, (const uint8_t*)chargen);
+    _sidEngine.setRoms(
+        reinterpret_cast<const uint8_t*>(kernal),
+        reinterpret_cast<const uint8_t*>(basic),
+        reinterpret_cast<const uint8_t*>(chargen)
+    );
 
     delete[] kernal;
     delete[] basic;
