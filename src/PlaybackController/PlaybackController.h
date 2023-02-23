@@ -69,7 +69,7 @@ public:
             filterConfig(aFilterConfig)
         {
             sidConfig.frequency = static_cast<uint_least32_t>(audioConfig.sampleRate);
-            sidConfig.playback = (audioConfig.outputChannels == 1) ? SidConfig::playback_t::MONO : SidConfig::playback_t::STEREO;
+            sidConfig.playback = (audioConfig.channelCount == 1) ? SidConfig::playback_t::MONO : SidConfig::playback_t::STEREO;
         }
 
         PortAudioOutput::AudioConfig audioConfig;

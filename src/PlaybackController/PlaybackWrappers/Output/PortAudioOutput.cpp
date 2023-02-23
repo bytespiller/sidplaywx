@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,7 @@
 #include <assert.h>
 #include <iostream>
 
-namespace runtimeSettings
-{
-    double sampleRate = 0.0;
-    float volume = 0.0f;
-    float volumeMultiplier = 1.0f;
-}
+static PortAudioOutput::TPortAudioConfig currentAudioConfig; // Must be static because the PlaybackCallback is static (PortAudio works that way).
 
 PortAudioOutput::~PortAudioOutput()
 {
@@ -37,24 +32,24 @@ PortAudioOutput::~PortAudioOutput()
 
 float PortAudioOutput::GetVolume()
 {
-    return runtimeSettings::volume;
+    return currentAudioConfig.volume;
 }
 
 float PortAudioOutput::GetVolumeMultiplier()
 {
-    return runtimeSettings::volumeMultiplier;
+    return currentAudioConfig.volumeMultiplier;
 }
 
 void PortAudioOutput::SetVolume(float volume)
 {
     assert(volume >= 0.0f && volume <= 1.0f);
-    runtimeSettings::volume = volume;
+    currentAudioConfig.volume = volume;
 }
 
 void PortAudioOutput::SetVolumeMultiplier(float multiplier)
 {
     assert(multiplier >= 1.0f);
-    runtimeSettings::volumeMultiplier = multiplier;
+    currentAudioConfig.volumeMultiplier = multiplier;
 }
 
 bool PortAudioOutput::PreInitPortAudioLibrary()
@@ -76,24 +71,23 @@ bool PortAudioOutput::TryInit(const AudioConfig& audioConfig, IBufferWriter* buf
     bool success = _paInitialized || PreInitPortAudioLibrary();
     if (success)
     {
-        PaDeviceIndex outputDevice = audioConfig.preferredOutputDevice == (paNoDevice) ? Pa_GetDefaultOutputDevice() : audioConfig.preferredOutputDevice;
+        PaDeviceIndex outputDevice = (audioConfig.preferredOutputDevice == paNoDevice) ? Pa_GetDefaultOutputDevice() : audioConfig.preferredOutputDevice;
+        if (outputDevice == paNoDevice)
+        {
+            LogAnyError("TryInit: selected outputDevice", Pa_GetLastHostErrorInfo()->errorCode);
+            return false;
+        }
+
         const PaDeviceInfo& deviceInfo = *Pa_GetDeviceInfo(outputDevice);
-        // TODO: check if outputDevice is still paNoDevice and return error if so.
-        _outputParameters.channelCount = audioConfig.outputChannels;
-        _outputParameters.device = outputDevice;
-        _outputParameters.hostApiSpecificStreamInfo = NULL;
-        _outputParameters.sampleFormat = paInt16; // Must be 16 bit (libsidplayfp expects 16 bit buffer).
-        _outputParameters.suggestedLatency = (audioConfig.lowLatency) ? deviceInfo.defaultLowOutputLatency : deviceInfo.defaultHighOutputLatency;
-        _outputParameters.hostApiSpecificStreamInfo = NULL;
+        currentAudioConfig = AudioConfig(audioConfig);
+        currentAudioConfig.hostApiSpecificStreamInfo = NULL; // Without this you get an error in the release mode.
+        currentAudioConfig.device = outputDevice;
+        currentAudioConfig.sampleFormat = paInt16; // Must be 16 bit (libsidplayfp expects 16 bit buffer).
+        currentAudioConfig.suggestedLatency = (currentAudioConfig.lowLatency) ? deviceInfo.defaultLowOutputLatency : deviceInfo.defaultHighOutputLatency;
 
         // Open an audio I/O stream.
-        success = ResetStream(audioConfig.sampleRate) == paNoError;
-
-        // Set runtime settings
-        runtimeSettings::sampleRate = audioConfig.sampleRate;
-        runtimeSettings::volume = 1.0f;
-
-        _currentAudioConfig = audioConfig;
+        assert(currentAudioConfig.sampleRate > 8000); // libsidplayfp supports sample rates *above* 8kHz only.
+        success = ResetStream(currentAudioConfig.sampleRate) == paNoError;
     }
 
     return success;
@@ -123,7 +117,7 @@ PaError PortAudioOutput::ResetStream(double samplerate)
     }
 
     // Open an audio I/O stream.
-    PaError err = Pa_OpenStream(&_stream, NULL, &_outputParameters, samplerate,
+    PaError err = Pa_OpenStream(&_stream, NULL, &currentAudioConfig, samplerate,
                                 paFramesPerBufferUnspecified,
                                 paNoFlag,
                                 PlaybackCallback,
@@ -140,12 +134,12 @@ PaError PortAudioOutput::ResetStream(double samplerate)
 
 const PortAudioOutput::AudioConfig& PortAudioOutput::GetAudioConfig() const
 {
-    return _currentAudioConfig;
+    return currentAudioConfig;
 }
 
 bool PortAudioOutput::IsOutputSampleRateSupported(double samplerate) const
 {
-    return Pa_IsFormatSupported(NULL, &_outputParameters, samplerate) == paFormatIsSupported;
+    return Pa_IsFormatSupported(NULL, &currentAudioConfig, samplerate) == paFormatIsSupported;
 }
 
 bool PortAudioOutput::LogAnyError(const char* tag, const PaError& err)
@@ -166,6 +160,18 @@ int PortAudioOutput::PlaybackCallback(const void* /*inputBuffer*/, void* outputB
                                       void* userData)
 {
     IBufferWriter* externalSource = static_cast<IBufferWriter*>(userData);
-    bool successful = externalSource->TryFillBuffer(outputBuffer, framesPerBuffer, runtimeSettings::volume * runtimeSettings::volumeMultiplier);
+    bool successful = externalSource->TryFillBuffer(outputBuffer, framesPerBuffer);
+
+    const float volume = currentAudioConfig.volume * currentAudioConfig.volumeMultiplier;
+    if (successful && volume != 1.0f) // Apply volume scale.
+    {
+        short* const out = static_cast<short*>(outputBuffer);
+        const uint_least32_t length = framesPerBuffer * currentAudioConfig.channelCount;
+        for (uint_least32_t i = 0; i < length; ++i)
+        {
+            out[i] *= volume;
+        }
+    }
+
     return (successful) ? paContinue : paAbort; // Reminder: there is also paComplete, so see about it when we reach the end maybe
 }

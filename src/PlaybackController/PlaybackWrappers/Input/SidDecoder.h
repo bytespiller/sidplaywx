@@ -72,7 +72,7 @@ public:
     SidDecoder(SidDecoder&) = delete;
 
 public:
-    bool TryFillBuffer(void* buffer, unsigned long framesPerBuffer, float volume = 1.0f) override;
+    bool TryFillBuffer(void* buffer, unsigned long framesPerBuffer) override;
 
 public:
     // Needed for playback. Can be skipped if intending to just read tunes' info.

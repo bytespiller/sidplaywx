@@ -47,9 +47,9 @@ SidDecoder::SidDecoder() :
     _rs.create(_sidEngine.info().maxsids());
 }
 
-bool SidDecoder::TryFillBuffer(void* buffer, unsigned long framesPerBuffer, float volume)
+bool SidDecoder::TryFillBuffer(void* buffer, unsigned long framesPerBuffer)
 {
-    short* out = static_cast<short*>(buffer);
+    short* const out = static_cast<short*>(buffer);
 
     const uint_least32_t length = framesPerBuffer * _sidConfigCache.playback;
     const uint_least32_t ret = _sidEngine.play(out, length);
@@ -58,14 +58,6 @@ bool SidDecoder::TryFillBuffer(void* buffer, unsigned long framesPerBuffer, floa
     {
         std::cerr << "SID engine error!" << std::endl;
         return false;
-    }
-
-    if (volume != 1.0f) // Apply volume scale.
-    {
-        for (uint_least32_t i = 0; i < length; ++i)
-        {
-            out[i] *= volume;
-        }
     }
 
     return true;

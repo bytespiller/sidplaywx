@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,13 @@
 class PortAudioOutput
 {
 public:
-    typedef struct TPortAudioConfig
+    typedef struct TPortAudioConfig: public PaStreamParameters
     {
-        int outputChannels = 0;
-        double sampleRate = 0.0; // Reminder: libsidplayfp supports only *above* 8kHz (limit it in GUI).
-        PaDeviceIndex preferredOutputDevice = paNoDevice;
+        float volume = 1.0f;
+        float volumeMultiplier = 1.0f;
+        double sampleRate = 0.0;
         bool lowLatency = false;
+        PaDeviceIndex preferredOutputDevice = paNoDevice;
     } AudioConfig;
 
 public:
@@ -62,9 +63,7 @@ private:
                                 void* userData);
 
 private:
-    PaStreamParameters _outputParameters;
     PaStream* _stream = nullptr;
     IBufferWriter* _bufferWriter = nullptr;
     bool _paInitialized = false;
-    AudioConfig _currentAudioConfig;
 };

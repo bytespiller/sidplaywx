@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,7 +100,7 @@ namespace
         assert(absoluteDeviceIndex > -1);
 
         audioConfig.preferredOutputDevice = absoluteDeviceIndex;
-        audioConfig.outputChannels = (settings.GetOption(Settings::AppSettings::ID::ForceMono)->GetValueAsBool()) ? 1 : 2;
+        audioConfig.channelCount = (settings.GetOption(Settings::AppSettings::ID::ForceMono)->GetValueAsBool()) ? 1 : 2;
         audioConfig.sampleRate = Pa_GetDeviceInfo(audioConfig.preferredOutputDevice)->defaultSampleRate;
         audioConfig.lowLatency = settings.GetOption(Settings::AppSettings::ID::LowLatency)->GetValueAsBool();
 

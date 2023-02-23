@@ -140,7 +140,7 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve));
 
     const bool needResetAudioOutput = (newConfig.audioConfig.lowLatency != _portAudioOutput->GetAudioConfig().lowLatency) ||
-                                      (newConfig.audioConfig.outputChannels != _portAudioOutput->GetAudioConfig().outputChannels) ||
+                                      (newConfig.audioConfig.channelCount != _portAudioOutput->GetAudioConfig().channelCount) ||
                                       (newConfig.audioConfig.preferredOutputDevice != _portAudioOutput->GetAudioConfig().preferredOutputDevice) ||
                                       (newConfig.audioConfig.sampleRate != _portAudioOutput->GetAudioConfig().sampleRate);
 
