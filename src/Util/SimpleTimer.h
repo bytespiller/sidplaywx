@@ -22,6 +22,7 @@
 #include <functional>
 #include <thread>
 
+/// @brief Utility class for periodic non-precise non-critical short-term callback invocation (e.g., updating UI every 100ms, delayed call etc.).
 class SimpleTimer
 {
 public:
@@ -44,7 +45,11 @@ public:
 
 public:
 	bool IsRunning() const;
+
+	/// @brief Returns currently elapsed milliseconds (not physically accurate).
 	unsigned long GetElapsed() const;
+
+	/// @brief Returns configured delay milliseconds (i.e., a fixed value).
 	unsigned long GetDelay() const;
 
 	void Restart();

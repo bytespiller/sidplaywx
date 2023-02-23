@@ -57,6 +57,8 @@ unsigned long SimpleTimer::GetDelay() const
 
 void SimpleTimer::Restart()
 {
+	const int RESOLUTION_MS = 10;
+
 	Abort();
 	_elapsedMs = 0;
 
@@ -64,8 +66,8 @@ void SimpleTimer::Restart()
 	{
 		while ((_elapsedMs < _delayMs) && !_aborting)
 		{
-			Sleep(10);
-			_elapsedMs += 10;
+			Sleep(RESOLUTION_MS);
+			_elapsedMs += RESOLUTION_MS; // Not a true elapsed time.
 		}
 
 		if (!_aborting)
