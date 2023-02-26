@@ -203,6 +203,7 @@ namespace FrameElements // Player class
 			{
 				{ExtraOptionId::DefaultSubsong, ExtraOption(Strings::Preferences::OPT_START_DEFAULT_SUBSONG, false)},
 				{ExtraOptionId::IncludeSubsongs, ExtraOption(Strings::Preferences::OPT_INCLUDE_SUBSONGS, false)},
+				{ExtraOptionId::PreRenderEnabled, ExtraOption(Strings::Preferences::OPT_PRERENDER, false)},
 			};
 
 			ExtraOptionsHandler extraOptionsHandler(extraOptions, [&appSettings](UIElements::RepeatModeButton& btnRepeatMode)
@@ -215,6 +216,11 @@ namespace FrameElements // Player class
 				{ // RepeatModeDefaultSubsong
 					const bool enabled = appSettings.GetOption(Settings::AppSettings::ID::RepeatModeDefaultSubsong)->GetValueAsBool();
 					btnRepeatMode.SetExtraOptionEnabled(ExtraOptionId::DefaultSubsong, enabled);
+				}
+
+				{ // PreRenderEnabled
+					const bool enabled = appSettings.GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool();
+					btnRepeatMode.SetExtraOptionEnabled(ExtraOptionId::PreRenderEnabled, enabled);
 				}
 			});
 

@@ -79,6 +79,7 @@ namespace Strings
 
 		inline constexpr const char* const STATUS_PAUSED("Paused");
 		inline constexpr const char* const STATUS_PLAYING("Playing");
+		inline constexpr const char* const STATUS_PLAYING_PRERENDER("Playing (prerender)");
 		inline constexpr const char* const STATUS_MODIFIED_SUFFIX(" (MODIFIED)");
 		inline constexpr const char* const STATUS_BYTES_SUFFIX(" bytes");
 		inline constexpr const char* const STATUS_SEEKING("Seeking...");
@@ -109,6 +110,7 @@ namespace Strings
 		inline constexpr const char* const SID_VOICE("Voice");
 		inline constexpr const char* const VOICE_ACTIVE("Active");
 		inline constexpr const char* const VOICE_MENU_ITEM_SOLO("Solo");
+		inline constexpr const char* const VOICES_UNAVAILABLE_PRERENDER("Voices state frozen during playback in Fast seeking mode.");
 
 		inline constexpr const char* const SPEED_SLIDER("Playback Speed (%)");
 		inline constexpr const char* const SPEED_SLIDER_MENU_ITEM_RESET("Reset to 100%");
@@ -125,16 +127,19 @@ namespace Strings
 		// Audio Output
 		inline constexpr const char* const CATEGORY_AUDIO_OUTPUT("Audio Output");
 		inline constexpr const char* const OPT_DEVICE("Device");
-		inline constexpr const char* const DESC_DEVICE("Additional notes:\n- Altering the playback speed is not supported on all device interfaces.\n- On MSW use DS or MME for full functionality.\n- Ongoing playback will stop if the output sample rate changes.");
+		inline constexpr const char* const DESC_DEVICE("- Modifying the playback speed is not supported on all device interfaces (e.g., WASAPI).\nNote: ongoing playback will stop when changing this setting.");
 
 		inline constexpr const char* const OPT_LOW_LATENCY("Low Latency");
-		inline constexpr const char* const DESC_LOW_LATENCY("Enable for more responsive controls.\nDisable if experiencing stuttering.");
+		inline constexpr const char* const DESC_LOW_LATENCY("Enable for more responsive controls.\nDisable if experiencing stuttering.\nNote: ongoing playback will stop when changing this setting.");
 
 		inline constexpr const char* const OPT_FORCE_MONO("Force mono");
 		inline constexpr const char* const DESC_FORCE_MONO("Disables stereo/panning effects of multi-SID tunes (2SID, 3SID).\nNote: ongoing playback will stop when changing this setting.");
 
 		// Playback behavior
 		inline constexpr const char* const CATEGORY_PLAYBACK_BEHAVIOR("Playback behavior");
+
+		inline constexpr const char* const OPT_PRERENDER("Fast seeking*");
+		inline constexpr const char* const DESC_PRERENDER("Pre-render the song in the background for faster seeking (especially backwards).\n- This *experimental* option is always disabled on app start.\n- Some realtime features (e.g., toggling voices, Leave Running) won't work during playback in this mode.\n- Ongoing playback will stop when changing this setting.\n(This option is also available in a Repeat Mode button's context menu.)");
 
 		inline constexpr const char* const OPT_AUTOPLAY("Autoplay");
 		inline constexpr const char* const DESC_AUTOPLAY("- Play added files immediately (unless enqueued).\n- Always start playback on track navigation.");
@@ -253,7 +258,7 @@ namespace Strings
 	{
 		inline constexpr const char* const DESCRIPTION("A GUI player for Commodore 64 SID music files based on libsidplayfp and wxWidgets");
 		inline constexpr const char* const DEVELOPER_LIBRARIES("This program uses the following (unaffiliated) Open Source libraries:");
-		inline constexpr const char* const ARTISTS_HVSC("Check out the (unaffiliated) High Voltage SID Collection for SID tunes, Songlengths Database and more: https://www.hvsc.c64.org");
+		inline constexpr const char* const HVSC("Check out the (unaffiliated) High Voltage SID Collection for SID tunes, Songlengths Database and more: https://www.hvsc.c64.org");
 		inline constexpr const char* const LICENSE("sidplaywx - A GUI player for Commodore 64 SID music files based on libsidplayfp and wxWidgets.\nCopyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html");
 	}
 

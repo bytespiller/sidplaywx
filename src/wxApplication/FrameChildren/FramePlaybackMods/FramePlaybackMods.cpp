@@ -72,6 +72,9 @@ void FramePlaybackMods::UpdateUiState()
         return;
     }
 
+    const bool changeable = !(_app.GetPlaybackInfo().GetState() != PlaybackController::State::Stopped && _app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool());
+    _ui->labelPreRenderActive->Show(!changeable);
+
     const PlaybackController& playback = _app.GetPlaybackInfo();
     const int sidChipsRequired = playback.GetCurrentTuneSidChipsRequired();
 
@@ -80,7 +83,7 @@ void FramePlaybackMods::UpdateUiState()
         const VoiceCheckBoxData* const data = dynamic_cast<VoiceCheckBoxData*>(chkBox->GetRefData());
         assert(data != nullptr);
         chkBox->SetValue(playback.IsVoiceEnabled(data->sidNum, data->voice));
-        chkBox->Enable(sidChipsRequired >= data->sidNum + 1);
+        chkBox->Enable(changeable && sidChipsRequired >= data->sidNum + 1);
     }
 
     _ui->SetActiveSidsIndicator(sidChipsRequired);

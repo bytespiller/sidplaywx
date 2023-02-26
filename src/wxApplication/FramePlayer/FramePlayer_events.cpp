@@ -456,7 +456,8 @@ void FramePlayer::OnButtonPlayPause()
                 _app.ResumePlayback();
                 break;
             default: // Usually Stopped (but could also be some other state if weird situation, app will say "error" then).
-                _app.ReplayLoadedTune();
+                const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(_ui->treePlaylist->TryGetCurrentSongTreeItemData()) : 0;
+                _app.ReplayLoadedTune(preRenderDurationMs);
         }
     }
     else
@@ -614,7 +615,10 @@ void FramePlayer::OnSongDurationReached()
         case RepeatMode::RepeatOne:
         {
             _app.StopPlayback();
-            _app.ReplayLoadedTune();
+
+            const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(_ui->treePlaylist->TryGetCurrentSongTreeItemData()) : 0;
+            _app.ReplayLoadedTune(preRenderDurationMs);
+
             break;
         }
         default:
@@ -652,6 +656,14 @@ void FramePlayer::OnRepeatModeExtraOptionToggled(ExtraOptionId extraOptionId)
             Settings::Option* option = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs);
             option->UpdateValue(!option->GetValueAsBool());
             _ui->btnRepeatMode->SetExtraOptionEnabled(ExtraOptionId::IncludeSubsongs, option->GetValueAsBool());
+            break;
+        }
+        case ExtraOptionId::PreRenderEnabled:
+        {
+            Settings::Option* option = _app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled);
+            option->UpdateValue(!option->GetValueAsBool());
+            _ui->btnRepeatMode->SetExtraOptionEnabled(ExtraOptionId::PreRenderEnabled, option->GetValueAsBool());
+            OnButtonStop();
             break;
         }
         default:

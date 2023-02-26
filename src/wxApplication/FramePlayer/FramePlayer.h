@@ -70,6 +70,7 @@ public:
     FrameElements::ElementsPlayer& GetUIElements(PassKey<FramePrefs>);
     void UpdateIgnoredSongs(PassKey<FramePrefs>);
     void ForceAppExitOnPrefsClose(PassKey<FramePrefs>);
+    void ForceStopPlayback(PassKey<FramePrefs>);
 
 private: // main
     void InitSonglengthsDatabase();
@@ -96,6 +97,7 @@ public: // playlist (iodetail)
 private:
     void SendFilesToPlaylist(const wxArrayString& files, bool clearPrevious = true, bool autoPlayFirstImmediately = true);
     void UpdateIgnoredSongs();
+    long GetEffectiveSongDuration(const SongTreeItemData* const tuneData) const;
 
 private: // input
     void BrowseFilesAndAddToPlaylist(bool enqueue);

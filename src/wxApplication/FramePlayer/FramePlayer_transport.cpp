@@ -28,13 +28,14 @@ bool FramePlayer::TryPlayPlaylistItem(const SongTreeItemData& itemData)
         const int subsong = (itemData.IsSubsong() || optionDefaultSubsong->GetValueAsBool()) ? itemData.GetDefaultSubsong() : _ui->treePlaylist->GetEffectiveDefaultOrFirstPlayableSubsong(itemData)->GetDefaultSubsong();
         const bool sameTune = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == itemData.GetFilePath().ToStdWstring();
 
+        const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(&itemData) : 0;
         if (sameTune)
         {
-            _app.PlaySubsong(subsong); // Switch an already-loaded tune to subsong.
+            _app.PlaySubsong(subsong, preRenderDurationMs); // Switch an already-loaded tune to subsong.
         }
         else
         {
-            _app.Play(itemData.GetFilePath(), subsong);
+            _app.Play(itemData.GetFilePath(), subsong, preRenderDurationMs);
         }
 
         const bool fileLoadedSuccessfully = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == itemData.GetFilePath();

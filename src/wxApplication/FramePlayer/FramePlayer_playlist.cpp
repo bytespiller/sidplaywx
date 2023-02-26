@@ -314,3 +314,14 @@ void FramePlayer::UpdateIgnoredSongs()
 
     UpdateUiState();
 }
+
+long FramePlayer::GetEffectiveSongDuration(const SongTreeItemData* const tuneData) const
+{
+    long effectiveDuration = static_cast<long>(tuneData->GetDuration());
+    if (effectiveDuration == 0)
+    {
+        effectiveDuration = _app.currentSettings->GetOption(Settings::AppSettings::ID::SongFallbackDuration)->GetValueAsInt() * Const::MILLISECONDS_IN_SECOND;
+    }
+
+    return effectiveDuration;
+}

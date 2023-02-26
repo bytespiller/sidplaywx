@@ -243,7 +243,7 @@ void MyApp::HandoffToCanonicalInstance()
     }
 }
 
-void MyApp::Play(const wxString& filename, unsigned int subsong)
+void MyApp::Play(const wxString& filename, unsigned int subsong, int preRenderDurationMs)
 {
     assert(_playback != nullptr);
 
@@ -263,7 +263,7 @@ void MyApp::Play(const wxString& filename, unsigned int subsong)
             bufferHolder = Helpers::Wx::Files::GetFileContentFromDisk(filename);
         }
 
-        success = (bufferHolder == nullptr) ? false : _playback->TryPlayFromBuffer(filename.ToStdWstring(), bufferHolder, subsong);
+        success = (bufferHolder == nullptr) ? false : _playback->TryPlayFromBuffer(filename.ToStdWstring(), bufferHolder, subsong, preRenderDurationMs);
     }
 
     if (success)
@@ -276,10 +276,10 @@ void MyApp::Play(const wxString& filename, unsigned int subsong)
     }
 }
 
-void MyApp::ReplayLoadedTune()
+void MyApp::ReplayLoadedTune(int preRenderDurationMs)
 {
     StopPlayback();
-    const bool success = _playback->TryReplayCurrentSong();
+    const bool success = _playback->TryReplayCurrentSong(preRenderDurationMs);
     if (success)
     {
         FinalizePlaybackStarted();
@@ -304,10 +304,10 @@ void MyApp::StopPlayback()
     }
 }
 
-void MyApp::PlaySubsong(int subsong)
+void MyApp::PlaySubsong(int subsong, int preRenderDurationMs)
 {
     PopSilencer();
-    _playback->TryPlaySubsong(subsong);
+    _playback->TryPlaySubsong(subsong, preRenderDurationMs);
 }
 
 void MyApp::SetVolume(float volume)

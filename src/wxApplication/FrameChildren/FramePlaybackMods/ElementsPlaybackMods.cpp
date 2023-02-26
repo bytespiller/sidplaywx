@@ -75,6 +75,12 @@ namespace FrameElements
 		chkSid3_3 = NewVoiceCheckBox(*sizerVoices3, wxString::Format("%s %i", Strings::PlaybackMods::SID_VOICE, 3), 2, 2);
 		labelActiveSid3 = NewActiveSidLabel(*sizerVoices3);
 
+		// Pre-render active label
+		labelPreRenderActive = new wxStaticText(&_parentPanel, wxID_ANY, Strings::PlaybackMods::VOICES_UNAVAILABLE_PRERENDER, wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END);
+		labelPreRenderActive->SetFont(labelPreRenderActive->GetFont().MakeBold());
+		sizerParent->Add(labelPreRenderActive, 0, wxALIGN_CENTER_HORIZONTAL);
+		sizerParent->AddSpacer(10);
+
 		// Playback speed
 	    wxStaticBoxSizer* sizer_6 = new wxStaticBoxSizer(wxVERTICAL, &_parentPanel, Strings::PlaybackMods::SPEED_SLIDER);
 	    sizerParent->Add(sizer_6, 0, wxEXPAND | wxTOP, BOX_BORDER_SIZE);

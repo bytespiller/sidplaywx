@@ -141,6 +141,7 @@ void FramePrefs::FillPropertyGrid()
     // Playback
     page->Append(new wxPropertyCategory(Strings::Preferences::CATEGORY_PLAYBACK_BEHAVIOR));
     {
+        AddWrappedProp(Settings::AppSettings::ID::PreRenderEnabled, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_PRERENDER), *page, Effective::Immediately, Strings::Preferences::DESC_PRERENDER);
         AddWrappedProp(Settings::AppSettings::ID::AutoPlay, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_AUTOPLAY), *page, Effective::Immediately, Strings::Preferences::DESC_AUTOPLAY);
 
         AddWrappedProp(Settings::AppSettings::ID::RepeatModeDefaultSubsong, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_START_DEFAULT_SUBSONG), *page, Effective::Immediately, Strings::Preferences::DESC_START_DEFAULT_SUBSONG);
@@ -383,9 +384,17 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                 case TypeSerialized::Int:
                     option.UpdateValue(propertyValueInt);
 
-                    if (prop.first == Settings::AppSettings::ID::SongFallbackDuration)
+                    if (prop.first == Settings::AppSettings::ID::PreRenderEnabled)
+                    {
+                        _framePlayer.ForceStopPlayback({});
+                    }
+                    else if (prop.first == Settings::AppSettings::ID::SongFallbackDuration)
                     {
                         _framePlayer.UpdateIgnoredSongs({}); // Just in case the "skip shorter" is affected by this.
+                        if (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool())
+                        {
+                            _framePlayer.ForceStopPlayback({}); // Fallback duration setting can be changed in realtime (and that's immediately reflected in the seekbar), but that's not supported when playing in a pre-render mode (in case new duration is longer), so we simply stop the playback to force new pre-render upon manual playback restart.
+                        }
                     }
                     else if (prop.first == Settings::AppSettings::ID::SkipShorter)
                     {

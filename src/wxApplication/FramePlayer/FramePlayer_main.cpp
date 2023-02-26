@@ -336,11 +336,16 @@ void FramePlayer::ForceAppExitOnPrefsClose(PassKey<FramePrefs>)
     _exitingApplication = true;
 }
 
+void FramePlayer::ForceStopPlayback(PassKey<FramePrefs>)
+{
+    OnButtonStop();
+}
+
 void FramePlayer::DisplayAboutBox()
 {
     wxAboutDialogInfo aboutInfo;
     aboutInfo.SetName(Strings::FramePlayer::WINDOW_TITLE);
-    aboutInfo.SetVersion("0.6.2"); // TODO
+    aboutInfo.SetVersion("0.7.0 beta"); // TODO
     aboutInfo.SetDescription(Strings::About::DESCRIPTION);
     aboutInfo.SetCopyright(L"(C) 2021-2023 Jasmin Rutić"); // TODO
     aboutInfo.SetWebSite("https://github.com/bytespiller/sidplaywx");
@@ -354,7 +359,7 @@ void FramePlayer::DisplayAboutBox()
                            wxString("Nano SVG (https://github.com/memononen/nanosvg)")
                           );
 
-    aboutInfo.AddArtist(Strings::About::ARTISTS_HVSC);
+    aboutInfo.AddArtist(Strings::About::HVSC);
 
     wxAboutBox(aboutInfo);
 }

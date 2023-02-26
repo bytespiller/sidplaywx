@@ -68,16 +68,7 @@ void FramePlayer::UpdateUiState()
         case PlaybackController::State::Playing:
         {
             _ui->btnPlayPause->SetPause();
-
-            const SongTreeItemData* const currentTuneData = _ui->treePlaylist->TryGetCurrentSongTreeItemData();
-            long currentSongDuration = static_cast<long>(currentTuneData->GetDuration());
-
-            if (currentSongDuration == 0)
-            {
-                currentSongDuration = _app.currentSettings->GetOption(Settings::AppSettings::ID::SongFallbackDuration)->GetValueAsInt() * Const::MILLISECONDS_IN_SECOND;
-            }
-
-            _ui->compositeSeekbar->ResetPlaybackPosition(currentSongDuration);
+            _ui->compositeSeekbar->ResetPlaybackPosition(GetEffectiveSongDuration(_ui->treePlaylist->TryGetCurrentSongTreeItemData()));
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_NORMAL);
 
             break;
@@ -125,7 +116,8 @@ void FramePlayer::UpdatePlaybackStatusBar()
 
         case PlaybackController::State::Playing:
         {
-            wxString status(Strings::FramePlayer::STATUS_PLAYING);
+            const bool preRendering = _app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool();
+            wxString status((preRendering) ? Strings::FramePlayer::STATUS_PLAYING_PRERENDER : Strings::FramePlayer::STATUS_PLAYING);
             if (playback.GetPlaybackSpeedFactor() != 1.0 || !playback.AreAllRelevantVoicesEnabled())
             {
                 status.append(Strings::FramePlayer::STATUS_MODIFIED_SUFFIX);

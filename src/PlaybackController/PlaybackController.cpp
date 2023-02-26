@@ -23,6 +23,7 @@
 #include <filesystem>
 #include <iostream>
 #include <map>
+#include <stdexcept>
 
 static const float VOLUME_MULTIPLIER_DISABLED = 1.0f;
 static const float VOLUME_MULTIPLIER_ENABLED = 2.6f;
@@ -113,7 +114,7 @@ bool PlaybackController::TryInit(const SyncedPlaybackConfig& config)
     _sidDecoder = std::make_unique<SidDecoder>();
 
     const bool sidInitSuccess = TryResetSidDecoder(config);
-    const bool audioInitSuccess = TryResetAudioOutput(config);
+    const bool audioInitSuccess = TryResetAudioOutput(config.audioConfig, false);
 
     const bool success = sidInitSuccess && audioInitSuccess;
     if (!success)
@@ -147,16 +148,21 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
     SwitchAudioDeviceResult result = SwitchAudioDeviceResult::OnTheFly;
     bool success = true;
 
+    const bool enablePreRender = _preRender != nullptr;
+
     if (needResetSidDecoder)
     {
         Stop();
+        _preRender = nullptr; // SID params changed, any pre-rendered content is no longer valid.
+
         success = TryResetSidDecoder(newConfig);
         result = (success) ? SwitchAudioDeviceResult::Stopped : SwitchAudioDeviceResult::Failure;
     }
 
     if (success && needResetAudioOutput)
     {
-        success = TryResetAudioOutput(newConfig);
+        Stop();
+        success = TryResetAudioOutput(newConfig.audioConfig, enablePreRender);
         result = (success) ? result : SwitchAudioDeviceResult::Failure;
 
         TrySetPlaybackSpeed(_playbackSpeedFactor);
@@ -179,24 +185,24 @@ RomUtil::RomStatus PlaybackController::TrySetRoms(const std::wstring& pathKernal
     return _loadedRoms;
 }
 
-bool PlaybackController::TryPlayFromBuffer(const std::wstring& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong)
+bool PlaybackController::TryPlayFromBuffer(const std::wstring& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs)
 {
     PrepareTryPlay();
     _activeTuneHolder = std::make_unique<TuneHolder>(filepathForUid, loadedBufferToAdopt);
     const bool success = _sidDecoder->TryLoadSong(_activeTuneHolder->bufferHolder->buffer, _activeTuneHolder->bufferHolder->size, subsong);
-    return FinalizeTryPlay(success);
+    return FinalizeTryPlay(success, preRenderDurationMs);
 }
 
-bool PlaybackController::TryReplayCurrentSong()
+bool PlaybackController::TryReplayCurrentSong(int preRenderDurationMs)
 {
-    return TryPlaySubsong(GetCurrentSubsong());
+    return TryPlaySubsong(GetCurrentSubsong(), preRenderDurationMs);
 }
 
-bool PlaybackController::TryPlaySubsong(unsigned int subsong)
+bool PlaybackController::TryPlaySubsong(unsigned int subsong, int preRenderDurationMs)
 {
     if (_state != State::Undefined && _activeTuneHolder != nullptr)
     {
-        return TryReplayCurrentSongFromBuffer(subsong);
+        return TryReplayCurrentSongFromBuffer(subsong, preRenderDurationMs);
     }
 
     return false;
@@ -262,6 +268,11 @@ void PlaybackController::Stop()
 
         if (_state != State::Stopped)
         {
+            if (_preRender != nullptr)
+            {
+                _preRender->Stop();
+            }
+
             _sidDecoder->Stop();
         }
 
@@ -299,10 +310,20 @@ void PlaybackController::SeekTo(uint_least32_t targetTimeMs)
     _state = State::Seeking;
     _seekOperation.seekThread = std::thread([this, targetTimeMs]
     {
-        _sidDecoder->SeekTo(targetTimeMs, [this](uint_least32_t cTimeMs, bool done) -> bool
+        if (_preRender != nullptr) // Instant seeking mode
         {
-            return OnSeekStatusReceived(cTimeMs, done);
-        });
+            return _preRender->SeekTo(targetTimeMs, [this](uint_least32_t cTimeMs, bool done) -> bool
+            {
+                return OnSeekStatusReceived(cTimeMs, done);
+            });
+        }
+        else // Regular mode
+        {
+            _sidDecoder->SeekTo(targetTimeMs, [this](uint_least32_t cTimeMs, bool done) -> bool
+            {
+                return OnSeekStatusReceived(cTimeMs, done);
+            });
+        }
     });
 }
 
@@ -342,6 +363,11 @@ uint_least32_t PlaybackController::GetTime() const
     }
     else
     {
+        if (_preRender != nullptr)
+        {
+            return _preRender->GetCurrentSongTimeMs();
+        }
+
         return _sidDecoder->GetTime();
     }
 }
@@ -631,12 +657,15 @@ bool PlaybackController::TryResetSidDecoder(const SyncedPlaybackConfig& newConfi
         Stop();
     }
 
+    _preRender = nullptr; // Some SID params changed, any pre-rendered content is no longer valid.
+
     const bool success = _sidDecoder->TryInitEmulation(newConfig.sidConfig, newConfig.filterConfig);
     if (success)
     {
-        if (TryPlaySubsong(subsong)) // Sync _activeTuneHolder with the (now reset) SID engine.
+        if (_state != State::Undefined && _activeTuneHolder != nullptr)
         {
-            Stop();
+            PrepareTryPlay(); // Stop everything (seeking, playback, whathaveyou).
+            _sidDecoder->TrySetSubsong(subsong); // Sync _activeTuneHolder with the (now reset) SID engine.
         }
     }
     else
@@ -647,19 +676,22 @@ bool PlaybackController::TryResetSidDecoder(const SyncedPlaybackConfig& newConfi
     return success;
 }
 
-bool PlaybackController::TryResetAudioOutput(const SyncedPlaybackConfig& newConfig)
+bool PlaybackController::TryResetAudioOutput(const PortAudioOutput::AudioConfig& audioConfig, bool enablePreRender)
 {
     if (_sidDecoder == nullptr)
     {
         throw std::runtime_error("SID decoder must be initialized first!");
     }
 
-    if (_sidDecoder->GetSidConfig().frequency != static_cast<uint_least32_t>(newConfig.audioConfig.sampleRate))
+    if (_sidDecoder->GetSidConfig().frequency != static_cast<uint_least32_t>(audioConfig.sampleRate))
     {
         throw std::runtime_error("Sample rates not in sync between SID decoder and Audio Output!");
     }
 
-    return _portAudioOutput != nullptr && _portAudioOutput->TryInit(newConfig.audioConfig, _sidDecoder.get());
+    _preRender = (enablePreRender) ? std::make_unique<PreRender>() : nullptr; // Enable the pre-render output if desired, otherwise destroy the old instance.
+
+    IBufferWriter* decoder = (_preRender == nullptr) ? _sidDecoder.get() : static_cast<IBufferWriter*>(_preRender.get()); // Use either the pre-render or the realtime audio output.
+    return _portAudioOutput != nullptr && _portAudioOutput->TryInit(audioConfig, decoder);
 }
 
 void PlaybackController::PrepareTryPlay()
@@ -676,17 +708,45 @@ void PlaybackController::PrepareTryPlay()
 
     if (_state != State::Stopped)
     {
+        if (_preRender != nullptr)
+        {
+            _preRender->Stop();
+        }
+
         _sidDecoder->Stop();
     }
 }
 
-bool PlaybackController::FinalizeTryPlay(bool isSuccessful)
+bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDurationMs)
 {
     if (isSuccessful)
     {
+        if (preRenderDurationMs > 0)
+        {
+            if (_preRender == nullptr)
+            {
+                TryResetAudioOutput(GetAudioConfig(), true);
+            }
+
+            const SidConfig& sidConfig = _sidDecoder->GetSidConfig();
+            _preRender->DoPreRender(*_sidDecoder.get(), sidConfig.frequency, sidConfig.playback, preRenderDurationMs);
+        }
+        else
+        {
+            if (_preRender != nullptr)
+            {
+                TryResetAudioOutput(GetAudioConfig(), false); // Destroy _preRender
+            }
+        }
+
         isSuccessful = _portAudioOutput->TryStartStream();
         if (!isSuccessful)
         {
+            if (_preRender != nullptr)
+            {
+                _preRender->Stop();
+            }
+
             _sidDecoder->Stop();
             _activeTuneHolder = nullptr;
         }
@@ -696,11 +756,11 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful)
     return isSuccessful;
 }
 
-bool PlaybackController::TryReplayCurrentSongFromBuffer(unsigned int subsong)
+bool PlaybackController::TryReplayCurrentSongFromBuffer(unsigned int subsong, int preRenderDurationMs)
 {
     PrepareTryPlay();
     const bool success = _sidDecoder->TrySetSubsong(subsong);
-    return FinalizeTryPlay(success);
+    return FinalizeTryPlay(success, preRenderDurationMs);
 }
 
 bool PlaybackController::OnSeekStatusReceived(uint_least32_t cTimeMs, bool done)

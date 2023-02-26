@@ -36,6 +36,7 @@ namespace Settings
 			static constexpr const char* const LowLatency = "LowLatency";
 			static constexpr const char* const ForceMono = "ForceMono";
 
+			static constexpr const char* const PreRenderEnabled = "PreRenderEnabled";
 			static constexpr const char* const AutoPlay = "AutoPlay";
 			static constexpr const char* const SongFallbackDuration = "SongFallbackDuration";
 			static constexpr const char* const SkipShorter = "SkipShorter";
@@ -125,6 +126,7 @@ namespace Settings
 				DefaultOption(ID::LowLatency, true),
 				DefaultOption(ID::ForceMono, false),
 
+				RuntimeOption(ID::PreRenderEnabled, false, DEFAULT), // RuntimeOption
 				DefaultOption(ID::AutoPlay, true),
 				DefaultOption(ID::RepeatMode, static_cast<int>(UIElements::RepeatModeButton::RepeatMode::Normal)),
 				DefaultOption(ID::RepeatModeIncludeSubsongs, false),
@@ -158,7 +160,7 @@ namespace Settings
 				DefaultOption(ID::RememberPlaylist, true),
 				DefaultOption(ID::MediaKeys, true),
 				DefaultOption(ID::SingleInstance, 1),
-				RuntimeOption(ID::RestoreDefaults, false, DEFAULT),
+				RuntimeOption(ID::RestoreDefaults, false, DEFAULT), // RuntimeOption
 
 				// Internal
 				DefaultOption(ID::Volume, 100),

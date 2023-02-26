@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "PreRender.h"
 #include "PlaybackWrappers/Output/PortAudioOutput.h"
 #include "PlaybackWrappers/Input/SidDecoder.h"
 #include "Util/RomUtil.h"
@@ -132,9 +133,9 @@ public:
     RomUtil::RomStatus TrySetRoms(const std::wstring& pathKernal, const std::wstring& pathBasic, const std::wstring& pathChargen);
 
 public:
-    bool TryPlayFromBuffer(const std::wstring& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong);
-    bool TryReplayCurrentSong();
-    bool TryPlaySubsong(unsigned int subsong);
+    bool TryPlayFromBuffer(const std::wstring& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs);
+    bool TryReplayCurrentSong(int preRenderDurationMs);
+    bool TryPlaySubsong(unsigned int subsong, int preRenderDurationMs);
 
     void Pause();
     void Resume();
@@ -188,11 +189,11 @@ public:
 
 private:
     bool TryResetSidDecoder(const SyncedPlaybackConfig& newConfig);
-    bool TryResetAudioOutput(const SyncedPlaybackConfig& newConfig);
+    bool TryResetAudioOutput(const PortAudioOutput::AudioConfig& audioConfig, bool enablePreRender);
 
     void PrepareTryPlay();
-    bool FinalizeTryPlay(bool isSuccessful);
-    bool TryReplayCurrentSongFromBuffer(unsigned int subsong);
+    bool FinalizeTryPlay(bool isSuccessful, int preRenderDurationMs);
+    bool TryReplayCurrentSongFromBuffer(unsigned int subsong, int preRenderDurationMs);
 
     bool OnSeekStatusReceived(uint_least32_t cTimeMs, bool done);
 
@@ -204,6 +205,7 @@ private:
     std::unique_ptr<TuneHolder> _activeTuneHolder;
     std::unique_ptr<SidDecoder> _sidDecoder;
     std::unique_ptr<PortAudioOutput> _portAudioOutput;
+    std::unique_ptr<PreRender> _preRender;
 
     StateHolder _state;
     SeekOperation _seekOperation{};

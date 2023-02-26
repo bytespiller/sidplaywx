@@ -49,9 +49,8 @@ SidDecoder::SidDecoder() :
 
 bool SidDecoder::TryFillBuffer(void* buffer, unsigned long framesPerBuffer)
 {
+    const uint_least32_t length = (framesPerBuffer * _sidConfigCache.playback);
     short* const out = static_cast<short*>(buffer);
-
-    const uint_least32_t length = framesPerBuffer * _sidConfigCache.playback;
     const uint_least32_t ret = _sidEngine.play(out, length);
 
     if (ret < length)

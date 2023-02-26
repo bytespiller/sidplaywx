@@ -50,12 +50,12 @@ private:
     void HandoffToCanonicalInstance();
 
 public:
-    void Play(const wxString& filename, unsigned int subsong = 0); // TODO: PassKey or something to allow calling this by the TryPlayPlaylistItem method only?
-    void ReplayLoadedTune();
+    void Play(const wxString& filename, unsigned int subsong, int preRenderDurationMs); // TODO: PassKey or something to allow calling this by the TryPlayPlaylistItem method only?
+    void ReplayLoadedTune(int preRenderDurationMs);
     void PausePlayback();
     void ResumePlayback();
     void StopPlayback();
-    void PlaySubsong(int subsong);
+    void PlaySubsong(int subsong, int preRenderDurationMs);
 
     void SetVolume(float volume);
     bool ImmediatelyUpdateVolumeBoost8580();

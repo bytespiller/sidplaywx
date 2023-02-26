@@ -81,6 +81,8 @@ namespace FrameElements
 	    wxCheckBox* chkSid3_3;
 		wxStaticText* labelActiveSid3;
 
+		wxStaticText* labelPreRenderActive;
+
 	    wxSlider* sliderPlaybackSpeed;
 
 	private:

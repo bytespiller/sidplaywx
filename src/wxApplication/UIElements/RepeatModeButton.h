@@ -66,7 +66,8 @@ namespace UIElements
 			{
 				Undefined = 0,
 				DefaultSubsong = 1,
-				IncludeSubsongs = 2
+				IncludeSubsongs = 2,
+				PreRenderEnabled = 3
 			};
 
 			struct ExtraOption

@@ -27,11 +27,8 @@
 #include <sidplayfp/SidTune.h>
 #include <sidplayfp/builders/residfp.h>
 
-#include <functional>
 #include <memory>
 #include <vector>
-
-using SeekStatusCallback = std::function<bool(uint_least32_t, bool)>;
 
 class SidDecoder : public IBufferWriter
 {

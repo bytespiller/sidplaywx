@@ -18,8 +18,13 @@
 
 #pragma once
 
+#include <functional>
+
 class IBufferWriter
 {
+public:
+    using SeekStatusCallback = std::function<bool(int, bool)>;
+
 public:
     virtual bool TryFillBuffer(void* buffer, unsigned long framesPerBuffer) = 0;
 };
