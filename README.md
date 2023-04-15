@@ -62,7 +62,12 @@ The code in a squashed "Public release" commit is a result of me working on sidp
 * Can sidplaywx open archive files?
   * Yes, but only the simplest Zip format is supported due to wxZip limitation.
 * How come the seeking is so slow? 
-  * That's why there is a composite seekbar which shows the seeking progress. The reason is that the SID tunes are not pre-rendered audio like for example the MP3, so they have to be decoded as fast as possible until the "seek" target is reached. The libsidplayfp library (which sidplaywx uses) focuses on accuracy so it's much slower than e.g., libsidplay2 (which is virtually instantaneous, try it in the DeaDBeeF player on the Linux!). I didn't find a way to make seeking in sidplaywx app any faster, especially not without touching the libsidplayfp code. FWIW the seeking in the sidplaywx is already separately threaded and bypasses some SID mixing steps, audio rendering etc. so I think it's as fast as possible at the moment).
+  * That's why there is a composite seekbar which shows the seeking progress. The reason is that the SID tunes are actually small programs and not audio files like for example the MP3, so they have to be emulated as fast as possible until the "seek" target is reached.
+    * <details>
+        <summary>More details</summary>
+        The libsidplayfp library (which sidplaywx uses) focuses on accuracy so it's much slower than e.g., libsidplay2 (which is virtually instantaneous, try it in the DeaDBeeF player on the Linux!). I didn't find a way to make seeking in sidplaywx app any faster, especially not without touching the libsidplayfp code. FWIW the seeking in the sidplaywx is already separately threaded and bypasses some SID mixing steps, audio rendering etc. so I think it's as fast as possible at the moment).
+      </details>
+  * **UPDATE:** there is a new "Fast seeking" option now available which pre-renders the entire SID tune in the background. See [release notes](https://github.com/bytespiller/sidplaywx/releases/tag/v0.7.0-beta) for details on how it works and what are the caveats.
 * Command-line options in sidplaywx?
   * Focus so far is on the GUI experience. There exists a [sidplayfp](https://github.com/libsidplayfp/sidplayfp/releases) console-based player in the libsidplayfp repo (not to be confused with a sidplaywx which is unrelated and unaffiliated project).
   * For now, you can pass the space-separated filenames. For example `sidplaywx Aces_High.sid Gunstar.sid` to open those two tunes. This "feature" is actually a side-effect of single-instance support, so there will be a slight delay if the app is already running and the single-instance option is enabled.
