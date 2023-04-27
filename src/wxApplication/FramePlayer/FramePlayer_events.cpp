@@ -279,7 +279,13 @@ void FramePlayer::OnDropFilesPlaylist(wxDropFilesEvent& evt)
 
 void FramePlayer::OnMenuOpening(wxMenuEvent& evt)
 {
-    if (evt.GetMenu()->GetTitle().IsSameAs(Strings::FramePlayer::MENU_FILE)) // TODO: try to find a better way to detect which menu is opened (e.g., "File" in this case).
+    const wxMenu* const menu = evt.GetMenu();
+    if (menu == nullptr) // Bogus menu event (e.g., right click on the titlebar in MSW).
+    {
+        return;
+    }
+
+    if (menu->GetTitle().IsSameAs(Strings::FramePlayer::MENU_FILE)) // TODO: try to find a better way to detect which menu is opened (e.g., "File" in this case).
     {
         const bool playlistEmpty = _ui->treePlaylist->IsEmpty();
         evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::PlaylistSave), !playlistEmpty);
