@@ -291,6 +291,13 @@ void FramePlayer::OnMenuOpening(wxMenuEvent& evt)
         evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::PlaylistSave), !playlistEmpty);
         evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::PlaylistClear), !playlistEmpty);
     }
+    else if (menu->GetTitle().IsSameAs(Strings::FramePlayer::MENU_EDIT))
+    {
+        const bool playlistEmpty = _ui->treePlaylist->IsEmpty();
+        evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::Find), !playlistEmpty);
+        evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::FindNext), !playlistEmpty);
+        evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::FindPrev), !playlistEmpty);
+    }
 }
 
 void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
@@ -729,38 +736,41 @@ void FramePlayer::OnFindSong(UIElements::SignalsSearchBar signalId)
     const char* COLOR_MISS = "#FFCCCB";
 
     const wxString& query = _ui->searchBar->GetQuery();
-    if (!query.IsEmpty())
+    if (query.IsEmpty())
     {
-        wxTreeItemId currentSelection = _ui->treePlaylist->GetBase().GetSelection();
+        return;
+    }
 
-        // Ensure search point is a main song and not a subsong
-        {
-            wxTreeItemId parentId = _ui->treePlaylist->GetBase().GetItemParent(currentSelection);
-            if (parentId.GetID() != _ui->treePlaylist->GetRootItem().GetID())
-            {
-                currentSelection = parentId;
-            }
-        }
+    wxTreeItemId currentSelection = _ui->treePlaylist->GetBase().GetSelection();
 
-        // Find next/prev
-        const bool forwardDirection = signalId != UIElements::SignalsSearchBar::SIGNAL_FIND_PREV;
-        bool wrapAround = false;
-        const SongTreeItemData* targetItem = DoFindSong(query, currentSelection, forwardDirection);
+    // Ensure search point is a main song and not a subsong
+    if (currentSelection != nullptr)
+    {
+        wxTreeItemId parentId = _ui->treePlaylist->GetBase().GetItemParent(currentSelection);
+        if (parentId.GetID() != _ui->treePlaylist->GetRootItem().GetID())
+        {
+            currentSelection = parentId;
+        }
+    }
 
-        if (targetItem == nullptr) // Next/prev result not found, try to wrap around
-        {
-            targetItem = DoFindSong(query, nullptr, forwardDirection); // Wrap around.
-            wrapAround = true;
-        }
+    // Find next/prev
+    const bool forwardDirection = signalId != UIElements::SignalsSearchBar::SIGNAL_FIND_PREV;
+    bool wrapAround = false;
+    const SongTreeItemData* targetItem = DoFindSong(query, currentSelection, forwardDirection);
 
-        if (targetItem == nullptr)
-        {
-            _ui->searchBar->FlashInputBox(wxColour(COLOR_MISS));
-        }
-        else
-        {
-            _ui->treePlaylist->SelectItem(targetItem->GetId());
-            _ui->searchBar->FlashInputBox((wrapAround) ? wxColour(COLOR_WRAPPED) : wxColour(COLOR_HIT));
-        }
+    if (targetItem == nullptr) // Next/prev result not found, try to wrap around
+    {
+        targetItem = DoFindSong(query, nullptr, forwardDirection); // Wrap around.
+        wrapAround = true;
+    }
+
+    if (targetItem == nullptr)
+    {
+        _ui->searchBar->FlashInputBox(wxColour(COLOR_MISS));
+    }
+    else
+    {
+        _ui->treePlaylist->SelectItem(targetItem->GetId());
+        _ui->searchBar->FlashInputBox((wrapAround) ? wxColour(COLOR_WRAPPED) : wxColour(COLOR_HIT));
     }
 }
