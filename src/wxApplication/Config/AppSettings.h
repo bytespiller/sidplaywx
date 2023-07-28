@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ namespace Settings
 			static constexpr const char* const FilterCurve8580 = "FilterCurve8580";
 
 			static constexpr const char* const DigiBoost = "DigiBoost";
-			static constexpr const char* const VolumeBoost8580 = "VolumeBoost8580";
+			static constexpr const char* const VolumeBoost = "VolumeBoost";
 
 			static constexpr const char* const RomKernalPath = "RomKernalPath";
 			static constexpr const char* const RomBasicPath = "RomBasicPath";
@@ -151,7 +151,7 @@ namespace Settings
 				DefaultOption(ID::FilterCurve8580, 0.5),
 
 				DefaultOption(ID::DigiBoost, false),
-				DefaultOption(ID::VolumeBoost8580, false),
+				DefaultOption(ID::VolumeBoost, false),
 
 				DefaultOption(ID::RomKernalPath, ""),
 				DefaultOption(ID::RomBasicPath, ""),

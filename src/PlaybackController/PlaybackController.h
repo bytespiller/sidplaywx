@@ -178,7 +178,7 @@ public:
     float GetVolume() const;
     void SetVolume(float volume);
 
-    void EnableVolumeBoost();
+    void EnableVolumeBoost(SidConfig::sid_model_t sidModel);
     void DisableVolumeBoost();
 
     bool ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable);

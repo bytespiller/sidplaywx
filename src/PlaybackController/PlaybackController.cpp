@@ -26,7 +26,11 @@
 #include <stdexcept>
 
 static const float VOLUME_MULTIPLIER_DISABLED = 1.0f;
-static const float VOLUME_MULTIPLIER_ENABLED = 1.4f;
+static const std::map<SidConfig::sid_model_t, float> VOLUME_MULTIPLIER_ENABLED // Test against clipping with EnergyBoost.sid (by Arman Behdad) and Flashbacks.sid (by Zardax) after 0:40.
+{
+    {SidConfig::sid_model_t::MOS6581, 1.6f},
+    {SidConfig::sid_model_t::MOS8580, 2.8f} // 8580 is quieter than the 6581 (https://github.com/libsidplayfp/libsidplayfp/issues/78)
+};
 
 // StateHolder inner class ------------------------------------
 
@@ -601,9 +605,9 @@ void PlaybackController::SetVolume(float volume)
     _portAudioOutput->SetVolume(volume);
 }
 
-void PlaybackController::EnableVolumeBoost()
+void PlaybackController::EnableVolumeBoost(SidConfig::sid_model_t sidModel)
 {
-    _portAudioOutput->SetVolumeMultiplier(VOLUME_MULTIPLIER_ENABLED);
+    _portAudioOutput->SetVolumeMultiplier(VOLUME_MULTIPLIER_ENABLED.at(sidModel));
 }
 
 void PlaybackController::DisableVolumeBoost()

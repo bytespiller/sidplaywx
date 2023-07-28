@@ -129,7 +129,10 @@ namespace Strings
 		inline constexpr const char* const OPT_DEVICE("Device");
 		inline constexpr const char* const DESC_DEVICE("- Modifying the playback speed is not supported on all device interfaces (e.g., WASAPI).\nNote: ongoing playback will stop when changing this setting.");
 
-		inline constexpr const char* const OPT_LOW_LATENCY("Low Latency");
+		inline constexpr const char* const OPT_BOOSTVOLUME("Volume boost");
+		inline constexpr const char* const DESC_BOOSTVOLUME("Boosts the overall output volume to a level safe enough to avoid clipping. This option also makes both the SID models similar in loudness.");
+
+		inline constexpr const char* const OPT_LOW_LATENCY("Low latency");
 		inline constexpr const char* const DESC_LOW_LATENCY("Enable for more responsive controls.\nDisable if experiencing stuttering.\nNote: ongoing playback will stop when changing this setting.");
 
 		inline constexpr const char* const OPT_FORCE_MONO("Force mono");
@@ -222,9 +225,6 @@ namespace Strings
 		inline constexpr const char* const OPT_FILTER_CURVE_6581("Filter curve (SID 6581)");
 		inline constexpr const char* const OPT_FILTER_CURVE_8580("Filter curve (SID 8580)");
 		inline constexpr const char* const DESC_FILTER_CURVE_COMMON("Adjust the center frequency value from 0.0 (high/light) to 1.0 (low/dark), default is 0.5.\nNote: ongoing playback will stop when changing this setting.");
-
-		inline constexpr const char* const OPT_BOOSTVOLUME8580("Volume boost (SID 8580)");
-		inline constexpr const char* const DESC_BOOSTVOLUME8580("Boost the output volume when the SID 8580 is used so that it plays with approximately the same loudness as a SID 6581.\n\nThe emulated 8580 is around half the loudness of a 6581. No idea why that is, but the libsidplayfp works that way. This option shouldn't cause clipping.");
 
 		inline constexpr const char* const OPT_DIGIBOOST("DigiBoost (SID 8580)");
 		inline constexpr const char* const DESC_DIGIBOOST("The SID 8580 performs volume changes silently. Some tunes are using the volume register to play digitized sounds on the older SID 6581. These sounds are very silent (effectively missing!) on a 8580. DigiBoost hack enables a loud volume changing on 8580 (but may have side effects with \"normal\" tunes made for 8580).\nNote: ongoing playback will stop when changing this setting.");
