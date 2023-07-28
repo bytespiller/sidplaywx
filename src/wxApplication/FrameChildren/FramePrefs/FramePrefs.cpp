@@ -122,15 +122,14 @@ void FramePrefs::FillPropertyGrid()
     {
         {
             const char* settingId = Settings::AppSettings::ID::AudioOutputDevice;
-            const wxArrayString& outDevices = Helpers::Wx::Audio::GetAudioDevicesNames(Helpers::Wx::Audio::DeviceType::Output, Helpers::Wx::Audio::Backend::Filtered);
-            wxPGProperty* propOut = new wxEnumProperty(Strings::Preferences::OPT_DEVICE, settingId, outDevices);
+            const wxArrayString& supportedOutDevices = Helpers::Wx::Audio::GetAudioDevicesNames(Helpers::Wx::Audio::DeviceType::Output, Helpers::Wx::Audio::Backend::Filtered);
+            wxPGProperty* propOut = new wxEnumProperty(Strings::Preferences::OPT_DEVICE, settingId, supportedOutDevices);
             AddWrappedProp(settingId, TypeSerialized::String, propOut, *page, Effective::Immediately, Strings::Preferences::DESC_DEVICE);
 
-            if (outDevices.Count() > 0)
+            const int filteredDeviceIndex = Helpers::Wx::Audio::TryGetFilteredFromAbsoluteAudioDeviceIndex(_app.GetPlaybackInfo().GetAudioConfig().device);
+            if (filteredDeviceIndex != wxNOT_FOUND)
             {
-                const wxString selectedDeviceName = _app.currentSettings->GetOption(settingId)->GetValueAsString();
-                const int deviceIndex = Helpers::Wx::Audio::GetSelectedOrDefaultAudioDeviceIndex(selectedDeviceName, Helpers::Wx::Audio::DeviceType::Output, Helpers::Wx::Audio::Backend::Filtered);
-                propOut->SetChoiceSelection(deviceIndex); // Select actual device
+                propOut->SetChoiceSelection(filteredDeviceIndex); // Select actual device.
             }
         }
 

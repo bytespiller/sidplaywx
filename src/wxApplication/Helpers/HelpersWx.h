@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ namespace Helpers
 			std::pair<wxString, wxString> SplitZipArchiveAndFileNames(const wxString& filename);
 			std::unique_ptr<BufferHolder> GetFileContentFromZip(const wxString& filename);
 
-			// Like GetFileContentFromZip but for regular files, supporting unicode paths (can't just naively load them directly via libsidplayfp's loader unfortunately due to lack of unicode paths support there).
+			/// @brief Like GetFileContentFromZip but for regular files, supporting unicode paths (can't just naively load them directly via libsidplayfp's loader unfortunately due to lack of unicode paths support there).
 			std::unique_ptr<BufferHolder> GetFileContentFromDisk(const wxString& filename);
 
 			bool TrySavePlaylist(const wxString& fullpath, const std::vector<wxString>& fileList);
@@ -83,7 +83,14 @@ namespace Helpers
 
 			wxArrayString GetAudioDevicesNames(DeviceType type, Backend backend);
 			wxString GetDefaultAudioOutDeviceName();
-			int GetSelectedOrDefaultAudioDeviceIndex(const wxString& selectedDeviceName, DeviceType type, Backend backend);
+
+			/// @brief Converts absolute output audio device index to filtered index (supported output audio devices).
+			/// @return Filtered index or wxNOT_FOUND (-1).
+			int TryGetFilteredFromAbsoluteAudioDeviceIndex(int absoluteIndex);
+
+			/// @brief Gets audio device index from the device name if it exists and if it's supported by this version of the app.
+			/// @return Absolute index of the specified audio device, or of a default device or paNoDevice if nothing is available.
+			int TryGetAudioDeviceIndex(const wxString& deviceName);
 		}
 
 		namespace Input

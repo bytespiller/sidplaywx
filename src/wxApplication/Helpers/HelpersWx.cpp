@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -329,7 +329,9 @@ namespace Helpers
 					{
 						const PaDeviceInfo* const deviceInfo = Pa_GetDeviceInfo(i);
 						const PaHostApiInfo* const hostApiInfo = Pa_GetHostApiInfo(deviceInfo->hostApi);
-						if (backend == Audio::Backend::All || hostApiInfo->type != paWDMKS)
+
+						// DirectSound has huge problems after libsidplayfp 2.5.0 (I don't know why, maybe the OpenMP messes it up somehow, who knows...).
+						if (backend == Audio::Backend::All || (hostApiInfo->type != paWDMKS && hostApiInfo->type != paDirectSound))
 						{
 							if (type != Audio::DeviceType::Output || deviceInfo->maxOutputChannels > 0)
 							{
@@ -350,28 +352,40 @@ namespace Helpers
 					return "";
 				}
 
-				return GetAudioDevicesNames(Audio::DeviceType::Output, Audio::Backend::All).Item(defaultOutDevice);
+				return GetAudioDevicesNames(Audio::DeviceType::Any, Audio::Backend::All).Item(defaultOutDevice);
 			}
 
-			int GetSelectedOrDefaultAudioDeviceIndex(const wxString& selectedDeviceName, Audio::DeviceType type, Audio::Backend backend)
+			int TryGetFilteredFromAbsoluteAudioDeviceIndex(int absoluteIndex)
 			{
-				if (selectedDeviceName.IsEmpty())
+				const wxString targetName = GetAudioDevicesNames(Audio::DeviceType::Any, Audio::Backend::All).Item(absoluteIndex);
+				const int filteredIndex = GetAudioDevicesNames(Audio::DeviceType::Output, Audio::Backend::Filtered).Index(targetName);
+				return filteredIndex;
+			}
+
+			int TryGetAudioDeviceIndex(const wxString& deviceName)
+			{
+				if (deviceName.IsEmpty())
 				{
-					return Pa_GetDefaultOutputDevice();
+					return paNoDevice;
 				}
 
-				const wxArrayString& outDevices = GetAudioDevicesNames(type, backend);
+				const wxArrayString& outDevices = GetAudioDevicesNames(Audio::DeviceType::Any, Audio::Backend::All);
 				int index = 0;
 				for (const wxString& cName: outDevices)
 				{
-					if (cName == selectedDeviceName)
+					if (cName == deviceName)
 					{
+						if (TryGetFilteredFromAbsoluteAudioDeviceIndex(index) == wxNOT_FOUND)
+						{
+							break;
+						}
+
 						return index;
 					}
 					++index;
 				}
 
-				return Pa_GetDefaultOutputDevice(); // Stored device no longer present, fallback to default.
+				return paNoDevice; // Stored device no longer present.
 			}
 		}
 

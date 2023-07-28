@@ -96,8 +96,12 @@ namespace
     {
         PortAudioOutput::AudioConfig audioConfig;
 
-        const int absoluteDeviceIndex = Helpers::Wx::Audio::GetSelectedOrDefaultAudioDeviceIndex(settings.GetOption(Settings::AppSettings::ID::AudioOutputDevice)->GetValueAsString(), Helpers::Wx::Audio::DeviceType::Any, Helpers::Wx::Audio::Backend::All);
-        assert(absoluteDeviceIndex > -1);
+        PaDeviceIndex absoluteDeviceIndex = Helpers::Wx::Audio::TryGetAudioDeviceIndex(settings.GetOption(Settings::AppSettings::ID::AudioOutputDevice)->GetValueAsString());
+        if (absoluteDeviceIndex == paNoDevice)
+        {
+            absoluteDeviceIndex = Pa_GetDefaultOutputDevice();
+            assert(absoluteDeviceIndex != paNoDevice);
+        }
 
         audioConfig.preferredOutputDevice = absoluteDeviceIndex;
         audioConfig.channelCount = (settings.GetOption(Settings::AppSettings::ID::ForceMono)->GetValueAsBool()) ? 1 : 2;
