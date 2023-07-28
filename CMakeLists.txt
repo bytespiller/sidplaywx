@@ -31,8 +31,9 @@ target_link_libraries(${PROJECT_NAME}
     setupapi dsound dxguid winmm # Windows-specific (for audio)
     Threads::Threads
     -static-libgcc -static-libstdc++ # needed for MinGW posix threading
+    -fopenmp # libsidplayfp since 2.5.0 uses OpenMP
 
-    -mwindows # WxWidgets, don't open console/terminal.
+    -mwindows # WxWidgets, don't open console/terminal
     liboleacc.a # WxWidgets MSW, must be defined BEFORE the wxWidgets_core
     wxWidgets_propgrid wxWidgets_adv # prefs window (must be included before others)
     wxWidgets_core wxWidgets_base wxWidgets_regex

@@ -26,7 +26,7 @@
 #include <stdexcept>
 
 static const float VOLUME_MULTIPLIER_DISABLED = 1.0f;
-static const float VOLUME_MULTIPLIER_ENABLED = 2.6f;
+static const float VOLUME_MULTIPLIER_ENABLED = 1.4f;
 
 // StateHolder inner class ------------------------------------
 
