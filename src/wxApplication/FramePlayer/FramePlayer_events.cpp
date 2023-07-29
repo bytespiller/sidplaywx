@@ -393,10 +393,15 @@ void FramePlayer::OnTimer(wxTimerEvent& /*evt*/)
             UpdatePeriodicDisplays(playbackTimeMs);
 
             // Playback (repeat) control
-            const int trimMs = _app.currentSettings->GetOption(Settings::AppSettings::ID::SonglengthsTrim)->GetValueAsInt();
-            if (playbackTimeMs >= _ui->compositeSeekbar->GetDurationValue() + trimMs)
+            const int ivalue = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode)->GetValueAsInt();
+            const RepeatMode repeatMode = static_cast<RepeatMode>(ivalue);
+            if (repeatMode != RepeatMode::InfiniteDuration)
             {
-                OnSongDurationReached();
+                const int trimMs = _app.currentSettings->GetOption(Settings::AppSettings::ID::SonglengthsTrim)->GetValueAsInt();
+                if (playbackTimeMs >= _ui->compositeSeekbar->GetDurationValue() + trimMs)
+                {
+                    OnSongDurationReached();
+                }
             }
         }
     }
