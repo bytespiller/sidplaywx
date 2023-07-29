@@ -46,7 +46,7 @@ Some alternatives to sidplaywx for playing the SID tunes I've tried and liked ar
 * Linux: DeaDBeeF player (note: it uses older/no longer maintained libsidplay2)
 
 ## Contributing, ideas, comments, issues
-The code in a squashed "Public release" commit is a result of me working on sidplaywx (very) sporadically over a year in my free time. I plan to continue updating it as I find more free time. If you have an idea or a comment, feel free to post it in the [Discussions](https://github.com/bytespiller/sidplaywx/discussions). Issues can be reported [here](https://github.com/bytespiller/sidplaywx/issues). There is also an email address provided in the application's Help > About box.
+If you have an idea or a comment, feel free to post it in the [Discussions](https://github.com/bytespiller/sidplaywx/discussions). Issues can be reported [here](https://github.com/bytespiller/sidplaywx/issues). There is also an email address provided in the application's Help > About box.
 
 ## FAQ
 * Where can I get SID tunes?
@@ -60,7 +60,7 @@ The code in a squashed "Public release" commit is a result of me working on sidp
     * BASIC ROM (tune indicated with a BLUE crossout text if missing)
     * _CHARGEN ROM (you'll probably never need this one, so let's just ignore it for now)_
 * Can sidplaywx open archive files?
-  * Yes, but only the simplest Zip format is supported due to wxZip limitation.
+  * Yes, but only the Zip format in its simplest form is supported due to wxZip limitation.
 * How come the seeking is so slow? 
   * That's why there is a composite seekbar which shows the seeking progress. The reason is that the SID tunes are actually small programs and not audio files like for example the MP3, so they have to be emulated as fast as possible until the "seek" target is reached.
     * <details>
