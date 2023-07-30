@@ -442,7 +442,7 @@ SidConfig::sid_model_t PlaybackController::GetCurrentlyEffectiveSidModel() const
     const SidConfig& cSidConfig = _sidDecoder->GetSidConfig();
     SidConfig::sid_model_t effectiveSidChipModel = cSidConfig.defaultSidModel;
 
-    if (!cSidConfig.forceSidModel)
+    if (IsValidSongLoaded() && !cSidConfig.forceSidModel)
     {
         const SidTuneInfo& tuneInfo = _sidDecoder->GetCurrentSongInfo();
         switch (tuneInfo.sidModel(0))
