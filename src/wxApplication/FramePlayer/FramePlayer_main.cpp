@@ -345,7 +345,7 @@ void FramePlayer::DisplayAboutBox()
 {
     wxAboutDialogInfo aboutInfo;
     aboutInfo.SetName(Strings::FramePlayer::WINDOW_TITLE);
-    aboutInfo.SetVersion("0.7.1"); // TODO
+    aboutInfo.SetVersion("0.7.1b"); // TODO
     aboutInfo.SetDescription(Strings::About::DESCRIPTION);
     aboutInfo.SetCopyright(L"(C) 2021-2023 Jasmin Rutić"); // TODO
     aboutInfo.SetWebSite("https://github.com/bytespiller/sidplaywx");

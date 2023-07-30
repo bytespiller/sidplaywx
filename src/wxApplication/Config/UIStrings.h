@@ -130,7 +130,7 @@ namespace Strings
 		inline constexpr const char* const DESC_DEVICE("- Modifying the playback speed is not supported on all device interfaces (e.g., WASAPI).\nNote: ongoing playback will stop when changing this setting.");
 
 		inline constexpr const char* const OPT_BOOSTVOLUME("Volume boost");
-		inline constexpr const char* const DESC_BOOSTVOLUME("Boosts the overall output volume to a level safe enough to avoid clipping. This option also makes both the SID models similar in loudness.");
+		inline constexpr const char* const DESC_BOOSTVOLUME("Boosts the overall output volume to a level that should be safe enough to avoid clipping.");
 
 		inline constexpr const char* const OPT_LOW_LATENCY("Low latency");
 		inline constexpr const char* const DESC_LOW_LATENCY("Enable for more responsive controls.\nDisable if experiencing stuttering.\nNote: ongoing playback will stop when changing this setting.");

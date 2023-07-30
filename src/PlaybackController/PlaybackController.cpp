@@ -26,10 +26,10 @@
 #include <stdexcept>
 
 static const float VOLUME_MULTIPLIER_DISABLED = 1.0f;
-static const std::map<SidConfig::sid_model_t, float> VOLUME_MULTIPLIER_ENABLED // Test against clipping with EnergyBoost.sid (by Arman Behdad) and Flashbacks.sid (by Zardax) after 0:40.
+static const std::map<SidConfig::sid_model_t, float> VOLUME_MULTIPLIER_ENABLED
 {
     {SidConfig::sid_model_t::MOS6581, 1.6f},
-    {SidConfig::sid_model_t::MOS8580, 2.8f} // 8580 is quieter than the 6581 (https://github.com/libsidplayfp/libsidplayfp/issues/78)
+    {SidConfig::sid_model_t::MOS8580, 1.54f} // 8580 is quieter than the 6581 (https://github.com/libsidplayfp/libsidplayfp/issues/78). Tweaked against clipping with /Fegolhuzz/Hues.sid (after 0:45, and @2:01) & /Nordischsound/Terminator_2.sid (after 1:03).
 };
 
 // StateHolder inner class ------------------------------------
