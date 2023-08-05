@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #pragma once
 
 // This is temporary until localization support is implemented one day perhaps.
-// Reminder: "inline" must be to (try to) avoid unnecessary duplication of string literals in the executable.
+// Reminder: "inline" must be to (try to) avoid unnecessary duplication of string literals in the executable (it seems to help for some reason!).
 
 namespace Strings
 {
@@ -90,8 +90,14 @@ namespace Strings
 
 	namespace PlaylistTree
 	{
-		inline constexpr const char* const MENU_ITEM_REMOVE("Skip this");
-		inline constexpr const char* const MENU_ITEM_RESTORE("Unskip this");
+		inline constexpr const char* const COLUMN_TITLE("Title");
+		inline constexpr const char* const COLUMN_DURATION("Duration");
+		inline constexpr const char* const COLUMN_AUTHOR("Author");
+
+		inline constexpr const char* const MENU_ITEM_REMOVE("Remove");
+
+		inline constexpr const char* const MENU_ITEM_BLACKLIST("Skip subsong");
+		inline constexpr const char* const MENU_ITEM_UNBLACKLIST("Un-skip subsong");
 
 		inline constexpr const char* const MENU_ITEM_SCROLL_TO_CURRENT("Scroll to current");
 
@@ -157,7 +163,7 @@ namespace Strings
 		inline constexpr const char* const DESC_FALLBACK_DURATION("Song duration (in seconds) when its real duration is unknown (i.e., song is not in a Songlengths.md5 database).");
 
 		inline constexpr const char* const OPT_SKIP_SHORTER("Auto-skip shorter");
-		inline constexpr const char* const DESC_SKIP_SHORTER("Auto-skip (sub)songs with durations below the specified threshold (in seconds). Affected (sub)songs will be indicated with a timer icon. You can still force playback by activating them in the playlist directly. Set to 0 to disable this feature.");
+		inline constexpr const char* const DESC_SKIP_SHORTER("Auto-skip (sub)songs with durations below the specified threshold (in seconds). Affected (sub)songs will be indicated with a timer icon. You can still force playback by activating them in the playlist directly. Set to 0 to disable this feature.\nNOTE: timer icons degrade the playlist scrolling performance when the window is maximized (wxWidgets issue).");
 
 		inline constexpr const char* const OPT_POP_SILENCER("Pop suppression");
 		inline constexpr const char* const DESC_POP_SILENCER("Mute duration (in milliseconds) on song start to try reduce the audible pop.");

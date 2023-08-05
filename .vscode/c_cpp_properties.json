@@ -3,7 +3,6 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/deps/include/nanosvg/*",
                 "${workspaceFolder}/src/**",
                 "C:/wxWidgets/include/**",
                 "C:/msys64/mingw64/include/*",

@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,7 @@
  */
 
 #include "HelpersWx.h"
-#include "../../Util/Const.h"
-#include "../../Util/HelpersGeneral.h"
+
 #include <wx/dir.h>
 #include <wx/stdpaths.h>
 #include <wx/textfile.h>
@@ -88,23 +87,6 @@ namespace Helpers
 {
 	namespace Wx
 	{
-		wxString GetTimeFormattedString(uint_least32_t millis, bool zeroDurationSpecial)
-		{
-			if (zeroDurationSpecial && millis == 0)
-			{
-				return "??:??";
-			}
-			else
-			{
-				const long min = millis / Const::MILLISECONDS_IN_MINUTE;
-
-				millis -= Const::MILLISECONDS_IN_MINUTE * min;
-				const long sec = millis / Const::MILLISECONDS_IN_SECOND;
-
-				return wxString::Format("%s:%s", Helpers::General::GetZeroPaddedString(min), Helpers::General::GetZeroPaddedString(sec));
-			}
-		}
-
 		namespace Files
 		{
 			std::wstring AsAbsolutePathIfPossible(const std::wstring& relPath)

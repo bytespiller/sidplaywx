@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
 #pragma once
 
 #include "../../Util/BufferHolder.h"
+#include "../../Util/Const.h"
+#include "../../Util/HelpersGeneral.h"
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
@@ -36,7 +38,39 @@ namespace Helpers
 {
 	namespace Wx
 	{
-		wxString GetTimeFormattedString(uint_least32_t millis, bool zeroDurationSpecial = false);
+		/// @brief Several times faster than using the wxString::Format or naive concatenation.
+		inline const wxString FastJoin(const wxString& base, const char* const a, const char* const b)
+		{
+			wxString x(base);
+			x += a;
+			x += b;
+			return x;
+		}
+
+		/// @brief Several times faster than using the wxString::Format or naive concatenation.
+		inline const wxString FastJoin(const wxString& base, const char* const a, const char* const b, const char* const c)
+		{
+			wxString x(base);
+			x += a;
+			x += b;
+			x += c;
+			return x;
+		}
+
+		inline const wxString GetTimeFormattedString(uint_least32_t millis, bool zeroDurationSpecial = false)
+		{
+			if (zeroDurationSpecial && millis == 0)
+			{
+				return "??:??";
+			}
+
+			const long min = millis / Const::MILLISECONDS_IN_MINUTE;
+
+			millis -= Const::MILLISECONDS_IN_MINUTE * min;
+			const long sec = millis / Const::MILLISECONDS_IN_SECOND;
+
+			return FastJoin(Helpers::General::GetZeroPaddedString(min), ":", Helpers::General::GetZeroPaddedString(sec).c_str());
+		}
 
 		namespace Files
 		{

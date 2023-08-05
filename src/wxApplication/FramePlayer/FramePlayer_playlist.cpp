@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,35 +22,25 @@
 #include "../Config/AppSettings.h"
 #include "../Config/UIStrings.h"
 #include "../Helpers/HelpersWx.h"
-#include "../UIElements/Playlist/Playlist.h"
+#include "../UIElements/Playlist/Components/PlaylistModel.h"
 #include "../../Util/Const.h"
 
-using PlaylistItemStyle = UIElements::Playlist::Playlist::ItemStyle;
-using SongItemType = UIElements::Playlist::SongTreeItemData::SongItemType;
-using ItemStatus = UIElements::Playlist::SongTreeItemData::ItemStatus;
-
-static const int iconNoIcon = static_cast<int>(FrameElements::PlaylistIconId::NoIcon);
-static const int iconDefaultSong = static_cast<int>(FrameElements::PlaylistIconId::DefaultSubsongIndicator);
-static const int iconChipIcon = static_cast<int>(FrameElements::PlaylistIconId::ChipIcon);
-static const int iconSkipShortIcon = static_cast<int>(FrameElements::PlaylistIconId::SkipShort);
-
-std::vector<wxString> FramePlayer::GetCurrentPlaylistFilePaths(bool includeSkippedSongs)
+std::vector<wxString> FramePlayer::GetCurrentPlaylistFilePaths(bool includeBlacklistedSongs)
 {
-    const size_t fileItemsCount = _ui->treePlaylist->GetBase().GetChildrenCount(_ui->treePlaylist->GetRootItem());
-    std::vector<wxString> fileList;
-    fileList.reserve(fileItemsCount);
+    const PlaylistTreeModelNodePtrArray& songs = _ui->treePlaylistNew->GetSongs();
 
-    _ui->treePlaylist->ForEachSibling([&fileList, includeSkippedSongs](const SongTreeItemData& songData)
+    std::vector<wxString> fileList;
+    fileList.reserve(songs.size());
+
+    for (const PlaylistTreeModelNodePtr& node : songs)
     {
-        if (!includeSkippedSongs && songData.GetStatus() == ItemStatus::IgnoredPlayable)
+        if (!includeBlacklistedSongs && node->GetTag() == PlaylistTreeModelNode::ItemTag::Blacklisted)
         {
-            // skipped
+            continue;
         }
-        else
-        {
-            fileList.emplace_back(songData.GetFilePath());
-        }
-    }, _ui->treePlaylist->GetRootItem().GetID());
+
+        fileList.emplace_back(node->filepath);
+    }
 
     return fileList;
 }
@@ -99,16 +89,15 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
         _app.StopPlayback();
         _app.UnloadActiveTune();
 
-        SetStatusText(Strings::FramePlayer::STATUS_CLEARING_PLAYLIST, 2); // TODO (for large amount of items this can take a few sec)
-        _ui->treePlaylist->ClearPlaylist();
+        SetStatusText(Strings::FramePlayer::STATUS_CLEARING_PLAYLIST, 2); // TODO
+        _ui->treePlaylistNew->Clear();
 
         UpdateUiState();
         Update();
     }
 
+    const bool enabledShortSongSkip = _app.currentSettings->GetOption(Settings::AppSettings::ID::SkipShorter)->GetValueAsInt() > 0;
     bool shouldAutoPlay = (autoPlayFirstImmediately) ? _app.currentSettings->GetOption(Settings::AppSettings::ID::AutoPlay)->GetValueAsBool() : false;
-    const uint_least32_t skipDurationThreshold = static_cast<uint_least32_t>(_app.currentSettings->GetOption(Settings::AppSettings::ID::SkipShorter)->GetValueAsInt() * Const::MILLISECONDS_IN_SECOND);
-    const uint_least32_t fallbackDuration = static_cast<uint_least32_t>(_app.currentSettings->GetOption(Settings::AppSettings::ID::SongFallbackDuration)->GetValueAsInt() * Const::MILLISECONDS_IN_SECOND);
 
     int processedFilesCount = 0;
     int lastPercentage = -1;
@@ -148,8 +137,6 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
 
         if (tuneIsValid)
         {
-            bool hasNonAutoSkippedSong = false;
-
             // Tune title
             const int sidsNeeded = _silentSidInfoDecoder.GetCurrentTuneSidChipsRequired();
             const wxString songTitleAddendum = (sidsNeeded > 1) ? wxString::Format(" [%iSID]", sidsNeeded) : "";
@@ -162,31 +149,14 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
             // Tune ROM requirement
             const SidDecoder::SongRequirement romRequirement = _silentSidInfoDecoder.GetCurrentSongRomRequirement();
             const bool playable = playback.IsRomLoaded(romRequirement);
-            const ItemStatus playlistItemStatus = (playable) ? ItemStatus::Normal : ItemStatus::Unplayable;
-            const bool needsBasicRom = romRequirement == SidDecoder::SongRequirement::BasicRom;
 
-            // Item style
-            PlaylistItemStyle style = PlaylistItemStyle::Normal;
-            if (!playable)
-            {
-                style = (needsBasicRom) ? PlaylistItemStyle::MissingBasic : PlaylistItemStyle::MissingKernal;
-            }
-
-            wxTreeItemId mainSongNode;
+            // Add main song node to playlist tree
+            PlaylistTreeModelNode* mainSongNodeNew = nullptr;
 
             {
-                // Tune duration
                 const uint_least32_t realDuration = _silentSidInfoDecoder.TryGetActiveSongDuration();
-
-                // Add main song to playlist tree
-                const int mainSongIcon = (romRequirement == SidDecoder::SongRequirement::None) ? iconNoIcon : iconChipIcon;
-                mainSongNode = _ui->treePlaylist->AppendMainSong(new SongTreeItemData(songTitle, filepath, defaultSubsong, realDuration, SongItemType::Song, playlistItemStatus, mainSongIcon), totalSubsongs, style);
-                if (totalSubsongs == 1)
-                {
-                    const uint_least32_t relevantDuration = (realDuration == 0) ? fallbackDuration : realDuration;
-                    const bool autoSkipped = skipDurationThreshold > 0 && (relevantDuration < skipDurationThreshold);
-                    hasNonAutoSkippedSong = !autoSkipped;
-                }
+                const wxString author = _silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author); // Don't use reference.
+                mainSongNodeNew = &_ui->treePlaylistNew->AddMainSong(songTitle, filepath, defaultSubsong, realDuration, author, playable);
             }
 
             if (playable)
@@ -197,43 +167,46 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
             // Add any subsongs to playlist tree
             if (totalSubsongs > 1)
             {
+                std::vector<uint_least32_t> subsongDurations;
+                subsongDurations.reserve(totalSubsongs);
+
+                // Determine durations
                 for (int i = 1; i <= totalSubsongs; ++i)
                 {
                     if (_silentSidInfoDecoder.TrySetSubsong(i))
                     {
-                        const int subsongIcon = (i == defaultSubsong) ? iconDefaultSong : iconNoIcon;
                         const uint_least32_t realDuration = _silentSidInfoDecoder.TryGetActiveSongDuration();
-                        const wxTreeItemId& subsongNode = _ui->treePlaylist->AppendSubSong(mainSongNode, new SongTreeItemData(songTitle, filepath, i, realDuration, SongItemType::Subsong, playlistItemStatus, subsongIcon), style);
-
-                        const uint_least32_t relevantDuration = (realDuration == 0) ? fallbackDuration : realDuration;
-                        if (skipDurationThreshold > 0 && (relevantDuration < skipDurationThreshold))
-                        {
-                            _ui->treePlaylist->IgnoreSong(subsongNode, iconSkipShortIcon);
-                        }
-                        else
-                        {
-                            hasNonAutoSkippedSong = true;
-                        }
+                        subsongDurations.emplace_back(realDuration);
                     }
                 }
+
+                // Add subsongs
+                _ui->treePlaylistNew->AddSubsongs(subsongDurations, *mainSongNodeNew);
+            }
+
+            // Indicate a ROM requirement & status (must be done after subsongs are added in order for styling to propagate to them too)
+            if (romRequirement != SidDecoder::SongRequirement::None)
+            {
+                const PlaylistTreeModelNode::ItemTag tag = (romRequirement == SidDecoder::SongRequirement::BasicRom) ? PlaylistTreeModelNode::ItemTag::RequiresRomBasic : PlaylistTreeModelNode::ItemTag::RequiresRomKernal;
+                _ui->treePlaylistNew->SetItemTag(*mainSongNodeNew, tag, true);
             }
 
             // One tune (with any subsongs) added -----------------
-            if (!hasNonAutoSkippedSong)
+
+            // Tag short songs
+            if (enabledShortSongSkip)
             {
-                _ui->treePlaylist->IgnoreSong(mainSongNode, iconSkipShortIcon);
+                UpdateIgnoredSong(*mainSongNodeNew);
             }
 
+            // Auto-play
             if (shouldAutoPlay)
             {
-                const SongTreeItemData* subsongItemData = nullptr;
-
+                const PlaylistTreeModelNode* subsongItemData = _ui->treePlaylistNew->GetEffectiveInitialSubsong(*mainSongNodeNew);
+                if (subsongItemData != nullptr) // Can be nullptr if the main song is not playable (e.g., missing ROM).
                 {
-                    const SongTreeItemData& mainSongItemData = _ui->treePlaylist->GetSongTreeItemData(mainSongNode);
-                    subsongItemData = _ui->treePlaylist->GetEffectiveDefaultOrFirstPlayableSubsong(mainSongItemData);
+                    shouldAutoPlay = subsongItemData->GetTag() != PlaylistTreeModelNode::ItemTag::Normal || !TryPlayPlaylistItem(*mainSongNodeNew);
                 }
-
-                shouldAutoPlay = subsongItemData->GetStatus() != SongTreeItemData::ItemStatus::Normal || !TryPlayPlaylistItem(*subsongItemData);
             }
         }
 
@@ -255,14 +228,33 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
         wxArrayString moreFiles(_enqueuedFiles);
         _enqueuedFiles.Clear();
         _enqueuedFiles.Shrink();
-        SendFilesToPlaylist(moreFiles, false, false);
+        SendFilesToPlaylist(moreFiles, false, false); // Process another batch of enqueued files.
     }
-    else
+    else // All enqueued files processed.
     {
         _addingFilesToPlaylist = false;
+        PadColumnsWidth();
     }
+}
 
-    //_ui->treePlaylist->SortChildren(_ui->treePlaylist->GetRootItem()); // TODO: turn this into a menu action instead
+void FramePlayer::PadColumnsWidth()
+{
+    // Pad the Title & Author column widths a little because the bold text takes up some extra width so the text could become cutoff when hard-selected.
+    PadColumnWidth(PlaylistTreeModel::ColumnId::Title);
+    PadColumnWidth(PlaylistTreeModel::ColumnId::Author);
+}
+
+void FramePlayer::PadColumnWidth(PlaylistTreeModel::ColumnId columnId)
+{
+    const unsigned int colIndex = static_cast<unsigned int>(columnId);
+    wxDataViewColumn* const col = _ui->treePlaylistNew->GetColumn(colIndex);
+
+    const unsigned int padding = _ui->treePlaylistNew->GetFont().GetPointSize() * 2;
+    const unsigned int newWidth = _ui->treePlaylistNew->GetBestColumnWidth(colIndex) + padding;
+    if (col->GetWidth() < newWidth)
+    {
+        col->SetWidth(newWidth);
+    }
 }
 
 void FramePlayer::UpdateIgnoredSongs(PassKey<FramePrefs>)
@@ -272,52 +264,58 @@ void FramePlayer::UpdateIgnoredSongs(PassKey<FramePrefs>)
 
 void FramePlayer::UpdateIgnoredSongs()
 {
-    const uint_least32_t skipDurationThreshold = static_cast<uint_least32_t>(_app.currentSettings->GetOption(Settings::AppSettings::ID::SkipShorter)->GetValueAsInt() * Const::MILLISECONDS_IN_SECOND);
-    const uint_least32_t fallbackDuration = static_cast<uint_least32_t>(_app.currentSettings->GetOption(Settings::AppSettings::ID::SongFallbackDuration)->GetValueAsInt() * Const::MILLISECONDS_IN_SECOND);
-
-    _ui->treePlaylist->ForEachSibling([skipDurationThreshold, fallbackDuration, this](SongTreeItemData& mainSongData)
+    for (const PlaylistTreeModelNodePtr& songNode : _ui->treePlaylistNew->GetSongs())
     {
-        assert(mainSongData.GetType() == SongTreeItemData::SongItemType::Song);
-
-        // Main song
-        {
-            const uint_least32_t realMainSongDuration = mainSongData.GetDuration();
-            const uint_least32_t relevantMainSongDuration = (realMainSongDuration == 0) ? fallbackDuration : realMainSongDuration;
-            if (skipDurationThreshold > 0 && (relevantMainSongDuration < skipDurationThreshold))
-            {
-                _ui->treePlaylist->IgnoreSong(mainSongData, iconSkipShortIcon);
-            }
-            else
-            {
-                _ui->treePlaylist->RestoreIgnoredSong(mainSongData);
-            }
-        }
-
-        // Subsongs
-        {
-            _ui->treePlaylist->ForEachSibling([skipDurationThreshold, fallbackDuration, this](SongTreeItemData& subsongData)
-            {
-                const uint_least32_t realSubsongDuration = subsongData.GetDuration();
-                const uint_least32_t relevantSubsongDuration = (realSubsongDuration == 0) ? fallbackDuration : realSubsongDuration;
-                if (skipDurationThreshold > 0 && (relevantSubsongDuration < skipDurationThreshold))
-                {
-                    _ui->treePlaylist->IgnoreSong(subsongData, iconSkipShortIcon);
-                }
-                else
-                {
-                    _ui->treePlaylist->RestoreIgnoredSong(subsongData);
-                }
-            }, mainSongData.GetId());
-        }
-
-    }, _ui->treePlaylist->GetRootItem());
+        UpdateIgnoredSong(*songNode.get());
+    }
 
     UpdateUiState();
 }
 
-long FramePlayer::GetEffectiveSongDuration(const SongTreeItemData* const tuneData) const
+void FramePlayer::UpdateIgnoredSong(PlaylistTreeModelNode& mainSongNode)
 {
-    long effectiveDuration = static_cast<long>(tuneData->GetDuration());
+    const uint_least32_t skipDurationThreshold = static_cast<uint_least32_t>(_app.currentSettings->GetOption(Settings::AppSettings::ID::SkipShorter)->GetValueAsInt() * Const::MILLISECONDS_IN_SECOND);
+    const uint_least32_t fallbackDuration = static_cast<uint_least32_t>(_app.currentSettings->GetOption(Settings::AppSettings::ID::SongFallbackDuration)->GetValueAsInt() * Const::MILLISECONDS_IN_SECOND);
+
+    const PlaylistTreeModelNodePtrArray& subNodes = mainSongNode.GetChildren();
+
+    // Subsongs
+    for (const PlaylistTreeModelNodePtr& subsongNode : subNodes)
+    {
+        const uint_least32_t relevantSubsongDuration = (subsongNode->duration == 0) ? fallbackDuration : subsongNode->duration;
+        const bool durationIsShort = skipDurationThreshold > 0 && (relevantSubsongDuration < skipDurationThreshold);
+
+        const PlaylistTreeModelNode::ItemTag tag = (durationIsShort) ? PlaylistTreeModelNode::ItemTag::ShortDuration : PlaylistTreeModelNode::ItemTag::Normal;
+        _ui->treePlaylistNew->SetItemTag(*subsongNode.get(), tag);
+    }
+
+    // Main song
+    {
+        bool mainSongDurationIsShort = false;
+
+        if (mainSongNode.GetSubsongCount() == 0)
+        {
+            const uint_least32_t relevantSingleSongDuration = (mainSongNode.duration == 0) ? fallbackDuration : mainSongNode.duration;
+            mainSongDurationIsShort = skipDurationThreshold > 0 && (relevantSingleSongDuration < skipDurationThreshold);
+        }
+        else
+        {
+            const bool allSubsongsAreShort = std::all_of(subNodes.begin(), subNodes.end(), [](const PlaylistTreeModelNodePtr& subNode)
+            {
+                return subNode->GetTag() == PlaylistTreeModelNode::ItemTag::ShortDuration;
+            });
+
+            mainSongDurationIsShort = allSubsongsAreShort;
+        }
+
+        const PlaylistTreeModelNode::ItemTag tag = (mainSongDurationIsShort) ? PlaylistTreeModelNode::ItemTag::ShortDuration : PlaylistTreeModelNode::ItemTag::Normal;
+        _ui->treePlaylistNew->SetItemTag(mainSongNode, tag);
+    }
+}
+
+long FramePlayer::GetEffectiveSongDuration(const PlaylistTreeModelNode& node) const
+{
+    long effectiveDuration = static_cast<long>(node.duration);
     if (effectiveDuration == 0)
     {
         effectiveDuration = _app.currentSettings->GetOption(Settings::AppSettings::ID::SongFallbackDuration)->GetValueAsInt() * Const::MILLISECONDS_IN_SECOND;

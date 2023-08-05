@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2023-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,119 +18,119 @@
 
 #pragma once
 
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
+#include "Components\PlaylistModel.h"
+#include "..\..\Config\AppSettings.h"
+#include <wx/dataview.h>
 
-#include "PlaylistBase.h"
-#include "Components/SongTreeItemData.h"
-#include "../../Config/AppSettings.h"
-
-namespace Settings
-{
-	class Options;
-}
+#include <memory>
+#include <vector>
 
 namespace UIElements
 {
 	namespace Playlist
 	{
-		class Playlist : private PlaylistBase
+		class Playlist : public wxDataViewCtrl
 		{
 		public:
-			enum class ItemStyle
-			{
-				Normal,
-				MissingBasic,
-				MissingKernal
-			};
+			Playlist() = delete;
+			Playlist(wxPanel* parent, const UIElements::Playlist::PlaylistIcons& playlistIcons, Settings::AppSettings& appSettings, unsigned long style);
 
-		public:
-			Playlist(wxPanel& parent, const PlaylistIcons& playlistIcons, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, Settings::AppSettings& appSettings);
 			~Playlist() override = default;
 
 		public:
-			PlaylistBase& GetBase();
-			wxTreeItemId GetRootItem() const;
-			void SelectItem(const wxTreeItemId& item);
-			void EnsureVisible(const wxTreeItemId& item);
+			PlaylistTreeModelNode& AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, bool playable);
 
+			/// @brief Efficiently adds multiple subsongs at once.
+			void AddSubsongs(const std::vector<uint_least32_t>& durations, PlaylistTreeModelNode& parent);
+
+			/// @brief Removes a main song or a subsong item.
+			void Remove(PlaylistTreeModelNode& item);
+
+			/// @brief Removes all items from the playlist.
+			void Clear();
+
+			/// @brief Expands the tree node.
+			void ExpandSongNode(const PlaylistTreeModelNode& node);
+
+			/// @brief Expands all top-level nodes.
+			void ExpandAll();
+
+			/// @brief Collapses all top-level nodes.
+			void CollapseAll();
+
+			/// @brief Hides the Author column if there is only one author and shows it otherwise.
+			bool RefreshAuthorColumnVisibility();
+
+			/// @brief Returns song-default or first playable subsong (depending on the user setting) or a nullptr.
+			PlaylistTreeModelNode* GetEffectiveInitialSubsong(const PlaylistTreeModelNode& mainSongItem) const;
+
+			/// @brief Returns all top-level song nodes.
+			const PlaylistTreeModelNodePtrArray& GetSongs() const;
+
+			/// @brief Returns a song (or nullptr) by filepath.
+			PlaylistTreeModelNode* GetSong(const wxString& filepath) const;
+
+			/// @brief Returns a subsong (or nullptr) by filepath. Returns an effective default subsong by default.
+			PlaylistTreeModelNode* GetSubsong(const wxString& filepath, int subsong = 0) const;
+
+			/// @brief Returns the currently active song or subsong item or nullptr.
+			PlaylistTreeModelNode* GetActiveSong() const;
+
+			/// @brief Returns the next playable song (a default or first subsong depending on the user setting) or nullptr.
+			PlaylistTreeModelNode* GetNextSong() const;
+
+			/// @brief Returns the next playable song (a default or first subsong depending on the user setting) or nullptr after the specified one.
+			PlaylistTreeModelNode* GetNextSong(const PlaylistTreeModelNode& fromSong) const;
+
+			/// @brief Returns the previous playable song (a default or first subsong depending on the user setting) or nullptr.
+			PlaylistTreeModelNode* GetPrevSong() const;
+
+			/// @brief Returns the previous playable song (a default or first subsong depending on the user setting) or nullptr before the specified one.
+			PlaylistTreeModelNode* GetPrevSong(const PlaylistTreeModelNode& fromSong) const;
+
+			/// @brief Returns the next playable subsong item (or nullptr) for the currently active song.
+			PlaylistTreeModelNode* GetNextSubsong() const;
+
+			/// @brief Returns the next playable subsong item (or nullptr) for the specified active song.
+			PlaylistTreeModelNode* GetNextSubsong(const PlaylistTreeModelNode& fromSubsong) const;
+
+			/// @brief Returns the previous playable subsong item (or nullptr) for the currently active song.
+			PlaylistTreeModelNode* GetPrevSubsong() const;
+
+			/// @brief Returns the previous playable subsong item (or nullptr) for the specified active song.
+			PlaylistTreeModelNode* GetPrevSubsong(const PlaylistTreeModelNode& fromSubsong) const;
+
+			/// @brief Sets the node as currently playing (sub)song if playable. Returns true if successful.
+			bool TrySetActiveSong(const PlaylistTreeModelNode& node, bool autoexpand);
+
+			/// @brief Returns true if there aren't any top-level items.
 			bool IsEmpty() const;
-			bool IsPlayableItem(const SongTreeItemData& songData) const;
 
-			wxTreeItemId AppendMainSong(SongTreeItemData* itemData, int totalSubsongs, ItemStyle itemStyle);
-			wxTreeItemId AppendSubSong(const wxTreeItemId& parent, SongTreeItemData* itemData, ItemStyle itemStyle);
+			/// @brief Applies the tag to the node with corresponding functional and visual changes. Ignores unplayable nodes by default unless forced.
+			void SetItemTag(PlaylistTreeModelNode& node, PlaylistTreeModelNode::ItemTag tag, bool force = false); // TODO: consider renaming to SetItemStatus (and "tag" concept to "status" concept)?
 
-			void IgnoreSong(SongTreeItemData& songData, const int iconId = PlaylistIcons::ICON_ID_NO_ICON);
-			void IgnoreSong(const wxTreeItemId& songId, const int iconId = PlaylistIcons::ICON_ID_NO_ICON);
+			/// @brief Soft-selects (highlights) a node in the tree.
+			bool Select(const PlaylistTreeModelNode& node);
 
-			void RestoreIgnoredSong(SongTreeItemData& songData);
-			void RestoreIgnoredSong(const wxTreeItemId& songId);
+			/// @brief Scrolls a node into view.
+			bool EnsureVisible(const PlaylistTreeModelNode& node);
 
-			const SongTreeItemData& GetParentSong(const SongTreeItemData& item);
-
-			const SongTreeItemData* FindPlaylistSubsongItem(const wxTreeItemId& parent, int subsong);
-
-			void ClearPlaylist();
-
-			const SongTreeItemData* GetNextSong(const SongTreeItemData* const startSong = nullptr);
-			const SongTreeItemData* GetPrevSong(const SongTreeItemData* const startSong = nullptr);
-
-			const SongTreeItemData* GetNextSubsong();
-			const SongTreeItemData* GetPrevSubsong();
-
-			const SongTreeItemData* GetEffectiveDefaultOrFirstPlayableSubsong(const SongTreeItemData& mainSongItemData);
-			const SongTreeItemData* GetEffectiveDefaultOrFirstPlayableSubsong();
-
-			bool TryHighlightPlaylistItem(const wxTreeItemId& songItem, int subsong, bool autoexpand);
-			const SongTreeItemData* TryGetCurrentSongTreeItemData() const;
-
-			const SongTreeItemData* TryGetContextMenuSongTreeItemData() const;
-
-			inline SongTreeItemData& GetSongTreeItemData(const wxTreeItemId& target)
-			{
-				assert(target.IsOk());
-				return *static_cast<SongTreeItemData*>(GetItemData(target));
-			}
-
-		public:
-			using ForEachPredicate = std::function<void(SongTreeItemData&)>;
-			void ForEachSibling(const ForEachPredicate& predicate, const wxTreeItemId& idParent, const wxTreeItemId& startSiblingId = wxTreeItemId());
-
-			using FindIfPredicate = std::function<bool(SongTreeItemData&)>;
-			const SongTreeItemData* FindSiblingIf(const FindIfPredicate& predicate, const wxTreeItemId& idParent, const wxTreeItemId& startSiblingId = wxTreeItemId(), bool forwardDirection = true);
-
-		public:
-			void OnContextMenuOpen(wxContextMenuEvent& evt);
+			/// @brief Convenience getter for use with wx bindings such as sizers and events.
+			wxWindow* GetWxWindow();
 
 		private:
-			inline void ApplySpecialItemStyle(const wxTreeItemId& target, ItemStyle itemStyle)
-			{
-				SetItemStrikethrough(target, true);
-				const char* textColorUnplayable = (itemStyle == ItemStyle::MissingBasic) ? "#054a80" : "#8a5454";
-				SetItemTextColour(target, textColorUnplayable);
-			}
+			wxDataViewColumn* _AddBitmapColumn(PlaylistTreeModel::ColumnId columnIndex, wxAlignment align = wxALIGN_CENTER, int flags = 0);
 
-			wxString emptyWxString;
-			inline const SongTreeItemData* TryGetAppropriateParentSong(const SongTreeItemData* const song = nullptr)
-			{
-				if (song == nullptr)
-				{
-					const SongTreeItemData* const songData = TryGetCurrentSongTreeItemData();
-					return (songData == nullptr) ? nullptr : &GetParentSong(*songData);
-				}
-				else
-				{
-					return &GetParentSong(*song);
-				}
-			}
+			// Reminder 1: wxCOL_SORTABLE would mess up the navigation since the wxDataViewCtrl is feature-incomplete (it sorts visually only and its tree path is inaccessible). Using the wxEVT_DATAVIEW_COLUMN_SORTED to manually sort the model entries proved to be problematic so I gave up for now.
+			// Reminder 2: wxCOL_REORDERABLE is crashy due to use of OnColumnsCountChanged().
+			wxDataViewColumn* _AddTextColumn(PlaylistTreeModel::ColumnId columnIndex, const wxString& title, wxAlignment align = wxALIGN_LEFT, int flags = wxCOL_RESIZABLE);
+
+			void _OverrideScrollWheel(wxMouseEvent& evt);
 
 		private:
+			PlaylistTreeModel& _model;
 			Settings::AppSettings& _appSettings;
-			const SongTreeItemData* _highlightedPlaylistTreeItem = nullptr;
-			wxTreeItemId _contextMenuItem;
-			bool _debugCheckRefreshedContextMenuItem = false;
+			wxDataViewItem _activeItem;
 		};
 	}
 }

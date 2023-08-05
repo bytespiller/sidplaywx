@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 
 namespace FrameElements // Static vars
 {
+	// TODO: these TEMP_* things could be defined in the theme XML?
 	static constexpr int TEMP_BUTTON_SIZE = 30;
 	static constexpr int TEMP_BUTTON_BORDER_SIZE = 1;
 	static constexpr int TEMP_LABEL_BORDER_SIZE = 2;
@@ -181,7 +182,8 @@ namespace FrameElements // Player class
 		wxBoxSizer* sizerSeekbar = new wxBoxSizer(wxHORIZONTAL);
 		sizerMain->Add(sizerSeekbar, 0, wxEXPAND, 0);
 
-		{ // RepeatMode button
+		// RepeatMode button
+		{
 			using RepeatMode = UIElements::RepeatModeButton::RepeatMode;
 			using ButtonState = UIElements::RepeatModeButton::ButtonState;
 			const UIElements::RepeatModeButton::ButtonStates repeatModes =
@@ -239,18 +241,20 @@ namespace FrameElements // Player class
 
 		AttachFixedSizeSeparator(DpiSize(TEMP_LABEL_BORDER_SIZE, 0), sizerSeekbar, _parentPanel);
 
-		{ // Playlist
+ 		// Playlist
+		{
 			UIElements::Playlist::PlaylistIcons playlistIcons(TEMP_PLAYLIST_ICON_SIZE);
-			playlistIcons.RegisterSvgIcon(static_cast<int>(PlaylistIconId::DefaultSubsongIndicator), themeData.GetImage("icon_defaultsubsong"));
-			playlistIcons.RegisterSvgIcon(static_cast<int>(PlaylistIconId::ChipIcon), themeData.GetImage("icon_chip"));
-			playlistIcons.RegisterSvgIcon(static_cast<int>(PlaylistIconId::SkipShort), themeData.GetImage("icon_skipshort"));
-			playlistIcons.RegisterSvgIcon(static_cast<int>(PlaylistIconId::RemoveSong), themeData.GetImage("icon_removesong"));
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::DefaultSubsongIndicator, themeData.GetImage("icon_defaultsubsong"));
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::ChipIcon, themeData.GetImage("icon_chip"));
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::SkipShort, themeData.GetImage("icon_skipshort"));
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::RemoveSong, themeData.GetImage("icon_removesong"));
 
-			treePlaylist = new UIElements::Playlist::Playlist(_parentPanel, playlistIcons, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_FULL_ROW_HIGHLIGHT | wxTR_HAS_BUTTONS | wxTR_HIDE_ROOT | wxTR_NO_LINES | wxTR_ROW_LINES | wxTR_SINGLE | wxTR_TWIST_BUTTONS, appSettings);
-			sizerMain->Add(&treePlaylist->GetBase(), 1, wxEXPAND | wxALL, 0);
+			treePlaylistNew = new UIElements::Playlist::Playlist(&_parentPanel, playlistIcons, appSettings, wxDV_SINGLE);
+			sizerMain->Add(treePlaylistNew->GetWxWindow(), 1, wxEXPAND | wxALL, 0);
 		}
 
-		{ // Search bar
+ 		// Search bar
+		{
 			searchBar = new UIElements::SearchBar(&_parentPanel, false);
 			sizerMain->Add(searchBar->GetPanel(), 0, wxEXPAND, 0);
 		}

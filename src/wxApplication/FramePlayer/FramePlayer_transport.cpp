@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,51 +20,62 @@
 #include "../MyApp.h"
 #include "../Config/AppSettings.h"
 
-bool FramePlayer::TryPlayPlaylistItem(const SongTreeItemData& itemData)
+bool FramePlayer::TryPlayPlaylistItem(const PlaylistTreeModelNode& node)
 {
-    if (_ui->treePlaylist->IsPlayableItem(itemData))
+    if (!node.IsPlayable())
     {
-        const Settings::Option* const optionDefaultSubsong = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeDefaultSubsong);
-        const int subsong = (itemData.IsSubsong() || optionDefaultSubsong->GetValueAsBool()) ? itemData.GetDefaultSubsong() : _ui->treePlaylist->GetEffectiveDefaultOrFirstPlayableSubsong(itemData)->GetDefaultSubsong();
-        const bool sameTune = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == itemData.GetFilePath().ToStdWstring();
-
-        const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(&itemData) : 0;
-        if (sameTune)
-        {
-            _app.PlaySubsong(subsong, preRenderDurationMs); // Switch an already-loaded tune to subsong.
-        }
-        else
-        {
-            _app.Play(itemData.GetFilePath(), subsong, preRenderDurationMs);
-        }
-
-        const bool fileLoadedSuccessfully = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == itemData.GetFilePath();
-        const bool highlightable = fileLoadedSuccessfully && _ui->treePlaylist->TryHighlightPlaylistItem(itemData.GetId(), subsong, _app.currentSettings->GetOption(Settings::AppSettings::ID::AutoExpandSubsongs)->GetValueAsBool());
-        UpdateUiState();
-
-        if (highlightable && _app.currentSettings->GetOption(Settings::AppSettings::ID::SelectionFollowsPlayback)->GetValueAsBool())
-        {
-            _ui->treePlaylist->SelectItem(itemData.GetId());
-
-            const wxTreeItemId& cItemId = _ui->treePlaylist->TryGetCurrentSongTreeItemData()->GetId();
-            if (cItemId.IsOk()) // Ensure a subsong itself is scrolled into view (not just its parent).
-            {
-                _ui->treePlaylist->EnsureVisible(cItemId);
-            }
-        }
-
-        return true;
+        return false;
     }
 
-    return false;
+    int subsong = node.defaultSubsong;
+
+    // If the selected node is a mainsong, determine the initial subsong to play.
+    if (node.type == PlaylistTreeModelNode::ItemType::Song && node.GetSubsongCount() > 0)
+    {
+        if (const PlaylistTreeModelNode* const subNode = _ui->treePlaylistNew->GetEffectiveInitialSubsong(node))
+        {
+            subsong = subNode->defaultSubsong;
+        }
+        else // All subsongs tagged for navigation auto-skip. Just expand the node but don't start any playback.
+        {
+            _ui->treePlaylistNew->ExpandSongNode(node);
+            return false;
+        }
+    }
+
+    // Trigger playback
+    const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(node) : 0;
+    const bool sameTune = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == node.filepath.ToStdWstring();
+    if (sameTune)
+    {
+        _app.PlaySubsong(subsong, preRenderDurationMs); // Switch an already-loaded tune to subsong.
+    }
+    else
+    {
+        _app.Play(node.filepath, subsong, preRenderDurationMs);
+    }
+
+    // Highlight the item in the playlist if the playback started successfully (file exists etc.)
+    const PlaylistTreeModelNode& actualNode = (node.type == PlaylistTreeModelNode::ItemType::Song && node.GetSubsongCount() > 0) ? *_ui->treePlaylistNew->GetSubsong(node.filepath, subsong) : node;
+    const bool fileLoadedSuccessfully = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == actualNode.filepath.ToStdWstring();
+    const bool highlightable = fileLoadedSuccessfully && _ui->treePlaylistNew->TrySetActiveSong(actualNode, _app.currentSettings->GetOption(Settings::AppSettings::ID::AutoExpandSubsongs)->GetValueAsBool());
+    UpdateUiState();
+
+    if (highlightable && _app.currentSettings->GetOption(Settings::AppSettings::ID::SelectionFollowsPlayback)->GetValueAsBool())
+    {
+        _ui->treePlaylistNew->Select(actualNode);
+        _ui->treePlaylistNew->EnsureVisible(actualNode); // Ensure a subsong itself is scrolled into view (not just its parent).
+    }
+
+    return true;
 }
 
 bool FramePlayer::TryPlayNextValidSong()
 {
-    const SongTreeItemData* const nextValidSong = _ui->treePlaylist->GetNextSong();
-    if (nextValidSong != nullptr)
+    const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetNextSong();
+    if (node != nullptr)
     {
-        return TryPlayPlaylistItem(*nextValidSong);
+        return TryPlayPlaylistItem(*node);
     }
 
     return false;
@@ -72,10 +83,10 @@ bool FramePlayer::TryPlayNextValidSong()
 
 bool FramePlayer::TryPlayPrevValidSong()
 {
-    const SongTreeItemData* const prevValidSong = _ui->treePlaylist->GetPrevSong();
-    if (prevValidSong != nullptr)
+    const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetPrevSong();
+    if (node != nullptr)
     {
-        return TryPlayPlaylistItem(*prevValidSong);
+        return TryPlayPlaylistItem(*node);
     }
 
     return false;
@@ -83,10 +94,10 @@ bool FramePlayer::TryPlayPrevValidSong()
 
 bool FramePlayer::TryPlayNextValidSubsong()
 {
-    const SongTreeItemData* const nextValidSubsong = _ui->treePlaylist->GetNextSubsong();
-    if (nextValidSubsong != nullptr)
+    const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetNextSubsong();
+    if (node != nullptr)
     {
-        return TryPlayPlaylistItem(*nextValidSubsong);
+        return TryPlayPlaylistItem(*node);
     }
 
     return false;
@@ -94,10 +105,10 @@ bool FramePlayer::TryPlayNextValidSubsong()
 
 bool FramePlayer::TryPlayPrevValidSubsong()
 {
-    const SongTreeItemData* const prevValidSubSong = _ui->treePlaylist->GetPrevSubsong();
-    if (prevValidSubSong != nullptr)
+    const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetPrevSubsong();
+    if (node != nullptr)
     {
-        return TryPlayPlaylistItem(*prevValidSubSong);
+        return TryPlayPlaylistItem(*node);
     }
 
     return false;

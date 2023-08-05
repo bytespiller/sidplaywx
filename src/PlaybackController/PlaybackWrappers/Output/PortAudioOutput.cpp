@@ -18,6 +18,7 @@
 
 #include "PortAudioOutput.h"
 #include <assert.h>
+#include <cstdint>
 #include <iostream>
 
 static PortAudioOutput::TPortAudioConfig currentAudioConfig; // Must be static because the PlaybackCallback is static (PortAudio works that way).

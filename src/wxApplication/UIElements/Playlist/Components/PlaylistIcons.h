@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,18 +35,26 @@ namespace UIElements
 {
 	namespace Playlist
 	{
+		enum class PlaylistIconId : int
+		{
+			NoIcon = -1,
+			DefaultSubsongIndicator,
+			ChipIcon,
+			SkipShort,
+			RemoveSong
+		};
+
 		class PlaylistIcons
 		{
 		public:
-			static constexpr int ICON_ID_NO_ICON = -1;
-			using AssignedIconList = std::map< int, std::shared_ptr<wxBitmap> >; // Reminder: don't use unsorted_map here (must be ordered for wx compatibility).
+			using AssignedIconList = std::map< PlaylistIconId, std::shared_ptr<wxBitmap> >; // Reminder: don't use unsorted_map here (must be ordered for wx compatibility).
 
 		public:
 			PlaylistIcons() = delete;
 			explicit PlaylistIcons(int commonIconSize);
 
 		public:
-			void RegisterSvgIcon(int iconId, const ThemeData::ThemeImage& themeImage);
+			void RegisterSvgIcon(PlaylistIconId iconId, const ThemeData::ThemeImage& themeImage);
 			const AssignedIconList& GetIconList() const;
 			const wxSize& GetIconSize() const;
 

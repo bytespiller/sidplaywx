@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@
 
 #include "ElementsPlayer.h"
 #include "../Theme/ThemeManager.h"
-#include "../UIElements/Playlist/Components/SongTreeItemData.h"
 #include "../../PlaybackController/PlaybackWrappers/Input/SidDecoder.h"
 #include "../../Util/SimpleSignal/SimpleSignalListener.h"
 
@@ -54,7 +53,6 @@ private:
     static constexpr int TIMER_REFRESH_INTERVAL_HIGH = 10;
     static constexpr int TIMER_REFRESH_INTERVAL_IDLE = 100;
 
-    using SongTreeItemData = UIElements::Playlist::SongTreeItemData;
     using ExtraOptionId = UIElements::RepeatModeButton::ExtraOptionsHandler::ExtraOptionId;
 
 public:
@@ -65,14 +63,15 @@ public:
     FramePlayer() = delete;
     FramePlayer(const wxString& title, const wxPoint& pos, const wxSize& size, MyApp& app);
 
+#pragma region *** main ***
+
 public:
     void IndicateExternalFilesIncoming();
     FrameElements::ElementsPlayer& GetUIElements(PassKey<FramePrefs>);
-    void UpdateIgnoredSongs(PassKey<FramePrefs>);
     void ForceAppExitOnPrefsClose(PassKey<FramePrefs>);
     void ForceStopPlayback(PassKey<FramePrefs>);
 
-private: // main
+private:
     void InitSonglengthsDatabase();
     void SetupUiElements();
     void DeferredInit();
@@ -84,36 +83,56 @@ private: // main
     void OpenPrefsFrame();
     void DisplayAboutBox();
 
-private: // visual
+#pragma endregion
+#pragma region *** visual ***
+
+private:
     void UpdateUiState();
     void UpdatePlaybackStatusBar();
     void UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs);
     void DisplayCurrentSongInfo(bool justClear = false);
     void SetRefreshTimerThrottled(bool throttle);
 
-public: // playlist (iodetail)
-    std::vector<wxString> GetCurrentPlaylistFilePaths(bool includeSkippedSongs);
+#pragma endregion
+#pragma region *** playlist (iodetail) ***
+
+public:
+    std::vector<wxString> GetCurrentPlaylistFilePaths(bool includeBlacklistedSongs);
     void DiscoverFilesAndSendToPlaylist(const wxArrayString& rawPaths, bool clearPrevious = true, bool autoPlayFirstImmediately = true);
+    void UpdateIgnoredSongs(PassKey<FramePrefs>);
+
 private:
     void SendFilesToPlaylist(const wxArrayString& files, bool clearPrevious = true, bool autoPlayFirstImmediately = true);
+    void PadColumnsWidth();
+    void PadColumnWidth(PlaylistTreeModel::ColumnId columnId);
     void UpdateIgnoredSongs();
-    long GetEffectiveSongDuration(const SongTreeItemData* const tuneData) const;
+    void UpdateIgnoredSong(PlaylistTreeModelNode& mainSongNode);
+    long GetEffectiveSongDuration(const PlaylistTreeModelNode& node) const;
 
-private: // input
+#pragma endregion
+#pragma region *** input ***
+
+private:
     void BrowseFilesAndAddToPlaylist(bool enqueue);
     void BrowseFoldersAndAddToPlaylist(bool enqueue);
     void OpenNewPlaylist(bool autoPlayFirstImmediately);
     bool TrySaveCurrentPlaylist();
 
-private: // transport
-    bool TryPlayPlaylistItem(const SongTreeItemData& itemData);
+#pragma endregion
+#pragma region *** transport ***
+
+private:
+    bool TryPlayPlaylistItem(const PlaylistTreeModelNode& node);
 
     bool TryPlayNextValidSong();
     bool TryPlayPrevValidSong();
     bool TryPlayNextValidSubsong();
     bool TryPlayPrevValidSubsong();
 
-private: // wx Event handlers
+#pragma endregion
+#pragma region *** wx Event handlers ***
+
+private:
     void OnButtonPlayPause(wxCommandEvent& evt);
     void OnButtonStop(wxCommandEvent& evt);
     void OnButtonSubsongNext(wxCommandEvent& evt);
@@ -127,10 +146,10 @@ private: // wx Event handlers
     void OnSeekBackward(wxCommandEvent& evt);
     void OnSeekForward(wxCommandEvent& evt);
 
-    void OnTreePlaylistItemActivated(wxTreeEvent& evt);
-    void OnTreePlaylistContextMenuOpen(wxContextMenuEvent& evt);
-    void OnTreePlaylistContextItem(wxCommandEvent& evt);
-    void OnTreePlaylistKeyPressed(wxTreeEvent& evt);
+    void OnTreePlaylistItemActivated(wxDataViewEvent& evt);
+    void OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt);
+    void OnTreePlaylistContextItem(PlaylistTreeModelNode& node, wxCommandEvent& evt);
+    void OnTreePlaylistKeyPressed(wxKeyEvent& evt);
     void OnDropFilesFramePlayer(wxDropFilesEvent& evt);
     void OnDropFilesPlaylist(wxDropFilesEvent& evt);
 
@@ -141,7 +160,10 @@ private: // wx Event handlers
     void OnIconize(wxIconizeEvent& evt);
     void OnClose(wxCloseEvent& evt);
 
-private: // Non-wx events
+#pragma endregion
+#pragma region *** Non-wx events ***
+
+private:
     void OnButtonPlayPause();
     void OnButtonStop();
     bool OnButtonSubsongNext();
@@ -155,8 +177,12 @@ private: // Non-wx events
 
     void OnAudioDeviceChanged(bool success);
 
-    const SongTreeItemData* const DoFindSong(const wxString& query, const wxTreeItemId& startPosition, bool forwardDirection);
+    PlaylistTreeModelNode* DoFindSong(const wxString& query, const PlaylistTreeModelNode& startNode, bool forwardDirection);
     void OnFindSong(UIElements::SignalsSearchBar signalId);
+    void DoRemoveSongTreeItem(PlaylistTreeModelNode& node);
+    void DoToggleSubsongBlacklistState(PlaylistTreeModelNode& node);
+
+#pragma endregion
 
 private:
     bool _initialized = false;

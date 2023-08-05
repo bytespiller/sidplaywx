@@ -21,7 +21,6 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*)
 set(SRC_FILES ${SRC_FILES} ../dev/resources.rc) # MSW manifest & stuff
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/deps/include/nanosvg)
 
 # libs
 find_package(Threads)

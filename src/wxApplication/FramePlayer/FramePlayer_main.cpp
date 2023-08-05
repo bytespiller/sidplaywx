@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -174,9 +174,9 @@ void FramePlayer::SetupUiElements()
     _ui->compositeSeekbar->Bind(UIElements::EVT_CSB_SeekBackward, &OnSeekBackward, this);
     _ui->compositeSeekbar->Bind(UIElements::EVT_CSB_SeekForward, &OnSeekForward, this);
 
-    _ui->treePlaylist->GetBase().Bind(wxEVT_TREE_ITEM_ACTIVATED, &OnTreePlaylistItemActivated, this);
-    _ui->treePlaylist->GetBase().Bind(wxEVT_CONTEXT_MENU, &OnTreePlaylistContextMenuOpen, this);
-    _ui->treePlaylist->GetBase().Bind(wxEVT_TREE_KEY_DOWN, &OnTreePlaylistKeyPressed, this);
+    _ui->treePlaylistNew->Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED, &OnTreePlaylistItemActivated, this);
+    _ui->treePlaylistNew->Bind(wxEVT_DATAVIEW_ITEM_CONTEXT_MENU, &OnTreePlaylistContextMenuOpen, this);
+    _ui->treePlaylistNew->Bind(wxEVT_KEY_DOWN, &OnTreePlaylistKeyPressed, this);
 
     SubscribeMe(*_ui->btnRepeatMode, UIElements::SignalsRepeatModeButton::SIGNAL_EXTRA_OPTION_SELECTED, [this](int param)
     {
@@ -192,14 +192,14 @@ void FramePlayer::SetupUiElements()
     Bind(wxEVT_COMMAND_MENU_SELECTED, &OnMenuItemSelected, this);
 
     // Other
-    SetMinClientSize({_ui->labelTitle->GetSize().GetWidth() + _ui->labelTitle->GetPosition().x, _ui->treePlaylist->GetBase().GetPosition().y});
+    SetMinClientSize({_ui->labelTitle->GetSize().GetWidth() + _ui->labelTitle->GetPosition().x, _ui->treePlaylistNew->GetPosition().y});
 
     _panel->DragAcceptFiles(true);
     _panel->Bind(wxEVT_DROP_FILES, &OnDropFilesFramePlayer, this);
 
-    _ui->treePlaylist->GetBase().DragAcceptFiles(true);
-    _ui->treePlaylist->GetBase().Bind(wxEVT_DROP_FILES, &OnDropFilesPlaylist, this);
-    _ui->treePlaylist->GetBase().SetFocus(); // Playlist should have the focus on app start for easy keyboard navigation.
+    _ui->treePlaylistNew->DragAcceptFiles(true);
+    _ui->treePlaylistNew->Bind(wxEVT_DROP_FILES, &OnDropFilesPlaylist, this);
+    _ui->treePlaylistNew->SetFocus(); // Playlist should have the focus on app start for easy keyboard navigation.
 }
 
 void FramePlayer::DeferredInit()
@@ -217,33 +217,28 @@ void FramePlayer::DeferredInit()
         {
             // Load default playlist from file
             const wxArrayString& playlistFiles = Helpers::Wx::Files::LoadPathsFromPlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME);
-            DiscoverFilesAndSendToPlaylist(playlistFiles, true, false);
+            DiscoverFilesAndSendToPlaylist(playlistFiles, true, false); // Reminder: this line can take a long time but is asynchronous and the program can be used before the next line is reached.
 
-            // Restore last song selection
-            const FramePlayer::SongTreeItemData* targetItemData = nullptr;
-            // scope
+            // Restore last song selection (unless already playing something, e.g., user selected a song while the large playlist is still loading)
+            const bool userSelectionAlreadyMade = _ui->treePlaylistNew->GetActiveSong() != nullptr;
+            if (!userSelectionAlreadyMade)
             {
                 const wxString& targetFilePath = _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongName)->GetValueAsString();
-                const FramePlayer::SongTreeItemData* const parentItemData = _ui->treePlaylist->FindSiblingIf([&targetFilePath = std::as_const(targetFilePath)](SongTreeItemData& cItemData)
-                {
-                    return cItemData.GetFilePath().IsSameAs(targetFilePath);
-                }, _ui->treePlaylist->GetRootItem());
+                PlaylistTreeModelNode* targetItemNode = _ui->treePlaylistNew->GetSong(targetFilePath); // Can be nullptr in case the target file path no longer exists or is an empty string.
 
-                if (parentItemData != nullptr)
+                // Determine subsong if needed
+                if (targetItemNode != nullptr && targetItemNode->GetSubsongCount() > 0)
                 {
                     const int targetSubsongIndex = _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSubsongIndex)->GetValueAsInt();
-                    targetItemData = _ui->treePlaylist->FindPlaylistSubsongItem(parentItemData->GetId(), targetSubsongIndex);
-                    if (targetItemData == nullptr)
-                    {
-                        targetItemData = parentItemData; // No subsong.
-                    }
+                    targetItemNode = &targetItemNode->GetSubsong(targetSubsongIndex);
                 }
-            }
 
-            if (targetItemData != nullptr)
-            {
-                TryPlayPlaylistItem(*targetItemData);
-                OnButtonStop();
+                // Pre-select the song
+                if (targetItemNode != nullptr)
+                {
+                    TryPlayPlaylistItem(*targetItemNode);
+                    OnButtonStop();
+                }
             }
         }
     }
@@ -279,9 +274,9 @@ void FramePlayer::CloseApplication()
         Helpers::Wx::Files::TrySavePlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME, fileList);
 
         // Store the last played song & subsong as an internal option...
-        const UIElements::Playlist::SongTreeItemData* const cSongData = _ui->treePlaylist->TryGetCurrentSongTreeItemData();
-        const wxString& cSongName = (cSongData == nullptr) ? "" : cSongData->GetFilePath();
-        const int cSongIndex = (cSongData == nullptr) ? 0 : cSongData->GetDefaultSubsong();
+        const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetActiveSong();
+        const wxString& cSongName = (node == nullptr) ? "" : node->filepath;
+        const int cSongIndex = (node == nullptr) ? 0 : node->defaultSubsong;
         _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongName)->UpdateValue(cSongName);
         _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSubsongIndex)->UpdateValue(cSongIndex);
     }
@@ -345,9 +340,9 @@ void FramePlayer::DisplayAboutBox()
 {
     wxAboutDialogInfo aboutInfo;
     aboutInfo.SetName(Strings::FramePlayer::WINDOW_TITLE);
-    aboutInfo.SetVersion("0.7.1b"); // TODO
+    aboutInfo.SetVersion("0.8.0"); // TODO
     aboutInfo.SetDescription(Strings::About::DESCRIPTION);
-    aboutInfo.SetCopyright(L"(C) 2021-2023 Jasmin Rutić"); // TODO
+    aboutInfo.SetCopyright(L"(C) 2021-2024 Jasmin Rutić"); // TODO
     aboutInfo.SetWebSite("https://github.com/bytespiller/sidplaywx");
 
     aboutInfo.SetLicense(Strings::About::LICENSE);
@@ -355,8 +350,7 @@ void FramePlayer::DisplayAboutBox()
     aboutInfo.AddDeveloper(wxString(Strings::About::DEVELOPER_LIBRARIES) + "\n" +
                            wxString::Format("%s %s", _silentSidInfoDecoder.GetEngineInfo().name(), _silentSidInfoDecoder.GetEngineInfo().version()) + "\n" + // libsidplayfp
                            wxString(Pa_GetVersionInfo()->versionText) + "\n" + // PortAudio
-                           wxVERSION_STRING + "\n" + // wxWidgets
-                           wxString("Nano SVG (https://github.com/memononen/nanosvg)")
+                           wxVERSION_STRING // wxWidgets
                           );
 
     aboutInfo.AddArtist(Strings::About::HVSC);
