@@ -133,9 +133,6 @@ void FramePrefs::FillPropertyGrid()
             }
         }
 
-        // Boost volume
-        AddWrappedProp(Settings::AppSettings::ID::VolumeBoost, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_BOOSTVOLUME), *page, Effective::Immediately, Strings::Preferences::DESC_BOOSTVOLUME);
-
         AddWrappedProp(Settings::AppSettings::ID::LowLatency, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_LOW_LATENCY), *page, Effective::Immediately, Strings::Preferences::DESC_LOW_LATENCY);
         AddWrappedProp(Settings::AppSettings::ID::ForceMono, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_FORCE_MONO), *page, Effective::Immediately, Strings::Preferences::DESC_FORCE_MONO);
     }
@@ -403,10 +400,6 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     {
                         const int opt = _app.currentSettings->GetOption(Settings::AppSettings::ID::TaskbarProgress)->GetValueAsInt();
 	                    _framePlayer.GetUIElements({}).compositeSeekbar->SetTaskbarProgressOption(static_cast<UIElements::CompositeSeekBar::TaskbarProgressOption>(opt));
-                    }
-                    else if (prop.first == Settings::AppSettings::ID::VolumeBoost)
-                    {
-                        _app.ImmediatelyUpdateVolumeBoost();
                     }
                     else if (prop.first == Settings::AppSettings::ID::RememberPlaylist)
                     {

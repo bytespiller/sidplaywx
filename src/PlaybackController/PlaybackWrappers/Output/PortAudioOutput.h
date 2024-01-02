@@ -27,7 +27,6 @@ public:
     typedef struct TPortAudioConfig: public PaStreamParameters
     {
         float volume = 1.0f;
-        float volumeMultiplier = 1.0f;
         double sampleRate = 0.0;
         bool lowLatency = false;
         PaDeviceIndex preferredOutputDevice = paNoDevice;
@@ -38,9 +37,7 @@ public:
 
 public:
     static float GetVolume();
-    static float GetVolumeMultiplier();
     static void SetVolume(float volume);
-    static void SetVolumeMultiplier(float multiplier);
 
 public:
     bool PreInitPortAudioLibrary();

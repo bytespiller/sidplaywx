@@ -36,21 +36,10 @@ float PortAudioOutput::GetVolume()
     return currentAudioConfig.volume;
 }
 
-float PortAudioOutput::GetVolumeMultiplier()
-{
-    return currentAudioConfig.volumeMultiplier;
-}
-
 void PortAudioOutput::SetVolume(float volume)
 {
     assert(volume >= 0.0f && volume <= 1.0f);
     currentAudioConfig.volume = volume;
-}
-
-void PortAudioOutput::SetVolumeMultiplier(float multiplier)
-{
-    assert(multiplier >= 1.0f);
-    currentAudioConfig.volumeMultiplier = multiplier;
 }
 
 bool PortAudioOutput::PreInitPortAudioLibrary()
@@ -163,7 +152,7 @@ int PortAudioOutput::PlaybackCallback(const void* /*inputBuffer*/, void* outputB
     IBufferWriter* externalSource = static_cast<IBufferWriter*>(userData);
     bool successful = externalSource->TryFillBuffer(outputBuffer, framesPerBuffer);
 
-    const float volume = currentAudioConfig.volume * currentAudioConfig.volumeMultiplier;
+    const float volume = currentAudioConfig.volume;
     if (successful && volume != 1.0f) // Apply volume scale.
     {
         short* const out = static_cast<short*>(outputBuffer);

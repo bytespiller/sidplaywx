@@ -319,19 +319,6 @@ void MyApp::SetVolume(float volume)
     _playback->SetVolume(volume);
 }
 
-void MyApp::ImmediatelyUpdateVolumeBoost()
-{
-    const bool shouldBoost = currentSettings->GetOption(Settings::AppSettings::ID::VolumeBoost)->GetValueAsBool();
-    if (shouldBoost)
-    {
-        _playback->EnableVolumeBoost(_playback->GetCurrentlyEffectiveSidModel());
-    }
-    else
-    {
-        _playback->DisableVolumeBoost();
-    }
-}
-
 void MyApp::SeekTo(uint_least32_t timeMs)
 {
     _playback->SeekTo(timeMs);
@@ -425,7 +412,6 @@ void MyApp::RunOnMainThread(std::function<void()> fn)
 void MyApp::FinalizePlaybackStarted()
 {
     PopSilencer();
-    ImmediatelyUpdateVolumeBoost();
 }
 
 void MyApp::PopSilencer()

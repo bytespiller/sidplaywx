@@ -605,16 +605,6 @@ void PlaybackController::SetVolume(float volume)
     _portAudioOutput->SetVolume(volume);
 }
 
-void PlaybackController::EnableVolumeBoost(SidConfig::sid_model_t sidModel)
-{
-    _portAudioOutput->SetVolumeMultiplier(VOLUME_MULTIPLIER_ENABLED.at(sidModel));
-}
-
-void PlaybackController::DisableVolumeBoost()
-{
-    _portAudioOutput->SetVolumeMultiplier(VOLUME_MULTIPLIER_DISABLED);
-}
-
 bool PlaybackController::ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable)
 {
     if (IsValidSongLoaded())

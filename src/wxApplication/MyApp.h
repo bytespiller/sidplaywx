@@ -58,7 +58,6 @@ public:
     void PlaySubsong(int subsong, int preRenderDurationMs);
 
     void SetVolume(float volume);
-    void ImmediatelyUpdateVolumeBoost();
     void SeekTo(uint_least32_t timeMs);
 
     void SetPlaybackSpeed(double factor);

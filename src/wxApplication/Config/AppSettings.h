@@ -62,7 +62,6 @@ namespace Settings
 			static constexpr const char* const FilterCurve8580 = "FilterCurve8580";
 
 			static constexpr const char* const DigiBoost = "DigiBoost";
-			static constexpr const char* const VolumeBoost = "VolumeBoost";
 
 			static constexpr const char* const RomKernalPath = "RomKernalPath";
 			static constexpr const char* const RomBasicPath = "RomBasicPath";
@@ -151,7 +150,6 @@ namespace Settings
 				DefaultOption(ID::FilterCurve8580, 0.5),
 
 				DefaultOption(ID::DigiBoost, false),
-				DefaultOption(ID::VolumeBoost, false),
 
 				DefaultOption(ID::RomKernalPath, ""),
 				DefaultOption(ID::RomBasicPath, ""),
