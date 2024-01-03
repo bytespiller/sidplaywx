@@ -136,14 +136,17 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
         wxString menuTextSkipUnskip(Strings::PlaylistTree::MENU_ITEM_BLACKLIST);
         bool skipUnskipValidItem = false;
 
-        if (node->GetTag() == PlaylistTreeModelNode::ItemTag::Normal)
+        if (node->IsPlayable())
         {
-            skipUnskipValidItem = true;
-        }
-        else if (node->GetTag() == PlaylistTreeModelNode::ItemTag::Blacklisted)
-        {
-            skipUnskipValidItem = true;
-            menuTextSkipUnskip = Strings::PlaylistTree::MENU_ITEM_UNBLACKLIST;
+            if (node->GetTag() == PlaylistTreeModelNode::ItemTag::Normal)
+            {
+                skipUnskipValidItem = true;
+            }
+            else if (node->GetTag() == PlaylistTreeModelNode::ItemTag::Blacklisted)
+            {
+                skipUnskipValidItem = true;
+                menuTextSkipUnskip = Strings::PlaylistTree::MENU_ITEM_UNBLACKLIST;
+            }
         }
 
         wxMenuItem* newItem = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::SkipUnskip), menuTextSkipUnskip);

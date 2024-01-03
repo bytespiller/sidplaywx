@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -559,20 +559,20 @@ bool PlaybackController::IsValidSongLoaded() const
     return _activeTuneHolder != nullptr;
 }
 
-SidDecoder::SongRequirement PlaybackController::GetCurrentSongRomRequirement() const
+SidDecoder::RomRequirement PlaybackController::GetCurrentSongRomRequirement() const
 {
     return _sidDecoder->GetCurrentSongRomRequirement();
 }
 
-bool PlaybackController::IsRomLoaded(SidDecoder::SongRequirement requirement) const
+bool PlaybackController::IsRomLoaded(SidDecoder::RomRequirement requirement) const
 {
     switch (requirement)
     {
-        case SidDecoder::SongRequirement::R64:
+        case SidDecoder::RomRequirement::R64:
             return _loadedRoms.IsValidated(RomUtil::RomType::Kernal);
-        case SidDecoder::SongRequirement::BasicRom:
+        case SidDecoder::RomRequirement::BasicRom:
             return _loadedRoms.IsValidated(RomUtil::RomType::Basic);
-        case SidDecoder::SongRequirement::None:
+        case SidDecoder::RomRequirement::None:
             return true;
         default:
             throw std::runtime_error("Unhandled switch case!");

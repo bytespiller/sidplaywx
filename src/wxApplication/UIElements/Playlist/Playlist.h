@@ -38,7 +38,7 @@ namespace UIElements
 			~Playlist() override = default;
 
 		public:
-			PlaylistTreeModelNode& AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, bool playable);
+			PlaylistTreeModelNode& AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable);
 
 			/// @brief Efficiently adds multiple subsongs at once.
 			void AddSubsongs(const std::vector<uint_least32_t>& durations, PlaylistTreeModelNode& parent);

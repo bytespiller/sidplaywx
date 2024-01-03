@@ -46,10 +46,10 @@ namespace UIElements
 			return this;
 		}
 
-		PlaylistTreeModelNode& Playlist::AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, bool playable)
+		PlaylistTreeModelNode& Playlist::AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable)
 		{
 			// Create item
-			_model.entries.emplace_back(new PlaylistTreeModelNode(nullptr, title, filepath, defaultSubsong, duration, author, playable));
+			_model.entries.emplace_back(new PlaylistTreeModelNode(nullptr, title, filepath, defaultSubsong, duration, author, romRequirement, playable));
 
 			// Notify the wx base control of change
 			wxDataViewItem childNotify = wxDataViewItem(_model.entries.back().get());
@@ -77,7 +77,7 @@ namespace UIElements
 				for (const uint_least32_t duration : durations)
 				{
 					++cnt;
-					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(&parent, wxString::Format("  %s: %s %i", parent.title, Strings::PlaylistTree::SUBSONG, cnt), parent.filepath, cnt, duration, "", parent.IsPlayable()), {});
+					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(&parent, wxString::Format("  %s: %s %i", parent.title, Strings::PlaylistTree::SUBSONG, cnt), parent.filepath, cnt, duration, "", parent.romRequirement, parent.IsPlayable()), {});
 					notifyItems.Add(wxDataViewItem(&newChildNode));
 
 					// Indicate if default subsong
@@ -461,9 +461,37 @@ namespace UIElements
 			{
 				case PlaylistTreeModelNode::ItemTag::Normal:
 				{
-					const bool itemIsDefaultSubsong = node.type == PlaylistTreeModelNode::ItemType::Subsong && node.defaultSubsong == node.GetParent()->defaultSubsong;
-					const PlaylistIconId nodeIconId = (itemIsDefaultSubsong) ? PlaylistIconId::DefaultSubsongIndicator : PlaylistIconId::NoIcon;
-					node.SetIconId(nodeIconId, {});
+					// Reset the icon
+					{
+						const bool itemIsDefaultSubsong = node.type == PlaylistTreeModelNode::ItemType::Subsong && node.defaultSubsong == node.GetParent()->defaultSubsong;
+						const PlaylistIconId nodeIconId = (itemIsDefaultSubsong) ? PlaylistIconId::DefaultSubsongIndicator : PlaylistIconId::NoIcon;
+						node.SetIconId(nodeIconId, {});
+					}
+
+					if (node.romRequirement != PlaylistTreeModelNode::RomRequirement::None)
+					{
+						// Set chip icon to the main/single song only
+						if (node.type == PlaylistTreeModelNode::ItemType::Song)
+						{
+							node.SetIconId(PlaylistIconId::ChipIcon, {});
+						}
+
+						// Apply unplayable styling
+						if (!node.IsPlayable())
+						{
+							const wxColour col = (node.romRequirement == PlaylistTreeModelNode::RomRequirement::BasicRom) ? "#054a80" : "#8a5454"; // TODO: these colors should probably be defined in the theme XML and not hardcoded here.
+							node.GetItemAttr({}).SetColour(col);
+							node.GetItemAttr({}).SetStrikethrough(true);
+
+							// Apply to any subsongs too
+							for (const PlaylistTreeModelNodePtr& subnode : node.GetChildren())
+							{
+								subnode->GetItemAttr({}).SetColour(col);
+								subnode->GetItemAttr({}).SetStrikethrough(true);
+							}
+						}
+					}
+
 					break;
 				}
 				case PlaylistTreeModelNode::ItemTag::ShortDuration:
@@ -474,25 +502,6 @@ namespace UIElements
 				case PlaylistTreeModelNode::ItemTag::Blacklisted:
 				{
 					node.SetIconId(PlaylistIconId::RemoveSong, {});
-					break;
-				}
-				case PlaylistTreeModelNode::ItemTag::RequiresRomBasic: // fall-through to RequiresRomKernal
-				case PlaylistTreeModelNode::ItemTag::RequiresRomKernal:
-				{
-					node.SetIconId(PlaylistIconId::ChipIcon, {});
-					if (!node.IsPlayable())
-					{
-						const wxColour col = (tag == PlaylistTreeModelNode::ItemTag::RequiresRomBasic) ? "#054a80" : "#8a5454"; // TODO: these colors should probably be defined in the theme XML and not hardcoded here.
-						node.GetItemAttr({}).SetColour(col);
-						node.GetItemAttr({}).SetStrikethrough(true);
-
-						// Apply to any subsongs too
-						for (const PlaylistTreeModelNodePtr& subnode : node.GetChildren())
-						{
-							subnode->GetItemAttr({}).SetColour(col);
-							subnode->GetItemAttr({}).SetStrikethrough(true);
-						}
-					}
 					break;
 				}
 			}

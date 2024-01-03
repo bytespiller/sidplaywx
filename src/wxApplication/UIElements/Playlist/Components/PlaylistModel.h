@@ -67,15 +67,20 @@ public:
 	{
 		Normal,
 		ShortDuration,
-		Blacklisted,
-		RequiresRomBasic,
-		RequiresRomKernal
+		Blacklisted
 	};
+
+    enum class RomRequirement
+    {
+        None,
+        BasicRom,
+        R64
+    };
 
 public:
 	PlaylistTreeModelNode() = delete;
 	PlaylistTreeModelNode(PlaylistTreeModelNode&) = delete;
-	PlaylistTreeModelNode(PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, bool playable);
+	PlaylistTreeModelNode(PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, RomRequirement romRequirement, bool playable);
 
 public:
 	/// @brief Returns a nullptr for a mainsong or a mainsong for a subsong.
@@ -130,6 +135,7 @@ public:
 	/// @brief Indicates a default subsong for a song item, or a self-index (1-based) for a subsong item.
 	const int defaultSubsong;
 	const uint_least32_t duration;
+	const RomRequirement romRequirement;
 
 
 private:

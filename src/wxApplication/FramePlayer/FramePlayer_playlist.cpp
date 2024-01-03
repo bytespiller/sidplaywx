@@ -147,7 +147,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
             const int totalSubsongs = _silentSidInfoDecoder.GetTotalSubsongs();
 
             // Tune ROM requirement
-            const SidDecoder::SongRequirement romRequirement = _silentSidInfoDecoder.GetCurrentSongRomRequirement();
+            const SidDecoder::RomRequirement romRequirement = _silentSidInfoDecoder.GetCurrentSongRomRequirement();
             const bool playable = playback.IsRomLoaded(romRequirement);
 
             // Add main song node to playlist tree
@@ -156,7 +156,26 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
             {
                 const uint_least32_t realDuration = _silentSidInfoDecoder.TryGetActiveSongDuration();
                 const wxString author = _silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author); // Don't use reference.
-                mainSongNodeNew = &_ui->treePlaylistNew->AddMainSong(songTitle, filepath, defaultSubsong, realDuration, author, playable);
+
+                // Determine ROM requirement
+                PlaylistTreeModelNode::RomRequirement nodeRom = PlaylistTreeModelNode::RomRequirement::None;
+                switch (romRequirement)
+                {
+                    case SidDecoder::RomRequirement::None:
+                        nodeRom = PlaylistTreeModelNode::RomRequirement::None;
+                        break;
+                    case SidDecoder::RomRequirement::BasicRom:
+                        nodeRom = PlaylistTreeModelNode::RomRequirement::BasicRom;
+                        break;
+                    case SidDecoder::RomRequirement::R64:
+                        nodeRom = PlaylistTreeModelNode::RomRequirement::R64;
+                        break;
+                    default:
+                        wxMessageBox(Strings::Internal::UNHANDLED_SWITCH_CASE); // throwing doesn't work properly with release mode wxWidgets
+                        throw(Strings::Internal::UNHANDLED_SWITCH_CASE);
+                }
+
+                mainSongNodeNew = &_ui->treePlaylistNew->AddMainSong(songTitle, filepath, defaultSubsong, realDuration, author, nodeRom, playable);
             }
 
             if (playable)
@@ -184,19 +203,15 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                 _ui->treePlaylistNew->AddSubsongs(subsongDurations, *mainSongNodeNew);
             }
 
-            // Indicate a ROM requirement & status (must be done after subsongs are added in order for styling to propagate to them too)
-            if (romRequirement != SidDecoder::SongRequirement::None)
-            {
-                const PlaylistTreeModelNode::ItemTag tag = (romRequirement == SidDecoder::SongRequirement::BasicRom) ? PlaylistTreeModelNode::ItemTag::RequiresRomBasic : PlaylistTreeModelNode::ItemTag::RequiresRomKernal;
-                _ui->treePlaylistNew->SetItemTag(*mainSongNodeNew, tag, true);
-            }
-
             // One tune (with any subsongs) added -----------------
 
-            // Tag short songs
-            if (enabledShortSongSkip)
+            if (playable && enabledShortSongSkip) // Tag short songs
             {
                 UpdateIgnoredSong(*mainSongNodeNew);
+            }
+            else // Apply Normal tag and ROM requirement icons/styling
+            {
+                _ui->treePlaylistNew->SetItemTag(*mainSongNodeNew, PlaylistTreeModelNode::ItemTag::Normal, true);
             }
 
             // Auto-play
