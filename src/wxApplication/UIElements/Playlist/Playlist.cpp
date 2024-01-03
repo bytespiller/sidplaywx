@@ -545,7 +545,7 @@ namespace UIElements
 			}
 
      		const int lines = (evt.GetWheelRotation() / evt.GetWheelDelta()) * evt.GetLinesPerAction();
-			DoScroll(GetScrollPos(wxHORIZONTAL), GetScrollPos(wxVERTICAL) - lines); // Not using the ScrollLines() since it uses the performance-problematic smooth scrolling.
+			DoScroll(GetScrollPos(wxHORIZONTAL), std::max(0, GetScrollPos(wxVERTICAL) - lines)); // Not using the ScrollLines() since it uses the performance-problematic smooth scrolling.
 		}
 	}
 }
