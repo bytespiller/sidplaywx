@@ -27,7 +27,7 @@
 
 std::vector<wxString> FramePlayer::GetCurrentPlaylistFilePaths(bool includeBlacklistedSongs)
 {
-    const PlaylistTreeModelNodePtrArray& songs = _ui->treePlaylistNew->GetSongs();
+    const PlaylistTreeModelNodePtrArray& songs = _ui->treePlaylist->GetSongs();
 
     std::vector<wxString> fileList;
     fileList.reserve(songs.size());
@@ -90,7 +90,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
         _app.UnloadActiveTune();
 
         SetStatusText(Strings::FramePlayer::STATUS_CLEARING_PLAYLIST, 2); // TODO
-        _ui->treePlaylistNew->Clear();
+        _ui->treePlaylist->Clear();
 
         UpdateUiState();
         Update();
@@ -175,7 +175,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                         throw(Strings::Internal::UNHANDLED_SWITCH_CASE);
                 }
 
-                mainSongNodeNew = &_ui->treePlaylistNew->AddMainSong(songTitle, filepath, defaultSubsong, realDuration, author, nodeRom, playable);
+                mainSongNodeNew = &_ui->treePlaylist->AddMainSong(songTitle, filepath, defaultSubsong, realDuration, author, nodeRom, playable);
             }
 
             if (playable)
@@ -200,7 +200,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                 }
 
                 // Add subsongs
-                _ui->treePlaylistNew->AddSubsongs(subsongDurations, *mainSongNodeNew);
+                _ui->treePlaylist->AddSubsongs(subsongDurations, *mainSongNodeNew);
             }
 
             // One tune (with any subsongs) added -----------------
@@ -211,13 +211,13 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
             }
             else // Apply Normal tag and ROM requirement icons/styling
             {
-                _ui->treePlaylistNew->SetItemTag(*mainSongNodeNew, PlaylistTreeModelNode::ItemTag::Normal, true);
+                _ui->treePlaylist->SetItemTag(*mainSongNodeNew, PlaylistTreeModelNode::ItemTag::Normal, true);
             }
 
             // Auto-play
             if (shouldAutoPlay)
             {
-                const PlaylistTreeModelNode* subsongItemData = _ui->treePlaylistNew->GetEffectiveInitialSubsong(*mainSongNodeNew);
+                const PlaylistTreeModelNode* subsongItemData = _ui->treePlaylist->GetEffectiveInitialSubsong(*mainSongNodeNew);
                 if (subsongItemData != nullptr) // Can be nullptr if the main song is not playable (e.g., missing ROM).
                 {
                     shouldAutoPlay = subsongItemData->GetTag() != PlaylistTreeModelNode::ItemTag::Normal || !TryPlayPlaylistItem(*mainSongNodeNew);
@@ -262,10 +262,10 @@ void FramePlayer::PadColumnsWidth()
 void FramePlayer::PadColumnWidth(PlaylistTreeModel::ColumnId columnId)
 {
     const unsigned int colIndex = static_cast<unsigned int>(columnId);
-    wxDataViewColumn* const col = _ui->treePlaylistNew->GetColumn(colIndex);
+    wxDataViewColumn* const col = _ui->treePlaylist->GetColumn(colIndex);
 
-    const unsigned int padding = _ui->treePlaylistNew->GetFont().GetPointSize() * 2;
-    const unsigned int newWidth = _ui->treePlaylistNew->GetBestColumnWidth(colIndex) + padding;
+    const unsigned int padding = _ui->treePlaylist->GetFont().GetPointSize() * 2;
+    const unsigned int newWidth = _ui->treePlaylist->GetBestColumnWidth(colIndex) + padding;
     if (col->GetWidth() < newWidth)
     {
         col->SetWidth(newWidth);
@@ -279,7 +279,7 @@ void FramePlayer::UpdateIgnoredSongs(PassKey<FramePrefs>)
 
 void FramePlayer::UpdateIgnoredSongs()
 {
-    for (const PlaylistTreeModelNodePtr& songNode : _ui->treePlaylistNew->GetSongs())
+    for (const PlaylistTreeModelNodePtr& songNode : _ui->treePlaylist->GetSongs())
     {
         UpdateIgnoredSong(*songNode.get());
     }
@@ -301,7 +301,7 @@ void FramePlayer::UpdateIgnoredSong(PlaylistTreeModelNode& mainSongNode)
         const bool durationIsShort = skipDurationThreshold > 0 && (relevantSubsongDuration < skipDurationThreshold);
 
         const PlaylistTreeModelNode::ItemTag tag = (durationIsShort) ? PlaylistTreeModelNode::ItemTag::ShortDuration : PlaylistTreeModelNode::ItemTag::Normal;
-        _ui->treePlaylistNew->SetItemTag(*subsongNode.get(), tag);
+        _ui->treePlaylist->SetItemTag(*subsongNode.get(), tag);
     }
 
     // Main song
@@ -324,7 +324,7 @@ void FramePlayer::UpdateIgnoredSong(PlaylistTreeModelNode& mainSongNode)
         }
 
         const PlaylistTreeModelNode::ItemTag tag = (mainSongDurationIsShort) ? PlaylistTreeModelNode::ItemTag::ShortDuration : PlaylistTreeModelNode::ItemTag::Normal;
-        _ui->treePlaylistNew->SetItemTag(mainSongNode, tag);
+        _ui->treePlaylist->SetItemTag(mainSongNode, tag);
     }
 }
 

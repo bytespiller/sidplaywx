@@ -174,9 +174,9 @@ void FramePlayer::SetupUiElements()
     _ui->compositeSeekbar->Bind(UIElements::EVT_CSB_SeekBackward, &OnSeekBackward, this);
     _ui->compositeSeekbar->Bind(UIElements::EVT_CSB_SeekForward, &OnSeekForward, this);
 
-    _ui->treePlaylistNew->Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED, &OnTreePlaylistItemActivated, this);
-    _ui->treePlaylistNew->Bind(wxEVT_DATAVIEW_ITEM_CONTEXT_MENU, &OnTreePlaylistContextMenuOpen, this);
-    _ui->treePlaylistNew->Bind(wxEVT_KEY_DOWN, &OnTreePlaylistKeyPressed, this);
+    _ui->treePlaylist->Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED, &OnTreePlaylistItemActivated, this);
+    _ui->treePlaylist->Bind(wxEVT_DATAVIEW_ITEM_CONTEXT_MENU, &OnTreePlaylistContextMenuOpen, this);
+    _ui->treePlaylist->Bind(wxEVT_KEY_DOWN, &OnTreePlaylistKeyPressed, this);
 
     SubscribeMe(*_ui->btnRepeatMode, UIElements::SignalsRepeatModeButton::SIGNAL_EXTRA_OPTION_SELECTED, [this](int param)
     {
@@ -192,14 +192,14 @@ void FramePlayer::SetupUiElements()
     Bind(wxEVT_COMMAND_MENU_SELECTED, &OnMenuItemSelected, this);
 
     // Other
-    SetMinClientSize({_ui->labelTitle->GetSize().GetWidth() + _ui->labelTitle->GetPosition().x, _ui->treePlaylistNew->GetPosition().y});
+    SetMinClientSize({_ui->labelTitle->GetSize().GetWidth() + _ui->labelTitle->GetPosition().x, _ui->treePlaylist->GetPosition().y});
 
     _panel->DragAcceptFiles(true);
     _panel->Bind(wxEVT_DROP_FILES, &OnDropFilesFramePlayer, this);
 
-    _ui->treePlaylistNew->DragAcceptFiles(true);
-    _ui->treePlaylistNew->Bind(wxEVT_DROP_FILES, &OnDropFilesPlaylist, this);
-    _ui->treePlaylistNew->SetFocus(); // Playlist should have the focus on app start for easy keyboard navigation.
+    _ui->treePlaylist->DragAcceptFiles(true);
+    _ui->treePlaylist->Bind(wxEVT_DROP_FILES, &OnDropFilesPlaylist, this);
+    _ui->treePlaylist->SetFocus(); // Playlist should have the focus on app start for easy keyboard navigation.
 }
 
 void FramePlayer::DeferredInit()
@@ -220,11 +220,11 @@ void FramePlayer::DeferredInit()
             DiscoverFilesAndSendToPlaylist(playlistFiles, true, false); // Reminder: this line can take a long time but is asynchronous and the program can be used before the next line is reached.
 
             // Restore last song selection (unless already playing something, e.g., user selected a song while the large playlist is still loading)
-            const bool userSelectionAlreadyMade = _ui->treePlaylistNew->GetActiveSong() != nullptr;
+            const bool userSelectionAlreadyMade = _ui->treePlaylist->GetActiveSong() != nullptr;
             if (!userSelectionAlreadyMade)
             {
                 const wxString& targetFilePath = _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongName)->GetValueAsString();
-                PlaylistTreeModelNode* targetItemNode = _ui->treePlaylistNew->GetSong(targetFilePath); // Can be nullptr in case the target file path no longer exists or is an empty string.
+                PlaylistTreeModelNode* targetItemNode = _ui->treePlaylist->GetSong(targetFilePath); // Can be nullptr in case the target file path no longer exists or is an empty string.
 
                 // Determine subsong if needed
                 if (targetItemNode != nullptr && targetItemNode->GetSubsongCount() > 0)
@@ -274,7 +274,7 @@ void FramePlayer::CloseApplication()
         Helpers::Wx::Files::TrySavePlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME, fileList);
 
         // Store the last played song & subsong as an internal option...
-        const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetActiveSong();
+        const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
         const wxString& cSongName = (node == nullptr) ? "" : node->filepath;
         const int cSongIndex = (node == nullptr) ? 0 : node->defaultSubsong;
         _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongName)->UpdateValue(cSongName);

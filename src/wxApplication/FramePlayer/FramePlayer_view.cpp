@@ -26,7 +26,7 @@
 
 void FramePlayer::UpdateUiState()
 {
-    const bool playlistHasItems = !_ui->treePlaylistNew->IsEmpty();
+    const bool playlistHasItems = !_ui->treePlaylist->IsEmpty();
     const PlaybackController& playback = _app.GetPlaybackInfo();
     const bool hasSomethingPlayable = playlistHasItems && playback.IsValidSongLoaded();
 
@@ -34,14 +34,14 @@ void FramePlayer::UpdateUiState()
     if (hasSomethingPlayable)
     {
         // Subsong buttons
-        _ui->btnNextSubsong->Enable(_ui->treePlaylistNew->GetNextSubsong() != nullptr);
-        _ui->btnPrevSubsong->Enable(_ui->treePlaylistNew->GetPrevSubsong() != nullptr);
+        _ui->btnNextSubsong->Enable(_ui->treePlaylist->GetNextSubsong() != nullptr);
+        _ui->btnPrevSubsong->Enable(_ui->treePlaylist->GetPrevSubsong() != nullptr);
         _ui->labelSubsong->Enable(playback.GetTotalSubsongs() > 1);
 
         // Transport buttons
-        const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetActiveSong();
-        _ui->btnNextTrack->Enable(node != nullptr && _ui->treePlaylistNew->GetNextSong(*node) != nullptr);
-        _ui->btnPrevTrack->Enable(node != nullptr && _ui->treePlaylistNew->GetPrevSong(*node) != nullptr);
+        const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
+        _ui->btnNextTrack->Enable(node != nullptr && _ui->treePlaylist->GetNextSong(*node) != nullptr);
+        _ui->btnPrevTrack->Enable(node != nullptr && _ui->treePlaylist->GetPrevSong(*node) != nullptr);
 
         // Other things to refresh regardless of the playback state
         SetStatusText(wxString::Format("%s / %s", playback.GetCurrentTuneSpeedDescription(), playback.GetCurrentTuneSidDescription()), 1); // TODO
@@ -68,7 +68,7 @@ void FramePlayer::UpdateUiState()
         case PlaybackController::State::Playing:
         {
             _ui->btnPlayPause->SetPause();
-            _ui->compositeSeekbar->ResetPlaybackPosition(GetEffectiveSongDuration(*_ui->treePlaylistNew->GetActiveSong()));
+            _ui->compositeSeekbar->ResetPlaybackPosition(GetEffectiveSongDuration(*_ui->treePlaylist->GetActiveSong()));
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_NORMAL);
 
             break;

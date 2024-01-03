@@ -163,7 +163,7 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
     {
         menu->AppendSeparator();
         wxMenuItem* newItem = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::ScrollToCurrent), Strings::PlaylistTree::MENU_ITEM_SCROLL_TO_CURRENT);
-        newItem->Enable(!_ui->treePlaylistNew->IsEmpty());
+        newItem->Enable(!_ui->treePlaylist->IsEmpty());
     }
 
     // Expand all, Collapse all
@@ -172,8 +172,8 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
         wxMenuItem* newItemExpand = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::ExpandAll), Strings::PlaylistTree::MENU_ITEM_EXPAND_ALL);
         wxMenuItem* newItemCollapse = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::CollapseAll), Strings::PlaylistTree::MENU_ITEM_COLLAPSE_ALL);
 
-        newItemExpand->Enable(!_ui->treePlaylistNew->IsEmpty());
-        newItemCollapse->Enable(!_ui->treePlaylistNew->IsEmpty());
+        newItemExpand->Enable(!_ui->treePlaylist->IsEmpty());
+        newItemCollapse->Enable(!_ui->treePlaylist->IsEmpty());
     }
 
     menu->Bind(wxEVT_COMMAND_MENU_SELECTED, [&node, this](wxCommandEvent& evt) { OnTreePlaylistContextItem(*node, evt); });
@@ -194,19 +194,19 @@ void FramePlayer::OnTreePlaylistContextItem(PlaylistTreeModelNode& node, wxComma
             break;
 
         case PopupMenuItemId_Playlist::ScrollToCurrent:
-            if (const PlaylistTreeModelNode* activeSong = _ui->treePlaylistNew->GetActiveSong())
+            if (const PlaylistTreeModelNode* activeSong = _ui->treePlaylist->GetActiveSong())
             {
-                _ui->treePlaylistNew->EnsureVisible(*activeSong);
-                _ui->treePlaylistNew->Select(*activeSong);
+                _ui->treePlaylist->EnsureVisible(*activeSong);
+                _ui->treePlaylist->Select(*activeSong);
             }
             break;
 
         case PopupMenuItemId_Playlist::ExpandAll:
-            _ui->treePlaylistNew->ExpandAll();
+            _ui->treePlaylist->ExpandAll();
             break;
 
         case PopupMenuItemId_Playlist::CollapseAll:
-            _ui->treePlaylistNew->CollapseAll();
+            _ui->treePlaylist->CollapseAll();
             break;
     }
 }
@@ -220,7 +220,7 @@ void FramePlayer::OnTreePlaylistKeyPressed(wxKeyEvent& evt)
         return;
     }
 
-    const wxDataViewItem& item = _ui->treePlaylistNew->GetSelection();
+    const wxDataViewItem& item = _ui->treePlaylist->GetSelection();
     if (item.IsOk())
     {
         PlaylistTreeModelNode* node = PlaylistTreeModel::TreeItemToModelNode(item);
@@ -289,7 +289,7 @@ void FramePlayer::OnMenuOpening(wxMenuEvent& evt)
         return;
     }
 
-    const bool playlistEmpty = _ui->treePlaylistNew->IsEmpty();
+    const bool playlistEmpty = _ui->treePlaylist->IsEmpty();
     if (menu->GetTitle().IsSameAs(Strings::FramePlayer::MENU_FILE)) // TODO: try to find a better way to detect which menu is opened (e.g., "File" in this case).
     {
         evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::PlaylistSave), !playlistEmpty);
@@ -343,7 +343,7 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
 
         case MenuItemId_Player::PlaylistClear:
             OnButtonStop();
-            _ui->treePlaylistNew->Clear();
+            _ui->treePlaylist->Clear();
             UpdateUiState();
             break;
 
@@ -415,7 +415,7 @@ void FramePlayer::OnTimer(wxTimerEvent& /*evt*/)
         {
             case WXK_MEDIA_PLAY_PAUSE:
             {
-                if (cState != PlaybackController::State::Undefined && _ui->treePlaylistNew->GetActiveSong() != nullptr)
+                if (cState != PlaybackController::State::Undefined && _ui->treePlaylist->GetActiveSong() != nullptr)
                 {
                     OnButtonPlayPause();
                 }
@@ -432,7 +432,7 @@ void FramePlayer::OnTimer(wxTimerEvent& /*evt*/)
             case WXK_MEDIA_NEXT_TRACK:
             {
                 const bool optIncludeSubsongs = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
-                const bool lastSubsong = _ui->treePlaylistNew->GetNextSubsong() == nullptr;
+                const bool lastSubsong = _ui->treePlaylist->GetNextSubsong() == nullptr;
                 if (!(optIncludeSubsongs && !lastSubsong && OnButtonSubsongNext()))
                 {
                     OnButtonTuneNext();
@@ -442,7 +442,7 @@ void FramePlayer::OnTimer(wxTimerEvent& /*evt*/)
             case WXK_MEDIA_PREV_TRACK:
             {
                 const bool optIncludeSubsongs = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
-                const bool firstSubsong = _ui->treePlaylistNew->GetPrevSubsong() == nullptr;
+                const bool firstSubsong = _ui->treePlaylist->GetPrevSubsong() == nullptr;
                 if (!(optIncludeSubsongs && !firstSubsong && OnButtonSubsongPrev()))
                 {
                     OnButtonTunePrev();
@@ -477,7 +477,7 @@ void FramePlayer::OnButtonPlayPause()
                 break;
             default: // Usually Stopped (but could also be some other state if weird situation, app will say "error" then).
             {
-                const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetActiveSong();
+                const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
                 const bool preRenderEnabled = _app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool();
                 const int preRenderDurationMs = (preRenderEnabled && node != nullptr) ? GetEffectiveSongDuration(*node) : 0;
                 _app.ReplayLoadedTune(preRenderDurationMs);
@@ -500,7 +500,7 @@ void FramePlayer::OnButtonStop()
 
 bool FramePlayer::OnButtonSubsongNext() // TODO: much repeating in these four methods, try to DRY refactor.
 {
-    const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetNextSubsong();
+    const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetNextSubsong();
     bool success = node != nullptr;
 
     const bool shouldAutoplay = ShouldAutoPlay(_app); // Must check *before* it changes.
@@ -522,7 +522,7 @@ bool FramePlayer::OnButtonSubsongNext() // TODO: much repeating in these four me
 
 bool FramePlayer::OnButtonSubsongPrev() // TODO: much repeating in these four methods, try to DRY refactor.
 {
-    const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetPrevSubsong();
+    const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetPrevSubsong();
     bool success = node != nullptr;
 
     const bool shouldAutoplay = ShouldAutoPlay(_app); // Must check *before* it changes.
@@ -544,7 +544,7 @@ bool FramePlayer::OnButtonSubsongPrev() // TODO: much repeating in these four me
 
 bool FramePlayer::OnButtonTuneNext() // TODO: much repeating in these four methods, try to DRY refactor.
 {
-    const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetNextSong();
+    const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetNextSong();
     bool success = node != nullptr;
 
     const bool shouldAutoplay = ShouldAutoPlay(_app); // Must check *before* it changes.
@@ -566,7 +566,7 @@ bool FramePlayer::OnButtonTuneNext() // TODO: much repeating in these four metho
 
 bool FramePlayer::OnButtonTunePrev() // TODO: much repeating in these four methods, try to DRY refactor.
 {
-    const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetPrevSong();
+    const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetPrevSong();
     bool success = node != nullptr;
 
     const bool shouldAutoplay = ShouldAutoPlay(_app); // Must check *before* it changes.
@@ -620,13 +620,13 @@ void FramePlayer::OnSongDurationReached()
         {
             _app.StopPlayback();
 
-            if (!_ui->treePlaylistNew->IsEmpty())
+            if (!_ui->treePlaylist->IsEmpty())
             {
                 const bool playingNextSubsong = includeSubsongs && TryPlayNextValidSubsong();
                 const bool reachedTheEnd = !playingNextSubsong && !TryPlayNextValidSong();
                 if (reachedTheEnd)
                 {
-                    const PlaylistTreeModelNode& firstTuneNode = *_ui->treePlaylistNew->GetSongs().at(0).get();
+                    const PlaylistTreeModelNode& firstTuneNode = *_ui->treePlaylist->GetSongs().at(0).get();
                     if (firstTuneNode.GetTag() == PlaylistTreeModelNode::ItemTag::Normal)
                     {
                         if (!TryPlayPlaylistItem(firstTuneNode))
@@ -643,7 +643,7 @@ void FramePlayer::OnSongDurationReached()
         {
             _app.StopPlayback();
 
-            const PlaylistTreeModelNode* const node = _ui->treePlaylistNew->GetActiveSong();
+            const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
             if (node != nullptr)
             {
                 const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(*node) : 0;
@@ -741,7 +741,7 @@ void FramePlayer::OnAudioDeviceChanged(bool success)
 
 PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const PlaylistTreeModelNode& startNode, bool forwardDirection)
 {
-    const PlaylistTreeModelNodePtrArray& songs = _ui->treePlaylistNew->GetSongs();
+    const PlaylistTreeModelNodePtrArray& songs = _ui->treePlaylist->GetSongs();
     auto itStart = std::find_if(songs.begin(), songs.end(), [&startNode](const PlaylistTreeModelNodePtr& qNode)
     {
         return startNode.filepath.IsSameAs(qNode->filepath);
@@ -786,13 +786,13 @@ PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const Play
 
 void FramePlayer::DoRemoveSongTreeItem(PlaylistTreeModelNode& node)
 {
-    const PlaylistTreeModelNode* activeSong = _ui->treePlaylistNew->GetActiveSong();
+    const PlaylistTreeModelNode* activeSong = _ui->treePlaylist->GetActiveSong();
     if (activeSong != nullptr && activeSong->filepath == node.filepath)
     {
         _app.UnloadActiveTune();
     }
 
-    _ui->treePlaylistNew->Remove(node);
+    _ui->treePlaylist->Remove(node);
     PadColumnsWidth();
     UpdateUiState(); // To refresh the Next/Prev buttons.
 }
@@ -802,11 +802,11 @@ void FramePlayer::DoToggleSubsongBlacklistState(PlaylistTreeModelNode& node)
     switch (node.GetTag())
     {
         case PlaylistTreeModelNode::ItemTag::Normal:
-            _ui->treePlaylistNew->SetItemTag(node, PlaylistTreeModelNode::ItemTag::Blacklisted);
+            _ui->treePlaylist->SetItemTag(node, PlaylistTreeModelNode::ItemTag::Blacklisted);
             break;
 
         case PlaylistTreeModelNode::ItemTag::Blacklisted:
-            _ui->treePlaylistNew->SetItemTag(node, PlaylistTreeModelNode::ItemTag::Normal);
+            _ui->treePlaylist->SetItemTag(node, PlaylistTreeModelNode::ItemTag::Normal);
             break;
     }
 
@@ -829,7 +829,7 @@ void FramePlayer::OnFindSong(UIElements::SignalsSearchBar signalId)
 
     // Ensure search point is a main song and not a subsong
     {
-        wxDataViewItem currentSelection = _ui->treePlaylistNew->GetSelection();
+        wxDataViewItem currentSelection = _ui->treePlaylist->GetSelection();
         if (currentSelection != nullptr && currentSelection.IsOk())
         {
             nodeCurrent = PlaylistTreeModel::TreeItemToModelNode(currentSelection);
@@ -844,7 +844,7 @@ void FramePlayer::OnFindSong(UIElements::SignalsSearchBar signalId)
 
     if (targetItem == nullptr) // Next/prev result not found, try to wrap around
     {
-        PlaylistTreeModelNode* nodeStart = (forwardDirection) ? _ui->treePlaylistNew->GetSongs().front().get() : _ui->treePlaylistNew->GetSongs().back().get();
+        PlaylistTreeModelNode* nodeStart = (forwardDirection) ? _ui->treePlaylist->GetSongs().front().get() : _ui->treePlaylist->GetSongs().back().get();
         targetItem = DoFindSong(query, *nodeStart, forwardDirection); // Wrap around.
         wrapAround = true;
     }
@@ -855,8 +855,8 @@ void FramePlayer::OnFindSong(UIElements::SignalsSearchBar signalId)
     }
     else
     {
-        _ui->treePlaylistNew->Select(*targetItem);
-        _ui->treePlaylistNew->EnsureVisible(*targetItem);
+        _ui->treePlaylist->Select(*targetItem);
+        _ui->treePlaylist->EnsureVisible(*targetItem);
         _ui->searchBar->FlashInputBox((wrapAround) ? wxColour(COLOR_WRAPPED) : wxColour(COLOR_HIT));
     }
 }

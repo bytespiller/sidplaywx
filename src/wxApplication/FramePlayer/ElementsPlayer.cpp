@@ -249,8 +249,8 @@ namespace FrameElements // Player class
 			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::SkipShort, themeData.GetImage("icon_skipshort"));
 			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::RemoveSong, themeData.GetImage("icon_removesong"));
 
-			treePlaylistNew = new UIElements::Playlist::Playlist(&_parentPanel, playlistIcons, appSettings, wxDV_SINGLE);
-			sizerMain->Add(treePlaylistNew->GetWxWindow(), 1, wxEXPAND | wxALL, 0);
+			treePlaylist = new UIElements::Playlist::Playlist(&_parentPanel, playlistIcons, appSettings, wxDV_SINGLE);
+			sizerMain->Add(treePlaylist->GetWxWindow(), 1, wxEXPAND | wxALL, 0);
 		}
 
  		// Search bar

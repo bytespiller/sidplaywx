@@ -115,7 +115,7 @@ namespace FrameElements
 
 		// Other disableable
 	    UIElements::CompositeSeekBar* compositeSeekbar;
-	    UIElements::Playlist::Playlist* treePlaylistNew;
+	    UIElements::Playlist::Playlist* treePlaylist;
 		UIElements::SearchBar* searchBar;
 
 	private:
