@@ -124,9 +124,6 @@ void FramePlayer::SetupUiElements()
     assert(!_initialized);
     _initialized = true;
 
-    // Init params
-    // TODO: recall size & position if available
-
     // Visuals
     _panel = new wxPanel(this);
     _panel->SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
@@ -204,7 +201,8 @@ void FramePlayer::SetupUiElements()
 
 void FramePlayer::DeferredInit()
 {
-    SetClientSize(DpiSize(530, 512)); // TODO: load from options
+    SetClientSize(DpiSize(640, 512)); // TODO: load from options if available
+    // TODO: position if available
 
     // Handle the "Open With" situation (not done in a constructor in order to have the wxYield/Refresh work while adding to playlist).
     if (_app.argc > 1)
