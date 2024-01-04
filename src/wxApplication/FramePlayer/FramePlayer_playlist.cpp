@@ -156,6 +156,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
             {
                 const uint_least32_t realDuration = _silentSidInfoDecoder.TryGetActiveSongDuration();
                 const wxString author = _silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author); // Don't use reference.
+                const wxString copyright = _silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released); // Don't use reference.
 
                 // Determine ROM requirement
                 PlaylistTreeModelNode::RomRequirement nodeRom = PlaylistTreeModelNode::RomRequirement::None;
@@ -175,7 +176,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                         throw(Strings::Internal::UNHANDLED_SWITCH_CASE);
                 }
 
-                mainSongNodeNew = &_ui->treePlaylist->AddMainSong(songTitle, filepath, defaultSubsong, realDuration, author, nodeRom, playable);
+                mainSongNodeNew = &_ui->treePlaylist->AddMainSong(songTitle, filepath, defaultSubsong, realDuration, author, copyright, nodeRom, playable);
             }
 
             if (playable)
@@ -254,9 +255,10 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
 
 void FramePlayer::PadColumnsWidth()
 {
-    // Pad the Title & Author column widths a little because the bold text takes up some extra width so the text could become cutoff when hard-selected.
+    // Pad the Title, Author and Copyright column widths a little because the bold text takes up some extra width so the text could become cutoff when hard-selected.
     PadColumnWidth(PlaylistTreeModel::ColumnId::Title);
     PadColumnWidth(PlaylistTreeModel::ColumnId::Author);
+    PadColumnWidth(PlaylistTreeModel::ColumnId::Copyright);
 }
 
 void FramePlayer::PadColumnWidth(PlaylistTreeModel::ColumnId columnId)
@@ -266,10 +268,7 @@ void FramePlayer::PadColumnWidth(PlaylistTreeModel::ColumnId columnId)
 
     const unsigned int padding = _ui->treePlaylist->GetFont().GetPointSize() * 2;
     const unsigned int newWidth = _ui->treePlaylist->GetBestColumnWidth(colIndex) + padding;
-    if (col->GetWidth() < newWidth)
-    {
-        col->SetWidth(newWidth);
-    }
+    col->SetWidth(newWidth);
 }
 
 void FramePlayer::UpdateIgnoredSongs(PassKey<FramePrefs>)

@@ -93,6 +93,7 @@ namespace Strings
 		inline constexpr const char* const COLUMN_TITLE("Title");
 		inline constexpr const char* const COLUMN_DURATION("Duration");
 		inline constexpr const char* const COLUMN_AUTHOR("Author");
+		inline constexpr const char* const COLUMN_COPYRIGHT("Copyright");
 
 		inline constexpr const char* const MENU_ITEM_REMOVE("Remove");
 

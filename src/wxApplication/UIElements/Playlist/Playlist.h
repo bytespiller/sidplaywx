@@ -38,7 +38,7 @@ namespace UIElements
 			~Playlist() override = default;
 
 		public:
-			PlaylistTreeModelNode& AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable);
+			PlaylistTreeModelNode& AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, const wxString& copyright, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable);
 
 			/// @brief Efficiently adds multiple subsongs at once.
 			void AddSubsongs(const std::vector<uint_least32_t>& durations, PlaylistTreeModelNode& parent);
@@ -57,9 +57,6 @@ namespace UIElements
 
 			/// @brief Collapses all top-level nodes.
 			void CollapseAll();
-
-			/// @brief Hides the Author column if there is only one author and shows it otherwise.
-			bool RefreshAuthorColumnVisibility();
 
 			/// @brief Returns song-default or first playable subsong (depending on the user setting) or a nullptr.
 			PlaylistTreeModelNode* GetEffectiveInitialSubsong(const PlaylistTreeModelNode& mainSongItem) const;

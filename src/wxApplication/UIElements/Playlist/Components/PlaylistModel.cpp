@@ -24,13 +24,14 @@
 // PlaylistTreeModelNode
 // ----------------------------------------------------------------------------
 
-PlaylistTreeModelNode::PlaylistTreeModelNode(PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, RomRequirement romRequirement, bool playable) :
+PlaylistTreeModelNode::PlaylistTreeModelNode(PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable) :
 	_parent(parent),
 	title(title),
 	filepath(filepath),
 	defaultSubsong(defaultSubsong),
 	duration(duration),
 	author(author),
+	copyright(copyright),
 	type((parent == nullptr) ? ItemType::Song : ItemType::Subsong),
 	romRequirement(romRequirement),
 	_playable(playable)
@@ -150,7 +151,7 @@ void PlaylistTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& item,
 			const UIElements::Playlist::PlaylistIconId nodeIconId = node->GetIconId();
 			if (nodeIconId != UIElements::Playlist::PlaylistIconId::NoIcon)
 			{
-				variant = wxVariant(*_playlistIcons.GetIconList().at(nodeIconId));
+				variant = wxVariant(*_playlistIcons.GetIconList().at(nodeIconId)); // This severely impacts the scrolling performance on MSW (issue with wxWidgets' wxDataViewCtrl indirection design).
 			}
 			break;
 		}
@@ -178,6 +179,11 @@ void PlaylistTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& item,
 		case ColumnId::Author:
 		{
 			variant = node->author;
+			break;
+		}
+		case ColumnId::Copyright:
+		{
+			variant = node->copyright;
 			break;
 		}
 		default:

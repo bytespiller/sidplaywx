@@ -35,7 +35,8 @@ namespace UIElements
 			_AddBitmapColumn(ColumnId::Icon);
 			_AddTextColumn(ColumnId::Title, Strings::PlaylistTree::COLUMN_TITLE);
 			_AddTextColumn(ColumnId::Duration, Strings::PlaylistTree::COLUMN_DURATION);
-			_AddTextColumn(ColumnId::Author, Strings::PlaylistTree::COLUMN_AUTHOR)->SetHidden(true);
+			_AddTextColumn(ColumnId::Author, Strings::PlaylistTree::COLUMN_AUTHOR);
+			_AddTextColumn(ColumnId::Copyright, Strings::PlaylistTree::COLUMN_COPYRIGHT);
 			_AddTextColumn(ColumnId::PlaceholderLast, "");
 
 			Bind(wxEVT_MOUSEWHEEL, &_OverrideScrollWheel, this); // Partial workaround for the smooth scrolling performance issues on MSW (especially with lots of icons in rows).
@@ -46,17 +47,14 @@ namespace UIElements
 			return this;
 		}
 
-		PlaylistTreeModelNode& Playlist::AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable)
+		PlaylistTreeModelNode& Playlist::AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, const wxString& copyright, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable)
 		{
 			// Create item
-			_model.entries.emplace_back(new PlaylistTreeModelNode(nullptr, title, filepath, defaultSubsong, duration, author, romRequirement, playable));
+			_model.entries.emplace_back(new PlaylistTreeModelNode(nullptr, title, filepath, defaultSubsong, duration, author, copyright, romRequirement, playable));
 
 			// Notify the wx base control of change
 			wxDataViewItem childNotify = wxDataViewItem(_model.entries.back().get());
 			_model.ItemAdded(wxDataViewItem(0), childNotify);
-
-			// Refresh
-			RefreshAuthorColumnVisibility();
 
 			// Return the just-created item for convenience
 			return *_model.entries.back().get();
@@ -77,7 +75,7 @@ namespace UIElements
 				for (const uint_least32_t duration : durations)
 				{
 					++cnt;
-					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(&parent, wxString::Format("  %s: %s %i", parent.title, Strings::PlaylistTree::SUBSONG, cnt), parent.filepath, cnt, duration, "", parent.romRequirement, parent.IsPlayable()), {});
+					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(&parent, wxString::Format("  %s: %s %i", parent.title, Strings::PlaylistTree::SUBSONG, cnt), parent.filepath, cnt, duration, "", "", parent.romRequirement, parent.IsPlayable()), {});
 					notifyItems.Add(wxDataViewItem(&newChildNode));
 
 					// Indicate if default subsong
@@ -111,9 +109,6 @@ namespace UIElements
 
 			// Notify the wx base control of change
 			_model.ItemDeleted(static_cast<wxDataViewItem>(parent), static_cast<wxDataViewItem>(&item));
-
-			// Refresh
-			RefreshAuthorColumnVisibility();
 		}
 
 		void Playlist::Clear()
@@ -125,9 +120,6 @@ namespace UIElements
 
 			// Notify the wx base control of change
 			_model.Cleared();
-
-			// Hide the column
-			RefreshAuthorColumnVisibility();
 		}
 
 		void Playlist::ExpandSongNode(const PlaylistTreeModelNode& node)
@@ -149,31 +141,6 @@ namespace UIElements
 			{
 				Collapse(PlaylistTreeModel::ModelNodeToTreeItem(*node.get()));
 			}
-		}
-
-		bool Playlist::RefreshAuthorColumnVisibility()
-		{
-			bool shouldHide = true;
-
-			if (_model.entries.size() > 1)
-			{
-				const wxString& author = _model.entries.front()->author;
-				shouldHide = std::all_of(_model.entries.begin(), _model.entries.end(), [&author](const PlaylistTreeModelNodePtr& node)
-				{
-					return node->author.IsSameAs(author);
-				});
-			}
-
-			wxDataViewColumn* const col = GetColumn(static_cast<unsigned int>(ColumnId::Author));
-			if (col->IsHidden() != shouldHide)
-			{
-				col->SetHidden(shouldHide);
-				OnColumnsCountChanged();
-				// Toggle the rightmost placeholder.
-				GetColumn(static_cast<unsigned int>(ColumnId::PlaceholderLast))->SetHidden(!shouldHide);
-			}
-
-			return shouldHide;
 		}
 
 		PlaylistTreeModelNode* Playlist::GetEffectiveInitialSubsong(const PlaylistTreeModelNode& mainSongItem) const

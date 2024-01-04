@@ -44,7 +44,7 @@ public:
     {
         Title = 0,
         Author,
-        Released
+        Released // a.k.a. Copyright
     };
 
     struct FilterConfig

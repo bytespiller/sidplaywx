@@ -80,7 +80,7 @@ public:
 public:
 	PlaylistTreeModelNode() = delete;
 	PlaylistTreeModelNode(PlaylistTreeModelNode&) = delete;
-	PlaylistTreeModelNode(PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, RomRequirement romRequirement, bool playable);
+	PlaylistTreeModelNode(PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable);
 
 public:
 	/// @brief Returns a nullptr for a mainsong or a mainsong for a subsong.
@@ -130,6 +130,7 @@ public:
 	const ItemType type;
 	const wxString title;
 	const wxString author;
+	const wxString copyright;
 	const wxString filepath;
 
 	/// @brief Indicates a default subsong for a song item, or a self-index (1-based) for a subsong item.
@@ -160,7 +161,8 @@ public:
 		Title,
 		Duration,
 		Author,
-		PlaceholderLast // Must exist for proper column layouting, especially for a dynamically shown "Author" column.
+		Copyright,
+		PlaceholderLast // Must exist for proper column layouting, especially for a dynamically shown "Author" and "Copyright" columns.
 	};
 
 	/// @brief Convenience method to downcast a wxDataViewItem to PlaylistTreeModelNode.
