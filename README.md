@@ -30,7 +30,7 @@ While the project uses GCC and CMake, at the moment the focus is on the Windows 
 
 ## Planned features for v1.0
 The current version of the sidplaywx is 0.x.x, so in addition to bugfixes and common sense updates, I consider at least _these_ features are needed before the sidplaywx can graduate to version 1.0:
-- Playlist improvements such as duration columns, reordering<del>, remembering last state and playlist file save/load</del> etc.
+- Playlist improvements such as <del>duration columns</del>, reordering<del>, remembering last state and playlist file save/load</del> etc.
 - Misc. necessary features such as remembering window size & position etc.
 - Exporting tunes to WAV
 - [STIL](https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/STIL.txt) support for displaying tune comments
@@ -51,28 +51,26 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 ## FAQ
 * Where can I get SID tunes?
   * Check out the [High Voltage SID Collection](https://www.hvsc.c64.org) for a massive collection of SID tunes sorted by authors, and more!
-* When drag & dropping the files, why the playlist sometimes gets cleared?
-  * By default, the sidplaywx will enqueue the files if dropped onto the playlist, and clear (replace) the playlist if they are dropped onto the main player window area. This is configurable in the Preferences.
 * Why are some tunes crossed-out and cannot be played?
   * Small number of tunes require a C64 system ROM to play. You can find the C64 system ROM files in e.g., open source C64 emulators (or elsewhere on the internet) and import them via the sidplaywx's Preferences.
   * There are three main C64 system ROM types that the sidplaywx supports (and some tunes require):
     * KERNAL ROM (tune indicated with a RED crossout text if missing)
     * BASIC ROM (tune indicated with a BLUE crossout text if missing)
     * _CHARGEN ROM (you'll probably never need this one, so let's just ignore it for now)_
+* When drag & dropping the files, why the playlist sometimes gets cleared?
+  * By default, the sidplaywx will enqueue the files if dropped onto the playlist area, and clear (replace) the playlist if they are dropped onto the general player window area. This is configurable in the Preferences.
 * Can sidplaywx open archive files?
   * Yes, but only the Zip format in its simplest form is supported due to wxZip limitation.
-* How come the seeking is so slow? 
-  * That's why there is a composite seekbar which shows the seeking progress. The reason is that the SID tunes are actually small programs and not audio files like for example the MP3, so they have to be emulated as fast as possible until the "seek" target is reached.
+* How come the seeking is so slow?
+  * SID tunes are actually small programs and not audio files like for example the MP3, so they have to be emulated linearly as fast as possible until the "seek" target is reached.
     * <details>
         <summary>More details</summary>
-        The libsidplayfp library (which sidplaywx uses) focuses on accuracy so it's much slower than e.g., libsidplay2 (which is virtually instantaneous, try it in the DeaDBeeF player on the Linux!). I didn't find a way to make seeking in sidplaywx app any faster, especially not without touching the libsidplayfp code. FWIW the seeking in the sidplaywx is already separately threaded and bypasses some SID mixing steps, audio rendering etc. so I think it's as fast as possible at the moment).
+        The libsidplayfp library (which sidplaywx uses) focuses on accuracy so it's much slower than e.g., libsidplay2 (which is virtually instantaneous, try it in the DeaDBeeF player on the Linux!). FWIW the seeking in the sidplaywx is already separately threaded and bypasses some SID mixing steps, audio rendering etc. so I think it's as fast as possible at the moment).
       </details>
-  * **UPDATE:** there is a new "Fast seeking" option now available which pre-renders the entire SID tune in the background. See [release notes](https://github.com/bytespiller/sidplaywx/releases/tag/v0.7.0-beta) for details on how it works and what are the caveats.
+  * There is a "Fast seeking" option available which pre-renders the entire SID tune in the background. See [release notes](https://github.com/bytespiller/sidplaywx/releases/tag/v0.7.0-beta) for details on how it works and what are the caveats.
 * Command-line options in sidplaywx?
   * Focus so far is on the GUI experience. There exists a [sidplayfp](https://github.com/libsidplayfp/sidplayfp/releases) console-based player in the libsidplayfp repo (not to be confused with a sidplaywx which is unrelated and unaffiliated project).
   * For now, you can pass the space-separated filenames. For example `sidplaywx Aces_High.sid Gunstar.sid` to open those two tunes. This "feature" is actually a side-effect of single-instance support, so there will be a slight delay if the app is already running and the single-instance option is enabled.
-* MSVC build version?
-  * Maybe one day. I would already do it but the libsidplayfp uses autotools so I decided to use the gcc to skip the need to fiddle with it.
 
 ## Building
 <details>
