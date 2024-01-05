@@ -18,19 +18,10 @@
 
 #include "PlaybackController.h"
 #include "../Util/HelpersGeneral.h"
-#include <sidplayfp/SidConfig.h>
 #include <sidplayfp/SidTuneInfo.h>
 #include <filesystem>
 #include <iostream>
-#include <map>
 #include <stdexcept>
-
-static const float VOLUME_MULTIPLIER_DISABLED = 1.0f;
-static const std::map<SidConfig::sid_model_t, float> VOLUME_MULTIPLIER_ENABLED
-{
-    {SidConfig::sid_model_t::MOS6581, 1.6f},
-    {SidConfig::sid_model_t::MOS8580, 1.54f} // 8580 is quieter than the 6581 (https://github.com/libsidplayfp/libsidplayfp/issues/78). Tweaked against clipping with /Fegolhuzz/Hues.sid (after 0:45, and @2:01) & /Nordischsound/Terminator_2.sid (after 1:03).
-};
 
 // StateHolder inner class ------------------------------------
 
