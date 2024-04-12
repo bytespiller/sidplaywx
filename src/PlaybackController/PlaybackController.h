@@ -148,6 +148,7 @@ public:
     State GetResumeState() const;
 
     uint_least32_t GetTime() const;
+    double GetPreRenderProgressFactor() const;
 
     bool TrySetPlaybackSpeed(double factor);
     double GetPlaybackSpeedFactor() const;

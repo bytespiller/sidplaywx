@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ namespace
 		static const std::string fillColorBarSeeking("fillColorBarSeeking");
 		static const std::string fillColorBarPreviewDiscard("fillColorBarPreviewDiscard");
 		static const std::string fillColorBarSeekingRemaining("fillColorBarSeekingRemaining");
+		static const std::string fillColorBarPreRenderProgress("fillColorBarPreRenderProgress");
 		static const std::string thumbDisabledColor("thumbDisabledColor");
 
 		std::unordered_map<std::string, wxColor> color =
@@ -47,6 +48,7 @@ namespace
 			{fillColorBarSeeking, wxColor()},
 			{fillColorBarPreviewDiscard, wxColor()},
 			{fillColorBarSeekingRemaining, wxColor()},
+			{fillColorBarPreRenderProgress, wxColor()},
 			{thumbDisabledColor, wxColor()}
 		};
 	}
@@ -91,7 +93,7 @@ namespace UIElements
 		});
 	}
 
-	void CompositeSeekBar::UpdatePlaybackPosition(long time)
+	void CompositeSeekBar::UpdatePlaybackPosition(long time, double preRenderProgressFactor)
 	{
 		_progressFillFactor = (_duration > 1.0) ? std::min(1.0, time / _duration) : 0.0;
 		const bool seeking = !IsSeekTargetReached();
@@ -99,6 +101,8 @@ namespace UIElements
 		{
 			_targetFillFactor = _progressFillFactor;
 		}
+
+		_preRenderFillFactor = preRenderProgressFactor;
 
 		UpdateTaskbarIndicator();
 		Refresh();
@@ -114,6 +118,8 @@ namespace UIElements
 		_targetFillFactor = 0.0;
 		_duration = std::max(1.0, static_cast<double>(duration));
 		wxAppProgressIndicator::SetValue(0);
+
+		_preRenderFillFactor = 0.0;
 
 		SetEnabledAuto();
 		Refresh();
@@ -183,6 +189,15 @@ namespace UIElements
 
 		// Disable border
 		dc.SetPen(*wxTRANSPARENT_PEN);
+
+		// Seekbar pre-render progress
+		if (_preRenderFillFactor > 0 && _preRenderFillFactor < 1.0) {
+			wxColor* brushPreRenderProgress = &ThemedColors::color.at(ThemedColors::fillColorBarPreRenderProgress);
+			dc.SetBrush(*brushPreRenderProgress);
+
+			const int fillWidth = static_cast<int>(seekAreaWidth * (1.0 - _preRenderFillFactor));
+			dc.DrawRectangle((seekAreaWidth - fillWidth) + SEEKBAR_BORDER_SIZE, barY + SEEKBAR_BORDER_SIZE, fillWidth - SEEKBAR_BORDER_SIZE_DOUBLE, barHeight - SEEKBAR_BORDER_SIZE_DOUBLE);
+		}
 
 		// Seekbar current-progress
 		wxColor* brushSeekbar = &ThemedColors::color.at(ThemedColors::fillColorBarDefault);

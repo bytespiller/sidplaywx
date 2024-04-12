@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ namespace UIElements
 		~CompositeSeekBar() override = default;
 
 	public:
-		void UpdatePlaybackPosition(long time);
+		void UpdatePlaybackPosition(long time, double preRenderProgressFactor = 0.0);
 		void ResetPlaybackPosition(long duration);
 		void SetEnabledAuto();
 		double GetNormalizedFillTarget() const;
@@ -91,9 +91,10 @@ namespace UIElements
 	private:
 		bool _pressedDown = false;
 		double _progressFillFactor = 0.0;
+		double _preRenderFillFactor = 0.0;
 		double _targetFillFactor = 0.0;
 		double _cancelableSeekPreviewFillFactor = CLEAR_SEEK_PREVIEW;
-		double _duration = 1;
+		double _duration = 1.0;
 		const ThemeData::ThemedElementData& _themedData;
 		TaskbarProgressOption _taskbarProgressOption{};
 

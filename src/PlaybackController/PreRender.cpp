@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2023-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,14 +105,14 @@ int PreRender::GetCurrentSongTimeMs() const
 	return _playbackPosition / _stridePerMs;
 }
 
-int PreRender::GetPreRenderProgressFactor() const
+double PreRender::GetPreRenderProgressFactor() const
 {
 	if (_waveBufferSize == 0)
 	{
-		return 0;
+		return 0.0;
 	}
 
-	return _preRenderedSize / _waveBufferSize;
+	return std::clamp(static_cast<double>(_preRenderedSize) / _waveBufferSize, 0.0, 1.0);
 }
 
 void PreRender::Stop()

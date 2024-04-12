@@ -162,7 +162,7 @@ void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
     uint_least32_t displayTimeMs = playbackTimeMs;
 
     // Seekbar
-    _ui->compositeSeekbar->UpdatePlaybackPosition(static_cast<long>(playbackTimeMs));
+    _ui->compositeSeekbar->UpdatePlaybackPosition(static_cast<long>(playbackTimeMs), _app.GetPlaybackInfo().GetPreRenderProgressFactor());
 
     // Time position label
     wxFont font(_ui->labelTime->GetFont());

@@ -367,6 +367,11 @@ uint_least32_t PlaybackController::GetTime() const
     }
 }
 
+double PlaybackController::GetPreRenderProgressFactor() const
+{
+    return (_preRender == nullptr) ? 0.0 : _preRender->GetPreRenderProgressFactor();
+}
+
 bool PlaybackController::TrySetPlaybackSpeed(double factor)
 {
     const double deviceSampleRate = _portAudioOutput->GetAudioConfig().sampleRate;

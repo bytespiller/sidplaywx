@@ -32,6 +32,7 @@
         <Color type="wxSYS" value="wxSYS_COLOUR_HIGHLIGHT" property="fillColorBarSeeking"/>
         <Color type="wxSYS" value="wxSYS_COLOUR_3DDKSHADOW" property="fillColorBarPreviewDiscard"/>
         <Color type="wxSYS" value="wxSYS_COLOUR_ACTIVECAPTION" property="fillColorBarSeekingRemaining"/>
+        <Color type="wxSYS" value="wxSYS_COLOUR_INFOBK" property="fillColorBarPreRenderProgress"/>
         <Color type="wxSYS" value="wxSYS_COLOUR_WINDOW" property="thumbDisabledColor"/>
       </Colors>
     </GuiElement>
