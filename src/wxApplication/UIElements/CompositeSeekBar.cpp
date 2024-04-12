@@ -181,7 +181,6 @@ namespace UIElements
 		const int barY = (seekAreaHeight - barHeight) / 2;
 		const bool seekingForward = !IsSeekTargetReached();
 		const bool seekingBackward = _pressedDown && _targetFillFactor < _progressFillFactor;
-		const int borderSize = SEEKBAR_BORDER_SIZE; // Otherwise std::max can't find it.
 
 		// Fill background
 		dc.SetBrush(ThemedColors::color.at(ThemedColors::fillColorBackground));
@@ -221,7 +220,7 @@ namespace UIElements
 		if (seekingForward)
 		{
 			dc.SetBrush(ThemedColors::color.at(ThemedColors::fillColorBarSeekingRemaining));
-			const int startX = std::max(borderSize, seekFillWidth);
+			const int startX = std::max(SEEKBAR_BORDER_SIZE, seekFillWidth);
 			dc.DrawRectangle(startX, barY + SEEKBAR_BORDER_SIZE, thumbTargetX - startX, barHeight - SEEKBAR_BORDER_SIZE_DOUBLE);
 		}
 
