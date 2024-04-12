@@ -145,8 +145,8 @@ namespace Strings
 		// Playback behavior
 		inline constexpr const char* const CATEGORY_PLAYBACK_BEHAVIOR("Playback behavior");
 
-		inline constexpr const char* const OPT_PRERENDER("Fast seeking*");
-		inline constexpr const char* const DESC_PRERENDER("Pre-render the song in the background for faster seeking (especially backwards).\n- This *experimental* option is always disabled on app start.\n- Some realtime features (e.g., toggling voices, Leave Running) won't work during playback in this mode.\n- Ongoing playback will stop when changing this setting.\n(This option is also available in a Repeat Mode button's context menu.)");
+		inline constexpr const char* const OPT_PRERENDER("Fast seeking");
+		inline constexpr const char* const DESC_PRERENDER("Pre-render the song in the background for faster seeking (especially backwards).\n- Some realtime features (e.g., toggling voices, Leave Running) won't work during playback in this mode.\n- Ongoing playback will stop when changing this setting.\n(This option is also available in a Repeat Mode button's context menu.)");
 
 		inline constexpr const char* const OPT_AUTOPLAY("Autoplay");
 		inline constexpr const char* const DESC_AUTOPLAY("- Play added files immediately (unless enqueued).\n- Always start playback on track navigation.");
