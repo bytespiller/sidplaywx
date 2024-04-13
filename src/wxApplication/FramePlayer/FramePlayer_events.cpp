@@ -369,6 +369,10 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             break;
 
         // Help
+        case MenuItemId_Player::CheckUpdates:
+            CheckUpdates();
+            break;
+
         case MenuItemId_Player::About:
             DisplayAboutBox();
             break;

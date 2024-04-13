@@ -117,6 +117,7 @@ namespace FrameElements // Player class
 			// Help menu
 			{
 				wxMenu* helpMenu = new wxMenu();
+				helpMenu->Append(static_cast<int>(MenuItemId_Player::CheckUpdates), wxString::Format("%s", Strings::FramePlayer::MENU_ITEM_CHECK_UPDATES));
 				helpMenu->Append(static_cast<int>(MenuItemId_Player::About), wxString::Format("%s", Strings::FramePlayer::MENU_ITEM_ABOUT));
 				menuBar->Append(helpMenu, Strings::FramePlayer::MENU_HELP);
 			}

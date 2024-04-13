@@ -25,6 +25,7 @@
 #include "../FrameChildren/FramePlaybackMods/FramePlaybackMods.h"
 #include "../FrameChildren/FramePrefs/FramePrefs.h"
 #include <wx/aboutdlg.h>
+#include <wx/webrequest.h>
 
 using RepeatMode = UIElements::RepeatModeButton::RepeatMode;
 static wxString bundledSonglengthsPath("bundled-Songlengths.md5");
@@ -334,13 +335,70 @@ void FramePlayer::ForceStopPlayback(PassKey<FramePrefs>)
     OnButtonStop();
 }
 
+static std::unique_ptr<wxWebRequest> requestUpdateCheck = nullptr;
+void FramePlayer::CheckUpdates()
+{
+    if (requestUpdateCheck != nullptr)
+    {
+        requestUpdateCheck->Cancel(); // Cancel any previous check that may still be in progress or stuck.
+    }
+
+    requestUpdateCheck = std::make_unique<wxWebRequest>(wxWebSession::GetDefault().CreateRequest(this, "https://api.github.com/repos/bytespiller/sidplaywx/releases/latest"));
+    requestUpdateCheck->SetHeader("User-Agent", "sidplaywx (update check)");
+    //requestUpdateCheck->SetHeader("Accept-Encoding", "gzip"); // I never got the GitHub API to return compressed response (checked via headers).
+    requestUpdateCheck->SetHeader("Accept", "application/vnd.github+json");
+    requestUpdateCheck->SetHeader("X-GitHub-Api-Version", "2022-11-28"); // If you specify an API version that is no longer supported, you will receive a 400 error.
+
+    Bind(wxEVT_WEBREQUEST_STATE, [&](wxWebRequestEvent& evt)
+    {
+        switch (evt.GetState())
+        {
+            case wxWebRequest::State_Completed:
+            {
+                const wxWebResponse& r = evt.GetResponse();
+                if (r.IsOk() && r.GetStatus() == 200)
+                {
+                    wxString remoteVersionTag; // Note: starts with "v"
+                    if (Helpers::Wx::ExtractValue(r.AsString(), "\"tag_name\":\"", "\"", remoteVersionTag))
+                    {
+                        const bool latest = remoteVersionTag == wxString("v").Append(Strings::APP_VERSION_TAG);
+                        if (latest)
+                        {
+                            wxMessageBox(wxString::Format(Strings::FramePlayer::UPDATE_CHECK_LATEST, Strings::APP_VERSION_TAG), Strings::FramePlayer::WINDOW_TITLE);
+                        }
+                        else if (wxMessageBox(wxString::Format(Strings::FramePlayer::UPDATE_CHECK_NEWER, remoteVersionTag, Strings::APP_VERSION_TAG), Strings::FramePlayer::WINDOW_TITLE, wxYES_NO) == wxYES)
+                        {
+                            wxLaunchDefaultBrowser("https://github.com/bytespiller/sidplaywx/releases/latest");
+                        }
+                    }
+                    else
+                    {
+                        wxMessageBox("Update check failed.", Strings::FramePlayer::WINDOW_TITLE);
+                    }
+                }
+                else
+                {
+                    wxMessageBox("Update check failed.\nStatus code: " + r.GetStatus(), Strings::FramePlayer::WINDOW_TITLE);
+                }
+
+                break;
+            }
+            case wxWebRequest::State_Failed:
+                wxMessageBox("Update check failed.\nRequest failed: " + evt.GetErrorDescription(), Strings::FramePlayer::WINDOW_TITLE);
+                break;
+        }
+    });
+
+    requestUpdateCheck->Start();
+}
+
 void FramePlayer::DisplayAboutBox()
 {
     wxAboutDialogInfo aboutInfo;
     aboutInfo.SetName(Strings::FramePlayer::WINDOW_TITLE);
-    aboutInfo.SetVersion("0.8.0"); // TODO
+    aboutInfo.SetVersion(Strings::APP_VERSION_TAG); // Reminder: don't forget to increase.
     aboutInfo.SetDescription(Strings::About::DESCRIPTION);
-    aboutInfo.SetCopyright(L"(C) 2021-2024 Jasmin Rutić"); // TODO
+    aboutInfo.SetCopyright(L"(C) 2021-2024 Jasmin Rutić"); // Reminder: don't forget to bump.
     aboutInfo.SetWebSite("https://github.com/bytespiller/sidplaywx");
 
     aboutInfo.SetLicense(Strings::About::LICENSE);

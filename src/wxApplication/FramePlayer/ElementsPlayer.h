@@ -70,6 +70,7 @@ namespace FrameElements
 			FindPrev,
 
 			// Help
+			CheckUpdates,
 			About,
 		};
 

@@ -81,6 +81,7 @@ private:
     void OpenSearchBar();
     void OpenPlaybackModFrame();
     void OpenPrefsFrame();
+    void CheckUpdates();
     void DisplayAboutBox();
 
 #pragma endregion

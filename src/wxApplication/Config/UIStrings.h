@@ -23,6 +23,8 @@
 
 namespace Strings
 {
+	inline constexpr const char* const APP_VERSION_TAG("0.9.0"); // Reminder: don't forget to increase.
+
 	namespace FramePlayer
 	{
 #ifndef NDEBUG
@@ -54,6 +56,7 @@ namespace Strings
 		inline constexpr const char* const MENU_ITEM_PREFERENCES("&Preferences");
 
 		inline constexpr const char* const MENU_HELP("&Help");
+		inline constexpr const char* const MENU_ITEM_CHECK_UPDATES("&Check For Updates");
 		inline constexpr const char* const MENU_ITEM_ABOUT("&About");
 
 		inline constexpr const char* const REPEAT_MODE_SEQUENTIAL("Sequential");
@@ -86,6 +89,9 @@ namespace Strings
 		inline constexpr const char* const STATUS_STOPPED("Stopped");
 		inline constexpr const char* const STATUS_ERROR("Error");
 		inline constexpr const char* const STATUS_EXTERNAL_FILES_INCOMING("Incoming files...");
+
+		inline constexpr const char* const UPDATE_CHECK_LATEST("You're up to date!\nVersion %s");
+		inline constexpr const char* const UPDATE_CHECK_NEWER("A new release is available!\n\nRelease version: %s\nYour version: v%s\n\nDo you want to open the GitHub release page?");
 	}
 
 	namespace PlaylistTree

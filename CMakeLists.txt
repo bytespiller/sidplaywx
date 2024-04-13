@@ -38,6 +38,7 @@ target_link_libraries(${PROJECT_NAME}
     wxWidgets_core wxWidgets_base wxWidgets_regex
     wxWidgets_jpeg wxWidgets_tiff wxWidgets_png wxWidgets_zlib
     wxWidgets_xml wxWidgets_libwxexpat # wx XML support
+    wxWidgets_net # for "Check for updates" support
 
     shlwapi version # needed for WxWidgets static linking and is MinGW specific
     uxtheme kernel32 user32 gdi32 comdlg32 winspool winmm shell32 comctl32 ole32 oleaut32 uuid rpcrt4 advapi32 # wxWidgets MSW

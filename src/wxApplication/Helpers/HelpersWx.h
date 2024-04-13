@@ -57,6 +57,23 @@ namespace Helpers
 			return x;
 		}
 
+		/// @brief Extracts a value from the string between delimiters and deposits it in the outResult returning true if successful. Otherwise just returns false.
+		inline bool ExtractValue(const wxString& source, const wxString& start, const wxString& end, wxString& outResult)
+		{
+			const int indexStart = source.Find(start);
+			if (indexStart != -1)
+			{
+				const size_t indexEnd = source.find(end, indexStart + start.length());
+				if (indexEnd != wxString::npos)
+				{
+					outResult = source.substr(indexStart + start.length(), indexEnd - (indexStart + start.length()));
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		inline const wxString GetTimeFormattedString(uint_least32_t millis, bool zeroDurationSpecial = false)
 		{
 			if (zeroDurationSpecial && millis == 0)
