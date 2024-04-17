@@ -73,14 +73,16 @@ namespace UIElements
 			struct ExtraOption
 			{
 				ExtraOption() = delete;
-				ExtraOption(const wxString& aText, bool aEnabled) :
+				ExtraOption(const wxString& aText, bool aEnabled, bool aSeparator = false) :
 					text(aText),
-					enabled(aEnabled)
+					enabled(aEnabled),
+					separator(aSeparator)
 				{
 				}
 
 				wxString text;
 				bool enabled;
+				bool separator;
 			};
 
 			using ExtraOptions = std::map<ExtraOptionId, ExtraOption>;

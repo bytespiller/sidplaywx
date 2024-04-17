@@ -201,16 +201,18 @@ namespace FrameElements // Player class
 			using ExtraOption = UIElements::RepeatModeButton::ExtraOptionsHandler::ExtraOption;
 			using ExtraOptionId = UIElements::RepeatModeButton::ExtraOptionsHandler::ExtraOptionId;
 			using ExtraOptionsHandler = UIElements::RepeatModeButton::ExtraOptionsHandler;
+			const bool PREPEND_SEPARATOR = true;
 
 			const ExtraOptionsHandler::ExtraOptions extraOptions
 			{
 				{ExtraOptionId::DefaultSubsong, ExtraOption(Strings::Preferences::OPT_START_DEFAULT_SUBSONG, false)},
 				{ExtraOptionId::IncludeSubsongs, ExtraOption(Strings::Preferences::OPT_INCLUDE_SUBSONGS, false)},
-				{ExtraOptionId::PreRenderEnabled, ExtraOption(Strings::Preferences::OPT_PRERENDER, false)},
+				// ----
+				{ExtraOptionId::PreRenderEnabled, ExtraOption(Strings::Preferences::OPT_PRERENDER, false, PREPEND_SEPARATOR)},
 			};
 
 			ExtraOptionsHandler extraOptionsHandler(extraOptions, [&appSettings](UIElements::RepeatModeButton& btnRepeatMode)
-			{
+			{ // Action callbacks
 				{ // RepeatModeIncludeSubsongs
 					const bool enabled = appSettings.GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
 					btnRepeatMode.SetExtraOptionEnabled(ExtraOptionId::IncludeSubsongs, enabled);

@@ -101,6 +101,11 @@ namespace UIElements
 			const int idOffset = menu->GetMenuItemCount();
 			for (const auto& extra : _extraOptionsHandler->extraOptions)
 			{
+				if (extra.second.separator)
+				{
+					menu->AppendSeparator();
+				}
+
 				const int extraId = static_cast<int>(extra.first);
 				menu->AppendCheckItem(idOffset + extraId, extra.second.text)->Check(extra.second.enabled);
 			}
