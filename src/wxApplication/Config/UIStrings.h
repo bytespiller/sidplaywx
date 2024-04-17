@@ -50,8 +50,8 @@ namespace Strings
 
 		inline constexpr const char* const MENU_EDIT("&Edit");
 		inline constexpr const char* const MENU_ITEM_FIND("&Find...");
-		inline constexpr const char* const MENU_ITEM_FIND_NEXT("&Find Next");
-		inline constexpr const char* const MENU_ITEM_FIND_PREV("&Find Prev");
+		inline constexpr const char* const MENU_ITEM_FIND_NEXT("Find &Next");
+		inline constexpr const char* const MENU_ITEM_FIND_PREV("Find &Prev");
 		inline constexpr const char* const MENU_ITEM_PLAYBACK_MODS("&Modify Playback");
 		inline constexpr const char* const MENU_ITEM_PREFERENCES("&Preferences");
 
