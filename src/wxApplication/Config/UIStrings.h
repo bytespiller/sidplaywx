@@ -56,7 +56,7 @@ namespace Strings
 		inline constexpr const char* const MENU_ITEM_PREFERENCES("&Preferences");
 
 		inline constexpr const char* const MENU_HELP("&Help");
-		inline constexpr const char* const MENU_ITEM_CHECK_UPDATES("&Check For Updates");
+		inline constexpr const char* const MENU_ITEM_CHECK_UPDATES("&Check for Updates");
 		inline constexpr const char* const MENU_ITEM_ABOUT("&About");
 
 		inline constexpr const char* const REPEAT_MODE_SEQUENTIAL("Sequential");
@@ -138,7 +138,7 @@ namespace Strings
 		inline constexpr const char* const TITLE_ROM_INFO("Detected ROM");
 
 		// Audio Output
-		inline constexpr const char* const CATEGORY_AUDIO_OUTPUT("Audio Output");
+		inline constexpr const char* const CATEGORY_AUDIO_OUTPUT("Audio output");
 		inline constexpr const char* const OPT_DEVICE("Device");
 		inline constexpr const char* const DESC_DEVICE("- Modifying the playback speed is not supported on all device interfaces (e.g., WASAPI).\nNote: ongoing playback will stop when changing this setting.");
 
@@ -254,8 +254,8 @@ namespace Strings
 		inline constexpr const char* const OPT_REMEMBER_PLAYLIST("Remember playlist");
 		inline constexpr const char* const DESC_REMEMBER_PLAYLIST("Restore the previous song list on app launch.");
 
-		inline constexpr const char* const OPT_MEDIA_KEYS("Use Media Keys");
-		inline constexpr const char* const DESC_MEDIA_KEYS("Use the Media Keys to control the playback.\nIf you don't have Media Keys on your keyboard, you can use an utility such as AutoHotkey to emulate them with hotkeys of your choice.");
+		inline constexpr const char* const OPT_MEDIA_KEYS("Use Media keys");
+		inline constexpr const char* const DESC_MEDIA_KEYS("Use the Media keys to control the playback.\nIf you don't have Media keys on your keyboard, you can use an utility such as AutoHotkey to emulate them with hotkeys of your choice.");
 
 		inline constexpr const char* const OPT_SINGLE_INSTANCE("Single instance");
 		inline constexpr const char* const DESC_SINGLE_INSTANCE("Do not spawn multiple instances of the app, reuse an existing instance whenever possible.");
