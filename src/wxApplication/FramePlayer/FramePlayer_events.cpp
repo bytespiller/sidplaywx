@@ -368,6 +368,11 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             OpenPrefsFrame();
             break;
 
+        // View
+        case MenuItemId_Player::StayTopmost:
+            ToggleTopmost();
+            break;
+
         // Help
         case MenuItemId_Player::CheckUpdates:
             CheckUpdates();

@@ -69,6 +69,9 @@ namespace FrameElements
 			FindNext,
 			FindPrev,
 
+			// View
+			StayTopmost,
+
 			// Help
 			CheckUpdates,
 			About,

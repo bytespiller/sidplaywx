@@ -114,11 +114,20 @@ namespace FrameElements // Player class
 				menuBar->Append(editMenu, Strings::FramePlayer::MENU_EDIT);
 			}
 
+			// View menu
+			{
+				wxMenu* viewMenu = new wxMenu();
+				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::StayTopmost), wxString::Format("%s\tAlt+A", Strings::FramePlayer::MENU_ITEM_STAY_TOPMOST));
+
+				menuBar->Append(viewMenu, Strings::FramePlayer::MENU_VIEW);
+			}
+
 			// Help menu
 			{
 				wxMenu* helpMenu = new wxMenu();
 				helpMenu->Append(static_cast<int>(MenuItemId_Player::CheckUpdates), wxString::Format("%s", Strings::FramePlayer::MENU_ITEM_CHECK_UPDATES));
 				helpMenu->Append(static_cast<int>(MenuItemId_Player::About), wxString::Format("%s", Strings::FramePlayer::MENU_ITEM_ABOUT));
+
 				menuBar->Append(helpMenu, Strings::FramePlayer::MENU_HELP);
 			}
 		}

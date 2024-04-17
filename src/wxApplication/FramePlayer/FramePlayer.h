@@ -72,15 +72,23 @@ public:
     void ForceStopPlayback(PassKey<FramePrefs>);
 
 private:
+    // File
     void InitSonglengthsDatabase();
     void SetupUiElements();
     void DeferredInit();
     void SetRefreshTimerInterval(int desiredInterval);
     void CloseApplication();
 
+    // Edit
     void OpenSearchBar();
     void OpenPlaybackModFrame();
     void OpenPrefsFrame();
+
+    // View
+    void ToggleTopmost();
+    bool IsTopmost() const; // Helper
+
+    // Help
     void CheckUpdates();
     void DisplayAboutBox();
 

@@ -55,6 +55,9 @@ namespace Strings
 		inline constexpr const char* const MENU_ITEM_PLAYBACK_MODS("&Modify Playback");
 		inline constexpr const char* const MENU_ITEM_PREFERENCES("&Preferences");
 
+		inline constexpr const char* const MENU_VIEW("&View");
+		inline constexpr const char* const MENU_ITEM_STAY_TOPMOST("&Always on Top");
+
 		inline constexpr const char* const MENU_HELP("&Help");
 		inline constexpr const char* const MENU_ITEM_CHECK_UPDATES("&Check for Updates");
 		inline constexpr const char* const MENU_ITEM_ABOUT("&About");

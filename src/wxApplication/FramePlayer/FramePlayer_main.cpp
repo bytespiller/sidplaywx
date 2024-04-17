@@ -205,6 +205,12 @@ void FramePlayer::DeferredInit()
     SetClientSize(DpiSize(640, 512)); // TODO: load from options if available
     // TODO: position if available
 
+    // Apply window topmost preference
+    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->GetValueAsBool() != IsTopmost())
+    {
+        ToggleTopmost();
+    }
+
     // Handle the "Open With" situation (not done in a constructor in order to have the wxYield/Refresh work while adding to playlist).
     if (_app.argc > 1)
     {
@@ -322,6 +328,25 @@ void FramePlayer::OpenPrefsFrame()
     {
         CloseApplication();
     }
+}
+
+void FramePlayer::ToggleTopmost()
+{
+    const bool topmost = IsTopmost();
+    if (topmost) {
+        SetWindowStyle(GetWindowStyle() & ~wxSTAY_ON_TOP);
+    }
+    else {
+        SetWindowStyle(GetWindowStyle() | wxSTAY_ON_TOP);
+    }
+
+    _ui->menuBar->Check(static_cast<int>(FrameElements::ElementsPlayer::MenuItemId_Player::StayTopmost), !topmost);
+    _app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->UpdateValue(!topmost);
+}
+
+bool FramePlayer::IsTopmost() const
+{
+    return (GetWindowStyle() & wxSTAY_ON_TOP) != 0;
 }
 
 void FramePlayer::ForceAppExitOnPrefsClose(PassKey<FramePrefs>)

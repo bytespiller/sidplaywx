@@ -71,6 +71,9 @@ namespace Settings
 			static constexpr const char* const MediaKeys = "MediaKeys";
 			static constexpr const char* const SingleInstance = "SingleInstance";
 
+			// Menu
+			static constexpr const char* const StayTopmost = "StayTopmost";
+
 			// Internal
 			static constexpr const char* const Volume = "Volume";
 			static constexpr const char* const VolumeControlEnabled = "VolumeControlEnabled";
@@ -159,6 +162,9 @@ namespace Settings
 				DefaultOption(ID::MediaKeys, true),
 				DefaultOption(ID::SingleInstance, 1),
 				RuntimeOption(ID::RestoreDefaults, false, DEFAULT), // RuntimeOption
+
+				// Menu
+				DefaultOption(ID::StayTopmost, false),
 
 				// Internal
 				DefaultOption(ID::Volume, 100),
