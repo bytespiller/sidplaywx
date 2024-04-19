@@ -134,8 +134,8 @@ public:
 
 public:
     bool TryPlayFromBuffer(const std::wstring& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs);
-    bool TryReplayCurrentSong(int preRenderDurationMs);
-    bool TryPlaySubsong(unsigned int subsong, int preRenderDurationMs);
+    bool TryReplayCurrentSong(int preRenderDurationMs, bool reusePreRender = false);
+    bool TryPlaySubsong(unsigned int subsong, int preRenderDurationMs, bool reusePreRender = false);
 
     void Pause();
     void Resume();
@@ -190,8 +190,8 @@ private:
     bool TryResetAudioOutput(const PortAudioOutput::AudioConfig& audioConfig, bool enablePreRender);
 
     void PrepareTryPlay();
-    bool FinalizeTryPlay(bool isSuccessful, int preRenderDurationMs);
-    bool TryReplayCurrentSongFromBuffer(unsigned int subsong, int preRenderDurationMs);
+    bool FinalizeTryPlay(bool isSuccessful, int preRenderDurationMs, bool reusePreRender = false);
+    bool TryReplayCurrentSongFromBuffer(unsigned int subsong, int preRenderDurationMs, bool reusePreRender = false);
 
     bool OnSeekStatusReceived(uint_least32_t cTimeMs, bool done);
 

@@ -625,30 +625,37 @@ void FramePlayer::OnSongDurationReached()
             _app.StopPlayback();
             break;
         }
-        case RepeatMode::RepeatAll:
+        case RepeatMode::RepeatAll: // Don't reorder or insert new after due to fall-through.
         {
-            _app.StopPlayback();
-
-            if (!_ui->treePlaylist->IsEmpty())
+            if (_ui->treePlaylist->GetSongs().size() == 1 && _ui->treePlaylist->GetSongs().front()->GetSubsongCount() == 0)
             {
-                const bool playingNextSubsong = includeSubsongs && TryPlayNextValidSubsong();
-                const bool reachedTheEnd = !playingNextSubsong && !TryPlayNextValidSong();
-                if (reachedTheEnd)
+                // fall-through to RepeatOne
+            }
+            else
+            {
+                _app.StopPlayback();
+
+                if (!_ui->treePlaylist->IsEmpty())
                 {
-                    const PlaylistTreeModelNode& firstTuneNode = *_ui->treePlaylist->GetSongs().at(0).get();
-                    if (firstTuneNode.GetTag() == PlaylistTreeModelNode::ItemTag::Normal)
+                    const bool playingNextSubsong = includeSubsongs && TryPlayNextValidSubsong();
+                    const bool reachedTheEnd = !playingNextSubsong && !TryPlayNextValidSong();
+                    if (reachedTheEnd)
                     {
-                        if (!TryPlayPlaylistItem(firstTuneNode))
+                        const PlaylistTreeModelNode& firstTuneNode = *_ui->treePlaylist->GetSongs().front();
+                        if (firstTuneNode.GetTag() == PlaylistTreeModelNode::ItemTag::Normal)
                         {
-                            TryPlayNextValidSong();
+                            if (!TryPlayPlaylistItem(firstTuneNode))
+                            {
+                                TryPlayNextValidSong();
+                            }
                         }
                     }
                 }
-            }
 
-            break;
+                break;
+            }
         }
-        case RepeatMode::RepeatOne:
+        case RepeatMode::RepeatOne: // Don't reorder or insert new before due to fall-through above.
         {
             _app.StopPlayback();
 
@@ -656,7 +663,7 @@ void FramePlayer::OnSongDurationReached()
             if (node != nullptr)
             {
                 const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(*node) : 0;
-                _app.ReplayLoadedTune(preRenderDurationMs);
+                _app.ReplayLoadedTune(preRenderDurationMs, true);
             }
 
             break;

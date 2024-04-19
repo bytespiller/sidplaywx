@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ private:
 
 public:
     void Play(const wxString& filename, unsigned int subsong, int preRenderDurationMs); // TODO: PassKey or something to allow calling this by the TryPlayPlaylistItem method only?
-    void ReplayLoadedTune(int preRenderDurationMs);
+    void ReplayLoadedTune(int preRenderDurationMs, bool reusePreRender = false);
     void PausePlayback();
     void ResumePlayback();
     void StopPlayback();

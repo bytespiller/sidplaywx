@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -280,10 +280,10 @@ void MyApp::Play(const wxString& filename, unsigned int subsong, int preRenderDu
     }
 }
 
-void MyApp::ReplayLoadedTune(int preRenderDurationMs)
+void MyApp::ReplayLoadedTune(int preRenderDurationMs, bool reusePreRender)
 {
     StopPlayback();
-    const bool success = _playback->TryReplayCurrentSong(preRenderDurationMs);
+    const bool success = _playback->TryReplayCurrentSong(preRenderDurationMs, reusePreRender);
     if (success)
     {
         FinalizePlaybackStarted();

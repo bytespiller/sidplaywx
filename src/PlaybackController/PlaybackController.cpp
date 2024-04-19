@@ -188,16 +188,16 @@ bool PlaybackController::TryPlayFromBuffer(const std::wstring& filepathForUid, s
     return FinalizeTryPlay(success, preRenderDurationMs);
 }
 
-bool PlaybackController::TryReplayCurrentSong(int preRenderDurationMs)
+bool PlaybackController::TryReplayCurrentSong(int preRenderDurationMs, bool reusePreRender)
 {
-    return TryPlaySubsong(GetCurrentSubsong(), preRenderDurationMs);
+    return TryPlaySubsong(GetCurrentSubsong(), preRenderDurationMs, reusePreRender);
 }
 
-bool PlaybackController::TryPlaySubsong(unsigned int subsong, int preRenderDurationMs)
+bool PlaybackController::TryPlaySubsong(unsigned int subsong, int preRenderDurationMs, bool reusePreRender)
 {
     if (_state != State::Undefined && _activeTuneHolder != nullptr)
     {
-        return TryReplayCurrentSongFromBuffer(subsong, preRenderDurationMs);
+        return TryReplayCurrentSongFromBuffer(subsong, preRenderDurationMs, reusePreRender);
     }
 
     return false;
@@ -707,7 +707,7 @@ void PlaybackController::PrepareTryPlay()
     }
 }
 
-bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDurationMs)
+bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDurationMs, bool reusePreRender)
 {
     if (isSuccessful)
     {
@@ -718,8 +718,11 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
                 TryResetAudioOutput(GetAudioConfig(), true);
             }
 
-            const SidConfig& sidConfig = _sidDecoder->GetSidConfig();
-            _preRender->DoPreRender(*_sidDecoder.get(), sidConfig.frequency, sidConfig.playback, preRenderDurationMs);
+            if (!reusePreRender || _preRender->GetPreRenderProgressFactor() != 1.0)
+            {
+                const SidConfig& sidConfig = _sidDecoder->GetSidConfig();
+                _preRender->DoPreRender(*_sidDecoder.get(), sidConfig.frequency, sidConfig.playback, preRenderDurationMs);
+            }
         }
         else
         {
@@ -746,11 +749,11 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
     return isSuccessful;
 }
 
-bool PlaybackController::TryReplayCurrentSongFromBuffer(unsigned int subsong, int preRenderDurationMs)
+bool PlaybackController::TryReplayCurrentSongFromBuffer(unsigned int subsong, int preRenderDurationMs, bool reusePreRender)
 {
     PrepareTryPlay();
     const bool success = _sidDecoder->TrySetSubsong(subsong);
-    return FinalizeTryPlay(success, preRenderDurationMs);
+    return FinalizeTryPlay(success, preRenderDurationMs, reusePreRender);
 }
 
 bool PlaybackController::OnSeekStatusReceived(uint_least32_t cTimeMs, bool done)
