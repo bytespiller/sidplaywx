@@ -362,6 +362,16 @@ SimpleSignalProvider<SignalsPlaybackController>& MyApp::GetPlaybackSignalProvide
     return *_playback;
 }
 
+size_t MyApp::SetVisualizationWaveformWindow(size_t milliseconds)
+{
+    return _playback->SetVisualizationWaveformWindow(milliseconds);
+}
+
+size_t MyApp::GetVisualizationWaveform(short* out) const
+{
+    return _playback->GetVisualizationWaveform(out);
+}
+
 bool MyApp::ResetToDefaultsRecovery(const wxString& message)
 {
     const int response = wxMessageBox(message, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR | wxYES_NO);

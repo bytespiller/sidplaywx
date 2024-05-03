@@ -118,6 +118,7 @@ namespace FrameElements // Player class
 			{
 				wxMenu* viewMenu = new wxMenu();
 				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::StayTopmost), wxString::Format("%s\tAlt+A", Strings::FramePlayer::MENU_ITEM_STAY_TOPMOST));
+				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::VisualizationEnabled), wxString::Format(Strings::FramePlayer::MENU_ITEM_VISUALIZATION_ENABLED));
 
 				menuBar->Append(viewMenu, Strings::FramePlayer::MENU_VIEW);
 			}
@@ -134,13 +135,20 @@ namespace FrameElements // Player class
 
 		// Sizers
 		wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
-		wxBoxSizer* sizerSongInfo = new wxBoxSizer(wxVERTICAL);
-		sizerMain->Add(sizerSongInfo, 0, wxEXPAND, 0);
+
+		wxBoxSizer* sizerSongArea = new wxBoxSizer(wxHORIZONTAL);
+		sizerMain->Add(sizerSongArea, 0, wxEXPAND);
+
+		wxBoxSizer* sizerSongInfoLeft = new wxBoxSizer(wxVERTICAL); // Left
+		sizerSongArea->Add(sizerSongInfoLeft, 1);
+
+		/*wxBoxSizer* sizerSongInfoRight = new wxBoxSizer(wxVERTICAL); // Right -- TODO (unused for now, perhaps STIL can be displayed here...)
+		sizerSongArea->Add(sizerSongInfoRight, 1, wxEXPAND);*/
 
 		// Labels
-		AttachFixedSizeSeparator(DpiSize(0, 4), sizerSongInfo, _parentPanel); // TODO: magic numbers
+		AttachFixedSizeSeparator(DpiSize(0, 4), sizerSongInfoLeft, _parentPanel); // TODO: magic numbers
 
-		labelTitle = AttachIconLabel(themeData.GetImage("icon_music"), _parentPanel, sizerSongInfo);
+		labelTitle = AttachIconLabel(themeData.GetImage("icon_music"), _parentPanel, sizerSongInfoLeft);
 
 		{
 			wxFont boldFont = labelTitle->GetFont();
@@ -148,10 +156,15 @@ namespace FrameElements // Player class
 			labelTitle->SetFont(boldFont);
 		}
 
-		labelAuthor = AttachIconLabel(themeData.GetImage("icon_author"), _parentPanel, sizerSongInfo);
-		labelCopyright = AttachIconLabel(themeData.GetImage("icon_copyright"), _parentPanel, sizerSongInfo);
+		labelAuthor = AttachIconLabel(themeData.GetImage("icon_author"), _parentPanel, sizerSongInfoLeft);
+		labelCopyright = AttachIconLabel(themeData.GetImage("icon_copyright"), _parentPanel, sizerSongInfoLeft);
 
-		AttachFixedSizeSeparator(DpiSize(0, 10), sizerSongInfo, _parentPanel); // TODO: magic numbers
+		// Visualization
+		waveformVisualization = new UIElements::WaveformVisualization(&_parentPanel, themeData.GetThemedElement("WaveformVisualization"));
+		waveformVisualization->Hide();
+		sizerSongInfoLeft->Add(waveformVisualization, 4, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
+
+		AttachFixedSizeSeparator(DpiSize(0, 10), sizerSongInfoLeft, _parentPanel); // TODO: magic numbers
 
 		// Sizer below
 		wxBoxSizer* gridSizerPlaybackButtons = new wxBoxSizer(wxHORIZONTAL);

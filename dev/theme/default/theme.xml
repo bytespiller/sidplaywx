@@ -36,5 +36,11 @@
         <Color type="wxSYS" value="wxSYS_COLOUR_WINDOW" property="thumbDisabledColor"/>
       </Colors>
     </GuiElement>
+    <GuiElement name="WaveformVisualization">
+      <Colors>
+        <Color type="wxSYS" value="wxSYS_COLOUR_HIGHLIGHT" property="waveColor"/>
+        <Color type="Val" value="white" property="gradientTo"/>
+      </Colors>
+    </GuiElement>
   </GuiElements>
 </Theme>

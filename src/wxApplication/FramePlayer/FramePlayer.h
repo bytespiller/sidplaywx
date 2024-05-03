@@ -88,6 +88,9 @@ private:
     void ToggleTopmost();
     bool IsTopmost() const; // Helper
 
+    void ToggleVisualizationEnabled();
+    void EnableVisualization(bool enable); // Helper
+
     // Help
     void CheckUpdates();
     void DisplayAboutBox();

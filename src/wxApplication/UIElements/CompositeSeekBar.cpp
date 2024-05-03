@@ -166,7 +166,7 @@ namespace UIElements
 		}
 	}
 
-	// Called by the system of by wxWidgets when the panel needs to be redrawn. You can also trigger this call by calling Refresh()/Update().
+	// Called by the system of wxWidgets when the panel needs to be redrawn. You can also trigger this call by calling Refresh()/Update().
 	void CompositeSeekBar::OnPaintEvent(wxPaintEvent& /*evt*/)
 	{
 		wxPaintDC dc(this);

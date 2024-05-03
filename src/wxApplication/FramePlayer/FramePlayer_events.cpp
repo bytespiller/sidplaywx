@@ -308,7 +308,7 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
     const MenuItemId_Player id = static_cast<MenuItemId_Player>(evt.GetId());
     switch (id)
     {
-        // File
+        // --- File ---
         case MenuItemId_Player::OpenFiles:
             BrowseFilesAndAddToPlaylist(false);
             break;
@@ -329,7 +329,7 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             CloseApplication();
             break;
 
-        // Playlist submenu
+        // --- File > Playlist submenu ---
         case MenuItemId_Player::PlaylistOpen:
         {
             const bool autoPlayFirstImmediately = _app.currentSettings->GetOption(Settings::AppSettings::ID::AutoPlay)->GetValueAsBool();
@@ -347,7 +347,7 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             UpdateUiState();
             break;
 
-        // Edit
+        // --- Edit ---
         case MenuItemId_Player::Find:
             OpenSearchBar();
             break;
@@ -368,12 +368,16 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             OpenPrefsFrame();
             break;
 
-        // View
+        // --- View ---
         case MenuItemId_Player::StayTopmost:
             ToggleTopmost();
             break;
 
-        // Help
+        case MenuItemId_Player::VisualizationEnabled:
+            ToggleVisualizationEnabled();
+            break;
+
+        // --- Help ---
         case MenuItemId_Player::CheckUpdates:
             CheckUpdates();
             break;

@@ -73,6 +73,7 @@ namespace Settings
 
 			// Menu
 			static constexpr const char* const StayTopmost = "StayTopmost";
+			static constexpr const char* const VisualizationEnabled = "VisualizationEnabled";
 
 			// Internal
 			static constexpr const char* const Volume = "Volume";
@@ -165,6 +166,7 @@ namespace Settings
 
 				// Menu
 				DefaultOption(ID::StayTopmost, false),
+				DefaultOption(ID::VisualizationEnabled, true),
 
 				// Internal
 				DefaultOption(ID::Volume, 100),

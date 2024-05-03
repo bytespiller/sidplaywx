@@ -68,6 +68,12 @@ public:
 
     SimpleSignalProvider<SignalsPlaybackController>& GetPlaybackSignalProvider();
 
+    /// @brief Defines visualization (double) buffer length. Pass 0 to disable and free some resources. Returns size of buffer (calculated from milliseconds and the currently effective sample rate).
+    size_t SetVisualizationWaveformWindow(size_t milliseconds);
+
+    /// @brief Copies the latest available waveform data (playback buffer size affects latency) into a target buffer. Returns size of data if successful or 0 if not ready or disabled.
+    size_t GetVisualizationWaveform(short* out) const;
+
     // Informs user about a critical problem. Returns true if settings were optionally reset. It's up to caller to decide what to do next.
     bool ResetToDefaultsRecovery(const wxString& message);
 

@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,93 @@
 
 #include "PortAudioOutput.h"
 #include <assert.h>
+#include <atomic>
 #include <cstdint>
 #include <iostream>
+#include <memory>
+
+class VisualizationBuffer
+{
+public:
+	VisualizationBuffer() = delete;
+    VisualizationBuffer(VisualizationBuffer&) = delete;
+	VisualizationBuffer& operator=(const VisualizationBuffer&) = delete;
+
+    explicit VisualizationBuffer(size_t aLength) :
+        maxLength(aLength)
+    {
+        _first = new std::atomic_short[maxLength];
+        _second = new std::atomic_short[maxLength];
+    }
+
+    ~VisualizationBuffer()
+    {
+        delete[] _first;
+        _first = nullptr;
+
+        delete[] _second;
+        _second = nullptr;
+    }
+
+public:
+    /// @brief Copies front-buffer data with an initialized constant maxLength size and returns maxLength. If no initial data is ready yet, doesn't copy anything and returns 0.
+    size_t Read(short* out) const
+    {
+        if (!_ready)
+        {
+            return 0;
+        }
+
+        const std::atomic_short* const buffer = (_flipped) ? _second : _first;
+        memcpy(out, buffer, maxLength * sizeof(short));
+        return maxLength;
+    }
+
+    void Write(const short* const data, size_t dataLength)
+    {
+        const size_t remaining = maxLength - _level;
+        const size_t overflow = (dataLength > remaining) ? (dataLength - remaining) : 0;
+
+        // Fill the active back-buffer up to its maximum
+        const size_t amount = (overflow == 0) ? dataLength : remaining;
+        std::atomic_short* buffer = (_flipped) ? _first : _second;
+        for (int i = 0; i < amount; ++i)
+        {
+            buffer[_level + i] = data[i];
+        }
+
+        _level += amount;
+
+        // Flip the front/back buffer roles if the current back-buffer is maxed out
+        if (_level >= maxLength)
+        {
+            _flipped = !_flipped;
+            _level = 0;
+            _ready = true;
+
+            // Keep overwriting any previous data until we're left with only the latest data portion stored across both buffers
+            if (overflow != 0)
+            {
+                Write(&data[amount], dataLength - amount);
+            }
+        }
+    }
+
+public:
+    const size_t maxLength;
+
+private:
+    std::atomic_bool _ready = false; // Whether the front-buffer is ready (remains true permanently).
+    std::atomic_bool _flipped = false; // Indicates a front-buffer and back-buffer role inversion.
+    std::atomic_size_t _level = 0; // Fill-level of the active back-buffer.
+
+    std::atomic_short* _first; // Front/back buffer #1.
+    std::atomic_short* _second; // Front/back buffer #2.
+};
+
 
 static PortAudioOutput::TPortAudioConfig currentAudioConfig; // Must be static because the PlaybackCallback is static (PortAudio works that way).
+static std::unique_ptr<VisualizationBuffer> visBuffer = nullptr;
 
 PortAudioOutput::~PortAudioOutput()
 {
@@ -40,6 +123,28 @@ void PortAudioOutput::SetVolume(float volume)
 {
     assert(volume >= 0.0f && volume <= 1.0f);
     currentAudioConfig.volume = volume;
+}
+
+void PortAudioOutput::InitVisualizationBuffer(size_t length)
+{
+    if (length == 0)
+    {
+        visBuffer = nullptr;
+    }
+    else
+    {
+        visBuffer = std::make_unique<VisualizationBuffer>(length);
+    }
+}
+
+size_t PortAudioOutput::GetVisualizationWaveform(short* out) const
+{
+    if (visBuffer == nullptr)
+    {
+        return 0;
+    }
+
+    return visBuffer->Read(out);
 }
 
 bool PortAudioOutput::PreInitPortAudioLibrary()
@@ -149,17 +254,30 @@ int PortAudioOutput::PlaybackCallback(const void* /*inputBuffer*/, void* outputB
                                       PaStreamCallbackFlags /*statusFlags*/,
                                       void* userData)
 {
+    // Write to output device
     IBufferWriter* externalSource = static_cast<IBufferWriter*>(userData);
-    bool successful = externalSource->TryFillBuffer(outputBuffer, framesPerBuffer);
+    const bool successful = externalSource->TryFillBuffer(outputBuffer, framesPerBuffer);
 
-    const float volume = currentAudioConfig.volume;
-    if (successful && volume != 1.0f) // Apply volume scale.
+    // Common
+    short* const out = static_cast<short*>(outputBuffer);
+    const uint_least32_t length = framesPerBuffer * currentAudioConfig.channelCount;
+
+    if (successful)
     {
-        short* const out = static_cast<short*>(outputBuffer);
-        const uint_least32_t length = framesPerBuffer * currentAudioConfig.channelCount;
-        for (uint_least32_t i = 0; i < length; ++i)
+        // Update the visualization buffer
+        if (visBuffer != nullptr)
         {
-            out[i] *= volume;
+            visBuffer->Write(out, length);
+        }
+
+        // Apply volume scale if needed
+        const float volume = currentAudioConfig.volume;
+        if (volume != 1.0f)
+        {
+            for (uint_least32_t i = 0; i < length; ++i)
+            {
+                out[i] *= volume;
+            }
         }
     }
 

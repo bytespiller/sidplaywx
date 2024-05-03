@@ -638,6 +638,18 @@ void PlaybackController::UnloadActiveTune()
     _activeTuneHolder = nullptr;
 }
 
+size_t PlaybackController::SetVisualizationWaveformWindow(size_t milliseconds)
+{
+    const size_t length = (milliseconds == 0) ? 0 : GetAudioConfig().sampleRate / (1000.0 / milliseconds);
+    _portAudioOutput->InitVisualizationBuffer(length);
+    return length;
+}
+
+size_t PlaybackController::GetVisualizationWaveform(short* out) const
+{
+    return _portAudioOutput->GetVisualizationWaveform(out);
+}
+
 bool PlaybackController::TryResetSidDecoder(const SyncedPlaybackConfig& newConfig)
 {
     const int subsong = (IsValidSongLoaded()) ? GetCurrentSubsong() : 1;

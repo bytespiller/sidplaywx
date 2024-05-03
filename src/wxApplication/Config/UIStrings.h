@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.9.0"); // Reminder: don't forget to increase.
+	inline constexpr const char* const APP_VERSION_TAG("0.10.0"); // Reminder: don't forget to increase.
 
 	namespace FramePlayer
 	{
@@ -57,6 +57,7 @@ namespace Strings
 
 		inline constexpr const char* const MENU_VIEW("&View");
 		inline constexpr const char* const MENU_ITEM_STAY_TOPMOST("&Always on Top");
+		inline constexpr const char* const MENU_ITEM_VISUALIZATION_ENABLED("&Oscilloscope");
 
 		inline constexpr const char* const MENU_HELP("&Help");
 		inline constexpr const char* const MENU_ITEM_CHECK_UPDATES("&Check for Updates");

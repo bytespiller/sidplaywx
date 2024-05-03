@@ -63,6 +63,9 @@ void FramePlayer::UpdateUiState()
             _ui->labelTime->Enable(false);
             _ui->compositeSeekbar->ResetPlaybackPosition(0); // Will also auto disable/enable itself.
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_NO_PROGRESS);
+
+            _ui->waveformVisualization->Clear();
+
             break;
         }
         case PlaybackController::State::Playing:
@@ -185,6 +188,10 @@ void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
     }
 
     _ui->labelTime->SetLabelText(Helpers::Wx::GetTimeFormattedString(displayTimeMs));
+
+    // Visualization
+    _app.GetVisualizationWaveform(_ui->waveformVisualization->GetBuffer());
+    _ui->waveformVisualization->Refresh();
 }
 
 void FramePlayer::DisplayCurrentSongInfo(bool justClear)

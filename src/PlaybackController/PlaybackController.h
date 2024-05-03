@@ -147,6 +147,7 @@ public:
     State GetState() const;
     State GetResumeState() const;
 
+    /// @brief Gets the current playback time position. Playback buffer size affects the returned value and is typically some milliseconds in the future.
     uint_least32_t GetTime() const;
     double GetPreRenderProgressFactor() const;
 
@@ -184,6 +185,12 @@ public:
     bool AreAllRelevantVoicesEnabled() const;
 
     void UnloadActiveTune();
+
+    /// @brief Defines visualization (double) buffer length. Pass 0 to disable and free some resources. Returns size of buffer (calculated from milliseconds and the currently effective sample rate).
+    size_t SetVisualizationWaveformWindow(size_t milliseconds);
+
+    /// @brief Copies the latest available waveform data (playback buffer size affects latency) into a target buffer. Returns size of data if successful or 0 if not ready or disabled.
+    size_t GetVisualizationWaveform(short* out) const;
 
 private:
     bool TryResetSidDecoder(const SyncedPlaybackConfig& newConfig);

@@ -28,6 +28,7 @@
 #include <wx/webrequest.h>
 
 using RepeatMode = UIElements::RepeatModeButton::RepeatMode;
+static constexpr size_t VISUALIZATION_WAVE_WINDOW_MS = 100;
 static wxString bundledSonglengthsPath("bundled-Songlengths.md5");
 
 FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize& size, MyApp& app)
@@ -198,6 +199,12 @@ void FramePlayer::SetupUiElements()
     _ui->treePlaylist->DragAcceptFiles(true);
     _ui->treePlaylist->Bind(wxEVT_DROP_FILES, &OnDropFilesPlaylist, this);
     _ui->treePlaylist->SetFocus(); // Playlist should have the focus on app start for easy keyboard navigation.
+
+    // Apply visualization preference
+    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::VisualizationEnabled)->GetValueAsBool())
+    {
+        EnableVisualization(true);
+    }
 }
 
 void FramePlayer::DeferredInit()
@@ -342,6 +349,23 @@ void FramePlayer::ToggleTopmost()
 
     _ui->menuBar->Check(static_cast<int>(FrameElements::ElementsPlayer::MenuItemId_Player::StayTopmost), !topmost);
     _app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->UpdateValue(!topmost);
+}
+
+void FramePlayer::ToggleVisualizationEnabled()
+{
+    const bool enable = !_app.currentSettings->GetOption(Settings::AppSettings::ID::VisualizationEnabled)->GetValueAsBool();
+    _app.currentSettings->GetOption(Settings::AppSettings::ID::VisualizationEnabled)->UpdateValue(enable);
+    EnableVisualization(enable);
+}
+
+void FramePlayer::EnableVisualization(bool enable)
+{
+    const size_t bufferWindowSize = _app.SetVisualizationWaveformWindow((enable) ? VISUALIZATION_WAVE_WINDOW_MS : 0);
+    _ui->waveformVisualization->SetBufferWindow(bufferWindowSize);
+    _ui->waveformVisualization->Show(enable);
+    _panel->Layout();
+
+    _ui->menuBar->Check(static_cast<int>(FrameElements::ElementsPlayer::MenuItemId_Player::VisualizationEnabled), enable);
 }
 
 bool FramePlayer::IsTopmost() const

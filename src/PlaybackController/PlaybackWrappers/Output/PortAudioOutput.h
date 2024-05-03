@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,17 @@ public:
     ~PortAudioOutput();
 
 public:
-    static float GetVolume();
-    static void SetVolume(float volume);
+    float GetVolume();
+    void SetVolume(float volume);
+
+    /** @brief
+     * Pass length 0 to disable.
+     * Ideally, length shouldn't be below the playback buffer size to avoid inefficiency (if the playback routine writes to this buffer in a fixed-size chunk, a too-small buffer would only retain the latest data it can fit so any write operations before that would be wasted).
+     */
+    void InitVisualizationBuffer(size_t length);
+
+    /// @brief Copies the latest waveform data (playback buffer size affects latency). Returns size of data (can be 0 if not ready or disabled).
+    size_t GetVisualizationWaveform(short* out) const;
 
 public:
     bool PreInitPortAudioLibrary();

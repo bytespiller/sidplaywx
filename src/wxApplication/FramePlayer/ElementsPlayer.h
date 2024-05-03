@@ -28,6 +28,7 @@
 #include "../UIElements/PlayPauseButton.h"
 #include "../UIElements/RepeatModeButton.h"
 #include "../UIElements/SearchBar.h"
+#include "../UIElements/WaveformVisualization.h"
 #include "../UIElements/Playlist/Playlist.h"
 
 namespace Settings
@@ -71,6 +72,7 @@ namespace FrameElements
 
 			// View
 			StayTopmost,
+			VisualizationEnabled,
 
 			// Help
 			CheckUpdates,
@@ -107,6 +109,7 @@ namespace FrameElements
 		// Always enabled
 		UIElements::RepeatModeButton* btnRepeatMode;
 	    wxSlider* sliderVolume;
+		UIElements::WaveformVisualization* waveformVisualization;
 
 		// Playback controls
 		wxButton* btnPrevTrack;
