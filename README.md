@@ -9,7 +9,7 @@ The **sidplaywx** uses [libsidplayfp](https://github.com/libsidplayfp/libsidplay
 |Main window|
 |-|
 |<p align="center">![Screenshot of the player application main window](../assets/screenshots/sidplaywx-player.png?raw=true)</p>|
-|Pictured: for tunes with subsongs, a _crown_ icon in the playlist indicates a default subsong, below it is a _timer_ icon indicating an (optional) auto-skipping of (sub)songs shorter than (n) seconds. You may also encounter other indicators such as a _chip_ (indicates a ROM file requirement).<br>Tunes can be seeked ([HVSC](https://www.hvsc.c64.org) *Songlengths.md5* database is supported, and default/fallback duration can be specified in the Preferences).|
+|Pictured: for tunes with subsongs, a _crown_ icon in the playlist indicates a default subsong. You may also encounter other indicators such as a _timer_ icon indicating an (optional) auto-skipping of (sub)songs shorter than (n) seconds, or a _chip_ (indicates a ROM file requirement).<br>Tunes can be seeked ([HVSC](https://www.hvsc.c64.org) *Songlengths.md5* database is supported, and default/fallback duration can be specified in the Preferences).|
 
 <br>
 
@@ -62,12 +62,12 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 * Can sidplaywx open archive files?
   * Yes, but only the Zip format in its simplest form is supported due to wxZip limitation.
 * How come the seeking is so slow?
+  * There is a "Fast seeking" option available which pre-renders the entire SID tune in the background. It is disabled by default, but if you enable it you will be able to seek instantly. See [release notes](https://github.com/bytespiller/sidplaywx/releases/tag/v0.7.0-beta) of the old release for details on how it works and what are the caveats.
   * SID tunes are actually small programs and not audio files like for example the MP3, so they have to be emulated linearly as fast as possible until the "seek" target is reached.
     * <details>
         <summary>More details</summary>
-        The libsidplayfp library (which sidplaywx uses) focuses on accuracy so it's much slower than e.g., libsidplay2 (which is virtually instantaneous, try it in the DeaDBeeF player on the Linux!). FWIW the seeking in the sidplaywx is already separately threaded and bypasses some SID mixing steps, audio rendering etc. so I think it's as fast as possible at the moment).
+        The libsidplayfp library (which sidplaywx uses) focuses on accuracy so it's much slower than e.g., libsidplay2 (which is virtually instantaneous, try it in the DeaDBeeF player on the Linux!). FWIW the seeking in the sidplaywx is already separately threaded and bypasses some SID mixing steps, audio rendering etc. so I think it's as fast as possible at the moment, unless you enable the "Fast seeking" option of course).
       </details>
-  * There is a "Fast seeking" option available which pre-renders the entire SID tune in the background. See [release notes](https://github.com/bytespiller/sidplaywx/releases/tag/v0.7.0-beta) for details on how it works and what are the caveats.
 * Command-line options in sidplaywx?
   * Focus so far is on the GUI experience. There exists a [sidplayfp](https://github.com/libsidplayfp/sidplayfp/releases) console-based player in the libsidplayfp repo (not to be confused with a sidplaywx which is unrelated and unaffiliated project).
   * For now, you can pass the space-separated filenames. For example `sidplaywx Aces_High.sid Gunstar.sid` to open those two tunes. This "feature" is actually a side-effect of single-instance support, so there will be a slight delay if the app is already running and the single-instance option is enabled.
