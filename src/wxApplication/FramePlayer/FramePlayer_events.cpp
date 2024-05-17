@@ -32,10 +32,12 @@ namespace
     enum class PopupMenuItemId_Playlist : int
     {
         Remove = 1,
+        RemoveAllAbove,
+        RemoveAllBelow,
         SkipUnskip,
-        ScrollToCurrent,
         ExpandAll,
-        CollapseAll
+        CollapseAll,
+        ScrollToCurrent
     };
 
     inline bool ShouldAutoPlay(const MyApp& app)
@@ -156,15 +158,20 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
     // Remove main song
     if (node->type == PlaylistTreeModelNode::ItemType::Song)
     {
+        // Remove
         menu->Append(static_cast<int>(PopupMenuItemId_Playlist::Remove), Strings::PlaylistTree::MENU_ITEM_REMOVE);
+
+        // Remove all above
+        menu
+            ->Append(static_cast<int>(PopupMenuItemId_Playlist::RemoveAllAbove), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_ABOVE)
+            ->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) > 0);
+
+        // Remove all below
+        menu
+            ->Append(static_cast<int>(PopupMenuItemId_Playlist::RemoveAllBelow), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_BELOW)
+            ->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) + 1 < _ui->treePlaylist->GetSongs().size());
     }
 
-    // Scroll to current
-    {
-        menu->AppendSeparator();
-        wxMenuItem* newItem = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::ScrollToCurrent), Strings::PlaylistTree::MENU_ITEM_SCROLL_TO_CURRENT);
-        newItem->Enable(!_ui->treePlaylist->IsEmpty());
-    }
 
     // Expand all, Collapse all
     {
@@ -174,6 +181,13 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
 
         newItemExpand->Enable(!_ui->treePlaylist->IsEmpty());
         newItemCollapse->Enable(!_ui->treePlaylist->IsEmpty());
+    }
+
+    // Scroll to current
+    {
+        menu->AppendSeparator();
+        wxMenuItem* newItem = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::ScrollToCurrent), Strings::PlaylistTree::MENU_ITEM_SCROLL_TO_CURRENT);
+        newItem->Enable(!_ui->treePlaylist->IsEmpty());
     }
 
     menu->Bind(wxEVT_COMMAND_MENU_SELECTED, [&node, this](wxCommandEvent& evt) { OnTreePlaylistContextItem(*node, evt); });
@@ -189,16 +203,16 @@ void FramePlayer::OnTreePlaylistContextItem(PlaylistTreeModelNode& node, wxComma
             DoRemoveSongTreeItem(node);
             break;
 
-        case PopupMenuItemId_Playlist::SkipUnskip:
-            DoToggleSubsongBlacklistState(node);
+        case PopupMenuItemId_Playlist::RemoveAllAbove:
+            DoRemoveAllSongTreeItemsAbove(node);
             break;
 
-        case PopupMenuItemId_Playlist::ScrollToCurrent:
-            if (const PlaylistTreeModelNode* activeSong = _ui->treePlaylist->GetActiveSong())
-            {
-                _ui->treePlaylist->EnsureVisible(*activeSong);
-                _ui->treePlaylist->Select(*activeSong);
-            }
+        case PopupMenuItemId_Playlist::RemoveAllBelow:
+            DoRemoveAllSongTreeItemsBelow(node);
+            break;
+
+        case PopupMenuItemId_Playlist::SkipUnskip:
+            DoToggleSubsongBlacklistState(node);
             break;
 
         case PopupMenuItemId_Playlist::ExpandAll:
@@ -207,6 +221,14 @@ void FramePlayer::OnTreePlaylistContextItem(PlaylistTreeModelNode& node, wxComma
 
         case PopupMenuItemId_Playlist::CollapseAll:
             _ui->treePlaylist->CollapseAll();
+            break;
+
+        case PopupMenuItemId_Playlist::ScrollToCurrent:
+            if (const PlaylistTreeModelNode* activeSong = _ui->treePlaylist->GetActiveSong())
+            {
+                _ui->treePlaylist->EnsureVisible(*activeSong);
+                _ui->treePlaylist->Select(*activeSong);
+            }
             break;
     }
 }
@@ -813,6 +835,83 @@ void FramePlayer::DoRemoveSongTreeItem(PlaylistTreeModelNode& node)
     }
 
     _ui->treePlaylist->Remove(node);
+    PadColumnsWidth();
+    UpdateUiState(); // To refresh the Next/Prev buttons.
+}
+
+void FramePlayer::DoRemoveAllSongTreeItemsAbove(PlaylistTreeModelNode& node)
+{
+    const PlaylistTreeModelNode* activeSong = _ui->treePlaylist->GetActiveSong();
+
+    // Remove songs above
+    {
+        // Enumerate songs to remove up to the selected song
+        std::vector<PlaylistTreeModelNode*> removeSongs;
+        for (const PlaylistTreeModelNodePtr& song : _ui->treePlaylist->GetSongs())
+        {
+            if (song.get() == &node)
+            {
+                break;
+            }
+
+            removeSongs.emplace_back(song.get());
+        }
+
+        // Remove songs
+        for (PlaylistTreeModelNode* const cSong : removeSongs)
+        {
+            if (activeSong != nullptr && activeSong->filepath == cSong->filepath)
+            {
+                _app.UnloadActiveTune();
+                activeSong = nullptr;
+            }
+
+            _ui->treePlaylist->Remove(*cSong);
+        }
+    }
+
+    _ui->treePlaylist->EnsureVisible(node);
+
+    PadColumnsWidth();
+    UpdateUiState(); // To refresh the Next/Prev buttons.
+}
+
+void FramePlayer::DoRemoveAllSongTreeItemsBelow(PlaylistTreeModelNode& node)
+{
+    const PlaylistTreeModelNode* activeSong = _ui->treePlaylist->GetActiveSong();
+
+    // Remove songs below
+    {
+        // Enumerate songs to remove after the selected song
+        std::vector<PlaylistTreeModelNode*> removeSongs;
+        bool found = false;
+        for (const PlaylistTreeModelNodePtr& song : _ui->treePlaylist->GetSongs())
+        {
+            if (found)
+            {
+                removeSongs.emplace_back(song.get());
+            }
+            else
+            {
+                found = song.get() == &node;
+            }
+        }
+
+        // Remove songs
+        for (PlaylistTreeModelNode* const cSong : removeSongs)
+        {
+            if (activeSong != nullptr && activeSong->filepath == cSong->filepath)
+            {
+                _app.UnloadActiveTune();
+                activeSong = nullptr;
+            }
+
+            _ui->treePlaylist->Remove(*cSong);
+        }
+    }
+
+    _ui->treePlaylist->EnsureVisible(node);
+
     PadColumnsWidth();
     UpdateUiState(); // To refresh the Next/Prev buttons.
 }

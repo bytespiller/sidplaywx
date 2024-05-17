@@ -97,6 +97,9 @@ namespace UIElements
 			/// @brief Returns the previous playable subsong item (or nullptr) for the specified active song.
 			PlaylistTreeModelNode* GetPrevSubsong(const PlaylistTreeModelNode& fromSubsong) const;
 
+			/// @brief Gets the main song node index (zero based). Returns -1 if not found.
+			int GetSongIndex(const wxString& filepath) const;
+
 			/// @brief Sets the node as currently playing (sub)song if playable. Returns true if successful.
 			bool TrySetActiveSong(const PlaylistTreeModelNode& node, bool autoexpand);
 

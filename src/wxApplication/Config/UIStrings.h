@@ -106,14 +106,16 @@ namespace Strings
 		inline constexpr const char* const COLUMN_COPYRIGHT("Copyright");
 
 		inline constexpr const char* const MENU_ITEM_REMOVE("Remove");
+		inline constexpr const char* const MENU_ITEM_REMOVE_ALL_ABOVE("Remove all above");
+		inline constexpr const char* const MENU_ITEM_REMOVE_ALL_BELOW("Remove all below");
 
 		inline constexpr const char* const MENU_ITEM_BLACKLIST("Skip subsong");
 		inline constexpr const char* const MENU_ITEM_UNBLACKLIST("Unskip subsong");
 
-		inline constexpr const char* const MENU_ITEM_SCROLL_TO_CURRENT("Scroll to current");
-
 		inline constexpr const char* const MENU_ITEM_EXPAND_ALL("Expand all");
 		inline constexpr const char* const MENU_ITEM_COLLAPSE_ALL("Collapse all");
+
+		inline constexpr const char* const MENU_ITEM_SCROLL_TO_CURRENT("Scroll to current");
 
 		inline constexpr const char* const SUBSONG("Subsong");
 	}

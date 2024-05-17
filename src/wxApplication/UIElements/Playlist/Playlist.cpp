@@ -354,6 +354,21 @@ namespace UIElements
 			return GetPrevSubsong(*activeSong);
 		}
 
+		int Playlist::GetSongIndex(const wxString& filepath) const
+		{
+			auto itTargetSong = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&filepath](const PlaylistTreeModelNodePtr& songItem)
+			{
+				return songItem->filepath.IsSameAs(filepath);
+			});
+
+			if (itTargetSong == _model.entries.cend())
+			{
+				return -1;
+			}
+
+			return std::distance(_model.entries.cbegin(), itTargetSong);
+		}
+
 		bool Playlist::TrySetActiveSong(const PlaylistTreeModelNode& node, bool autoexpand)
 		{
 			if (!node.IsPlayable())

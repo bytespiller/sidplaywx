@@ -192,6 +192,8 @@ private:
     PlaylistTreeModelNode* DoFindSong(const wxString& query, const PlaylistTreeModelNode& startNode, bool forwardDirection);
     void OnFindSong(UIElements::SignalsSearchBar signalId);
     void DoRemoveSongTreeItem(PlaylistTreeModelNode& node);
+    void DoRemoveAllSongTreeItemsAbove(PlaylistTreeModelNode& node);
+    void DoRemoveAllSongTreeItemsBelow(PlaylistTreeModelNode& node);
     void DoToggleSubsongBlacklistState(PlaylistTreeModelNode& node);
 
 #pragma endregion
