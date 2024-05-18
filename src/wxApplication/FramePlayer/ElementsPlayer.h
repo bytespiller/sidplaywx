@@ -38,6 +38,17 @@ namespace Settings
 
 namespace FrameElements
 {
+	enum class PlaylistContextMenuIconId : int
+	{
+		RemoveMainSong = 0,
+		RemoveAllAbove,
+		RemoveAllBelow,
+		ExpandAll,
+		CollapseAll,
+		ScrollToCurrent,
+		SkipSubsong
+	};
+
 	class ElementsPlayer
 	{
 	public:
@@ -124,6 +135,9 @@ namespace FrameElements
 	    UIElements::CompositeSeekBar* compositeSeekbar;
 	    UIElements::Playlist::Playlist* treePlaylist;
 		UIElements::SearchBar* searchBar;
+
+		// Context menu icons
+		std::unordered_map<PlaylistContextMenuIconId, std::shared_ptr<wxBitmap>> playlistContextMenuIcons;
 
 	private:
 		wxPanel& _parentPanel;

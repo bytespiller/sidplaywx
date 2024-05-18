@@ -152,6 +152,7 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
         }
 
         wxMenuItem* newItem = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::SkipUnskip), menuTextSkipUnskip);
+        newItem->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::SkipSubsong));
         newItem->Enable(skipUnskipValidItem);
     }
 
@@ -159,27 +160,36 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
     if (node->type == PlaylistTreeModelNode::ItemType::Song)
     {
         // Remove
-        menu->Append(static_cast<int>(PopupMenuItemId_Playlist::Remove), Strings::PlaylistTree::MENU_ITEM_REMOVE);
+        {
+            wxMenuItem* const item = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::Remove), Strings::PlaylistTree::MENU_ITEM_REMOVE);
+            item->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::RemoveMainSong));
+        }
 
         // Remove all above
-        menu
-            ->Append(static_cast<int>(PopupMenuItemId_Playlist::RemoveAllAbove), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_ABOVE)
-            ->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) > 0);
+        {
+            wxMenuItem* const item = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::RemoveAllAbove), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_ABOVE);
+            item->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) > 0);
+            item->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::RemoveAllAbove));
+        }
 
         // Remove all below
-        menu
-            ->Append(static_cast<int>(PopupMenuItemId_Playlist::RemoveAllBelow), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_BELOW)
-            ->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) + 1 < _ui->treePlaylist->GetSongs().size());
+        {
+            wxMenuItem* const item = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::RemoveAllBelow), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_BELOW);
+            item->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) + 1 < _ui->treePlaylist->GetSongs().size());
+            item->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::RemoveAllBelow));
+        }
     }
-
 
     // Expand all, Collapse all
     {
         menu->AppendSeparator();
-        wxMenuItem* newItemExpand = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::ExpandAll), Strings::PlaylistTree::MENU_ITEM_EXPAND_ALL);
-        wxMenuItem* newItemCollapse = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::CollapseAll), Strings::PlaylistTree::MENU_ITEM_COLLAPSE_ALL);
 
+        wxMenuItem* newItemExpand = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::ExpandAll), Strings::PlaylistTree::MENU_ITEM_EXPAND_ALL);
+        newItemExpand->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::ExpandAll));
         newItemExpand->Enable(!_ui->treePlaylist->IsEmpty());
+
+        wxMenuItem* newItemCollapse = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::CollapseAll), Strings::PlaylistTree::MENU_ITEM_COLLAPSE_ALL);
+        newItemCollapse->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::CollapseAll));
         newItemCollapse->Enable(!_ui->treePlaylist->IsEmpty());
     }
 
@@ -187,6 +197,7 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
     {
         menu->AppendSeparator();
         wxMenuItem* newItem = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::ScrollToCurrent), Strings::PlaylistTree::MENU_ITEM_SCROLL_TO_CURRENT);
+        newItem->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::ScrollToCurrent));
         newItem->Enable(!_ui->treePlaylist->IsEmpty());
     }
 

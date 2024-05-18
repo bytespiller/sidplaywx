@@ -21,6 +21,13 @@
     <Image type="svg" offset="0,0" scale="1.0" name="icon_defaultsubsong" path="svg/vip-crown-2-line.svg"/>
     <Image type="svg" offset="0,0" scale="1.0" name="icon_skipshort" path="svg/timer-fill.svg"/>
     <Image type="svg" offset="0,0" scale="1.0" name="icon_removesong" path="svg/dislike-fill.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_removesongmenu" path="svg/dislike-line.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_removemainsong" path="svg/close-line.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_removeallabove" path="svg/arrow-up-s-line.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_removeallbelow" path="svg/arrow-down-s-line.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_expandall" path="svg/add-line.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_collapseall" path="svg/subtract-line.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_scrolltocurrent" path="svg/home-line.svg"/>
   </Images>
   <GuiElements>
     <GuiElement name="Seekbar">

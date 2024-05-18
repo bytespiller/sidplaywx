@@ -32,6 +32,7 @@ namespace FrameElements // Static vars
 	static constexpr int TEMP_LABEL_TIME_BORDER_SIZE = 2;
 	static constexpr int TEMP_LABEL_ICON_SIZE = 14;
 	static constexpr int TEMP_PLAYLIST_ICON_SIZE = 16;
+	static constexpr int TEMP_MENU_ICON_SIZE = 16;
 }
 
 namespace FrameElements // Static functions
@@ -41,7 +42,7 @@ namespace FrameElements // Static functions
 		wxBoxSizer* sizerIconLabel = new wxBoxSizer(wxHORIZONTAL);
 		parentSizer->Add(sizerIconLabel, 1, wxEXPAND, 0);
 
-		const auto& img = UIElements::Util::LoadRasterizedSvg(themeImage.path.c_str(), DpiSize(TEMP_LABEL_ICON_SIZE, TEMP_LABEL_ICON_SIZE), themeImage.offset, themeImage.scale);
+		const auto& img = UIElements::Util::LoadRasterizedSvg(themeImage.path.c_str(), DpiSize(TEMP_LABEL_ICON_SIZE), themeImage.offset, themeImage.scale);
 		wxStaticBitmap* bitmapIcon = new wxStaticBitmap(&parent, wxID_ANY, *img.get());
 		sizerIconLabel->Add(bitmapIcon, 0, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
 
@@ -53,7 +54,7 @@ namespace FrameElements // Static functions
 
 	static wxButton* AttachSimplePlaybackControlButton(const ThemeData::ThemeImage& themeImage, wxPanel& parent, wxBoxSizer* parentSizer)
 	{
-		wxButton* newButton = UIElements::Util::NewSvgButton(themeImage, DpiSize(TEMP_BUTTON_SIZE, TEMP_BUTTON_SIZE), parent);
+		wxButton* newButton = UIElements::Util::NewSvgButton(themeImage, DpiSize(TEMP_BUTTON_SIZE), parent);
 		parentSizer->Add(newButton, 0, wxALL, TEMP_BUTTON_BORDER_SIZE);
 		return newButton;
 	}
@@ -65,6 +66,12 @@ namespace FrameElements // Static functions
 		separatorDummyPanel->Enable(false);
 		separatorDummyPanel->Hide();
 		parentSizer->Add(separatorDummyPanel, 0, wxFIXED_MINSIZE | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
+	}
+
+	static std::shared_ptr<wxBitmap> LoadMenuIcon(const ThemeData::ThemeData& themeData, const std::string& themeIconName)
+	{
+		const ThemeData::ThemeImage& img = themeData.GetImage(themeIconName);
+		return UIElements::Util::LoadRasterizedSvg(img.path.c_str(), DpiSize(TEMP_MENU_ICON_SIZE), img.offset, img.scale);
 	}
 }
 
@@ -180,7 +187,7 @@ namespace FrameElements // Player class
 		// Playback controls & other buttons
 		btnStop = AttachSimplePlaybackControlButton(themeData.GetImage("btn_stop"), _parentPanel, gridSizerPlaybackButtons);
 
-		btnPlayPause = new UIElements::PlayPauseButton(themeData.GetImage("btn_play"), themeData.GetImage("btn_pause"), DpiSize(TEMP_BUTTON_SIZE, TEMP_BUTTON_SIZE), _parentPanel);
+		btnPlayPause = new UIElements::PlayPauseButton(themeData.GetImage("btn_play"), themeData.GetImage("btn_pause"), DpiSize(TEMP_BUTTON_SIZE), _parentPanel);
 		gridSizerPlaybackButtons->Add(btnPlayPause, 0, wxALL, TEMP_BUTTON_BORDER_SIZE);
 
 		gridSizerPlaybackButtons->Add(0, 0, wxEXPAND, 0); // This "spacer" makes the playback control buttons horizontally centered (without it, they'd be left-aligned).
@@ -253,7 +260,7 @@ namespace FrameElements // Player class
 
 			// ------------------------------------------------
 
-			btnRepeatMode = new UIElements::RepeatModeButton(repeatModes, DpiSize(TEMP_BUTTON_SIZE, TEMP_BUTTON_SIZE), _parentPanel, extraOptionsHandler);
+			btnRepeatMode = new UIElements::RepeatModeButton(repeatModes, DpiSize(TEMP_BUTTON_SIZE), _parentPanel, extraOptionsHandler);
 			sizerSeekbar->Add(btnRepeatMode, 0, wxALL, TEMP_LABEL_TIME_BORDER_SIZE);
 		}
 
@@ -276,6 +283,17 @@ namespace FrameElements // Player class
 
 			treePlaylist = new UIElements::Playlist::Playlist(&_parentPanel, playlistIcons, appSettings, wxDV_SINGLE);
 			sizerMain->Add(treePlaylist->GetWxWindow(), 1, wxEXPAND | wxALL, 0);
+
+			// Context menu icons
+			playlistContextMenuIcons = {
+				{PlaylistContextMenuIconId::RemoveMainSong, LoadMenuIcon(themeData, "icon_removemainsong")},
+				{PlaylistContextMenuIconId::RemoveAllAbove, LoadMenuIcon(themeData, "icon_removeallabove")},
+				{PlaylistContextMenuIconId::RemoveAllBelow, LoadMenuIcon(themeData, "icon_removeallbelow")},
+				{PlaylistContextMenuIconId::ExpandAll, LoadMenuIcon(themeData, "icon_expandall")},
+				{PlaylistContextMenuIconId::CollapseAll, LoadMenuIcon(themeData, "icon_collapseall")},
+				{PlaylistContextMenuIconId::ScrollToCurrent, LoadMenuIcon(themeData, "icon_scrolltocurrent")},
+				{PlaylistContextMenuIconId::SkipSubsong, LoadMenuIcon(themeData, "icon_removesongmenu")}
+			};
 		}
 
  		// Search bar
