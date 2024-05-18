@@ -45,6 +45,7 @@ public:
 
 public:
     bool OnInit() override;
+    int OnRun() override;
 
 private:
     void HandoffToCanonicalInstance();
@@ -92,6 +93,7 @@ public:
     std::unique_ptr<Settings::AppSettings> currentSettings;
 
 private:
+    bool _earlyExit = false;
     FramePlayer* _framePlayer = nullptr;
     std::unique_ptr<PlaybackController> _playback;
     std::unique_ptr<SingleInstanceManager> _instanceManager;

@@ -149,7 +149,8 @@ bool MyApp::OnInit()
     if (!weAreFirstInstance && currentSettings->GetOption(Settings::AppSettings::ID::SingleInstance)->GetValueAsBool())
     {
         HandoffToCanonicalInstance();
-        return false;
+        _earlyExit = true;
+        return true;
     }
     else // Normal init
     {
@@ -215,6 +216,16 @@ bool MyApp::OnInit()
 
         return initSuccess;
     }
+}
+
+int MyApp::OnRun()
+{
+    if (_earlyExit)
+    {
+        return EXIT_SUCCESS;
+    }
+
+    return wxApp::OnRun();
 }
 
 void MyApp::HandoffToCanonicalInstance()
