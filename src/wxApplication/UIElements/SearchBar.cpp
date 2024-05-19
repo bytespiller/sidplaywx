@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2023-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ namespace UIElements
 		}
 
 		// Bindings
-		_txtInput->Bind(wxEVT_TEXT_ENTER, [this](wxCommandEvent& evt)
+		_txtInput->Bind(wxEVT_TEXT_ENTER, [this](wxCommandEvent& /*evt*/)
 		{
 			const bool shiftPressed = wxGetKeyState(wxKeyCode::WXK_SHIFT);
 			EmitSignal((shiftPressed) ? SignalsSearchBar::SIGNAL_FIND_PREV : SignalsSearchBar::SIGNAL_FIND_NEXT);
@@ -62,12 +62,12 @@ namespace UIElements
 			evt.Skip();
 		});
 
-		_btnFindPrev->Bind(wxEVT_BUTTON, [this](wxCommandEvent& evt)
+		_btnFindPrev->Bind(wxEVT_BUTTON, [this](wxCommandEvent& /*evt*/)
 		{
 			EmitSignal(SignalsSearchBar::SIGNAL_FIND_PREV);
 		});
 
-		_btnFindNext->Bind(wxEVT_BUTTON, [this](wxCommandEvent& evt)
+		_btnFindNext->Bind(wxEVT_BUTTON, [this](wxCommandEvent& /*evt*/)
 		{
 			EmitSignal(SignalsSearchBar::SIGNAL_FIND_NEXT);
 		});
