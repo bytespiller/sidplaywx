@@ -86,7 +86,6 @@ bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig
     _rs.filter6581Curve(_filterConfigCache->filter6581Curve);
     _rs.filter8580Curve(_filterConfigCache->filter8580Curve);
     _rs.filter(_filterConfigCache->filterEnabled);
-    _rs.combinedWaveformsStrength(SidConfig::STRONG); // STRONG seems to yield the best results (https://github.com/libsidplayfp/libsidplayfp/issues/127).
 
     // Reset the voices enabled status
     _sidVoicesEnabledStatus =
