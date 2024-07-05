@@ -77,9 +77,14 @@ namespace FrameElements
 
 		// Pre-render active label
 		labelPreRenderActive = new wxStaticText(&_parentPanel, wxID_ANY, Strings::PlaybackMods::VOICES_UNAVAILABLE_PRERENDER, wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END);
-		labelPreRenderActive->SetFont(labelPreRenderActive->GetFont().MakeBold());
-		sizerParent->Add(labelPreRenderActive, 0, wxALIGN_CENTER_HORIZONTAL);
-		sizerParent->AddSpacer(10);
+
+		{
+			wxFont font = labelPreRenderActive->GetFont().MakeBold();
+			font.SetPointSize(10);
+			labelPreRenderActive->SetFont(font);
+			sizerParent->Add(labelPreRenderActive, 0, wxALIGN_CENTER_HORIZONTAL);
+			sizerParent->AddSpacer(10);
+		}
 
 		// Playback speed
 	    wxStaticBoxSizer* sizer_6 = new wxStaticBoxSizer(wxVERTICAL, &_parentPanel, Strings::PlaybackMods::SPEED_SLIDER);

@@ -323,7 +323,7 @@ void FramePlayer::OpenPlaybackModFrame()
         return;
     }
 
-    _framePlaybackMods = new FramePlaybackMods(this, Strings::PlaybackMods::WINDOW_TITLE, wxDefaultPosition, DpiSize(430, 240), _app);
+    _framePlaybackMods = new FramePlaybackMods(this, Strings::PlaybackMods::WINDOW_TITLE, wxDefaultPosition, DpiSize(450, 250), _app);
     _framePlaybackMods->Show();
 }
 

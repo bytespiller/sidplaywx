@@ -86,7 +86,7 @@ namespace Strings
 
 		inline constexpr const char* const STATUS_PAUSED("Paused");
 		inline constexpr const char* const STATUS_PLAYING("Playing");
-		inline constexpr const char* const STATUS_PLAYING_PRERENDER("Playing (prerender)");
+		inline constexpr const char* const STATUS_PLAYING_PRERENDER("Playing (instant)");
 		inline constexpr const char* const STATUS_MODIFIED_SUFFIX(" (MODIFIED)");
 		inline constexpr const char* const STATUS_BYTES_SUFFIX(" bytes");
 		inline constexpr const char* const STATUS_SEEKING("Seeking...");
@@ -129,7 +129,7 @@ namespace Strings
 		inline constexpr const char* const SID_VOICE("Voice");
 		inline constexpr const char* const VOICE_ACTIVE("Active");
 		inline constexpr const char* const VOICE_MENU_ITEM_SOLO("Solo");
-		inline constexpr const char* const VOICES_UNAVAILABLE_PRERENDER("Voices state frozen during playback in Fast seeking mode.");
+		inline constexpr const char* const VOICES_UNAVAILABLE_PRERENDER("Voices state frozen during playback in Instant seeking mode.");
 
 		inline constexpr const char* const SPEED_SLIDER("Playback Speed (%)");
 		inline constexpr const char* const SPEED_SLIDER_MENU_ITEM_RESET("Reset to 100%");
@@ -154,11 +154,11 @@ namespace Strings
 		inline constexpr const char* const OPT_FORCE_MONO("Force mono");
 		inline constexpr const char* const DESC_FORCE_MONO("Disables stereo/panning effects of multi-SID tunes (2SID, 3SID).\nNote: ongoing playback will stop when changing this setting.");
 
-		// Playback behavior
-		inline constexpr const char* const CATEGORY_PLAYBACK_BEHAVIOR("Playback behavior");
+		// Playback
+		inline constexpr const char* const CATEGORY_PLAYBACK_BEHAVIOR("Playback");
 
-		inline constexpr const char* const OPT_PRERENDER("Fast seeking");
-		inline constexpr const char* const DESC_PRERENDER("Pre-render the song in the background for faster seeking (especially backwards).\n- Some realtime features (e.g., toggling voices, Leave Running) won't work during playback in this mode.\n- Ongoing playback will stop when changing this setting.\n(This option is also available in a Repeat Mode button's context menu.)");
+		inline constexpr const char* const OPT_PRERENDER("Instant seeking");
+		inline constexpr const char* const DESC_PRERENDER("Pre-render the song to allow for instant seeking.\n- Some realtime features (e.g., toggling voices, Leave Running) won't work during playback in this mode.\n- Ongoing playback will stop when changing this setting.\n(This option is also available in a Repeat Mode button's context menu.)");
 
 		inline constexpr const char* const OPT_AUTOPLAY("Autoplay");
 		inline constexpr const char* const DESC_AUTOPLAY("- Play added files immediately (unless enqueued).\n- Always start playback on track navigation.");
