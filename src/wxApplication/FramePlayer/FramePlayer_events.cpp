@@ -184,13 +184,21 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
     {
         menu->AppendSeparator();
 
-        wxMenuItem* newItemExpand = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::ExpandAll), Strings::PlaylistTree::MENU_ITEM_EXPAND_ALL);
-        newItemExpand->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::ExpandAll));
-        newItemExpand->Enable(!_ui->treePlaylist->IsEmpty());
+        const bool relevant = std::any_of(_ui->treePlaylist->GetSongs().begin(), _ui->treePlaylist->GetSongs().end(), [](const PlaylistTreeModelNodePtr& qSong) { return qSong->GetSubsongCount() > 0; });
 
-        wxMenuItem* newItemCollapse = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::CollapseAll), Strings::PlaylistTree::MENU_ITEM_COLLAPSE_ALL);
-        newItemCollapse->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::CollapseAll));
-        newItemCollapse->Enable(!_ui->treePlaylist->IsEmpty());
+        // Expand all
+        {
+            wxMenuItem* newItemExpand = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::ExpandAll), Strings::PlaylistTree::MENU_ITEM_EXPAND_ALL);
+            newItemExpand->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::ExpandAll));
+            newItemExpand->Enable(relevant);
+        }
+
+        // Collapse all
+        {
+            wxMenuItem* newItemCollapse = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::CollapseAll), Strings::PlaylistTree::MENU_ITEM_COLLAPSE_ALL);
+            newItemCollapse->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::CollapseAll));
+            newItemCollapse->Enable(relevant);
+        }
     }
 
     // Scroll to current
