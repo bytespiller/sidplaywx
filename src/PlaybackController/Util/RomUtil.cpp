@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ namespace RomUtil
 
 	bool RomStatus::AreAllValidated() const
 	{
-		return std::all_of(_romStatus.begin(), _romStatus.end(), [](const auto& status){return status.second;});
+		return std::all_of(_romStatus.cbegin(), _romStatus.cend(), [](const auto& status){return status.second;});
 	}
 
 	void RomStatus::Mark(RomType type, bool value)

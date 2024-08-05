@@ -101,8 +101,8 @@ namespace UIElements
 			}
 
 			// Find and remove the item from the model (in case of a main song it is removed from the root, in case of a subsong it is removed from its parent main song)
-			auto it = std::find_if(_model.entries.begin(), _model.entries.end(), [&item](const PlaylistTreeModelNodePtr& qItemNode) { return qItemNode.get() == &item; });
-			if (it != _model.entries.end())
+			const auto it = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&item](const PlaylistTreeModelNodePtr& qItemNode) { return qItemNode.get() == &item; });
+			if (it != _model.entries.cend())
 			{
 				_model.entries.erase(it); // "item" is now nullptr/invalid, do not access it beyond this point.
 			}
@@ -172,12 +172,12 @@ namespace UIElements
 
 			// Effective default subsong is not playable, so find the first playable one.
 			const PlaylistTreeModelNodePtrArray& subsongs = node.GetChildren();
-			auto itSubsong = std::find_if(subsongs.begin(), subsongs.end(), [](const PlaylistTreeModelNodePtr& subsongItem)
+			const auto itSubsong = std::find_if(subsongs.cbegin(), subsongs.cend(), [](const PlaylistTreeModelNodePtr& subsongItem)
 			{
 				return subsongItem->IsAutoPlayable();
 			});
 
-			if (itSubsong == subsongs.end())
+			if (itSubsong == subsongs.cend())
 			{
 				return nullptr;
 			}
@@ -192,12 +192,12 @@ namespace UIElements
 
 		PlaylistTreeModelNode* Playlist::GetSong(const wxString& filepath) const
 		{
-			auto itTargetSong = std::find_if(_model.entries.begin(), _model.entries.end(), [&filepath](const PlaylistTreeModelNodePtr& songItem)
+			const auto itTargetSong = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&filepath](const PlaylistTreeModelNodePtr& songItem)
 			{
 				return songItem->filepath.IsSameAs(filepath);
 			});
 
-			if (itTargetSong == _model.entries.end())
+			if (itTargetSong == _model.entries.cend())
 			{
 				return nullptr;
 			}
@@ -233,14 +233,14 @@ namespace UIElements
 
 		PlaylistTreeModelNode* Playlist::GetNextSong(const PlaylistTreeModelNode& fromSong) const
 		{
-			const auto itCurrent = std::find_if(_model.entries.begin(), _model.entries.end(), [&fromSong](const PlaylistTreeModelNodePtr& cSongNode) { return cSongNode->filepath.IsSameAs(fromSong.filepath); });
-			if (itCurrent == _model.entries.end())
+			const auto itCurrent = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&fromSong](const PlaylistTreeModelNodePtr& cSongNode) { return cSongNode->filepath.IsSameAs(fromSong.filepath); });
+			if (itCurrent == _model.entries.cend())
 			{
 				return nullptr; // Not found (should never happen).
 			}
 
 			const auto itNext = std::next(itCurrent);
-			if (itNext == _model.entries.end())
+			if (itNext == _model.entries.cend())
 			{
 				return nullptr; // No further items.
 			}
@@ -267,8 +267,8 @@ namespace UIElements
 
 		PlaylistTreeModelNode* Playlist::GetPrevSong(const PlaylistTreeModelNode& fromSong) const
 		{
-			const auto itCurrent = std::find_if(_model.entries.begin(), _model.entries.end(), [&fromSong](const PlaylistTreeModelNodePtr& cSongNode) { return cSongNode->filepath.IsSameAs(fromSong.filepath); });
-			if (itCurrent == _model.entries.end() || itCurrent == _model.entries.begin()) // Not found (should never happen) or there aren't any previous items.
+			const auto itCurrent = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&fromSong](const PlaylistTreeModelNodePtr& cSongNode) { return cSongNode->filepath.IsSameAs(fromSong.filepath); });
+			if (itCurrent == _model.entries.cend() || itCurrent == _model.entries.cbegin()) // Not found (should never happen) or there aren't any previous items.
 			{
 				return nullptr;
 			}
@@ -356,7 +356,7 @@ namespace UIElements
 
 		int Playlist::GetSongIndex(const wxString& filepath) const
 		{
-			auto itTargetSong = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&filepath](const PlaylistTreeModelNodePtr& songItem)
+			const auto itTargetSong = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&filepath](const PlaylistTreeModelNodePtr& songItem)
 			{
 				return songItem->filepath.IsSameAs(filepath);
 			});

@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,6 @@ namespace ThemeData
 	wxColor ThemedElementData::GetPropertyColor(const std::string& property) const
 	{
 		const auto it = _colors.find(property);
-		return (it == _colors.end()) ? wxColor() : (*it).second;
+		return (it == _colors.cend()) ? wxColor() : (*it).second;
 	}
 }

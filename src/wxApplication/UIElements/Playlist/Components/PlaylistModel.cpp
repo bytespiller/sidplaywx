@@ -72,7 +72,7 @@ bool PlaylistTreeModelNode::IsAutoPlayable() const
 	}
 
 	// If it has children, check that there is at least one which isn't tagged for auto-navigation skip.
-	return _children.empty() || std::any_of(_children.begin(), _children.end(), [](const PlaylistTreeModelNodePtr& subsong)
+	return _children.empty() || std::any_of(_children.cbegin(), _children.cend(), [](const PlaylistTreeModelNodePtr& subsong)
 	{
 		return subsong->GetTag() == PlaylistTreeModelNode::ItemTag::Normal;
 	});

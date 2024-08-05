@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ namespace Settings
 
 		inline Option::TypeSerialized StringAsType(const wxString& type)
 		{
-			const auto it = std::find_if(detail::typeToStringMap.begin(), detail::typeToStringMap.end(), [&type](const auto& pair)
+			const auto it = std::find_if(detail::typeToStringMap.cbegin(), detail::typeToStringMap.cend(), [&type](const auto& pair)
 			{
 				return pair.second == type;
 			});

@@ -314,7 +314,7 @@ void FramePlayer::UpdateIgnoredSong(PlaylistTreeModelNode& mainSongNode)
         }
         else
         {
-            const bool allSubsongsAreShort = std::all_of(subNodes.begin(), subNodes.end(), [](const PlaylistTreeModelNodePtr& subNode)
+            const bool allSubsongsAreShort = std::all_of(subNodes.cbegin(), subNodes.cend(), [](const PlaylistTreeModelNodePtr& subNode)
             {
                 return subNode->GetTag() == PlaylistTreeModelNode::ItemTag::ShortDuration;
             });

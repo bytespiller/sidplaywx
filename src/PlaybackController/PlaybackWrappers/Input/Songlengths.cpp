@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -145,7 +145,7 @@ uint_least32_t Songlengths::GetDurationMs(SidTune& tune) const
 	}
 
 	const auto& it = _database.find(md5);
-	if (it == _database.end())
+	if (it == _database.cend())
 	{
 		return 0; // No tune in database.
 	}

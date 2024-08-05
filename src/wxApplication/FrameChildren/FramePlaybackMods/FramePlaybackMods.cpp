@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ void FramePlaybackMods::OnVoiceCheckBox(wxCommandEvent& evt)
     if (modifierSolo)
     {
         const bool modifierSoloAll = wxGetKeyState(WXK_SHIFT);
-        const bool shouldUnmuteAll = std::all_of(allCheckboxes.begin(), allCheckboxes.end(), [data, modifierSoloAll](const wxCheckBox* chkBox)
+        const bool shouldUnmuteAll = std::all_of(allCheckboxes.cbegin(), allCheckboxes.cend(), [data, modifierSoloAll](const wxCheckBox* chkBox)
         {
             const VoiceCheckBoxData* const dataOther = dynamic_cast<VoiceCheckBoxData*>(chkBox->GetRefData());
             if (!modifierSoloAll && dataOther->sidNum != data->sidNum)

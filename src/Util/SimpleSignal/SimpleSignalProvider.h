@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,21 +73,19 @@ public:
 	void Unsubscribe(const Subscriber& subscriber)
 	{
 		_subscribers.erase(
-		std::remove_if(_subscribers.begin(), _subscribers.end(), [&subscriber](const SubscriptionRef& subRef)
-		{
-			if (auto weakSubscriber = subRef.subscriber.lock())
+			std::remove_if(_subscribers.begin(), _subscribers.end(), [&subscriber](const SubscriptionRef& subRef)
 			{
-				return weakSubscriber.get() == &subscriber;
-			}
-			else
-			{
-				return true; // This one is dead anyway.
-			}
+				if (auto weakSubscriber = subRef.subscriber.lock())
+				{
+					return weakSubscriber.get() == &subscriber;
+				}
 
-			return false;
+				return true; // This one is dead anyway since the lock failed.
+			}),
+   			_subscribers.end()
+		);
 
-		}),
-   		_subscribers.end());
+		// Reminder: C++20 has std::erase_if so update this code perhaps in the future.
 	}
 
 protected:
@@ -122,11 +120,14 @@ private:
 	void CleanupDeadSubscribers()
 	{
 		_subscribers.erase(
-		std::remove_if(_subscribers.begin(), _subscribers.end(), [](const SubscriptionRef& subRef)
-		{
-			return subRef.subscriber.expired();
-		}),
-   		_subscribers.end());
+			std::remove_if(_subscribers.begin(), _subscribers.end(), [](const SubscriptionRef& subRef)
+			{
+				return subRef.subscriber.expired();
+			}),
+			_subscribers.end()
+		);
+
+		// Reminder: C++20 has std::erase_if so update this code perhaps in the future.
 	}
 
 private:

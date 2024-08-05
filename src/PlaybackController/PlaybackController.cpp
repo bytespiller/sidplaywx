@@ -481,7 +481,7 @@ std::string PlaybackController::GetCurrentTuneSidDescription() const
 
         if (multipleOfTheSame)
         {
-            retString = prefix + *uniqueSidNames.begin();
+            retString = prefix + *uniqueSidNames.cbegin();
         }
         else
         {
@@ -625,9 +625,9 @@ bool PlaybackController::AreAllRelevantVoicesEnabled() const
 {
     const SidDecoder::SidVoicesEnabledStatus& allSidVoices = _sidDecoder->GetSidVoicesEnabledStatus();
     const int sidsNeeded = _sidDecoder->GetCurrentTuneSidChipsRequired();
-    return std::all_of(allSidVoices.begin(), allSidVoices.begin() + sidsNeeded, [](const std::vector<bool>& cSidVoices)
+    return std::all_of(allSidVoices.cbegin(), allSidVoices.cbegin() + sidsNeeded, [](const std::vector<bool>& cSidVoices)
     {
-        return std::all_of(cSidVoices.begin(), cSidVoices.end(), [](const bool enabled){return enabled;});
+        return std::all_of(cSidVoices.cbegin(), cSidVoices.cend(), [](const bool enabled){return enabled;});
     });
 }
 

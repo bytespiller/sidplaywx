@@ -184,7 +184,7 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
     {
         menu->AppendSeparator();
 
-        const bool relevant = std::any_of(_ui->treePlaylist->GetSongs().begin(), _ui->treePlaylist->GetSongs().end(), [](const PlaylistTreeModelNodePtr& qSong) { return qSong->GetSubsongCount() > 0; });
+        const bool relevant = std::any_of(_ui->treePlaylist->GetSongs().cbegin(), _ui->treePlaylist->GetSongs().cend(), [](const PlaylistTreeModelNodePtr& qSong) { return qSong->GetSubsongCount() > 0; });
 
         // Expand all
         {
@@ -802,13 +802,15 @@ void FramePlayer::OnAudioDeviceChanged(bool success)
 
 PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const PlaylistTreeModelNode& startNode, bool forwardDirection)
 {
+    // TODO: fix bug where first item in playlist cannot be found
+
     const PlaylistTreeModelNodePtrArray& songs = _ui->treePlaylist->GetSongs();
-    auto itStart = std::find_if(songs.begin(), songs.end(), [&startNode](const PlaylistTreeModelNodePtr& qNode)
+    auto itStart = std::find_if(songs.cbegin(), songs.cend(), [&startNode](const PlaylistTreeModelNodePtr& qNode)
     {
         return startNode.filepath.IsSameAs(qNode->filepath);
     });
 
-    if (itStart == songs.end())
+    if (itStart == songs.cend())
     {
         return nullptr; // startNode not found (can happen if the playlist is empty/cleared).
     }
@@ -817,12 +819,12 @@ PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const Play
 
     if (forwardDirection)
     {
-        auto itNextResult = std::find_if(++itStart, songs.end(), [&queryLower](const PlaylistTreeModelNodePtr& qNode)
+        auto itNextResult = std::find_if(++itStart, songs.cend(), [&queryLower](const PlaylistTreeModelNodePtr& qNode)
         {
             return qNode->title.Lower().Contains(queryLower);
         });
 
-        if (itNextResult == songs.end())
+        if (itNextResult == songs.cend())
         {
             return nullptr; // No further results.
         }
