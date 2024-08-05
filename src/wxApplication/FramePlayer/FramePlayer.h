@@ -189,7 +189,7 @@ private:
 
     void OnAudioDeviceChanged(bool success);
 
-    PlaylistTreeModelNode* DoFindSong(const wxString& query, const PlaylistTreeModelNode& startNode, bool forwardDirection);
+    PlaylistTreeModelNode* DoFindSong(const wxString& query, const PlaylistTreeModelNode& startNode, bool forwardDirection, bool restart);
     void OnFindSong(UIElements::SignalsSearchBar signalId);
     void DoRemoveSongTreeItem(PlaylistTreeModelNode& node);
     void DoRemoveAllSongTreeItemsAbove(PlaylistTreeModelNode& node);

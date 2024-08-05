@@ -800,10 +800,8 @@ void FramePlayer::OnAudioDeviceChanged(bool success)
     audioDeviceRevertCount = 0;
 }
 
-PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const PlaylistTreeModelNode& startNode, bool forwardDirection)
+PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const PlaylistTreeModelNode& startNode, bool forwardDirection, bool restart)
 {
-    // TODO: fix bug where first item in playlist cannot be found
-
     const PlaylistTreeModelNodePtrArray& songs = _ui->treePlaylist->GetSongs();
     auto itStart = std::find_if(songs.cbegin(), songs.cend(), [&startNode](const PlaylistTreeModelNodePtr& qNode)
     {
@@ -819,7 +817,7 @@ PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const Play
 
     if (forwardDirection)
     {
-        auto itNextResult = std::find_if(++itStart, songs.cend(), [&queryLower](const PlaylistTreeModelNodePtr& qNode)
+        const auto itNextResult = std::find_if(itStart + ((restart) ? 0 : 1), songs.cend(), [&queryLower](const PlaylistTreeModelNodePtr& qNode)
         {
             return qNode->title.Lower().Contains(queryLower);
         });
@@ -833,7 +831,7 @@ PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const Play
     }
     else
     {
-        auto itPrevResult = std::find_if(std::reverse_iterator(itStart), songs.rend(), [&queryLower](const PlaylistTreeModelNodePtr& qNode)
+        const auto itPrevResult = std::find_if(std::reverse_iterator(itStart) - ((restart) ? 1 : 0), songs.rend(), [&queryLower](const PlaylistTreeModelNodePtr& qNode)
         {
             return qNode->title.Lower().Contains(queryLower);
         });
@@ -980,12 +978,12 @@ void FramePlayer::OnFindSong(UIElements::SignalsSearchBar signalId)
     // Find next/prev
     const bool forwardDirection = signalId != UIElements::SignalsSearchBar::SIGNAL_FIND_PREV;
     bool wrapAround = false;
-    const PlaylistTreeModelNode* targetItem = (nodeCurrent == nullptr) ? nullptr : DoFindSong(query, *nodeCurrent, forwardDirection);
+    const PlaylistTreeModelNode* targetItem = (nodeCurrent == nullptr) ? nullptr : DoFindSong(query, *nodeCurrent, forwardDirection, false);
 
     if (targetItem == nullptr) // Next/prev result not found, try to wrap around
     {
         PlaylistTreeModelNode* nodeStart = (forwardDirection) ? _ui->treePlaylist->GetSongs().front().get() : _ui->treePlaylist->GetSongs().back().get();
-        targetItem = DoFindSong(query, *nodeStart, forwardDirection); // Wrap around.
+        targetItem = DoFindSong(query, *nodeStart, forwardDirection, true); // Wrap around.
         wrapAround = true;
     }
 
