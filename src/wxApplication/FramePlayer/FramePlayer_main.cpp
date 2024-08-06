@@ -182,8 +182,9 @@ void FramePlayer::SetupUiElements()
         OnRepeatModeExtraOptionToggled(static_cast<ExtraOptionId>(param));
     });
 
-    _timer = std::make_unique<wxTimer>(this);
-    Bind(wxEVT_TIMER, &OnTimer, this);
+    // Global throttleable UI-update timer
+    _timerRefresh = std::make_unique<wxTimer>(this);
+    Bind(wxEVT_TIMER, &OnTimerRefresh, this, _timerRefresh->GetId());
 
     // Menu
     SetMenuBar(_ui->menuBar);
@@ -217,6 +218,11 @@ void FramePlayer::DeferredInit()
     {
         ToggleTopmost();
     }
+
+    // Global hotkeys-polling timer
+    _timerGlobalHotkeysPolling = std::make_unique<wxTimer>(this);
+    Bind(wxEVT_TIMER, &OnTimerGlobalHotkeysPolling, this, _timerGlobalHotkeysPolling->GetId());
+    _timerGlobalHotkeysPolling->Start(TIMER_INTERVAL_GLOBAL_HOTKEYS_POLLING);
 
     // Handle the "Open With" situation (not done in a constructor in order to have the wxYield/Refresh work while adding to playlist).
     if (_app.argc > 1)
@@ -258,20 +264,21 @@ void FramePlayer::DeferredInit()
 
 void FramePlayer::SetRefreshTimerInterval(int desiredInterval)
 {
-    _timerCanonicalRefreshInterval = desiredInterval;
+    _canonicalTimerRefreshInterval = desiredInterval;
 
-    const int cInterval = _timer->GetInterval();
-    const int effectiveInterval = (IsIconized()) ? TIMER_REFRESH_INTERVAL_IDLE : _timerCanonicalRefreshInterval;
+    const int cInterval = _timerRefresh->GetInterval();
+    const int effectiveInterval = (IsIconized()) ? TIMER_REFRESH_INTERVAL_IDLE : _canonicalTimerRefreshInterval;
     if (cInterval != effectiveInterval)
     {
-        _timer->Start(effectiveInterval);
+        _timerRefresh->Start(effectiveInterval);
     }
 }
 
 void FramePlayer::CloseApplication()
 {
     _exitingApplication = true;
-    _timer->Stop(); // Segfault can occur otherwise.
+    _timerGlobalHotkeysPolling->Stop();
+    _timerRefresh->Stop(); // Segfault can occur otherwise.
     _app.StopPlayback();
 
     // TODO: save window settings etc.

@@ -50,10 +50,13 @@ private:
     using SimpleSignalListener<UIElements::SignalsSearchBar>::SubscribeMe;
 
 private:
+    using ExtraOptionId = UIElements::RepeatModeButton::ExtraOptionsHandler::ExtraOptionId;
+
+private:
     static constexpr int TIMER_REFRESH_INTERVAL_HIGH = 10;
     static constexpr int TIMER_REFRESH_INTERVAL_IDLE = 100;
 
-    using ExtraOptionId = UIElements::RepeatModeButton::ExtraOptionsHandler::ExtraOptionId;
+    static constexpr int TIMER_INTERVAL_GLOBAL_HOTKEYS_POLLING = 30;
 
 public:
     template <typename T>
@@ -168,7 +171,9 @@ private:
     void OnMenuOpening(wxMenuEvent& evt);
     void OnMenuItemSelected(wxCommandEvent& evt);
 
-    void OnTimer(wxTimerEvent& evt);
+    void OnTimerGlobalHotkeysPolling(wxTimerEvent& evt);
+    void OnTimerRefresh(wxTimerEvent& evt);
+
     void OnIconize(wxIconizeEvent& evt);
     void OnClose(wxCloseEvent& evt);
 
@@ -206,10 +211,11 @@ private:
     ThemeManager _themeManager;
     SidDecoder _silentSidInfoDecoder;
     std::unique_ptr<FrameElements::ElementsPlayer> _ui;
-    std::unique_ptr<wxTimer> _timer;
+    std::unique_ptr<wxTimer> _timerRefresh;
+    std::unique_ptr<wxTimer> _timerGlobalHotkeysPolling;
     FramePlaybackMods* _framePlaybackMods = nullptr;
     FramePrefs* _framePrefs = nullptr;
     wxArrayString _enqueuedFiles;
     bool _addingFilesToPlaylist = false;
-    int _timerCanonicalRefreshInterval = TIMER_REFRESH_INTERVAL_IDLE;
+    int _canonicalTimerRefreshInterval = TIMER_REFRESH_INTERVAL_IDLE;
 };

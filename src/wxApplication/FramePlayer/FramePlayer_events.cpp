@@ -433,38 +433,13 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
     }
 }
 
-void FramePlayer::OnTimer(wxTimerEvent& /*evt*/)
+void FramePlayer::OnTimerGlobalHotkeysPolling(wxTimerEvent& /*evt*/)
 {
-    const PlaybackController& playbackInfo = _app.GetPlaybackInfo();
-    PlaybackController::State cState = playbackInfo.GetState();
-
-    const bool hiresUpdate = _ui->compositeSeekbar->IsSeekPreviewing() || cState == PlaybackController::State::Seeking || cState == PlaybackController::State::Playing;
-    SetRefreshTimerThrottled(!hiresUpdate);
-
-    if (cState != PlaybackController::State::Stopped && cState != PlaybackController::State::Undefined)
-    {
-        const uint_least32_t playbackTimeMs = playbackInfo.GetTime();
-        if (playbackTimeMs > 0)
-        {
-            UpdatePeriodicDisplays(playbackTimeMs);
-
-            // Playback (repeat) control
-            const int ivalue = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode)->GetValueAsInt();
-            const RepeatMode repeatMode = static_cast<RepeatMode>(ivalue);
-            if (repeatMode != RepeatMode::InfiniteDuration)
-            {
-                const int trimMs = _app.currentSettings->GetOption(Settings::AppSettings::ID::SonglengthsTrim)->GetValueAsInt();
-                if (playbackTimeMs >= _ui->compositeSeekbar->GetDurationValue() + trimMs)
-                {
-                    OnSongDurationReached();
-                }
-            }
-        }
-    }
-
     // Media Keys
     if (_app.currentSettings->GetOption(Settings::AppSettings::ID::MediaKeys)->GetValueAsBool())
     {
+        PlaybackController::State cState = _app.GetPlaybackInfo().GetState();
+
         switch(Helpers::Wx::Input::GetMediaKeyCommand()) // Because the RegisterHotKey is only implemented under MSW, we use this universal solution for now.
         {
             case WXK_MEDIA_PLAY_PAUSE:
@@ -507,9 +482,39 @@ void FramePlayer::OnTimer(wxTimerEvent& /*evt*/)
     }
 }
 
+void FramePlayer::OnTimerRefresh(wxTimerEvent& /*evt*/)
+{
+    const PlaybackController& playbackInfo = _app.GetPlaybackInfo();
+    PlaybackController::State cState = playbackInfo.GetState();
+
+    const bool hiresUpdate = _ui->compositeSeekbar->IsSeekPreviewing() || cState == PlaybackController::State::Seeking || cState == PlaybackController::State::Playing;
+    SetRefreshTimerThrottled(!hiresUpdate);
+
+    if (cState != PlaybackController::State::Stopped && cState != PlaybackController::State::Undefined)
+    {
+        const uint_least32_t playbackTimeMs = playbackInfo.GetTime();
+        if (playbackTimeMs > 0)
+        {
+            UpdatePeriodicDisplays(playbackTimeMs);
+
+            // Playback (repeat) control
+            const int ivalue = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode)->GetValueAsInt();
+            const RepeatMode repeatMode = static_cast<RepeatMode>(ivalue);
+            if (repeatMode != RepeatMode::InfiniteDuration)
+            {
+                const int trimMs = _app.currentSettings->GetOption(Settings::AppSettings::ID::SonglengthsTrim)->GetValueAsInt();
+                if (playbackTimeMs >= _ui->compositeSeekbar->GetDurationValue() + trimMs)
+                {
+                    OnSongDurationReached();
+                }
+            }
+        }
+    }
+}
+
 void FramePlayer::OnIconize(wxIconizeEvent& evt)
 {
-    const int timerInterval = (evt.IsIconized()) ? TIMER_REFRESH_INTERVAL_IDLE : _timerCanonicalRefreshInterval;
+    const int timerInterval = (evt.IsIconized()) ? TIMER_REFRESH_INTERVAL_IDLE : _canonicalTimerRefreshInterval;
     SetRefreshTimerInterval(timerInterval);
 }
 
