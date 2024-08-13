@@ -25,13 +25,19 @@ namespace UIElements
 {
 	namespace Util // Static functions.
 	{
-		std::shared_ptr<wxBitmap> LoadRasterizedSvg(const char* image, const wxSize& size, const wxPoint& artOffset, double scale)
+		std::shared_ptr<wxBitmap> LoadRasterizedSvg(const char* image, const wxSize& size, const wxPoint& artOffset, double scale, const wxColor* color)
 		{
 			const std::unique_ptr<BufferHolder>& data = Helpers::Wx::Files::GetFileContentFromDisk(image);
 			assert(data.get() != nullptr); // File not found.
 			const wxSize scaledImageSize = size * scale;
 			wxBitmapBundle bb = wxBitmapBundle::FromSVG(data->buffer, data->size, scaledImageSize);
 			wxImage destImage = bb.GetBitmap(scaledImageSize).ConvertToImage().Resize(wxSize(scaledImageSize.GetWidth() / scale, scaledImageSize.GetHeight() / scale), wxPoint(artOffset.x * scale, artOffset.y * scale));
+
+			if (color != nullptr)
+			{
+				destImage.SetRGB(destImage.GetSize(), color->GetRed(), color->GetGreen(), color->GetBlue());
+			}
+
 			return std::make_shared<wxBitmap>(destImage);
 		}
 

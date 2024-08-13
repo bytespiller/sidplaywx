@@ -190,6 +190,7 @@ void FramePrefs::FillPropertyGrid()
         wxPropertyCategory* categoryHvsc = new wxPropertyCategory(Strings::Preferences::CATEGORY_HVSC);
         categoryHvsc->SetHelpString(Strings::Preferences::DESC_CATEGORY_HVSC);
         page->Append(categoryHvsc);
+
         {
             wxFileProperty* filePropertyHandler = new wxFileProperty(Strings::Preferences::OPT_SONGLENGTHS_PATH);
             filePropertyHandler->SetAttribute(wxPG_FILE_WILDCARD, wxString::Format("%s (*.md5)|*.md5", Strings::Preferences::WILDCARD_DESC_MD5));
@@ -197,6 +198,12 @@ void FramePrefs::FillPropertyGrid()
         }
 
         AddWrappedProp(Settings::AppSettings::ID::SonglengthsTrim, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_SONGLENGTHS_TRIM), *page, Effective::Immediately, Strings::Preferences::DESC_SONGLENGTHS_TRIM, MIN_SONGLENGTHS_TRIM, MAX_SONGLENGTHS_TRIM);
+
+        {
+            wxFileProperty* filePropertyHandler = new wxFileProperty(Strings::Preferences::OPT_STIL_PATH);
+            filePropertyHandler->SetAttribute(wxPG_FILE_WILDCARD, wxString::Format("%s|STIL.txt", Strings::Preferences::WILDCARD_DESC_STIL_TXT));
+            AddWrappedProp(Settings::AppSettings::ID::StilPath, TypeSerialized::String, filePropertyHandler, *page, Effective::Immediately, Strings::Preferences::DESC_STIL_PATH);
+        }
     }
 
     // Emulation
@@ -435,6 +442,12 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     {
                         const std::wstring& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
                         option.UpdateValue(relPath);
+                    }
+                    else if (prop.first == Settings::AppSettings::ID::StilPath)
+                    {
+                        const std::wstring& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
+                        option.UpdateValue(relPath);
+                        _framePlayer.InitStilInfo({});
                     }
                     else if (prop.first == Settings::AppSettings::ID::RomKernalPath || prop.first == Settings::AppSettings::ID::RomBasicPath || prop.first == Settings::AppSettings::ID::RomChargenPath)
                     {

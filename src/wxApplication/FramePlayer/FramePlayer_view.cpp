@@ -202,15 +202,71 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
         _ui->labelAuthor->SetLabelText("");
         _ui->labelCopyright->SetLabelText("");
         _ui->labelSubsong->SetLabelText("0 / 0");
+
+        _ui->labelStilNameTitle->SetText("");
+        _ui->labelStilArtistAuthor->SetText("");
+        _ui->labelStilComment->SetText("");
     }
     else
     {
         const PlaybackController& playback = _app.GetPlaybackInfo();
+        const int subsong = playback.GetCurrentSubsong();
+
         _ui->labelTitle->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Title));
         _ui->labelAuthor->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author));
         _ui->labelCopyright->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released));
+        _ui->labelSubsong->SetLabelText(wxString::Format("%i / %i", subsong, playback.GetTotalSubsongs()));
 
-        _ui->labelSubsong->SetLabelText(wxString::Format("%i / %i", playback.GetCurrentSubsong(), playback.GetTotalSubsongs()));
+        // Set STIL labels
+        if (const PlaylistTreeModelNode* node = _ui->treePlaylist->GetActiveSong())
+        {
+            const std::wstring& NONE(L"/");
+            const std::wstring& SEPARATOR =  L"  |  ";
+
+            const Stil::Info& stil = _stilInfo.Get(node->hvscPath.ToStdString());
+
+            // "Name - Title"
+            {
+
+                std::wstring namesTitles = stil.GetFieldAsString(stil.names, subsong, SEPARATOR, true);
+                const std::wstring& titles = stil.GetFieldAsString(stil.titles, subsong, SEPARATOR, true);
+                if (!namesTitles.empty() && !titles.empty())
+                {
+                    namesTitles.append(L" - ");
+                }
+
+                const std::wstring& final = namesTitles.append(titles);
+                _ui->labelStilNameTitle->SetText((final.empty()) ? NONE : final);
+            }
+
+            // "Artist (Author)"
+            {
+                std::wstring artistsAuthors = stil.GetFieldAsString(stil.artists, subsong, SEPARATOR, true);
+                const std::wstring& authors = stil.GetFieldAsString(stil.authors, subsong, SEPARATOR, true);
+
+                const bool bothPresent = !artistsAuthors.empty() && !authors.empty();
+                if (bothPresent)
+                {
+                    artistsAuthors.append(L" (");
+                }
+
+                artistsAuthors.append(authors);
+
+                if (bothPresent)
+                {
+                    artistsAuthors.append(L")");
+                }
+
+                _ui->labelStilArtistAuthor->GetForegroundColour();
+                _ui->labelStilArtistAuthor->SetText((artistsAuthors.empty()) ? NONE : artistsAuthors);
+            }
+
+            // Comment(s)
+            {
+                const std::wstring& final = stil.GetFieldAsString(stil.comments, subsong, SEPARATOR, true);
+                _ui->labelStilComment->SetText((final.empty()) ? NONE : final);
+            }
+        }
     }
 
     UpdatePlaybackStatusBar();

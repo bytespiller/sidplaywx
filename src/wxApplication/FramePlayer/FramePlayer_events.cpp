@@ -418,6 +418,10 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             ToggleVisualizationEnabled();
             break;
 
+        case MenuItemId_Player::StilInfoEnabled:
+            ToggleStilInfoEnabled();
+            break;
+
         // --- Help ---
         case MenuItemId_Player::CheckUpdates:
             CheckUpdates();

@@ -25,6 +25,8 @@
 
 #include "ElementsPlayer.h"
 #include "../Theme/ThemeManager.h"
+#include "../../HvscSupport/Songlengths.h"
+#include "../../HvscSupport/Stil/Stil.h"
 #include "../../PlaybackController/PlaybackWrappers/Input/SidDecoder.h"
 #include "../../Util/SimpleSignal/SimpleSignalListener.h"
 
@@ -73,10 +75,12 @@ public:
     FrameElements::ElementsPlayer& GetUIElements(PassKey<FramePrefs>);
     void ForceAppExitOnPrefsClose(PassKey<FramePrefs>);
     void ForceStopPlayback(PassKey<FramePrefs>);
+    void InitStilInfo(PassKey<FramePrefs>);
 
 private:
     // File
     void InitSonglengthsDatabase();
+    void InitStilInfo();
     void SetupUiElements();
     void DeferredInit();
     void SetRefreshTimerInterval(int desiredInterval);
@@ -93,6 +97,8 @@ private:
 
     void ToggleVisualizationEnabled();
     void EnableVisualization(bool enable); // Helper
+    void ToggleStilInfoEnabled();
+    void EnableStilInfo(bool enable); // Helper
 
     // Help
     void CheckUpdates();
@@ -123,6 +129,8 @@ private:
     void UpdateIgnoredSongs();
     void UpdateIgnoredSong(PlaylistTreeModelNode& mainSongNode);
     long GetEffectiveSongDuration(const PlaylistTreeModelNode& node) const;
+
+    Songlengths::HvscInfo TryGetHvscInfo(const char* md5, int subsong = 1) const;
 
 #pragma endregion
 #pragma region *** input ***
@@ -206,16 +214,23 @@ private:
 private:
     bool _initialized = false;
     bool _exitingApplication = false;
+
     MyApp& _app;
     wxPanel* _panel;
+
     ThemeManager _themeManager;
+    Songlengths _sidDatabase;
+    Stil _stilInfo;
     SidDecoder _silentSidInfoDecoder;
+
     std::unique_ptr<FrameElements::ElementsPlayer> _ui;
     std::unique_ptr<wxTimer> _timerRefresh;
     std::unique_ptr<wxTimer> _timerGlobalHotkeysPolling;
+    int _canonicalTimerRefreshInterval = TIMER_REFRESH_INTERVAL_IDLE;
+
     FramePlaybackMods* _framePlaybackMods = nullptr;
     FramePrefs* _framePrefs = nullptr;
+
     wxArrayString _enqueuedFiles;
     bool _addingFilesToPlaylist = false;
-    int _canonicalTimerRefreshInterval = TIMER_REFRESH_INTERVAL_IDLE;
 };

@@ -80,7 +80,7 @@ public:
 public:
 	PlaylistTreeModelNode() = delete;
 	PlaylistTreeModelNode(PlaylistTreeModelNode&) = delete;
-	PlaylistTreeModelNode(PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable);
+	PlaylistTreeModelNode(PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable);
 
 public:
 	/// @brief Returns a nullptr for a mainsong or a mainsong for a subsong.
@@ -132,6 +132,8 @@ public:
 	const wxString author;
 	const wxString copyright;
 	const wxString filepath;
+	const wxString hvscPath;
+	const char* const md5;
 
 	/// @brief Indicates a default subsong for a song item, or a self-index (1-based) for a subsong item.
 	const int defaultSubsong;

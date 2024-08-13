@@ -28,6 +28,9 @@
     <Image type="svg" offset="0,0" scale="1.0" name="icon_expandall" path="svg/add-line.svg"/>
     <Image type="svg" offset="0,0" scale="1.0" name="icon_collapseall" path="svg/subtract-line.svg"/>
     <Image type="svg" offset="0,0" scale="1.0" name="icon_scrolltocurrent" path="svg/home-line.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_stilnametitle" path="svg/album-fill.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_stilartistauthor" path="svg/mic-fill.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_stilcomment" path="svg/chat-quote-fill.svg"/>
   </Images>
   <GuiElements>
     <GuiElement name="Seekbar">
@@ -47,6 +50,12 @@
       <Colors>
         <Color type="wxSYS" value="wxSYS_COLOUR_HIGHLIGHT" property="waveColor"/>
         <Color type="Val" value="white" property="gradientTo"/>
+      </Colors>
+    </GuiElement>
+    <GuiElement name="StilInfo">
+      <Colors>
+        <Color type="wxSYS" value="wxSYS_COLOUR_HIGHLIGHT" property="textColor"/>
+        <Color type="wxSYS" value="wxSYS_COLOUR_HIGHLIGHT" property="iconColor"/>
       </Colors>
     </GuiElement>
   </GuiElements>

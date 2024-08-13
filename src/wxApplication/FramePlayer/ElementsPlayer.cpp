@@ -37,7 +37,7 @@ namespace FrameElements // Static vars
 
 namespace FrameElements // Static functions
 {
-	static wxStaticText* AttachIconLabel(const ThemeData::ThemeImage& themeImage, wxPanel& parent, wxBoxSizer* parentSizer)
+	static wxStaticText* AttachIconLabel(const ThemeData::ThemeImage& themeImage, const std::string& tooltip, wxPanel& parent, wxBoxSizer* parentSizer)
 	{
 		wxBoxSizer* sizerIconLabel = new wxBoxSizer(wxHORIZONTAL);
 		parentSizer->Add(sizerIconLabel, 1, wxEXPAND, 0);
@@ -45,9 +45,41 @@ namespace FrameElements // Static functions
 		const auto& img = UIElements::Util::LoadRasterizedSvg(themeImage.path.c_str(), DpiSize(TEMP_LABEL_ICON_SIZE), themeImage.offset, themeImage.scale);
 		wxStaticBitmap* bitmapIcon = new wxStaticBitmap(&parent, wxID_ANY, *img.get());
 		sizerIconLabel->Add(bitmapIcon, 0, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
+		bitmapIcon->SetToolTip(tooltip);
 
 		wxStaticText* labelPtr = new wxStaticText(&parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END);
 		sizerIconLabel->Add(labelPtr, 1, wxALIGN_CENTER_VERTICAL, TEMP_LABEL_BORDER_SIZE);
+
+		return labelPtr;
+	}
+
+	static UIElements::ScrollingLabel* AttachStilIconScrollingLabel(const ThemeData::ThemeImage& themeImage, const ThemeData::ThemedElementData& themedData, const std::string& tooltip, wxPanel& parent, wxBoxSizer* parentSizer, UIElements::ScrollingLabel::TextJustify justify)
+	{
+		wxBoxSizer* sizerIconLabel = new wxBoxSizer(wxHORIZONTAL);
+		parentSizer->Add(sizerIconLabel, 1, wxEXPAND, 0);
+
+		// Create icon
+		const wxColor iconColor = themedData.GetPropertyColor("iconColor");
+		const std::shared_ptr<wxBitmap>& img = UIElements::Util::LoadRasterizedSvg(themeImage.path.c_str(), DpiSize(TEMP_LABEL_ICON_SIZE), themeImage.offset, themeImage.scale, &iconColor);
+		wxStaticBitmap* bitmapIcon = new wxStaticBitmap(&parent, wxID_ANY, *img.get());
+		bitmapIcon->SetToolTip(tooltip);
+
+		// Create label
+		UIElements::ScrollingLabel* labelPtr = new UIElements::ScrollingLabel(&parent, themedData, justify);
+
+		// Attach & layout the elements
+		wxSizerFlags::DisableConsistencyChecks(); // (wxEXPAND | wxALIGN_CENTER_VERTICAL) is effective combination but the check against it is defective. This call disables this check globally (with no way to re-enable it unfortunately).
+
+		if (justify == UIElements::ScrollingLabel::TextJustify::Right)
+		{
+			sizerIconLabel->Add(labelPtr, 1, wxEXPAND | wxALIGN_CENTER_VERTICAL, TEMP_LABEL_BORDER_SIZE);
+			sizerIconLabel->Add(bitmapIcon, 0, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
+		}
+		else
+		{
+			sizerIconLabel->Add(bitmapIcon, 0, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
+			sizerIconLabel->Add(labelPtr, 1, wxEXPAND | wxALIGN_CENTER_VERTICAL, TEMP_LABEL_BORDER_SIZE);
+		}
 
 		return labelPtr;
 	}
@@ -126,6 +158,7 @@ namespace FrameElements // Player class
 				wxMenu* viewMenu = new wxMenu();
 				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::StayTopmost), wxString::Format("%s\tAlt+A", Strings::FramePlayer::MENU_ITEM_STAY_TOPMOST));
 				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::VisualizationEnabled), wxString::Format(Strings::FramePlayer::MENU_ITEM_VISUALIZATION_ENABLED));
+				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::StilInfoEnabled), wxString::Format(Strings::FramePlayer::MENU_ITEM_STIL_INFO));
 
 				menuBar->Append(viewMenu, Strings::FramePlayer::MENU_VIEW);
 			}
@@ -146,16 +179,16 @@ namespace FrameElements // Player class
 		wxBoxSizer* sizerSongArea = new wxBoxSizer(wxHORIZONTAL);
 		sizerMain->Add(sizerSongArea, 0, wxEXPAND);
 
-		wxBoxSizer* sizerSongInfoLeft = new wxBoxSizer(wxVERTICAL); // Left
+		// Left
+		wxBoxSizer* sizerSongInfoLeft = new wxBoxSizer(wxVERTICAL);
 		sizerSongArea->Add(sizerSongInfoLeft, 1);
 
-		/*wxBoxSizer* sizerSongInfoRight = new wxBoxSizer(wxVERTICAL); // Right -- TODO (unused for now, perhaps STIL can be displayed here...)
-		sizerSongArea->Add(sizerSongInfoRight, 1, wxEXPAND);*/
+		// Right
+		wxBoxSizer* sizerStilRight = new wxBoxSizer(wxVERTICAL);
+		sizerSongArea->Add(sizerStilRight, 1, wxEXPAND);
 
 		// Labels
-		AttachFixedSizeSeparator(DpiSize(0, 4), sizerSongInfoLeft, _parentPanel); // TODO: magic numbers
-
-		labelTitle = AttachIconLabel(themeData.GetImage("icon_music"), _parentPanel, sizerSongInfoLeft);
+		labelTitle = AttachIconLabel(themeData.GetImage("icon_music"), Strings::FramePlayer::TOOLTIP_PSID_TITLE, _parentPanel, sizerSongInfoLeft);
 
 		{
 			wxFont boldFont = labelTitle->GetFont();
@@ -163,15 +196,25 @@ namespace FrameElements // Player class
 			labelTitle->SetFont(boldFont);
 		}
 
-		labelAuthor = AttachIconLabel(themeData.GetImage("icon_author"), _parentPanel, sizerSongInfoLeft);
-		labelCopyright = AttachIconLabel(themeData.GetImage("icon_copyright"), _parentPanel, sizerSongInfoLeft);
+		labelAuthor = AttachIconLabel(themeData.GetImage("icon_author"), Strings::FramePlayer::TOOLTIP_PSID_AUTHOR, _parentPanel, sizerSongInfoLeft);
+		labelCopyright = AttachIconLabel(themeData.GetImage("icon_copyright"), Strings::FramePlayer::TOOLTIP_PSID_COPYRIGHT, _parentPanel, sizerSongInfoLeft);
+
+		// STIL scrolling labels
+		{
+			const ThemeData::ThemedElementData&	theme = themeData.GetThemedElement("StilInfo");
+			labelStilNameTitle = AttachStilIconScrollingLabel(themeData.GetImage("icon_stilnametitle"), theme, Strings::FramePlayer::TOOLTIP_STIL_NAME_TITLE, _parentPanel, sizerStilRight, UIElements::ScrollingLabel::TextJustify::Right);
+			labelStilArtistAuthor = AttachStilIconScrollingLabel(themeData.GetImage("icon_stilartistauthor"), theme, Strings::FramePlayer::TOOLTIP_STIL_ARTIST_AUTHOR, _parentPanel, sizerStilRight, UIElements::ScrollingLabel::TextJustify::Right);
+			labelStilComment = AttachStilIconScrollingLabel(themeData.GetImage("icon_stilcomment"), theme, Strings::FramePlayer::TOOLTIP_STIL_COMMENT, _parentPanel, sizerStilRight, UIElements::ScrollingLabel::TextJustify::Right);
+		}
 
 		// Visualization
 		waveformVisualization = new UIElements::WaveformVisualization(&_parentPanel, themeData.GetThemedElement("WaveformVisualization"));
 		waveformVisualization->Hide();
-		sizerSongInfoLeft->Add(waveformVisualization, 4, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
+		waveformVisualization->SetMinClientSize(wxSize(-1, 10));
+		waveformVisualization->SetMaxClientSize(wxSize(-1, 72));
+		sizerMain->Add(waveformVisualization, 1, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
 
-		AttachFixedSizeSeparator(DpiSize(0, 10), sizerSongInfoLeft, _parentPanel); // TODO: magic numbers
+		AttachFixedSizeSeparator(DpiSize(0, 10 + 4), sizerMain, _parentPanel); // TODO: magic numbers
 
 		// Sizer below
 		wxBoxSizer* gridSizerPlaybackButtons = new wxBoxSizer(wxHORIZONTAL);
@@ -206,9 +249,9 @@ namespace FrameElements // Player class
 		// Playback modifier button
 		btnPlaybackMod = AttachSimplePlaybackControlButton(themeData.GetImage("btn_eq"), _parentPanel, gridSizerPlaybackButtons);
 
-		// Seekbar area...
-		AttachFixedSizeSeparator(DpiSize(0, 10), sizerMain, _parentPanel); // TODO: magic number
+		AttachFixedSizeSeparator(DpiSize(0, 1 + 4), sizerMain, _parentPanel); // TODO: magic number
 
+		// Seekbar area...
 		wxBoxSizer* sizerSeekbar = new wxBoxSizer(wxHORIZONTAL);
 		sizerMain->Add(sizerSeekbar, 0, wxEXPAND, 0);
 

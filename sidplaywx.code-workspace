@@ -79,7 +79,8 @@
 			"semaphore": "cpp",
 			"charconv": "cpp",
 			"format": "cpp",
-			"span": "cpp"
+			"span": "cpp",
+			"strstream": "cpp"
 		}
 	}
 }

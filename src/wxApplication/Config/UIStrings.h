@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.11.0"); // Reminder: don't forget to increase.
+	inline constexpr const char* const APP_VERSION_TAG("0.12.0"); // Reminder: don't forget to increase.
 
 	namespace FramePlayer
 	{
@@ -58,6 +58,7 @@ namespace Strings
 		inline constexpr const char* const MENU_VIEW("&View");
 		inline constexpr const char* const MENU_ITEM_STAY_TOPMOST("&Always on Top");
 		inline constexpr const char* const MENU_ITEM_VISUALIZATION_ENABLED("&Oscilloscope");
+		inline constexpr const char* const MENU_ITEM_STIL_INFO("&STIL info");
 
 		inline constexpr const char* const MENU_HELP("&Help");
 		inline constexpr const char* const MENU_ITEM_CHECK_UPDATES("&Check for Updates");
@@ -93,9 +94,18 @@ namespace Strings
 		inline constexpr const char* const STATUS_STOPPED("Stopped");
 		inline constexpr const char* const STATUS_ERROR("Error");
 		inline constexpr const char* const STATUS_EXTERNAL_FILES_INCOMING("Incoming files...");
+		inline constexpr const char* const STATUS_LOADING_STIL("STIL indexing...");
 
 		inline constexpr const char* const UPDATE_CHECK_LATEST("You're up to date!\nVersion %s");
 		inline constexpr const char* const UPDATE_CHECK_NEWER("A new release is available!\n\nRelease version: %s\nYour version: v%s\n\nDo you want to open the GitHub release page?");
+
+		inline constexpr const char* const TOOLTIP_PSID_TITLE("Song title");
+		inline constexpr const char* const TOOLTIP_PSID_AUTHOR("Song author");
+		inline constexpr const char* const TOOLTIP_PSID_COPYRIGHT("Song copyright");
+
+		inline constexpr const char* const TOOLTIP_STIL_NAME_TITLE("STIL Name - Title");
+		inline constexpr const char* const TOOLTIP_STIL_ARTIST_AUTHOR("STIL Artist (Author)");
+		inline constexpr const char* const TOOLTIP_STIL_COMMENT("STIL Comment");
 	}
 
 	namespace PlaylistTree
@@ -211,6 +221,10 @@ namespace Strings
 		inline constexpr const char* const OPT_SONGLENGTHS_TRIM("Songlengths trim offset");
 		inline constexpr const char* const DESC_SONGLENGTHS_TRIM("Playback duration offset (in milliseconds, limited to 1 second).\nFor example a value of -500 would play the tunes for a half second shorter than the displayed time.");
 
+		inline constexpr const char* const OPT_STIL_PATH("Path to STIL.txt file");
+		inline constexpr const char* const DESC_STIL_PATH("If missing, a bundled STIL database will be used instead (which is likely older).");
+		inline constexpr const char* const WILDCARD_DESC_STIL_TXT("STIL text file");
+
 		// Emulation
 		inline constexpr const char* const CATEGORY_EMULATION("Emulation");
 		inline constexpr const char* const DESC_CATEGORY_EMULATION("Some tunes (indicated with a chip) require C64 system ROMs to play. Since distribution of the C64 system ROM files is legally gray area, you'll have to source them yourself. They are usually distributed with C64 emulators for example.");
@@ -287,7 +301,12 @@ namespace Strings
 
 		inline constexpr const char* const MSG_ERR_SONGLENGTHS_NOT_FOUND("Songlengths database not found. Note: we use relative paths, so if you've moved the executable that could be the reason.");
 		inline constexpr const char* const MSG_ERR_SONGLENGTHS_INIT_FAILED("Songlengths database is corrupted.");
-		inline constexpr const char* const MSG_ERR_SONGLENGTHS_FALLBACK_SUCCESS("A built-in older database will be used from now on instead.");
+		inline constexpr const char* const MSG_ERR_SONGLENGTHS_FALLBACK_SUCCESS("A built-in songlengths database will be used from now on instead.");
+		inline constexpr const char* const MSG_ERR_SONGLENGTHS_FALLBACK_FAILED("Songlengths database unavailable. Other depending functionality (such as STIL) also won't work.");
+
+		inline constexpr const char* const MSG_ERR_STIL_NOT_FOUND("STIL database not found. Note: we use relative paths, so if you've moved the executable that could be the reason.");
+		inline constexpr const char* const MSG_ERR_STIL_INIT_FAILED("STIL database is corrupted.");
+		inline constexpr const char* const MSG_ERR_STIL_FALLBACK_SUCCESS("A built-in STIL database will be used from now on instead.");
 
 		inline constexpr const char* const MSG_ERR_ROM_KERNAL("Failed to load the KERNAL ROM file.");
 		inline constexpr const char* const MSG_ERR_ROM_BASIC("Failed to load the BASIC ROM file.");

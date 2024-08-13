@@ -27,6 +27,7 @@
 #include "../UIElements/CompositeSeekBar.h"
 #include "../UIElements/PlayPauseButton.h"
 #include "../UIElements/RepeatModeButton.h"
+#include "../UIElements/ScrollingLabel.h"
 #include "../UIElements/SearchBar.h"
 #include "../UIElements/WaveformVisualization.h"
 #include "../UIElements/Playlist/Playlist.h"
@@ -84,6 +85,7 @@ namespace FrameElements
 			// View
 			StayTopmost,
 			VisualizationEnabled,
+			StilInfoEnabled,
 
 			// Help
 			CheckUpdates,
@@ -121,6 +123,10 @@ namespace FrameElements
 		UIElements::RepeatModeButton* btnRepeatMode;
 	    wxSlider* sliderVolume;
 		UIElements::WaveformVisualization* waveformVisualization;
+
+		UIElements::ScrollingLabel* labelStilNameTitle; // NAME - TITLE
+		UIElements::ScrollingLabel* labelStilArtistAuthor; // ARTIST (AUTHOR)
+		UIElements::ScrollingLabel* labelStilComment;
 
 		// Playback controls
 		wxButton* btnPrevTrack;

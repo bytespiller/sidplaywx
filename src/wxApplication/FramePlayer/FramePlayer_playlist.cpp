@@ -153,8 +153,9 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
             // Add main song node to playlist tree
             PlaylistTreeModelNode* mainSongNodeNew = nullptr;
 
+            const Songlengths::HvscInfo& hvscInfoMain = TryGetHvscInfo(_silentSidInfoDecoder.CalcCurrentTuneMd5());
+
             {
-                const uint_least32_t realDuration = _silentSidInfoDecoder.TryGetActiveSongDuration();
                 const wxString author = _silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author); // Don't use reference.
                 const wxString copyright = _silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released); // Don't use reference.
 
@@ -176,7 +177,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                         throw(Strings::Internal::UNHANDLED_SWITCH_CASE);
                 }
 
-                mainSongNodeNew = &_ui->treePlaylist->AddMainSong(songTitle, filepath, defaultSubsong, realDuration, author, copyright, nodeRom, playable);
+                mainSongNodeNew = &_ui->treePlaylist->AddMainSong(songTitle, filepath, defaultSubsong, hvscInfoMain.duration, hvscInfoMain.hvscPath, hvscInfoMain.md5, author, copyright, nodeRom, playable);
             }
 
             if (playable)
@@ -193,11 +194,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                 // Determine durations
                 for (int i = 1; i <= totalSubsongs; ++i)
                 {
-                    if (_silentSidInfoDecoder.TrySetSubsong(i))
-                    {
-                        const uint_least32_t realDuration = _silentSidInfoDecoder.TryGetActiveSongDuration();
-                        subsongDurations.emplace_back(realDuration);
-                    }
+                    subsongDurations.emplace_back(TryGetHvscInfo(hvscInfoMain.md5, i).duration);
                 }
 
                 // Add subsongs
@@ -336,4 +333,15 @@ long FramePlayer::GetEffectiveSongDuration(const PlaylistTreeModelNode& node) co
     }
 
     return effectiveDuration;
+}
+
+Songlengths::HvscInfo FramePlayer::TryGetHvscInfo(const char* md5, int subsong) const
+{
+    if (!_sidDatabase.IsLoaded())
+    {
+        //throw std::runtime_error("Database wasn't loaded!");
+        return Songlengths::HvscInfo(); // Dummy
+    }
+
+    return _sidDatabase.GetHvscInfo(md5, subsong);
 }

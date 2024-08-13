@@ -28,16 +28,16 @@
 #include <wx/webrequest.h>
 
 using RepeatMode = UIElements::RepeatModeButton::RepeatMode;
+
 static constexpr size_t VISUALIZATION_WAVE_WINDOW_MS = 100;
 static wxString bundledSonglengthsPath("bundled-Songlengths.md5");
+static wxString bundledStilPath("bundled-STIL.txt");
 
 FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize& size, MyApp& app)
     : wxFrame(NULL, wxID_ANY, title, pos, size),
     _app(app)
 {
     SetIcon(wxICON(appicon)); // Comes from .rc
-
-    InitSonglengthsDatabase();
 
     _themeManager.LoadTheme("default");
     SetupUiElements();
@@ -54,8 +54,14 @@ FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize
     SubscribeMe(*_ui->searchBar, UIElements::SignalsSearchBar::SIGNAL_FIND_PREV, std::bind(&OnFindSong, this, UIElements::SignalsSearchBar::SIGNAL_FIND_PREV));
 
     // Final
+    SetClientSize(DpiSize(640, 512)); // TODO: load from options if available
+    // TODO: position if available
+
     UpdateUiState();
-    CallAfter(&DeferredInit);
+
+    Show(); // Allow update immediately.
+    Update(); // Immediately paint the window so it appears fully formed.
+    CallAfter(&DeferredInit); // Init like this so the playlist control is immediately available rather than in a frozen state in case it's loading lots of items.
 }
 
 void FramePlayer::IndicateExternalFilesIncoming()
@@ -99,7 +105,7 @@ void FramePlayer::InitSonglengthsDatabase()
             continue;
         }
 
-        success = _silentSidInfoDecoder.TryInitSidDatabase(path.GetFullPath().ToStdWstring());
+        success = _sidDatabase.TryLoad(path.GetFullPath().ToStdWstring());
         if (success)
         {
             break;
@@ -116,9 +122,83 @@ void FramePlayer::InitSonglengthsDatabase()
         {
             exceptionMessage = wxString::Format("%s\n%s", exceptionMessage, Strings::Error::MSG_ERR_SONGLENGTHS_FALLBACK_SUCCESS);
         }
+        else
+        {
+            exceptionMessage
+                .append('\n')
+                .append(Strings::Error::MSG_ERR_SONGLENGTHS_FALLBACK_FAILED);
+        }
+
         wxMessageBox(exceptionMessage, Strings::FramePlayer::WINDOW_TITLE, wxICON_EXCLAMATION);
         _app.currentSettings->GetOption(Settings::AppSettings::ID::SonglengthsPath)->UpdateValue(""); // Reminder: leave this even if resettable in Prefs.
     }
+}
+
+void FramePlayer::InitStilInfo()
+{
+    /*
+    This method handles all combinations of exceptional init failure states (with appropriate error message being generated):
+    - a: If specified, try to load user-provided database, unless it's non-existant (MSG_ERR_STIL_NOT_FOUND)
+    - b: If specified and exists, try to init user-provided database, unless it's corrupted (MSG_ERR_STIL_INIT_FAILED)
+    - c: Otherwise, try to load default database, unless it doesn't exist (MSG_ERR_STIL_NOT_FOUND)
+    - d: Otherwise, try to init default database, unless it's corrupted (MSG_ERR_STIL_INIT_FAILED)
+
+    Recovery by loading the default database and clearing the option.
+    - If successful, a confirmation suffix is added to the message: MSG_ERR_STIL_FALLBACK_SUCCESS indicating invalidated DB path setting.
+        - We have to auto-clear it because there's no way to do it via GUI in the wxPropertyGrid. TODO: revise this comment later.
+    */
+
+    if (!_sidDatabase.IsLoaded())
+    {
+        return; // STIL piggybacks on the Songlengths database to cross-reference the tune's MD5 and HVSC paths. Since it's unavailable, there's no point to init the STIL.
+    }
+
+    const wxString& optionStilPath = _app.currentSettings->GetOption(Settings::AppSettings::ID::StilPath)->GetValueAsString();
+
+    wxString exceptionMessage;
+    bool success = false;
+    for (wxFileName path : {optionStilPath, bundledStilPath})
+    {
+        if (path.GetFullPath().IsEmpty())
+        {
+            continue;
+        }
+
+        path.MakeAbsolute();
+        if (!path.Exists())
+        {
+            exceptionMessage = Strings::Error::MSG_ERR_STIL_NOT_FOUND;
+            continue;
+        }
+
+        GetStatusBar()->PushStatusText(Strings::FramePlayer::STATUS_LOADING_STIL, 0);
+        success = _stilInfo.TryLoad(path.GetFullPath().ToStdWstring());
+        GetStatusBar()->PopStatusText(0);
+
+        if (success)
+        {
+            break;
+        }
+        else
+        {
+            exceptionMessage = Strings::Error::MSG_ERR_STIL_INIT_FAILED;
+        }
+    }
+
+    if (!exceptionMessage.IsEmpty())
+    {
+        if (success)
+        {
+            exceptionMessage = wxString::Format("%s\n%s", exceptionMessage, Strings::Error::MSG_ERR_STIL_FALLBACK_SUCCESS);
+        }
+        wxMessageBox(exceptionMessage, Strings::FramePlayer::WINDOW_TITLE, wxICON_EXCLAMATION);
+        _app.currentSettings->GetOption(Settings::AppSettings::ID::StilPath)->UpdateValue(""); // Reminder: leave this even if resettable in Prefs.
+    }
+}
+
+void FramePlayer::InitStilInfo(PassKey<FramePrefs>)
+{
+    InitStilInfo();
 }
 
 void FramePlayer::SetupUiElements()
@@ -210,8 +290,10 @@ void FramePlayer::SetupUiElements()
 
 void FramePlayer::DeferredInit()
 {
-    SetClientSize(DpiSize(640, 512)); // TODO: load from options if available
-    // TODO: position if available
+    InitSonglengthsDatabase();
+
+    // Init STIL info
+    EnableStilInfo(_app.currentSettings->GetOption(Settings::AppSettings::ID::StilInfoEnabled)->GetValueAsBool());
 
     // Apply window topmost preference
     if (_app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->GetValueAsBool() != IsTopmost())
@@ -277,9 +359,19 @@ void FramePlayer::SetRefreshTimerInterval(int desiredInterval)
 void FramePlayer::CloseApplication()
 {
     _exitingApplication = true;
-    _timerGlobalHotkeysPolling->Stop();
-    _timerRefresh->Stop(); // Segfault can occur otherwise.
+
+    if (_timerGlobalHotkeysPolling != nullptr)
+    {
+        _timerGlobalHotkeysPolling->Stop();
+    }
+
+    if (_timerRefresh != nullptr)
+    {
+        _timerRefresh->Stop(); // Segfault can occur otherwise.
+    }
+
     _app.StopPlayback();
+    Hide();
 
     // TODO: save window settings etc.
     _app.currentSettings->GetOption(Settings::AppSettings::ID::Volume)->UpdateValue(_ui->sliderVolume->GetValue());
@@ -363,6 +455,39 @@ void FramePlayer::ToggleVisualizationEnabled()
     const bool enable = !_app.currentSettings->GetOption(Settings::AppSettings::ID::VisualizationEnabled)->GetValueAsBool();
     _app.currentSettings->GetOption(Settings::AppSettings::ID::VisualizationEnabled)->UpdateValue(enable);
     EnableVisualization(enable);
+}
+
+void FramePlayer::ToggleStilInfoEnabled()
+{
+    EnableStilInfo(!_stilInfo.IsLoaded());
+    _app.currentSettings->GetOption(Settings::AppSettings::ID::StilInfoEnabled)->UpdateValue(_stilInfo.IsLoaded());
+}
+
+void FramePlayer::EnableStilInfo(bool enable)
+{
+    // Init/deinit
+    if (enable)
+    {
+        InitStilInfo();
+    }
+    else
+    {
+        _stilInfo.Unload();
+    }
+
+    // Refresh UI elements
+    const bool loaded = _stilInfo.IsLoaded();
+
+    if (loaded && _app.GetPlaybackInfo().IsValidSongLoaded())
+    {
+        DisplayCurrentSongInfo();
+    }
+
+    _ui->labelStilNameTitle->GetContainingSizer()->Show(loaded);
+    _ui->labelStilArtistAuthor->GetContainingSizer()->Show(loaded);
+    _ui->labelStilComment->GetContainingSizer()->Show(loaded);
+
+    _ui->menuBar->Check(static_cast<int>(FrameElements::ElementsPlayer::MenuItemId_Player::StilInfoEnabled), loaded);
 }
 
 void FramePlayer::EnableVisualization(bool enable)

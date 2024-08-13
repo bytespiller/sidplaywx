@@ -53,6 +53,7 @@ namespace Settings
 
 			static constexpr const char* const SonglengthsPath = "SonglengthsPath";
 			static constexpr const char* const SonglengthsTrim = "SonglengthsTrim";
+			static constexpr const char* const StilPath = "StilPath";
 
 			static constexpr const char* const DefaultC64Model = "DefaultC64Model";
 			static constexpr const char* const DefaultSidModel = "DefaultSidModel";
@@ -74,6 +75,7 @@ namespace Settings
 			// Menu
 			static constexpr const char* const StayTopmost = "StayTopmost";
 			static constexpr const char* const VisualizationEnabled = "VisualizationEnabled";
+			static constexpr const char* const StilInfoEnabled = "StilInfoEnabled";
 
 			// Internal
 			static constexpr const char* const Volume = "Volume";
@@ -145,6 +147,7 @@ namespace Settings
 
 				DefaultOption(ID::SonglengthsPath, ""),
 				DefaultOption(ID::SonglengthsTrim, 0),
+				DefaultOption(ID::StilPath, ""),
 
 				DefaultOption(ID::DefaultC64Model, static_cast<int>(DefaultC64Model::Prefer_PAL)),
 				DefaultOption(ID::DefaultSidModel, static_cast<int>(DefaultSidModel::Prefer_MOS6581)),
@@ -167,6 +170,7 @@ namespace Settings
 				// Menu
 				DefaultOption(ID::StayTopmost, false),
 				DefaultOption(ID::VisualizationEnabled, true),
+				DefaultOption(ID::StilInfoEnabled, true),
 
 				// Internal
 				DefaultOption(ID::Volume, 100),

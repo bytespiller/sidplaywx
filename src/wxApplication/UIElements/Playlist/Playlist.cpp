@@ -47,10 +47,10 @@ namespace UIElements
 			return this;
 		}
 
-		PlaylistTreeModelNode& Playlist::AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& author, const wxString& copyright, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable)
+		PlaylistTreeModelNode& Playlist::AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable)
 		{
 			// Create item
-			_model.entries.emplace_back(new PlaylistTreeModelNode(nullptr, title, filepath, defaultSubsong, duration, author, copyright, romRequirement, playable));
+			_model.entries.emplace_back(new PlaylistTreeModelNode(nullptr, title, filepath, defaultSubsong, duration, hvscPath, md5, author, copyright, romRequirement, playable));
 
 			// Notify the wx base control of change
 			wxDataViewItem childNotify = wxDataViewItem(_model.entries.back().get());
@@ -75,7 +75,7 @@ namespace UIElements
 				for (const uint_least32_t duration : durations)
 				{
 					++cnt;
-					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(&parent, wxString::Format("  %s: %s %i", parent.title, Strings::PlaylistTree::SUBSONG, cnt), parent.filepath, cnt, duration, "", "", parent.romRequirement, parent.IsPlayable()), {});
+					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(&parent, wxString::Format("  %s: %s %i", parent.title, Strings::PlaylistTree::SUBSONG, cnt), parent.filepath, cnt, duration, parent.hvscPath, parent.md5, "", "", parent.romRequirement, parent.IsPlayable()), {});
 					notifyItems.Add(wxDataViewItem(&newChildNode));
 
 					// Indicate if default subsong

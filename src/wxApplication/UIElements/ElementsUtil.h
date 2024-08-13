@@ -35,6 +35,6 @@ namespace UIElements
 	namespace Util
 	{
 		wxButton* NewSvgButton(const ThemeData::ThemeImage& themeImage, const wxSize& size, wxPanel& panel);
-		std::shared_ptr<wxBitmap> LoadRasterizedSvg(const char* image, const wxSize& size, const wxPoint& artOffset = wxPoint(0, 0), double scale = 1.0);
+		std::shared_ptr<wxBitmap> LoadRasterizedSvg(const char* image, const wxSize& size, const wxPoint& artOffset = wxPoint(0, 0), double scale = 1.0, const wxColor* color = nullptr);
 	}
 }

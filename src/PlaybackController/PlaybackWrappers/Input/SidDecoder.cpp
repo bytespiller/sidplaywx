@@ -98,11 +98,6 @@ bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig
     return true;
 }
 
-bool SidDecoder::TryInitSidDatabase(const std::wstring& songlengthsFilename)
-{
-    return _sidDatabase.TryLoad(songlengthsFilename);
-}
-
 RomUtil::RomStatus SidDecoder::TrySetRoms(const std::wstring& pathKernal, const std::wstring& pathBasic, const std::wstring& pathChargen)
 {
     char* kernal = loadRom(pathKernal, RomUtil::ROM_SIZE_KERNAL);
@@ -201,16 +196,6 @@ int SidDecoder::GetTotalSubsongs() const
     return _tune->getInfo()->songs();
 }
 
-int_least32_t SidDecoder::TryGetActiveSongDuration() const
-{
-    if (_sidDatabase.IsLoaded())
-    {
-        return _sidDatabase.GetDurationMs(*_tune.get());
-    }
-
-    return 0;
-}
-
 std::string SidDecoder::GetCurrentTuneInfoString(SongInfoCategory category) const
 {
     return _tune->getInfo()->infoString(static_cast<unsigned int>(category));
@@ -244,6 +229,16 @@ int SidDecoder::GetCurrentTuneSidChipsRequired() const
     }
 
     return 0;
+}
+
+const char* SidDecoder::CalcCurrentTuneMd5() const
+{
+    if (_tune == nullptr)
+    {
+        return 0;
+    }
+
+    return _tune->createMD5New();
 }
 
 const SidInfo& SidDecoder::GetEngineInfo() const

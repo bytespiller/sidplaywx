@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "Songlengths.h"
 #include "../IBufferWriter.h"
 #include "../../Util/RomUtil.h"
 
@@ -75,8 +74,6 @@ public:
     // Needed for playback. Can be skipped if intending to just read tunes' info.
     bool TryInitEmulation(const SidConfig& sidConfig, const FilterConfig& filterConfig);
 
-    bool TryInitSidDatabase(const std::wstring& songlengthsFilename);
-
     RomUtil::RomStatus TrySetRoms(const std::wstring& pathKernal, const std::wstring& pathBasic, const std::wstring& pathChargen);
 
     // Unicode paths not supported for filepath variant, rather use the oneFileFormatSidtune variant and do custom file loading.
@@ -90,11 +87,14 @@ public:
     int GetCurrentSubsong() const;
     int GetDefaultSubsong() const;
     int GetTotalSubsongs() const;
-    int_least32_t TryGetActiveSongDuration() const;
+
     std::string GetCurrentTuneInfoString(SongInfoCategory category) const;
     const SidTuneInfo& GetCurrentSongInfo() const;
     RomRequirement GetCurrentSongRomRequirement() const;
     int GetCurrentTuneSidChipsRequired() const;
+
+    // Calculates the MD5 hash of the current tune. Returns 0 if no tune is loaded.
+    const char* CalcCurrentTuneMd5() const;
 
     const SidInfo& GetEngineInfo() const;
     const SidVoicesEnabledStatus& GetSidVoicesEnabledStatus() const;
@@ -116,5 +116,4 @@ private:
     sidplayfp _sidEngine;
     std::unique_ptr<SidTune> _tune;
     ReSIDfpBuilder _rs;
-    Songlengths _sidDatabase;
 };
