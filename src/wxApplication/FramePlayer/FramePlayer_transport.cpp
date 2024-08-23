@@ -20,51 +20,53 @@
 #include "../MyApp.h"
 #include "../Config/AppSettings.h"
 
-bool FramePlayer::TryPlayPlaylistItem(const PlaylistTreeModelNode& node)
+bool FramePlayer::TryPlayPlaylistItem(const PlaylistTreeModelNode& activatedNode)
 {
-    if (!node.IsPlayable())
+    if (!activatedNode.IsPlayable())
     {
         return false;
     }
 
-    int subsong = node.defaultSubsong;
+    int subsong = activatedNode.defaultSubsong;
+
+    const PlaylistTreeModelNode* nodeToPlay = &activatedNode;
 
     // If the selected node is a mainsong, determine the initial subsong to play.
-    if (node.type == PlaylistTreeModelNode::ItemType::Song && node.GetSubsongCount() > 0)
+    if (activatedNode.type == PlaylistTreeModelNode::ItemType::Song && activatedNode.GetSubsongCount() > 0)
     {
-        if (const PlaylistTreeModelNode* const subNode = _ui->treePlaylist->GetEffectiveInitialSubsong(node))
+        if (const PlaylistTreeModelNode* const subNode = _ui->treePlaylist->GetEffectiveInitialSubsong(activatedNode))
         {
             subsong = subNode->defaultSubsong;
+            nodeToPlay = subNode;
         }
         else // All subsongs tagged for navigation auto-skip. Just expand the node but don't start any playback.
         {
-            _ui->treePlaylist->ExpandSongNode(node);
+            _ui->treePlaylist->ExpandSongNode(activatedNode);
             return false;
         }
     }
 
     // Trigger playback
-    const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(node) : 0;
-    const bool sameTune = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == node.filepath.ToStdWstring();
+    const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(*nodeToPlay) : 0;
+    const bool sameTune = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == nodeToPlay->filepath.ToStdWstring();
     if (sameTune)
     {
         _app.PlaySubsong(subsong, preRenderDurationMs); // Switch an already-loaded tune to subsong.
     }
     else
     {
-        _app.Play(node.filepath, subsong, preRenderDurationMs);
+        _app.Play(nodeToPlay->filepath, subsong, preRenderDurationMs);
     }
 
     // Highlight the item in the playlist if the playback started successfully (file exists etc.)
-    const PlaylistTreeModelNode& actualNode = (node.type == PlaylistTreeModelNode::ItemType::Song && node.GetSubsongCount() > 0) ? *_ui->treePlaylist->GetSubsong(node.filepath, subsong) : node;
-    const bool fileLoadedSuccessfully = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == actualNode.filepath.ToStdWstring();
-    const bool highlightable = fileLoadedSuccessfully && _ui->treePlaylist->TrySetActiveSong(actualNode, _app.currentSettings->GetOption(Settings::AppSettings::ID::AutoExpandSubsongs)->GetValueAsBool());
+    const bool fileLoadedSuccessfully = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == nodeToPlay->filepath.ToStdWstring();
+    const bool highlightable = fileLoadedSuccessfully && _ui->treePlaylist->TrySetActiveSong(*nodeToPlay, _app.currentSettings->GetOption(Settings::AppSettings::ID::AutoExpandSubsongs)->GetValueAsBool());
     UpdateUiState();
 
     if (highlightable && _app.currentSettings->GetOption(Settings::AppSettings::ID::SelectionFollowsPlayback)->GetValueAsBool())
     {
-        _ui->treePlaylist->Select(actualNode);
-        _ui->treePlaylist->EnsureVisible(actualNode); // Ensure a subsong itself is scrolled into view (not just its parent).
+        _ui->treePlaylist->Select(*nodeToPlay);
+        _ui->treePlaylist->EnsureVisible(*nodeToPlay); // Ensure a subsong itself is scrolled into view (not just its parent).
     }
 
     return true;

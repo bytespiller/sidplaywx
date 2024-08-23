@@ -145,7 +145,7 @@ private:
 #pragma region *** transport ***
 
 private:
-    bool TryPlayPlaylistItem(const PlaylistTreeModelNode& node);
+    bool TryPlayPlaylistItem(const PlaylistTreeModelNode& activatedNode);
 
     bool TryPlayNextValidSong();
     bool TryPlayPrevValidSong();
