@@ -304,8 +304,9 @@ void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
 
             wxString statusText(Strings::FramePlayer::STATUS_SEEKING);
 
-            const wxString& etaText = "ETA " + std::to_string(remainingSeconds + 1).append("s");
-            const wxString& speedText = wxString(std::to_string(seekingSpeed)).append('x');
+            // Reminder: don't declare as a reference (due to way append() gets optimized in the release mode, we'd get gibberish)
+            const wxString etaText = "ETA " + std::to_string(remainingSeconds + 1).append("s");
+            const wxString speedText = wxString(std::to_string(seekingSpeed)).append('x');
 
             SetStatusText(statusText.append(' ').append(etaText).append(" @ ").append(speedText), 0);
         });
