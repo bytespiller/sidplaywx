@@ -175,6 +175,7 @@ namespace FrameElements // Player class
 
 		// Sizers
 		wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
+		AttachFixedSizeSeparator(wxSize(-1, TEMP_LABEL_BORDER_SIZE * 2), sizerMain, panel); // Add some top-margin to clear the song area from the menubar.
 
 		wxBoxSizer* sizerSongArea = new wxBoxSizer(wxHORIZONTAL);
 		sizerMain->Add(sizerSongArea, 0, wxEXPAND);
