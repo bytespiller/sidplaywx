@@ -123,7 +123,7 @@ void FramePlayer::UpdatePlaybackStatusBar()
         {
             const bool preRendering = _app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool();
             wxString status((preRendering) ? Strings::FramePlayer::STATUS_PLAYING_PRERENDER : Strings::FramePlayer::STATUS_PLAYING);
-            if (playback.GetPlaybackSpeedFactor() != 1.0 || !playback.AreAllRelevantVoicesEnabled())
+            if (playback.GetPlaybackSpeedFactor() != 1.0 || !playback.AreAllRelevantVoicesEnabled() || !_app.currentSettings->GetOption(Settings::AppSettings::ID::FilterEnabled)->GetValueAsBool())
             {
                 status.append(Strings::FramePlayer::STATUS_MODIFIED_SUFFIX);
                 statusFont.SetWeight(wxFONTWEIGHT_BOLD);
