@@ -300,6 +300,7 @@ void PlaybackController::SeekTo(uint_least32_t targetTimeMs)
     _seekOperation.abortFlag = false;
     _seekOperation.resumeToState = _state.Get();
     _seekOperation.safeCtimeMs = 0;
+    _seekOperation.safeTargetTimeMs = targetTimeMs;
 
     // Start seeking in a new thread
     _state = State::Seeking;
@@ -338,6 +339,11 @@ void PlaybackController::AbortSeek(bool resumePlaybackState)
     {
         Warn("AbortSeek called while not seeking, ignored.");
     }
+}
+
+uint_least32_t PlaybackController::GetLastSeekTargetMs() const
+{
+    return _seekOperation.safeTargetTimeMs;
 }
 
 PlaybackController::State PlaybackController::GetState() const

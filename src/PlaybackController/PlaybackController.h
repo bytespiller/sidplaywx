@@ -102,6 +102,7 @@ private:
     {
         std::atomic_bool abortFlag {false};
         std::atomic_uint_least32_t safeCtimeMs {0};
+        std::atomic_uint_least32_t safeTargetTimeMs {0}; // Informative
         PlaybackController::State resumeToState{};
         std::thread seekThread;
     };
@@ -143,6 +144,9 @@ public:
 
     void SeekTo(uint_least32_t targetTimeMs);
     void AbortSeek(bool resumePlaybackState = true);
+
+    // Gets the target time milliseconds parameter of the last SeekTo() call or zero.
+    uint_least32_t GetLastSeekTargetMs() const;
 
     State GetState() const;
     State GetResumeState() const;

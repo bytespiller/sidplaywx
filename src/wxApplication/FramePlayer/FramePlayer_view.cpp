@@ -23,6 +23,8 @@
 #include "../Helpers/HelpersWx.h"
 #include "../FrameChildren/FramePlaybackMods/FramePlaybackMods.h"
 #include "../../Util/Const.h"
+#include <chrono>
+#include <numeric>
 
 void FramePlayer::UpdateUiState()
 {
@@ -160,12 +162,104 @@ void FramePlayer::UpdatePlaybackStatusBar()
     GetStatusBar()->SetFont(statusFont);
 }
 
+static class SeekMetrics
+{
+    static constexpr std::chrono::milliseconds MIN_UPDATE_INTERVAL = static_cast<std::chrono::milliseconds>(200); // Ensures the display isn't updated too often.
+
+public:
+    SeekMetrics() = default;
+
+    // This constructor also snapshots the initial seek progress for convenience.
+    SeekMetrics(const std::chrono::steady_clock::time_point timeNow, const uint_least32_t playbackTimeMs)
+    {
+        TrySnapshotSeekProgress(timeNow, playbackTimeMs);
+    }
+
+    SeekMetrics(SeekMetrics&) = delete;
+
+public:
+    // If this instance was marked as expired, you'll need to initialize a new one.
+    inline bool IsExpired() const
+    {
+        return _expired;
+    }
+
+    // Marks this instance as expired.
+    void Expire()
+    {
+        _expired = true;
+    }
+
+    // Snapshots a seek progress for use in calculating the average seek speed over the update interval and returns true. Returns false if this class instance has expired and the snapshot can't happen.
+    bool TrySnapshotSeekProgress(const std::chrono::steady_clock::time_point timeNow, const uint_least32_t playbackTimeMs)
+    {
+        if (playbackTimeMs < _previousPlaybackTimeMs)
+        {
+            _expired = true; // Seeking backwards was initiated while seeking forward was still underway.
+        }
+
+        if (_expired)
+        {
+            return false;
+        }
+
+        const uint_least32_t realtimeDelta = static_cast<uint_least32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(timeNow - _previousTimestamp).count());
+        if (realtimeDelta > 0)
+        {
+            const uint_least32_t playbackTimePositionDelta = playbackTimeMs - _previousPlaybackTimeMs;
+
+            const uint_least32_t currentSpeed = playbackTimePositionDelta / std::max(static_cast<uint_least32_t>(1), realtimeDelta);
+            _speedSnapshots.emplace_back(currentSpeed);
+
+            _ready = true;
+        }
+
+        _previousTimestamp = timeNow;
+        _previousPlaybackTimeMs = playbackTimeMs;
+
+        return true;
+    }
+
+    // Calls your callback (with a rolling average result in between) if the time since the last call reached the minimum update interval.
+    bool UpdateIfNeeded(const std::chrono::steady_clock::time_point timeNow, std::function<void(uint_least32_t)> callback)
+    {
+        if (_expired)
+        {
+            throw std::runtime_error("This SeekMetrics instance has been marked as expired!");
+        }
+
+        if (_ready && std::chrono::duration_cast<std::chrono::milliseconds>(timeNow - _lastUpdateTimestamp) >= SeekMetrics::MIN_UPDATE_INTERVAL)
+        {
+            _lastUpdateTimestamp = timeNow;
+
+            const uint_least32_t currentDisplayResult = std::accumulate(_speedSnapshots.begin(), _speedSnapshots.end(), 0) / _speedSnapshots.size();
+            _speedSnapshots.clear();
+
+            callback(currentDisplayResult);
+            return true;
+        }
+
+        return false;
+    }
+
+private:
+    bool _ready = false;
+    bool _expired = false;
+
+    std::vector<uint_least32_t> _speedSnapshots;
+    std::chrono::steady_clock::time_point _lastUpdateTimestamp;
+
+    uint_least32_t _previousPlaybackTimeMs = 0;
+    std::chrono::steady_clock::time_point _previousTimestamp = std::chrono::steady_clock::now();
+} seekMetrics;
+
 void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
 {
     uint_least32_t displayTimeMs = playbackTimeMs;
+    const PlaybackController& playback = _app.GetPlaybackInfo();
 
     // Seekbar
-    _ui->compositeSeekbar->UpdatePlaybackPosition(static_cast<long>(playbackTimeMs), _app.GetPlaybackInfo().GetPreRenderProgressFactor());
+    _ui->compositeSeekbar->UpdatePlaybackPosition(static_cast<long>(playbackTimeMs), playback.GetPreRenderProgressFactor());
 
     // Time position label
     wxFont font(_ui->labelTime->GetFont());
@@ -192,6 +286,34 @@ void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
     // Visualization
     _app.GetVisualizationWaveform(_ui->waveformVisualization->GetBuffer());
     _ui->waveformVisualization->Refresh();
+
+    // Seeking speed indicator
+    if (playback.GetState() == PlaybackController::State::Seeking)
+    {
+        const std::chrono::steady_clock::time_point timeNow = std::chrono::steady_clock::now();
+
+        if (!seekMetrics.TrySnapshotSeekProgress(timeNow, playbackTimeMs))
+        {
+            seekMetrics = SeekMetrics(timeNow, playbackTimeMs);
+        }
+
+        seekMetrics.UpdateIfNeeded(timeNow, [this, playbackTimeMs, &playback](uint_least32_t seekingSpeed)
+        {
+            const uint_least32_t target = playback.GetLastSeekTargetMs();
+            const uint_least32_t remainingSeconds = (target - playbackTimeMs) / (std::max(static_cast<uint_least32_t>(1), seekingSpeed) * 1000);
+
+            wxString statusText(Strings::FramePlayer::STATUS_SEEKING);
+
+            const wxString& etaText = "ETA " + std::to_string(remainingSeconds + 1).append("s");
+            const wxString& speedText = wxString(std::to_string(seekingSpeed)).append('x');
+
+            SetStatusText(statusText.append(' ').append(etaText).append(" @ ").append(speedText), 0);
+        });
+    }
+    else if (!seekMetrics.IsExpired())
+    {
+        seekMetrics.Expire();
+    }
 }
 
 void FramePlayer::DisplayCurrentSongInfo(bool justClear)
