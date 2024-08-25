@@ -9,7 +9,7 @@ The **sidplaywx** uses [libsidplayfp](https://github.com/libsidplayfp/libsidplay
 |Main window|
 |-|
 |<p align="center">![Screenshot of the player application main window](../assets/screenshots/sidplaywx-player.png?raw=true)</p>|
-|Pictured: for tunes with subsongs, a _crown_ icon in the playlist indicates a default subsong. You may also encounter other indicators such as a _timer_ icon indicating an (optional) auto-skipping of (sub)songs shorter than (n) seconds, or a _chip_ (indicates a ROM file requirement).<br>Tunes can be seeked ([HVSC](https://www.hvsc.c64.org) *Songlengths.md5* database is supported, and default/fallback duration can be specified in the Preferences).|
+|Pictured: for tunes with subsongs, a _crown_ icon in the playlist indicates a default subsong. You may also encounter other indicators such as a _timer_ icon indicating an (optional) auto-skipping of (sub)songs shorter than (n) seconds, or a _chip_ (indicates a ROM file requirement).<br>Tunes can be seeked ([HVSC](https://www.hvsc.c64.org) *Songlengths.md5* database is supported, and default/fallback duration can be specified in the Preferences).<br>HVSC STIL info is also supported (blue text in the top right).|
 
 <br>
 
@@ -33,7 +33,7 @@ The current version of the sidplaywx is 0.x.x, so in addition to bugfixes and co
 - Playlist improvements such as <del>duration columns</del>, reordering<del>, remembering last state and playlist file save/load</del> etc.
 - Misc. necessary features such as remembering window size & position etc.
 - Exporting tunes to WAV
-- [STIL](https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/STIL.txt) support for displaying tune comments
+- [<del>STIL</del>](https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/STIL.txt) <del>support for displaying tune comments</del>
 - Proper Linux support
 - Theming support / dark theme
 
@@ -60,13 +60,13 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 * When drag & dropping the files, why the playlist sometimes gets cleared?
   * By default, the sidplaywx will enqueue the files if dropped onto the playlist area, and clear (replace) the playlist if they are dropped onto the general player window area. This is configurable in the Preferences.
 * Can sidplaywx open archive files?
-  * Yes, but only the Zip format in its simplest form is supported due to wxZip limitation.
+  * Yes, but only the Zip format in its simplest variant is supported due to wxZip limitation.
 * How come the seeking is so slow?
-  * There is a "Fast seeking" option available which pre-renders the entire SID tune in the background. It is disabled by default, but if you enable it you will be able to seek instantly. See [release notes](https://github.com/bytespiller/sidplaywx/releases/tag/v0.7.0-beta) of the old release for details on how it works and what are the caveats.
+  * There is an "Instant seeking" option available which pre-renders the entire SID tune in the background. It is disabled by default, but if you enable it you will be able to seek instantly. See [release notes](https://github.com/bytespiller/sidplaywx/releases/tag/v0.7.0-beta) of the old release (note: "Instant seeking" was formerly named "Fast seeking") for details on how it works and what are the caveats.
   * SID tunes are actually small programs and not audio files like for example the MP3, so they have to be emulated linearly as fast as possible until the "seek" target is reached.
     * <details>
         <summary>More details</summary>
-        The libsidplayfp library (which sidplaywx uses) focuses on accuracy so it's much slower than e.g., libsidplay2 (which is virtually instantaneous, try it in the DeaDBeeF player on the Linux!). FWIW the seeking in the sidplaywx is already separately threaded and bypasses some SID mixing steps, audio rendering etc. so I think it's as fast as possible at the moment, unless you enable the "Fast seeking" option of course).
+        The libsidplayfp library (which sidplaywx uses) focuses on accuracy so it's much slower than e.g., libsidplay2 (which is virtually instantaneous, try it in the DeaDBeeF player on the Linux!). FWIW the seeking in the sidplaywx is already separately threaded and bypasses some SID mixing steps, audio rendering etc. so I think it's as fast as possible at the moment, unless you enable the "Instant seeking" option of course).
       </details>
 * Command-line options in sidplaywx?
   * Focus so far is on the GUI experience. There exists a [sidplayfp](https://github.com/libsidplayfp/sidplayfp/releases) console-based player in the libsidplayfp repo (not to be confused with a sidplaywx which is unrelated and unaffiliated project).
@@ -96,14 +96,15 @@ Building libsidplayfp:
 Building Portaudio:
 * [Download](http://files.portaudio.com/download.html) the PortAudio stable source release.
 * Prerequisites (in the MSYS2 MINGW64 terminal): `pacman -S mingw-w64-x86_64-cmake && pacman -S mingw-w64-x86_64-make`
+* `cd` (with MSYS2 MINGW64 terminal) into the PortAudio's root.
 * `cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release`
 * `mingw32-make`
-* Copy headers and libs into the new folder (so our cmake can find it later):
+* Copy headers and libs into the following new folder (so our cmake can find it later):
   * _headers_ into the `C:\Program Files\PortAudio\include\`
   * _libs_ into the `C:\Program Files\PortAudio\include\lib\`
 
 wxWidgets:
-* Simply [download](https://www.wxwidgets.org/downloads/) the appropriate pre-built binaries for your compiler (e.g., GCC v10).
+* Simply [download](https://www.wxwidgets.org/downloads/) the appropriate pre-built binaries for your compiler (e.g., GCC v13).
 * Copy them into the new folder:
   * _headers_ into the `C:\wxWidgets\include\` (with `msvc` and `wx` subfolders in there)
   * _libs_ into the `C:\wxWidgets\gcc_lib\`
@@ -114,5 +115,6 @@ Finally building the actual **sidplaywx** application:
 * IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following files into the sidplaywx's **build** folder:
   * The entire `dev\theme` folder (so you end up with `build\theme`).
   * The `dev\bundled-Songlengths.md5` file (so you end up with `build\bundled-Songlengths.md5`).
+  * You may also need several *.dll files (see Tip below).
   * Tip: you can see the [release](https://github.com/bytespiller/sidplaywx/releases) package for example if you get stuck.
 </details>
