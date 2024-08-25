@@ -384,6 +384,8 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
 
         case MenuItemId_Player::PlaylistClear:
             OnButtonStop();
+            _enqueuedFiles.Clear(); // Clear any pending files.
+            _addingFilesToPlaylist = false; // Break the loop.
             _ui->treePlaylist->Clear();
             UpdateUiState();
             break;

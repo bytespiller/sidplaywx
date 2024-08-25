@@ -229,7 +229,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
         }
 
         wxYield(); // Also must be before the HasFocus() call because not even that updates otherwise!
-        if (_exitingApplication) // In case the user clicked Close while adding lots of files. This should be checked immediately after any wxYield.
+        if (_exitingApplication || !_addingFilesToPlaylist) // In case the user clicked Close (or cleared the playlist) while adding lots of files. This should be checked immediately after any wxYield.
         {
             return;
         }
