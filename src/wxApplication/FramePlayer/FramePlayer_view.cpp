@@ -380,7 +380,6 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
                     artistsAuthors.append(L")");
                 }
 
-                _ui->labelStilArtistAuthor->GetForegroundColour();
                 _ui->labelStilArtistAuthor->SetText((artistsAuthors.empty()) ? NONE : artistsAuthors);
             }
 
