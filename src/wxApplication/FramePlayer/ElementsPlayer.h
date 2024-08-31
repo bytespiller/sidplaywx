@@ -124,6 +124,7 @@ namespace FrameElements
 	    wxSlider* sliderVolume;
 		UIElements::WaveformVisualization* waveformVisualization;
 
+		wxBoxSizer* sizerStilRight;
 		UIElements::ScrollingLabel* labelStilNameTitle; // NAME - TITLE
 		UIElements::ScrollingLabel* labelStilArtistAuthor; // ARTIST (AUTHOR)
 		UIElements::ScrollingLabel* labelStilComment;

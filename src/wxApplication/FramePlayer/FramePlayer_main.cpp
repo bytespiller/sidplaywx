@@ -482,10 +482,15 @@ void FramePlayer::EnableStilInfo(bool enable)
     {
         DisplayCurrentSongInfo();
     }
+    else // Clear (disable ScrollingLabels' internal timers)
+    {
+        _ui->labelStilNameTitle->SetText("");
+        _ui->labelStilArtistAuthor->SetText("");
+        _ui->labelStilComment->SetText("");
+    }
 
-    _ui->labelStilNameTitle->GetContainingSizer()->Show(loaded);
-    _ui->labelStilArtistAuthor->GetContainingSizer()->Show(loaded);
-    _ui->labelStilComment->GetContainingSizer()->Show(loaded);
+    _ui->sizerStilRight->Show(loaded);
+    _ui->sizerStilRight->GetContainingWindow()->Layout();
 
     _ui->menuBar->Check(static_cast<int>(FrameElements::ElementsPlayer::MenuItemId_Player::StilInfoEnabled), loaded);
 }

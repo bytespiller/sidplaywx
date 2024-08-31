@@ -185,7 +185,7 @@ namespace FrameElements // Player class
 		sizerSongArea->Add(sizerSongInfoLeft, 1);
 
 		// Right
-		wxBoxSizer* sizerStilRight = new wxBoxSizer(wxVERTICAL);
+		sizerStilRight = new wxBoxSizer(wxVERTICAL);
 		sizerSongArea->Add(sizerStilRight, 1, wxEXPAND);
 
 		// Labels
