@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,8 @@ namespace FrameElements
 
 	public:
 		std::vector<wxCheckBox*> GetVoiceCheckBoxes();
+		std::vector<wxCheckBox*> GetDigiCheckBoxes();
+		std::vector<wxCheckBox*> GetFilterCheckBoxes();
 		void SetAllCheckBoxesState(bool checked);
 		void SetActiveSidsIndicator(unsigned int count);
 
@@ -69,16 +71,22 @@ namespace FrameElements
 	    wxCheckBox* chkSid1_1;
 	    wxCheckBox* chkSid1_2;
 	    wxCheckBox* chkSid1_3;
+		wxCheckBox* chkSid1_digi;
+		wxCheckBox* chkSid1_filter;
 		wxStaticText* labelActiveSid1;
 
 	    wxCheckBox* chkSid2_1;
 	    wxCheckBox* chkSid2_2;
 	    wxCheckBox* chkSid2_3;
+		wxCheckBox* chkSid2_digi;
+		wxCheckBox* chkSid2_filter;
 		wxStaticText* labelActiveSid2;
 
 	    wxCheckBox* chkSid3_1;
 	    wxCheckBox* chkSid3_2;
 	    wxCheckBox* chkSid3_3;
+		wxCheckBox* chkSid3_digi;
+		wxCheckBox* chkSid3_filter;
 		wxStaticText* labelActiveSid3;
 
 		wxStaticText* labelPreRenderActive;

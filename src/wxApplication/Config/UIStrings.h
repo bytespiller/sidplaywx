@@ -137,6 +137,8 @@ namespace Strings
 		inline constexpr const char* const SID_VOICES_TITLE("Voices");
 		inline constexpr const char* const SID_TITLE("SID");
 		inline constexpr const char* const SID_VOICE("Voice");
+		inline constexpr const char* const SID_DIGI("Digi samples");
+		inline constexpr const char* const SID_FILTER("Filter operation");
 		inline constexpr const char* const VOICE_ACTIVE("Active");
 		inline constexpr const char* const VOICE_MENU_ITEM_SOLO("Solo");
 		inline constexpr const char* const VOICES_UNAVAILABLE_PRERENDER("Voices state frozen during playback in Instant seeking mode.");
@@ -248,9 +250,6 @@ namespace Strings
 		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_PREFER_8580("Prefer MOS 8580");
 		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_FORCE_6581("Force MOS 6581");
 		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_FORCE_8580("Force MOS 8580");
-
-		inline constexpr const char* const OPT_FILTER_ENABLED("Filter enabled");
-		inline constexpr const char* const DESC_FILTER_ENABLED("Enable filter emulation.\nNote: ongoing playback will stop when changing this setting.");
 
 		inline constexpr const char* const OPT_FILTER_CURVE_6581("Filter curve (SID 6581)");
 		inline constexpr const char* const OPT_FILTER_CURVE_8580("Filter curve (SID 8580)");

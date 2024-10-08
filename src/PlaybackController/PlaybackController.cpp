@@ -131,7 +131,6 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
                                      (newConfig.sidConfig.forceC64Model != _sidDecoder->GetSidConfig().forceC64Model) ||
                                      (newConfig.sidConfig.forceSidModel != _sidDecoder->GetSidConfig().forceSidModel) ||
                                      (newConfig.sidConfig.digiBoost != _sidDecoder->GetSidConfig().digiBoost) ||
-                                     (newConfig.filterConfig.filterEnabled != _sidDecoder->GetFilterConfig().filterEnabled) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Curve, _sidDecoder->GetFilterConfig().filter6581Curve)) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve));
 
@@ -530,12 +529,6 @@ std::string PlaybackController::GetCurrentTuneSidDescription() const
         }
     }
 
-    // Indicate disabled filter
-    if (!_sidDecoder->GetFilterConfig().filterEnabled)
-    {
-        retString += " [Filter Off]";
-    }
-
     return retString;
 }
 
@@ -622,19 +615,45 @@ bool PlaybackController::ToggleVoice(unsigned int sidNum, unsigned int voice, bo
     return false;
 }
 
+bool PlaybackController::ToggleFilter(unsigned int sidNum, bool enable)
+{
+    if (IsValidSongLoaded())
+    {
+        if (sidNum + 1 <= GetCurrentTuneSidChipsRequired())
+        {
+            _sidDecoder->ToggleFilter(sidNum, enable);
+            EmitSignal(SignalsPlaybackController::SIGNAL_VOICE_TOGGLED);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool PlaybackController::IsVoiceEnabled(unsigned int sidNum, unsigned int voice) const
 {
     return _sidDecoder->GetSidVoicesEnabledStatus().at(sidNum).at(voice);
 }
 
-bool PlaybackController::AreAllRelevantVoicesEnabled() const
+bool PlaybackController::IsFilterEnabled(unsigned int sidNum) const
 {
-    const SidDecoder::SidVoicesEnabledStatus& allSidVoices = _sidDecoder->GetSidVoicesEnabledStatus();
+    return _sidDecoder->GetSidFiltersEnabledStatus().at(sidNum);
+}
+
+bool PlaybackController::AreRelevantSidsFullyEnabled() const
+{
     const int sidsNeeded = _sidDecoder->GetCurrentTuneSidChipsRequired();
-    return std::all_of(allSidVoices.cbegin(), allSidVoices.cbegin() + sidsNeeded, [](const std::vector<bool>& cSidVoices)
+
+    // Check voices
+    const SidDecoder::SidVoicesEnabledStatus& allSidVoices = _sidDecoder->GetSidVoicesEnabledStatus();
+    const bool voicesOk = std::all_of(allSidVoices.cbegin(), allSidVoices.cbegin() + sidsNeeded, [](const std::vector<bool>& cSidVoices)
     {
-        return std::all_of(cSidVoices.cbegin(), cSidVoices.cend(), [](const bool enabled){return enabled;});
+        return std::all_of(cSidVoices.cbegin(), cSidVoices.cend(), [](const bool enabled){ return enabled; });
     });
+
+    // Check filters (if voices are OK)
+    const SidDecoder::SidFiltersEnabledStatus& allSidFilters = _sidDecoder->GetSidFiltersEnabledStatus();
+    return voicesOk && std::all_of(allSidFilters.cbegin(), allSidFilters.cbegin() + sidsNeeded, [](const bool enabled){ return enabled; });
 }
 
 void PlaybackController::UnloadActiveTune()

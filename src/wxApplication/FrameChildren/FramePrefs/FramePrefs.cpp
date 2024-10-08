@@ -249,7 +249,6 @@ void FramePrefs::FillPropertyGrid()
             }
 
             // Filter
-            AddWrappedProp(Settings::AppSettings::ID::FilterEnabled, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_FILTER_ENABLED), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_ENABLED);
             AddWrappedProp(Settings::AppSettings::ID::FilterCurve6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE_COMMON, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
             AddWrappedProp(Settings::AppSettings::ID::FilterCurve8580, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_8580), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE_COMMON, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
 

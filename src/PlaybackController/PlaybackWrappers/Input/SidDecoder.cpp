@@ -85,15 +85,17 @@ bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig
 
     _rs.filter6581Curve(_filterConfigCache->filter6581Curve);
     _rs.filter8580Curve(_filterConfigCache->filter8580Curve);
-    _rs.filter(_filterConfigCache->filterEnabled);
 
-    // Reset the voices enabled status
+    // Reset the voices enabled status (fourth "voice" is digi samples, added in libsidplayfp v2.10.0)
     _sidVoicesEnabledStatus =
     {
-        {true, true, true},
-        {true, true, true},
-        {true, true, true}
+        {true, true, true, true},
+        {true, true, true, true},
+        {true, true, true, true}
     };
+
+    // Reset the filter enabled status
+    _sidFiltersEnabledStatus = {true, true, true};
 
     return true;
 }
@@ -251,6 +253,11 @@ const SidDecoder::SidVoicesEnabledStatus& SidDecoder::GetSidVoicesEnabledStatus(
     return _sidVoicesEnabledStatus;
 }
 
+const SidDecoder::SidFiltersEnabledStatus& SidDecoder::GetSidFiltersEnabledStatus() const
+{
+    return _sidFiltersEnabledStatus;
+}
+
 const SidConfig& SidDecoder::GetSidConfig() const
 {
     return _sidEngine.config();
@@ -288,7 +295,13 @@ void SidDecoder::SeekTo(uint_least32_t timeMs, const SeekStatusCallback& callbac
 void SidDecoder::ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable)
 {
     _sidVoicesEnabledStatus.at(sidNum).at(voice) = enable;
-    _sidEngine.mute(sidNum, voice, !enable); // Reminder: mute has it inverted, hopefully they won't fix it and make this incorrect without us noticing :P
+    _sidEngine.mute(sidNum, voice, !enable); // Reminder: inverted, makes sense due to a "mute" verb.
+}
+
+void SidDecoder::ToggleFilter(unsigned int sidNum, bool enable)
+{
+    _sidFiltersEnabledStatus.at(sidNum) = enable;
+    _sidEngine.filter(sidNum, enable);
 }
 
 void SidDecoder::UnloadActiveTune()

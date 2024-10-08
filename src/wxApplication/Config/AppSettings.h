@@ -58,7 +58,6 @@ namespace Settings
 			static constexpr const char* const DefaultC64Model = "DefaultC64Model";
 			static constexpr const char* const DefaultSidModel = "DefaultSidModel";
 
-			static constexpr const char* const FilterEnabled = "FilterEnabled";
 			static constexpr const char* const FilterCurve6581 = "FilterCurve6581";
 			static constexpr const char* const FilterCurve8580 = "FilterCurve8580";
 
@@ -152,7 +151,6 @@ namespace Settings
 				DefaultOption(ID::DefaultC64Model, static_cast<int>(DefaultC64Model::Prefer_PAL)),
 				DefaultOption(ID::DefaultSidModel, static_cast<int>(DefaultSidModel::Prefer_MOS6581)),
 
-				DefaultOption(ID::FilterEnabled, true),
 				DefaultOption(ID::FilterCurve6581, 0.5),
 				DefaultOption(ID::FilterCurve8580, 0.5),
 

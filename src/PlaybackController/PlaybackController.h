@@ -185,8 +185,13 @@ public:
     void SetVolume(float volume);
 
     bool ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable);
+    bool ToggleFilter(unsigned int sidNum, bool enable);
+
     bool IsVoiceEnabled(unsigned int sidNum, unsigned int voice) const;
-    bool AreAllRelevantVoicesEnabled() const;
+    bool IsFilterEnabled(unsigned int sidNum) const;
+
+    /// @brief Checks for voices + digi and filter.
+    bool AreRelevantSidsFullyEnabled() const;
 
     void UnloadActiveTune();
 

@@ -49,19 +49,18 @@ public:
     struct FilterConfig
     {
         FilterConfig() = delete;
-        FilterConfig(bool aFilterEnabled, double aFilter6581Curve, double aFilter8580Curve) :
-            filterEnabled(aFilterEnabled),
+        FilterConfig(double aFilter6581Curve, double aFilter8580Curve) :
             filter6581Curve(aFilter6581Curve),
             filter8580Curve(aFilter8580Curve)
         {
         }
 
-        const bool filterEnabled;
         const double filter6581Curve;
         const double filter8580Curve;
     };
 
-    using SidVoicesEnabledStatus = std::vector< std::vector<bool> >;
+    using SidVoicesEnabledStatus = std::vector< std::vector<bool> >; // Not using the std::bitset, the code becomes messy, not worth it!
+    using SidFiltersEnabledStatus = std::vector<bool>;
 
 public:
     SidDecoder();
@@ -98,11 +97,13 @@ public:
 
     const SidInfo& GetEngineInfo() const;
     const SidVoicesEnabledStatus& GetSidVoicesEnabledStatus() const;
+    const SidFiltersEnabledStatus& GetSidFiltersEnabledStatus() const;
     const SidConfig& GetSidConfig() const;
     const FilterConfig& GetFilterConfig() const;
 
     void SeekTo(uint_least32_t timeMs, const SeekStatusCallback& callback);
     void ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable);
+    void ToggleFilter(unsigned int sidNum, bool enable);
 
     void UnloadActiveTune();
 
@@ -113,6 +114,7 @@ private:
     SidConfig _sidConfigCache;
     std::unique_ptr<FilterConfig> _filterConfigCache;
     SidVoicesEnabledStatus _sidVoicesEnabledStatus;
+    SidFiltersEnabledStatus _sidFiltersEnabledStatus;
     sidplayfp _sidEngine;
     std::unique_ptr<SidTune> _tune;
     ReSIDfpBuilder _rs;
