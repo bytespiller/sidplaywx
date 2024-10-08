@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.11.0)
-project(sidplaywx CXX)
+
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+project(sidplaywx CXX)
+
 #set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # external headers
@@ -10,7 +14,6 @@ include(${CMAKE_SOURCE_DIR}/deps/include/wxWidgets/CMakeLists_msw.txt)
 
 # external libs
 include(${CMAKE_SOURCE_DIR}/deps/lib/sidplayfp/CMakeLists_msw.txt)
-include(${CMAKE_SOURCE_DIR}/deps/lib/stilview/CMakeLists_msw.txt)
 include(${CMAKE_SOURCE_DIR}/deps/lib/portaudio/CMakeLists_msw.txt)
 include(${CMAKE_SOURCE_DIR}/deps/lib/wxWidgets/CMakeLists_msw.txt)
 
@@ -25,12 +28,11 @@ add_executable(${PROJECT_NAME} ${SRC_FILES})
 # libs
 find_package(Threads)
 target_link_libraries(${PROJECT_NAME}
-    libsidplayfp libstilview
+    libsidplayfp
     libportaudio
     setupapi dsound dxguid winmm # Windows-specific (for audio)
     Threads::Threads
     -static-libgcc -static-libstdc++ # needed for MinGW posix threading
-    -fopenmp # libsidplayfp since 2.5.0 uses OpenMP
 
     -mwindows # WxWidgets, don't open console/terminal
     liboleacc.a # WxWidgets MSW, must be defined BEFORE the wxWidgets_core
