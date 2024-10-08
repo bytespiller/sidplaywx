@@ -129,7 +129,6 @@ namespace
     PlaybackController::FilterConfig LoadFilterConfig(Settings::AppSettings& settings)
     {
         return {
-            settings.GetOption(Settings::AppSettings::ID::FilterEnabled)->GetValueAsBool(),
             settings.GetOption(Settings::AppSettings::ID::FilterCurve6581)->GetValueAsDouble(),
             settings.GetOption(Settings::AppSettings::ID::FilterCurve8580)->GetValueAsDouble()
         };
@@ -343,6 +342,11 @@ void MyApp::SetPlaybackSpeed(double factor)
 void MyApp::ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable)
 {
     _playback->ToggleVoice(sidNum, voice, enable);
+}
+
+void MyApp::ToggleFilter(unsigned int sidNum, bool enable)
+{
+    _playback->ToggleFilter(sidNum, enable);
 }
 
 const PlaybackController& MyApp::GetPlaybackInfo() const

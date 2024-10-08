@@ -35,10 +35,23 @@ FramePlaybackMods::FramePlaybackMods(wxWindow* parent, const wxString& title, co
     // Configure UI
     UpdateUiState();
 
-    // Bindings
+    // *** Bindings ***
+    // Voices toggle
     for (wxCheckBox* const chkBox : _ui->GetVoiceCheckBoxes())
     {
         chkBox->Bind(wxEVT_CHECKBOX, &OnVoiceCheckBox, this);
+    }
+
+    // Digi samples toggle
+    for (wxCheckBox* const chkBox : _ui->GetDigiCheckBoxes())
+    {
+        chkBox->Bind(wxEVT_CHECKBOX, &OnDigiCheckBox, this);
+    }
+
+    // Filter toggle
+    for (wxCheckBox* const chkBox : _ui->GetFilterCheckBoxes())
+    {
+        chkBox->Bind(wxEVT_CHECKBOX, &OnFilterCheckBox, this);
     }
 
     _ui->sliderPlaybackSpeed->Bind(wxEVT_SCROLL_CHANGED, &OnSpeedSlider, this);
@@ -78,6 +91,7 @@ void FramePlaybackMods::UpdateUiState()
     const PlaybackController& playback = _app.GetPlaybackInfo();
     const int sidChipsRequired = playback.GetCurrentTuneSidChipsRequired();
 
+    // Voice 1, 2, 3 checboxes (for each SID)
     for (wxCheckBox* chkBox : _ui->GetVoiceCheckBoxes())
     {
         const VoiceCheckBoxData* const data = dynamic_cast<VoiceCheckBoxData*>(chkBox->GetRefData());
@@ -86,6 +100,25 @@ void FramePlaybackMods::UpdateUiState()
         chkBox->Enable(changeable && sidChipsRequired >= data->sidNum + 1);
     }
 
+    // Digi checkboxes (for each SID)
+    for (wxCheckBox* chkBox : _ui->GetDigiCheckBoxes())
+    {
+        const VoiceCheckBoxData* const data = dynamic_cast<VoiceCheckBoxData*>(chkBox->GetRefData());
+        assert(data != nullptr);
+        chkBox->SetValue(playback.IsVoiceEnabled(data->sidNum, data->voice));
+        chkBox->Enable(changeable && sidChipsRequired >= data->sidNum + 1);
+    }
+
+    // Filter checkboxes (for each SID)
+    for (wxCheckBox* chkBox : _ui->GetFilterCheckBoxes())
+    {
+        const VoiceCheckBoxData* const data = dynamic_cast<VoiceCheckBoxData*>(chkBox->GetRefData());
+        assert(data != nullptr);
+        chkBox->SetValue(playback.IsFilterEnabled(data->sidNum));
+        chkBox->Enable(changeable && sidChipsRequired >= data->sidNum + 1);
+    }
+
+    // Other
     _ui->SetActiveSidsIndicator(sidChipsRequired);
     _ui->sliderPlaybackSpeed->SetValue(playback.GetPlaybackSpeedFactor() * 100);
 }
@@ -152,6 +185,21 @@ void FramePlaybackMods::OnVoiceCheckBox(wxCommandEvent& evt)
 
     _app.ToggleVoice(data->sidNum, data->voice, modifierSolo || evt.IsChecked());
     UpdateUiState();
+}
+
+void FramePlaybackMods::OnDigiCheckBox(wxCommandEvent& evt)
+{
+    const VoiceCheckBoxData* const data = dynamic_cast<VoiceCheckBoxData*>(evt.GetEventObject()->GetRefData());
+    assert(data != nullptr);
+    assert(data->voice == 3);
+    _app.ToggleVoice(data->sidNum, data->voice, evt.IsChecked());
+}
+
+void FramePlaybackMods::OnFilterCheckBox(wxCommandEvent& evt)
+{
+    const VoiceCheckBoxData* const data = dynamic_cast<VoiceCheckBoxData*>(evt.GetEventObject()->GetRefData());
+    assert(data != nullptr);
+    _app.ToggleFilter(data->sidNum, evt.IsChecked());
 }
 
 void FramePlaybackMods::OnCharHook(wxKeyEvent& evt)

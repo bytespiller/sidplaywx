@@ -62,7 +62,10 @@ public:
     void SeekTo(uint_least32_t timeMs);
 
     void SetPlaybackSpeed(double factor);
+
     void ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable);
+    void ToggleFilter(unsigned int sidNum, bool enable);
+
     const PlaybackController& GetPlaybackInfo() const;
     bool ReapplyPlaybackSettings();
     void UnloadActiveTune();
