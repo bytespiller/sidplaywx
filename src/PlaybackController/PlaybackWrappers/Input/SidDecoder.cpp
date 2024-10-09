@@ -270,6 +270,8 @@ const SidDecoder::FilterConfig& SidDecoder::GetFilterConfig() const
 
 void SidDecoder::SeekTo(uint_least32_t timeMs, const SeekStatusCallback& callback)
 {
+    _seeking = true;
+
     uint_least32_t cTimeMs = _sidEngine.timeMs();
     if (cTimeMs >= timeMs)
     {
@@ -277,31 +279,72 @@ void SidDecoder::SeekTo(uint_least32_t timeMs, const SeekStatusCallback& callbac
         cTimeMs = 0;
     }
 
+    // Disable voices and filters of all SIDs -- yields additional ~4x speedup when seeking
+    const unsigned int maxSids = _sidEngine.info().maxsids();
+    for (unsigned int sid = 0; sid < maxSids; ++sid)
+    {
+        _sidEngine.mute(sid, 0, true); // Voice 1
+        _sidEngine.mute(sid, 1, true); // Voice 2
+        _sidEngine.mute(sid, 2, true); // Voice 3
+        _sidEngine.mute(sid, 3, true); // Digi
+        _sidEngine.filter(sid, false);
+    }
+
+    // Seeking: decode until target timeMs
+    bool aborted = false;
     while (cTimeMs < timeMs)
     {
         _sidEngine.play(nullptr, 0);
 
         if (callback(cTimeMs, false))
         {
-            return;
+            aborted = true;
+            break;
         }
 
         cTimeMs = _sidEngine.timeMs();
     }
 
-    callback(cTimeMs, true);
+    // Restore explicitly disabled voices back to their canonical state
+    for (unsigned int sid = 0; sid < maxSids; ++sid)
+    {
+        _sidEngine.mute(sid, 0, !_sidVoicesEnabledStatus.at(sid).at(0)); // Voice 1
+        _sidEngine.mute(sid, 1, !_sidVoicesEnabledStatus.at(sid).at(1)); // Voice 2
+        _sidEngine.mute(sid, 2, !_sidVoicesEnabledStatus.at(sid).at(2)); // Voice 3
+        _sidEngine.mute(sid, 3, !_sidVoicesEnabledStatus.at(sid).at(3)); // Digi
+        _sidEngine.filter(sid, _sidFiltersEnabledStatus.at(sid));
+    }
+
+    // Seeking done
+    _seeking = false;
+    if (!aborted)
+    {
+        callback(cTimeMs, true);
+    }
 }
 
 void SidDecoder::ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable)
 {
+    // Remember as canonical state
     _sidVoicesEnabledStatus.at(sidNum).at(voice) = enable;
-    _sidEngine.mute(sidNum, voice, !enable); // Reminder: inverted, makes sense due to a "mute" verb.
+
+    // Apply immediately, unless seeking (the seek operation will do it when finished)
+    if (!_seeking)
+    {
+        _sidEngine.mute(sidNum, voice, !enable); // Reminder: inverted, makes sense due to a "mute" verb.
+    }
 }
 
 void SidDecoder::ToggleFilter(unsigned int sidNum, bool enable)
 {
+    // Remember as canonical state
     _sidFiltersEnabledStatus.at(sidNum) = enable;
-    _sidEngine.filter(sidNum, enable);
+
+    // Apply immediately, unless seeking (the seek operation will do it when finished)
+    if (!_seeking)
+    {
+        _sidEngine.filter(sidNum, enable);
+    }
 }
 
 void SidDecoder::UnloadActiveTune()
