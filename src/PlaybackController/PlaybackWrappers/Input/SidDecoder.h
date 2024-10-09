@@ -111,6 +111,7 @@ private:
     void PrepareLoadSong();
 
 private:
+    bool _seeking = false;
     SidConfig _sidConfigCache;
     std::unique_ptr<FilterConfig> _filterConfigCache;
     SidVoicesEnabledStatus _sidVoicesEnabledStatus;
