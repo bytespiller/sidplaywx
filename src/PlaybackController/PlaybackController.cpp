@@ -134,7 +134,8 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Curve, _sidDecoder->GetFilterConfig().filter6581Curve)) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve));
 
-    const bool needResetAudioOutput = (newConfig.audioConfig.lowLatency != _portAudioOutput->GetAudioConfig().lowLatency) ||
+    const bool needResetAudioOutput = (needResetSidDecoder && _preRender != nullptr) || // -> Reset the prerender (in Instant Seeking mode) when the SID decoder gets reset since it'd hold an invalid reference to it then.
+                                      (newConfig.audioConfig.lowLatency != _portAudioOutput->GetAudioConfig().lowLatency) ||
                                       (newConfig.audioConfig.channelCount != _portAudioOutput->GetAudioConfig().channelCount) ||
                                       (newConfig.audioConfig.preferredOutputDevice != _portAudioOutput->GetAudioConfig().preferredOutputDevice) ||
                                       (newConfig.audioConfig.sampleRate != _portAudioOutput->GetAudioConfig().sampleRate);
