@@ -110,6 +110,9 @@ public:
 private:
     void PrepareLoadSong();
 
+    // Applies the SidVoicesEnabledStatus and SidFiltersEnabledStatus to SIDs.
+    void ApplyCanonicalVoiceAndFilterStates();
+
 private:
     bool _seeking = false;
     SidConfig _sidConfigCache;

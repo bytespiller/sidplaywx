@@ -97,6 +97,8 @@ bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig
     // Reset the filter enabled status
     _sidFiltersEnabledStatus = {true, true, true};
 
+    ApplyCanonicalVoiceAndFilterStates();
+
     return true;
 }
 
@@ -306,14 +308,7 @@ void SidDecoder::SeekTo(uint_least32_t timeMs, const SeekStatusCallback& callbac
     }
 
     // Restore explicitly disabled voices back to their canonical state
-    for (unsigned int sid = 0; sid < maxSids; ++sid)
-    {
-        _sidEngine.mute(sid, 0, !_sidVoicesEnabledStatus.at(sid).at(0)); // Voice 1
-        _sidEngine.mute(sid, 1, !_sidVoicesEnabledStatus.at(sid).at(1)); // Voice 2
-        _sidEngine.mute(sid, 2, !_sidVoicesEnabledStatus.at(sid).at(2)); // Voice 3
-        _sidEngine.mute(sid, 3, !_sidVoicesEnabledStatus.at(sid).at(3)); // Digi
-        _sidEngine.filter(sid, _sidFiltersEnabledStatus.at(sid));
-    }
+    ApplyCanonicalVoiceAndFilterStates();
 
     // Seeking done
     _seeking = false;
@@ -354,5 +349,18 @@ void SidDecoder::UnloadActiveTune()
         _sidEngine.stop();
         _sidEngine.load(0);
         _tune = nullptr;
+    }
+}
+
+void SidDecoder::ApplyCanonicalVoiceAndFilterStates()
+{
+    const unsigned int maxSids = _sidEngine.info().maxsids();
+    for (unsigned int sid = 0; sid < maxSids; ++sid)
+    {
+        _sidEngine.mute(sid, 0, !_sidVoicesEnabledStatus.at(sid).at(0)); // Voice 1
+        _sidEngine.mute(sid, 1, !_sidVoicesEnabledStatus.at(sid).at(1)); // Voice 2
+        _sidEngine.mute(sid, 2, !_sidVoicesEnabledStatus.at(sid).at(2)); // Voice 3
+        _sidEngine.mute(sid, 3, !_sidVoicesEnabledStatus.at(sid).at(3)); // Digi
+        _sidEngine.filter(sid, _sidFiltersEnabledStatus.at(sid));
     }
 }
