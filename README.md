@@ -16,7 +16,7 @@ The **sidplaywx** uses [libsidplayfp](https://github.com/libsidplayfp/libsidplay
 |Modify Playback window|
 |-|
 |<p align="center">![Screenshot of the Modify Playback window](../assets/screenshots/sidplaywx-playbackmod.png?raw=true)</p>|
-|Modification of ongoing playback: toggling individual SID voices (the active SIDs are indicated -- most normal tunes use a single SID chip, but there exist special stereo/multi-SID tunes which will use up to three).<br>Playback speed (not tempo) can also be modified (pitch is affected).<br>If any of these settings are changed, and they affect the currently playing tune, there will be a "MODIFIED" indication in the status bar.|
+|Modification of ongoing playback: toggling individual SID voices (the active SIDs are indicated -- most normal tunes use a single SID chip, but there exist special stereo/multi-SID tunes which will use up to three). Realtime toggles to inhibit the filter and digi samples are also available. <br>Playback speed (not tempo) can also be modified (pitch is affected).<br>If any of these settings are changed, and they affect the currently playing tune, there will be a "MODIFIED" indication in the status bar.|
 
 <br>
 
@@ -34,7 +34,8 @@ The current version of the sidplaywx is 0.x.x, so in addition to bugfixes and co
 - Misc. necessary features such as remembering window size & position etc.
 - Exporting tunes to WAV
 - [<del>STIL</del>](https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/STIL.txt) <del>support for displaying tune comments</del>
-- Proper Linux support
+- Native Linux support
+  - Side note: while it currently works fine under Wine, there are some glitches such as STIL not being displayed (due to a layout problem) etc.
 - Theming support / dark theme
 
 ## Download
@@ -76,30 +77,44 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 <details>
   <summary>Click to expand!</summary>
 
-At the moment, the easiest way to build the sidplaywx on MSW is probably by using the [MSYS2](https://www.msys2.org/) environment.<br>
+### Windows (7, 10, 11)
+At the moment, the easiest way to build the sidplaywx on Windows is probably by using the [MSYS2](https://www.msys2.org/) environment.<br>
 Note: you should install it into the default `C:\msys64\` path in order for hardcoded cmake paths to work out-of-the-box.
 
-Once installed you need to first-time configure it like so:
+Once installed you need to **first-time configure** it like so:
+* **NOTE:** MSYS2 supports modern UCRT64 and legacy MINGW environments. UCRT64 is recommended these days.
 * Update package lists etc.: `pacman -Syu` and after restart (if needed): `pacman -Su`
 * Prerequisites: `pacman -S base-devel`
-* msvcrt-compatible gcc: `pacman -S mingw-w64-x86_64-gcc`
-* IMPORTANT: run in **mingw64.exe**, **not** default msys2 terminal (otherwise the proper gcc variant might not be used)!
-* Note: if need to install gdb separately for some reason: `pacman -S mingw-w64-x86_64-gdb`
+* msvcrt-compatible gcc:
+  * UCRT64: `pacman -S mingw-w64-ucrt-x86_64-gcc`
+  * MINGW: `pacman -S mingw-w64-x86_64-gcc`
+* Tools (e.g., PortAudio needs those):
+	 * UCRT64: `pacman -S mingw-w64-ucrt-x86_64-cmake && pacman -S mingw-w64-ucrt-x86_64-make`
+	 * MINGW: `pacman -S mingw-w64-x86_64-cmake && pacman -S mingw-w64-x86_64-make`
+* Extra if you need to install gdb separately for some reason:
+	 * UCRT64: `pacman -S mingw-w64-ucrt-x86_64-gdb`
+	 * MINGW: `pacman -S mingw-w64-x86_64-gdb`
+* In your PATH environment variable add either the:
+	 * UCRT64: "C:\msys64\ucrt64\bin"
+	 * MINGW: "C:\msys64\mingw64\bin"
+* IMPORTANT: run the terminal via **ucrt64.exe** (or mingw64.exe respectively), **not** default msys2 terminal (otherwise the proper gcc variant might not be used)!
 
 Building libsidplayfp:
-* [Download](https://github.com/libsidplayfp/libsidplayfp/releases) the libsidplayfp source release.
-* `cd` (with MSYS2 MINGW64 terminal) into the libsidplayfp's root.
-* To enable C++14 set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++0x"`
+* **NOTE:** Building the libsidplayfp from the master is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
+* `cd` (with MSYS2 e.g., UCRT64.exe terminal) into the libsidplayfp's root.
+* To specify either:
+  * C++20 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++20"` (new)
+  * C++14 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++0x"` (older versions of libsidplayfp)
 * Finally, run: `./configure LDFLAGS="-static" && make && make install`
+  * TIP: if doing this for the first time, break down these 3 commands (i.e., they are separated by `&&`) and run them one by one so you can catch any problems more easily.
 * Note: the lib will be automatically found by our cmake later (if you've installed the msys into the `C:\msys64\`) and it will get linked statically.
 
 Building Portaudio:
 * [Download](http://files.portaudio.com/download.html) the PortAudio stable source release.
-* Prerequisites (in the MSYS2 MINGW64 terminal): `pacman -S mingw-w64-x86_64-cmake && pacman -S mingw-w64-x86_64-make`
-* `cd` (with MSYS2 MINGW64 terminal) into the PortAudio's root.
+* `cd` (with MSYS2 e.g., UCRT64.exe terminal) into the PortAudio's root.
 * `cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release`
 * `mingw32-make`
-* Copy headers and libs into the following new folder (so our cmake can find it later):
+* Copy headers and libs into the following new folder (so our cmake can find it automatically):
   * _headers_ into the `C:\Program Files\PortAudio\include\`
   * _libs_ into the `C:\Program Files\PortAudio\include\lib\`
 
@@ -108,13 +123,22 @@ wxWidgets:
 * Copy them into the new folder:
   * _headers_ into the `C:\wxWidgets\include\` (with `msvc` and `wx` subfolders in there)
   * _libs_ into the `C:\wxWidgets\gcc_lib\`
-* IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following wxWidgets' `.dll` files into the sidplaywx's **build** folder: `libgcc_s_seh-1.dll`, `libstdc++-6.dll`, `libwinpthread-1.dll`, `wxbase315u_gcc1020_x64.dll`, `wxbase315u_xml_gcc1020_x64.dll`, `wxmsw315u_core_gcc1020_x64.dll`, `wxmsw315u_propgrid_gcc1020_x64.dll`
+* IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following wxWidgets' `.dll` files into the sidplaywx's **build** folder: `wxbase315u_SUFFIX.dll`, `wxbase315u_xml_SUFFIX.dll`, `wxmsw315u_core_SUFFIX.dll`, `wxmsw315u_propgrid_SUFFIX.dll` (the exact `_SUFFIX` suffixes differ depending on gcc version etc.).
+* TIP: You can also build the wxWidgets yourself in the similar manner to building the PortAudio (in case you want to use a specific GCC version not offered among pre-built binaries).
 
 Finally building the actual **sidplaywx** application:
 * The main `CMakeLists.txt` should do the trick (I myself use the Visual Studio Code).
 * IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following files into the sidplaywx's **build** folder:
+  * `libgcc_s_seh-1.dll`, `libstdc++-6.dll`, `libwinpthread-1.dll` found in your appropriate MSYS bin folders (e.g., ucrt64 or mingw64).
   * The entire `dev\theme` folder (so you end up with `build\theme`).
   * The `dev\bundled-Songlengths.md5` file (so you end up with `build\bundled-Songlengths.md5`).
-  * You may also need several *.dll files (see Tip below).
-  * Tip: you can see the [release](https://github.com/bytespiller/sidplaywx/releases) package for example if you get stuck.
+  * The `dev\bundled-STIL.txt` file (so you end up with `build\bundled-STIL.txt`).
+  * Tip: you can see the [release](https://github.com/bytespiller/sidplaywx/releases) package for example of bundled dependency files if you get stuck.
+
+---
+
+### Linux
+_Coming soon, stay tuned..._
+<br><br>
+Please note that while the sidplaywx application runs fine under Wine, it is not fully supported that way (e.g., STIL isn't displayed due to a layout problem where the label is zero width, and there may be issues with text colors, styles etc.).
 </details>
