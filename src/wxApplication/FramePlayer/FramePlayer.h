@@ -158,10 +158,13 @@ private:
 private:
     void OnButtonPlayPause(wxCommandEvent& evt);
     void OnButtonStop(wxCommandEvent& evt);
+
     void OnButtonSubsongNext(wxCommandEvent& evt);
     void OnButtonSubsongPrev(wxCommandEvent& evt);
     void OnButtonTuneNext(wxCommandEvent& evt);
     void OnButtonTunePrev(wxCommandEvent& evt);
+    bool DoChangePlaylistTrack(const PlaylistTreeModelNode* const targetNode);
+
     void OnButtonPlaybackMod(wxCommandEvent& evt);
 
     void OnVolumeSlider(wxCommandEvent& evt);

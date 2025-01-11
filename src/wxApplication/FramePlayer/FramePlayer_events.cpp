@@ -595,10 +595,31 @@ void FramePlayer::OnButtonStop()
     UpdateUiState();
 }
 
-bool FramePlayer::OnButtonSubsongNext() // TODO: much repeating in these four methods, try to DRY refactor.
+#pragma region Track navigation
+
+bool FramePlayer::OnButtonSubsongNext()
 {
-    const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetNextSubsong();
-    bool success = node != nullptr;
+    return DoChangePlaylistTrack(_ui->treePlaylist->GetNextSubsong());
+}
+
+bool FramePlayer::OnButtonSubsongPrev()
+{
+    return DoChangePlaylistTrack(_ui->treePlaylist->GetPrevSubsong());
+}
+
+bool FramePlayer::OnButtonTuneNext()
+{
+    return DoChangePlaylistTrack(_ui->treePlaylist->GetNextSong());
+}
+
+bool FramePlayer::OnButtonTunePrev()
+{
+    return DoChangePlaylistTrack(_ui->treePlaylist->GetPrevSong());
+}
+
+bool FramePlayer::DoChangePlaylistTrack(const PlaylistTreeModelNode* const targetNode)
+{
+    bool success = targetNode != nullptr;
 
     const bool shouldAutoplay = ShouldAutoPlay(_app); // Must check *before* it changes.
     if (!shouldAutoplay || !success)
@@ -609,7 +630,7 @@ bool FramePlayer::OnButtonSubsongNext() // TODO: much repeating in these four me
     {
         if (success)
         {
-            success = TryPlayPlaylistItem(*node);
+            success = TryPlayPlaylistItem(*targetNode);
         }
         UpdateUiState();
     }
@@ -617,71 +638,7 @@ bool FramePlayer::OnButtonSubsongNext() // TODO: much repeating in these four me
     return success;
 }
 
-bool FramePlayer::OnButtonSubsongPrev() // TODO: much repeating in these four methods, try to DRY refactor.
-{
-    const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetPrevSubsong();
-    bool success = node != nullptr;
-
-    const bool shouldAutoplay = ShouldAutoPlay(_app); // Must check *before* it changes.
-    if (!shouldAutoplay || !success)
-    {
-        OnButtonStop();
-    }
-    else
-    {
-        if (success)
-        {
-            success = TryPlayPlaylistItem(*node);
-        }
-        UpdateUiState();
-    }
-
-    return success;
-}
-
-bool FramePlayer::OnButtonTuneNext() // TODO: much repeating in these four methods, try to DRY refactor.
-{
-    const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetNextSong();
-    bool success = node != nullptr;
-
-    const bool shouldAutoplay = ShouldAutoPlay(_app); // Must check *before* it changes.
-    if (!shouldAutoplay || !success)
-    {
-        OnButtonStop();
-    }
-    else
-    {
-        if (success)
-        {
-            success = TryPlayPlaylistItem(*node);
-        }
-        UpdateUiState();
-    }
-
-    return success;
-}
-
-bool FramePlayer::OnButtonTunePrev() // TODO: much repeating in these four methods, try to DRY refactor.
-{
-    const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetPrevSong();
-    bool success = node != nullptr;
-
-    const bool shouldAutoplay = ShouldAutoPlay(_app); // Must check *before* it changes.
-    if (!shouldAutoplay || !success)
-    {
-        OnButtonStop();
-    }
-    else
-    {
-        if (success)
-        {
-            success = TryPlayPlaylistItem(*node);
-        }
-        UpdateUiState();
-    }
-
-    return success;
-}
+#pragma endregion
 
 void FramePlayer::OnSongDurationReached()
 {
