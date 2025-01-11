@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.13.0"); // Reminder: don't forget to increase.
+	inline constexpr const char* const APP_VERSION_TAG("0.14.0"); // Reminder: don't forget to increase.
 
 	namespace FramePlayer
 	{
@@ -288,7 +288,7 @@ namespace Strings
 		inline constexpr const char* const DESCRIPTION("A GUI player for Commodore 64 SID music files based on libsidplayfp and wxWidgets");
 		inline constexpr const char* const DEVELOPER_LIBRARIES("This program uses the following Open Source libraries:");
 		inline constexpr const char* const HVSC("Check out the (unaffiliated) High Voltage SID Collection for SID tunes, Songlengths Database and more: https://www.hvsc.c64.org");
-		inline constexpr const char* const LICENSE("sidplaywx - A GUI player for Commodore 64 SID music files based on libsidplayfp and wxWidgets.\nCopyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html");
+		inline constexpr const char* const LICENSE("sidplaywx - A GUI player for Commodore 64 SID music files based on libsidplayfp and wxWidgets.\nCopyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html");
 	}
 
 	namespace Error
