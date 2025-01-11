@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,14 +18,14 @@
 
 #include "SimpleTimer.h"
 
+#include <chrono>
+#include <system_error>
+
 #ifdef _WIN32
 #include <Windows.h>
 #else
 #include <unistd.h>
 #endif
-
-#include <system_error>
-
 
 SimpleTimer::SimpleTimer(Type type, unsigned long delayMs, Callback callback) :
 	_type(type),
@@ -57,7 +57,7 @@ unsigned long SimpleTimer::GetDelay() const
 
 void SimpleTimer::Restart()
 {
-	const int RESOLUTION_MS = 10;
+	constexpr int RESOLUTION_MS = 10; // milliseconds
 
 	Abort();
 	_elapsedMs = 0;
@@ -66,8 +66,12 @@ void SimpleTimer::Restart()
 	{
 		while ((_elapsedMs < _delayMs) && !_aborting)
 		{
+			const auto start = std::chrono::high_resolution_clock::now();
 			Sleep(RESOLUTION_MS);
-			_elapsedMs += RESOLUTION_MS; // Not a true elapsed time.
+			const auto end = std::chrono::high_resolution_clock::now();
+			const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+			_elapsedMs += duration;
 		}
 
 		if (!_aborting)
