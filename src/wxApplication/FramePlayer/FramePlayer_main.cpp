@@ -25,6 +25,7 @@
 #include "../FrameChildren/FramePlaybackMods/FramePlaybackMods.h"
 #include "../FrameChildren/FramePrefs/FramePrefs.h"
 #include <wx/aboutdlg.h>
+#include <wx/display.h>
 #include <wx/webrequest.h>
 
 using RepeatMode = UIElements::RepeatModeButton::RepeatMode;
@@ -54,8 +55,17 @@ FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize
     SubscribeMe(*_ui->searchBar, UIElements::SignalsSearchBar::SIGNAL_FIND_PREV, std::bind(&OnFindSong, this, UIElements::SignalsSearchBar::SIGNAL_FIND_PREV));
 
     // Final
-    SetClientSize(DpiSize(640, 512)); // TODO: load from options if available
-    // TODO: position if available
+    if (!TryRestoreMainWindowPositionAndSize())
+    {
+        // Default position is implied/automatic here
+        SetClientSize(DpiSize(640, 512)); // Hardcoded default size
+    }
+
+    const bool maximized = _app.currentSettings->GetOption(Settings::AppSettings::ID::MainWindowMaximized)->GetValueAsBool();
+    if (maximized)
+    {
+        Maximize();
+    }
 
     UpdateUiState();
 
@@ -72,6 +82,44 @@ void FramePlayer::IndicateExternalFilesIncoming()
 FrameElements::ElementsPlayer& FramePlayer::GetUIElements(PassKey<FramePrefs>)
 {
     return *_ui;
+}
+
+bool FramePlayer::TryRestoreMainWindowPositionAndSize()
+{
+    const wxString& rawPos = _app.currentSettings->GetOption(Settings::AppSettings::ID::MainWindowPosition)->GetValueAsString();
+    const wxString& rawSize = _app.currentSettings->GetOption(Settings::AppSettings::ID::MainWindowSize)->GetValueAsString();
+
+    if (!rawPos.IsEmpty() && !rawSize.IsEmpty())
+    {
+        // Extract the settings
+        const wxArrayString& rawXY = wxSplit(rawPos, ',');
+        const int x = wxAtoi(rawXY.front());
+        const int y = wxAtoi(rawXY.back());
+
+        const wxArrayString& rawWH = wxSplit(rawSize, 'x');
+        const int w = wxAtoi(rawWH.front());
+        const int h = wxAtoi(rawWH.back());
+
+        if (w < GetMinClientSize().GetWidth() || h < GetMinClientSize().GetHeight())
+        {
+            return false;
+        }
+
+        // DPI aware position & size
+        const wxPoint& restorePosition = FromDIP(wxPoint(x, y));
+        const wxSize& restoreSize = DpiSize(w, h);
+
+        // Restore window position & size (if it fits on the current screen/viewport)
+        wxDisplay display(wxDisplay::GetFromWindow(this));
+        if (display.GetClientArea().Contains(wxRect(restorePosition, restoreSize)))
+        {
+            SetPosition(restorePosition);
+            SetClientSize(restoreSize);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void FramePlayer::InitSonglengthsDatabase()
@@ -375,7 +423,15 @@ void FramePlayer::CloseApplication()
     _app.StopPlayback();
     Hide();
 
-    // TODO: save window settings etc.
+    // Main window size & position
+    _app.currentSettings->GetOption(Settings::AppSettings::ID::MainWindowMaximized)->UpdateValue(IsMaximized());
+    if (!IsMaximized()) // Don't save position & size if maximized (remember non-maximized state).
+    {
+        _app.currentSettings->GetOption(Settings::AppSettings::ID::MainWindowPosition)->UpdateValue(wxString::Format("%i,%i", GetScreenPosition().x, GetScreenPosition().y));
+        _app.currentSettings->GetOption(Settings::AppSettings::ID::MainWindowSize)->UpdateValue(wxString::Format("%ix%i", GetClientSize().x, GetClientSize().y));
+    }
+
+    // Audio volume
     _app.currentSettings->GetOption(Settings::AppSettings::ID::Volume)->UpdateValue(_ui->sliderVolume->GetValue());
     _app.currentSettings->GetOption(Settings::AppSettings::ID::VolumeControlEnabled)->UpdateValue(_ui->sliderVolume->IsEnabled());
 

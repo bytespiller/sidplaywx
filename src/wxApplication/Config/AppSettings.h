@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,6 +70,7 @@ namespace Settings
 			static constexpr const char* const RememberPlaylist = "RememberPlaylist";
 			static constexpr const char* const MediaKeys = "MediaKeys";
 			static constexpr const char* const SingleInstance = "SingleInstance";
+			static constexpr const char* const RestoreDefaults = "RestoreDefaults";
 
 			// Menu
 			static constexpr const char* const StayTopmost = "StayTopmost";
@@ -79,9 +80,13 @@ namespace Settings
 			// Internal
 			static constexpr const char* const Volume = "Volume";
 			static constexpr const char* const VolumeControlEnabled = "VolumeControlEnabled";
-			static constexpr const char* const RestoreDefaults = "RestoreDefaults";
+
 			static constexpr const char* const LastSongName = "LastSongName";
 			static constexpr const char* const LastSubsongIndex = "LastSubsongIndex";
+
+			static constexpr const char* const MainWindowPosition = "MainWindowPosition";
+			static constexpr const char* const MainWindowSize = "MainWindowSize";
+			static constexpr const char* const MainWindowMaximized = "MainWindowMaximized";
 		};
 
 		enum class DragDropMode
@@ -175,6 +180,10 @@ namespace Settings
 				DefaultOption(ID::VolumeControlEnabled, true),
 				DefaultOption(ID::LastSongName, ""),
 				DefaultOption(ID::LastSubsongIndex, 0),
+
+				DefaultOption(ID::MainWindowPosition, ""),
+				DefaultOption(ID::MainWindowSize, ""),
+				DefaultOption(ID::MainWindowMaximized, false),
 			};
 		}
 	};

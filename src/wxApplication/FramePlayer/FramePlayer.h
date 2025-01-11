@@ -78,12 +78,14 @@ public:
     void InitStilInfo(PassKey<FramePrefs>);
 
 private:
-    // File
+    bool TryRestoreMainWindowPositionAndSize();
     void InitSonglengthsDatabase();
     void InitStilInfo();
     void SetupUiElements();
     void DeferredInit();
     void SetRefreshTimerInterval(int desiredInterval);
+
+    // File
     void CloseApplication();
 
     // Edit
