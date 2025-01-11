@@ -356,7 +356,7 @@ void FramePlayer::OnLabelTitleMouseOver(wxMouseEvent& /*evt*/)
 
 void FramePlayer::OnMenuOpening(wxMenuEvent& evt)
 {
-    const wxMenu* const menu = evt.GetMenu();
+    wxMenu* const menu = evt.GetMenu();
     if (menu == nullptr) // Bogus menu event (e.g., right click on the titlebar in MSW).
     {
         return;
@@ -365,14 +365,14 @@ void FramePlayer::OnMenuOpening(wxMenuEvent& evt)
     const bool playlistEmpty = _ui->treePlaylist->IsEmpty();
     if (menu->GetTitle().IsSameAs(Strings::FramePlayer::MENU_FILE)) // TODO: try to find a better way to detect which menu is opened (e.g., "File" in this case).
     {
-        evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::PlaylistSave), !playlistEmpty);
-        evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::PlaylistClear), !playlistEmpty);
+        menu->Enable(static_cast<int>(MenuItemId_Player::PlaylistSave), !playlistEmpty);
+        menu->Enable(static_cast<int>(MenuItemId_Player::PlaylistClear), !playlistEmpty);
     }
     else if (menu->GetTitle().IsSameAs(Strings::FramePlayer::MENU_EDIT))
     {
-        evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::Find), !playlistEmpty);
-        evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::FindNext), !playlistEmpty);
-        evt.GetMenu()->Enable(static_cast<int>(MenuItemId_Player::FindPrev), !playlistEmpty);
+        menu->Enable(static_cast<int>(MenuItemId_Player::Find), !playlistEmpty);
+        menu->Enable(static_cast<int>(MenuItemId_Player::FindNext), !playlistEmpty);
+        menu->Enable(static_cast<int>(MenuItemId_Player::FindPrev), !playlistEmpty);
     }
 }
 
@@ -982,7 +982,7 @@ void FramePlayer::OnFindSong(UIElements::SignalsSearchBar signalId)
 
     if (targetItem == nullptr) // Next/prev result not found, try to wrap around
     {
-        PlaylistTreeModelNode* nodeStart = (forwardDirection) ? _ui->treePlaylist->GetSongs().front().get() : _ui->treePlaylist->GetSongs().back().get();
+        const PlaylistTreeModelNode* const nodeStart = (forwardDirection) ? _ui->treePlaylist->GetSongs().front().get() : _ui->treePlaylist->GetSongs().back().get();
         targetItem = DoFindSong(query, *nodeStart, forwardDirection, true); // Wrap around.
         wrapAround = true;
     }
