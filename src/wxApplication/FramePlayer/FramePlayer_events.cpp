@@ -347,6 +347,13 @@ void FramePlayer::OnDropFilesPlaylist(wxDropFilesEvent& evt)
     }
 }
 
+void FramePlayer::OnLabelTitleMouseOver(wxMouseEvent& /*evt*/)
+{
+    const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
+    _ui->labelTitle->SetToolTip((node != nullptr) ? node->filepath : "");
+    _ui->labelTitle->SetCursor((node != nullptr) ? wxCURSOR_QUESTION_ARROW : wxCURSOR_DEFAULT);
+}
+
 void FramePlayer::OnMenuOpening(wxMenuEvent& evt)
 {
     const wxMenu* const menu = evt.GetMenu();
