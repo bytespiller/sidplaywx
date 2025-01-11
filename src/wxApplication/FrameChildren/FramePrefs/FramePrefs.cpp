@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,7 +146,7 @@ void FramePrefs::FillPropertyGrid()
         AddWrappedProp(Settings::AppSettings::ID::RepeatModeDefaultSubsong, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_START_DEFAULT_SUBSONG), *page, Effective::Immediately, Strings::Preferences::DESC_START_DEFAULT_SUBSONG);
         AddWrappedProp(Settings::AppSettings::ID::RepeatModeIncludeSubsongs, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_INCLUDE_SUBSONGS), *page, Effective::Immediately, Strings::Preferences::DESC_INCLUDE_SUBSONGS);
 
-        AddWrappedProp(Settings::AppSettings::ID::SongFallbackDuration, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_FALLBACK_DURATION), *page, Effective::Immediately, Strings::Preferences::DESC_FALLBACK_DURATION, MIN_DURATION, MAX_DURATION);
+        AddWrappedProp(Settings::AppSettings::ID::SongFallbackDuration, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_FALLBACK_DURATION), *page, Effective::Immediately, Strings::Preferences::DESC_FALLBACK_DURATION, 1, MAX_DURATION);
         AddWrappedProp(Settings::AppSettings::ID::SkipShorter, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_SKIP_SHORTER), *page, Effective::Immediately, Strings::Preferences::DESC_SKIP_SHORTER, MIN_DURATION, MAX_DURATION);
         AddWrappedProp(Settings::AppSettings::ID::PopSilencer, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_POP_SILENCER), *page, Effective::Immediately, Strings::Preferences::DESC_POP_SILENCER, MIN_POP_SILENCER, MAX_POP_SILENCER);
 
