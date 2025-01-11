@@ -311,6 +311,7 @@ namespace Strings
 		inline constexpr const char* const MSG_ERR_ROM_BASIC("Failed to load the BASIC ROM file.");
 		inline constexpr const char* const MSG_ERR_ROM_CHARGEN("Failed to load the CHARGEN ROM file.");
 		inline constexpr const char* const MSG_ERR_ROM_FILE_NOT_FOUND("File not found. Note: we use relative paths, so if you've moved the executable that could be the reason.");
+		inline constexpr const char* const MSG_ERR_ROM_FILE_REQUIRED("This tune requires a %s ROM file.\nPlease check the Emulation page in Preferences to set the ROM file.\n\n%s");
 
 		inline constexpr const char* const MSG_ERR_TUNE_FILE("Unable to read tune file.");
 
