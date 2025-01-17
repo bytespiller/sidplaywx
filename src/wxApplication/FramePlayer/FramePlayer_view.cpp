@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,6 +121,7 @@ void FramePlayer::UpdatePlaybackStatusBar()
 
         case PlaybackController::State::Playing:
         {
+            // Leftmost
             const bool preRendering = _app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool();
             wxString status((preRendering) ? Strings::FramePlayer::STATUS_PLAYING_PRERENDER : Strings::FramePlayer::STATUS_PLAYING);
             if (playback.GetPlaybackSpeedFactor() != 1.0 || !playback.AreRelevantSidsFullyEnabled())
@@ -128,8 +129,10 @@ void FramePlayer::UpdatePlaybackStatusBar()
                 status.append(Strings::FramePlayer::STATUS_MODIFIED_SUFFIX);
                 statusFont.SetWeight(wxFONTWEIGHT_BOLD);
             }
+
             SetStatusText(status, 0);
 
+            // Rightmost
             const std::string& typeDesc = playback.GetCurrentTuneTypeDescription();
             const wxString& romInfoSuffix = (typeDesc.empty()) ? "" : wxString::Format(" (%s)", typeDesc);
 
@@ -334,14 +337,19 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
     {
         const PlaybackController& playback = _app.GetPlaybackInfo();
         const int subsong = playback.GetCurrentSubsong();
+        const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
 
-        _ui->labelTitle->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Title));
-        _ui->labelAuthor->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author));
-        _ui->labelCopyright->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released));
-        _ui->labelSubsong->SetLabelText(wxString::Format("%i / %i", subsong, playback.GetTotalSubsongs()));
+        // Set song info labels
+        if (node)
+        {
+            _ui->labelTitle->SetLabelText(wxString(node->title).Trim(false));
+            _ui->labelAuthor->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author));
+            _ui->labelCopyright->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released));
+            _ui->labelSubsong->SetLabelText(wxString::Format("%i / %i", subsong, playback.GetTotalSubsongs()));
+        }
 
         // Set STIL labels
-        if (const PlaylistTreeModelNode* node = _ui->treePlaylist->GetActiveSong())
+        if (node)
         {
             const std::wstring& NONE(L"/");
             const std::wstring& SEPARATOR =  L"  |  ";
@@ -350,7 +358,6 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
 
             // "Name - Title"
             {
-
                 std::wstring namesTitles = stil.GetFieldAsString(stil.names, subsong, SEPARATOR, true);
                 const std::wstring& titles = stil.GetFieldAsString(stil.titles, subsong, SEPARATOR, true);
                 if (!namesTitles.empty() && !titles.empty())
@@ -385,8 +392,19 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
 
             // Comment(s)
             {
-                const std::wstring& final = stil.GetFieldAsString(stil.comments, subsong, SEPARATOR, true);
-                _ui->labelStilComment->SetText((final.empty()) ? NONE : final);
+                std::wstring comments = stil.GetFieldAsString(stil.comments, subsong, SEPARATOR, true);
+
+                if (comments.empty())
+                {
+                    // Try to get MUS comments instead
+                    const std::string& musComments = playback.GetCurrentTuneMusComments();
+                    if (!musComments.empty())
+                    {
+                        comments = std::wstring(musComments.begin(), musComments.end()); // MUS comments are always ASCII (well, PETSCII).
+                    }
+                }
+
+                _ui->labelStilComment->SetText((comments.empty()) ? NONE : comments);
             }
         }
     }

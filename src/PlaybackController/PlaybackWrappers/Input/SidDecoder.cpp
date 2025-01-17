@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -200,9 +200,50 @@ int SidDecoder::GetTotalSubsongs() const
     return _tune->getInfo()->songs();
 }
 
+static void trimString(std::string& str)
+{
+    str.erase(str.find_last_not_of(' ') + 1); // ltrim
+    str.erase(0, str.find_first_not_of(' ')); // rtrim
+}
+
 std::string SidDecoder::GetCurrentTuneInfoString(SongInfoCategory category) const
 {
-    return _tune->getInfo()->infoString(static_cast<unsigned int>(category));
+    const SidTuneInfo& info = *_tune->getInfo();
+    const unsigned int index = static_cast<unsigned int>(category);
+
+    std::string retStr(info.infoString(index));
+
+    // Try get similar MUS fields in case this is a MUS file
+    if (category != SongInfoCategory::Title && retStr.empty()) [[unlikely]]
+    {
+        retStr = info.commentString(index); // Any index overflow is handled by the lib already (returns an empty string).
+        trimString(retStr);
+    }
+
+    return retStr;
+}
+
+std::string SidDecoder::GetCurrentTuneMusComments() const
+{
+    static constexpr char SEPARATOR[] = "   ***   ";
+
+    std::string retStr;
+
+    const SidTuneInfo& info = *_tune->getInfo();
+    const unsigned int count = info.numberOfCommentStrings();
+
+    for (unsigned int i = 0; i < count; ++i)
+    {
+        std::string curr(info.commentString(i));
+        trimString(curr);
+
+        if (!curr.empty())
+        {
+            retStr.append(curr + ((i + 1 < count) ? SEPARATOR : ""));
+        }
+    }
+
+    return retStr;
 }
 
 const SidTuneInfo& SidDecoder::GetCurrentSongInfo() const

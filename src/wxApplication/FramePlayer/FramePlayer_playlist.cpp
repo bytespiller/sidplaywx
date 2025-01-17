@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -138,9 +138,17 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
         if (tuneIsValid)
         {
             // Tune title
-            const int sidsNeeded = _silentSidInfoDecoder.GetCurrentTuneSidChipsRequired();
-            const wxString songTitleAddendum = (sidsNeeded > 1) ? wxString::Format(" [%iSID]", sidsNeeded) : "";
-            const wxString songTitle = _silentSidInfoDecoder.GetCurrentTuneInfoString(SidDecoder::SongInfoCategory::Title) + songTitleAddendum;
+            wxString songTitle(_silentSidInfoDecoder.GetCurrentTuneInfoString(SidDecoder::SongInfoCategory::Title));
+            {
+                if (songTitle.IsEmpty()) [[unlikely]] // Fallback/MUS file (rare situation)
+                {
+                    songTitle = wxFileNameFromPath(filepath);
+                }
+
+                const int sidsNeeded = _silentSidInfoDecoder.GetCurrentTuneSidChipsRequired();
+                const wxString& songTitleAddendum = (sidsNeeded > 1) ? wxString::Format(" [%iSID]", sidsNeeded) : wxGetEmptyString();
+                songTitle.Append(songTitleAddendum);
+            }
 
             // Subsongs count
             const int defaultSubsong = _silentSidInfoDecoder.GetDefaultSubsong();
