@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2023-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2023-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +78,6 @@ void PreRender::DoPreRender(IBufferWriter& renderer, int sampleRate, int numChan
 			}
 			else
 			{
-				DestroyData();
 				break;
 			}
 		}
