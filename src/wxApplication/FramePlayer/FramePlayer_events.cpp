@@ -619,21 +619,20 @@ bool FramePlayer::OnButtonTunePrev()
 
 bool FramePlayer::DoChangePlaylistTrack(const PlaylistTreeModelNode* const targetNode)
 {
+    const bool shouldAutoplay = ShouldAutoPlay(_app); // Must check *before* it changes.
     bool success = targetNode != nullptr;
 
-    const bool shouldAutoplay = ShouldAutoPlay(_app); // Must check *before* it changes.
+    if (success)
+    {
+        success = TryPlayPlaylistItem(*targetNode);
+    }
+
     if (!shouldAutoplay || !success)
     {
         OnButtonStop();
     }
-    else
-    {
-        if (success)
-        {
-            success = TryPlayPlaylistItem(*targetNode);
-        }
-        UpdateUiState();
-    }
+
+    UpdateUiState();
 
     return success;
 }
