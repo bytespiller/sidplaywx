@@ -46,8 +46,8 @@ target_link_libraries(${PROJECT_NAME}
     uxtheme kernel32 user32 gdi32 comdlg32 winspool winmm shell32 comctl32 ole32 oleaut32 uuid rpcrt4 advapi32 # wxWidgets MSW
 )
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE -DHAVE_CONFIG_H -DHAVE_CXX11)
-#target_compile_options(${PROJECT_NAME} PUBLIC -g -O0 -Wall -Wextra -pedantic) # TEMP!!!
+target_compile_options(${PROJECT_NAME} PRIVATE -Werror -DHAVE_CONFIG_H -DHAVE_CXX11)
+#target_compile_options(${PROJECT_NAME} PUBLIC -g -O0 -Werror -Wall -Wextra -pedantic) # TEMP!!!
 
 # CPack
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
