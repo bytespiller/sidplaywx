@@ -434,6 +434,11 @@ std::wstring PlaybackController::GetCurrentTuneFilePath() const
     return (_activeTuneHolder != nullptr) ? _activeTuneHolder->filepath : L"";
 }
 
+const SidTuneInfo& PlaybackController::GetCurrentTuneSidInfo() const
+{
+    return _sidDecoder->GetCurrentSongInfo();
+}
+
 int PlaybackController::GetCurrentTuneSidChipsRequired() const
 {
     return _sidDecoder->GetCurrentTuneSidChipsRequired();
@@ -473,7 +478,7 @@ SidConfig::sid_model_t PlaybackController::GetCurrentlyEffectiveSidModel() const
     return effectiveSidChipModel;
 }
 
-std::string PlaybackController::GetCurrentTuneSidDescription() const
+std::string PlaybackController::GetCurrentTuneSidDescription(bool includeEffective) const
 {
     const SidTuneInfo& tuneInfo = _sidDecoder->GetCurrentSongInfo();
     std::string retString;
@@ -510,6 +515,7 @@ std::string PlaybackController::GetCurrentTuneSidDescription() const
         }
     }
 
+    if (includeEffective)
     {
         // Determine effective SID model
         const SidConfig& cSidConfig = _sidDecoder->GetSidConfig();

@@ -166,9 +166,10 @@ public:
     std::string GetCurrentTuneMusComments() const;
 
     std::string GetCurrentTuneSpeedDescription() const;
-    std::string GetCurrentTuneSidDescription() const;
+    std::string GetCurrentTuneSidDescription(bool includeEffective = true) const;
     std::string GetCurrentTuneTypeDescription() const;
     std::wstring GetCurrentTuneFilePath() const;
+    const SidTuneInfo& GetCurrentTuneSidInfo() const;
     int GetCurrentTuneSidChipsRequired() const;
     bool IsValidSongLoaded() const;
 

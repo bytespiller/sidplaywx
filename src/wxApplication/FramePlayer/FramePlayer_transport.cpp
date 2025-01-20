@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include "FramePlayer.h"
 #include "../MyApp.h"
 #include "../Config/AppSettings.h"
+#include "../FrameChildren/FrameTuneInfo/FrameTuneInfo.h"
 
 bool FramePlayer::TryPlayPlaylistItem(const PlaylistTreeModelNode& activatedNode)
 {
@@ -67,6 +68,11 @@ bool FramePlayer::TryPlayPlaylistItem(const PlaylistTreeModelNode& activatedNode
     {
         _ui->treePlaylist->Select(*nodeToPlay);
         _ui->treePlaylist->EnsureVisible(*nodeToPlay); // Ensure a subsong itself is scrolled into view (not just its parent).
+    }
+
+    if (_frameTuneInfo != nullptr && _frameTuneInfo->ShouldFollowPlayback() && _app.GetPlaybackInfo().IsValidSongLoaded())
+    {
+        ShowTuneInfo();
     }
 
     return true;

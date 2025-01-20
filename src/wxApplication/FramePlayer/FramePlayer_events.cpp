@@ -374,6 +374,10 @@ void FramePlayer::OnMenuOpening(wxMenuEvent& evt)
         menu->Enable(static_cast<int>(MenuItemId_Player::FindNext), !playlistEmpty);
         menu->Enable(static_cast<int>(MenuItemId_Player::FindPrev), !playlistEmpty);
     }
+    else if (menu->GetTitle().IsSameAs(Strings::FramePlayer::MENU_VIEW))
+    {
+        menu->Enable(static_cast<int>(MenuItemId_Player::TuneInfo), _app.GetPlaybackInfo().IsValidSongLoaded());
+    }
 }
 
 void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
@@ -454,6 +458,10 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
 
         case MenuItemId_Player::StilInfoEnabled:
             ToggleStilInfoEnabled();
+            break;
+
+        case MenuItemId_Player::TuneInfo:
+            ShowTuneInfo();
             break;
 
         // --- Help ---
@@ -575,9 +583,10 @@ void FramePlayer::OnButtonPlayPause()
             default: // Usually Stopped (but could also be some other state if weird situation, app will say "error" then).
             {
                 const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
-                const bool preRenderEnabled = _app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool();
-                const int preRenderDurationMs = (preRenderEnabled && node != nullptr) ? GetEffectiveSongDuration(*node) : 0;
-                _app.ReplayLoadedTune(preRenderDurationMs);
+                if (node != nullptr)
+                {
+                    TryPlayPlaylistItem(*node);
+                }
             }
         }
     }

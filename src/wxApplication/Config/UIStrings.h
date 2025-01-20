@@ -58,7 +58,8 @@ namespace Strings
 		inline constexpr const char* const MENU_VIEW("&View");
 		inline constexpr const char* const MENU_ITEM_STAY_TOPMOST("&Always on Top");
 		inline constexpr const char* const MENU_ITEM_VISUALIZATION_ENABLED("&Oscilloscope");
-		inline constexpr const char* const MENU_ITEM_STIL_INFO("&STIL info");
+		inline constexpr const char* const MENU_ITEM_STIL_INFO("&STIL Info");
+		inline constexpr const char* const MENU_ITEM_TUNE_INFO("Current Tune &Info...");
 
 		inline constexpr const char* const MENU_HELP("&Help");
 		inline constexpr const char* const MENU_ITEM_CHECK_UPDATES("&Check for Updates");
@@ -145,6 +146,39 @@ namespace Strings
 
 		inline constexpr const char* const SPEED_SLIDER("Playback Speed (%)");
 		inline constexpr const char* const SPEED_SLIDER_MENU_ITEM_RESET("Reset to 100%");
+	}
+
+	namespace TuneInfo
+	{
+		inline constexpr const char* const WINDOW_TITLE("Tune Info");
+		inline constexpr const char* const CHECKBOX_FOLLOW_PLAYBACK("Follow playback");
+
+		inline constexpr const char* const CATEGORY_BASIC("General");
+		inline constexpr const char* const TUNE_TITLE("Title");
+		inline constexpr const char* const TUNE_AUTHOR("Author");
+		inline constexpr const char* const TUNE_RELEASED("Released");
+		inline constexpr const char* const TUNE_MUS_COMMENT("MUS comment");
+		inline constexpr const char* const TUNE_PATH_FILE("File");
+
+		inline constexpr const char* const CATEGORY_TECHNICAL("Technical");
+		inline constexpr const char* const TUNE_ADDR_LOAD("Load address");
+		inline constexpr const char* const TUNE_ADDR_INIT("Init address");
+		inline constexpr const char* const TUNE_ADDR_PLAY("Play address");
+		inline constexpr const char* const TUNE_SIZE("Size data / file");
+		inline constexpr const char* const TUNE_SUBSONG("Song (default)");
+		inline constexpr const char* const TUNE_MODEL_SID("SID model");
+		inline constexpr const char* const TUNE_MODEL_C64("Clock speed");
+		inline constexpr const char* const TUNE_TYPE("Type");
+		inline constexpr const char* const TUNE_ROM("ROM required");
+
+		inline constexpr const char* const CATEGORY_HVSC("STIL");
+		inline constexpr const char* const HVSC_CANONICAL("HVSC");
+		inline constexpr const char* const HVSC_NAME("Name");
+		inline constexpr const char* const HVSC_TITLE("Title(s)");
+		inline constexpr const char* const HVSC_ARTIST("Artist(s)");
+		inline constexpr const char* const HVSC_AUTHOR("Author(s)");
+		inline constexpr const char* const HVSC_COMMENT("Comment");
+		inline constexpr const char* const HVSC_MD5("MD5");
 	}
 
 	namespace Preferences
@@ -316,6 +350,12 @@ namespace Strings
 		inline constexpr const char* const MSG_ERR_TUNE_FILE("Unable to read tune file.");
 
 		inline constexpr const char* const MSG_ERR_AUDIO_CONFIG("Incorrect audio device configuration, reverting settings.");
+	}
+
+	namespace Common
+	{
+		inline constexpr const char* const ACTION_BROWSE_LOCATION("Browse location");
+		inline constexpr const char* const GENERIC_NOT_FOUND("Not found");
 	}
 
 	namespace Internal

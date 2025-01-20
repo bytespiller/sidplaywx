@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2023-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2023-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,7 +133,7 @@ public:
 	const wxString copyright;
 	const wxString filepath;
 	const wxString hvscPath;
-	const char* const md5;
+	const wxString md5;
 
 	/// @brief Indicates a default subsong for a song item, or a self-index (1-based) for a subsong item.
 	const int defaultSubsong;

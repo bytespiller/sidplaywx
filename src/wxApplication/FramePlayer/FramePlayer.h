@@ -32,6 +32,7 @@
 
 class FramePlaybackMods;
 class FramePrefs;
+class FrameTuneInfo;
 class MyApp;
 
 enum class SignalsMyApp;
@@ -100,7 +101,8 @@ private:
     void ToggleVisualizationEnabled();
     void EnableVisualization(bool enable); // Helper
     void ToggleStilInfoEnabled();
-    void EnableStilInfo(bool enable); // Helper
+    void EnableStilInfoDisplay(bool enable); // Helper
+    void ShowTuneInfo();
 
     // Help
     void CheckUpdates();
@@ -237,6 +239,7 @@ private:
 
     FramePlaybackMods* _framePlaybackMods = nullptr;
     FramePrefs* _framePrefs = nullptr;
+    FrameTuneInfo* _frameTuneInfo = nullptr;
 
     wxArrayString _enqueuedFiles;
     bool _addingFilesToPlaylist = false;

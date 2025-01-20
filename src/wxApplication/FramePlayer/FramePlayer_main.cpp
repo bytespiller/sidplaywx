@@ -24,6 +24,7 @@
 #include "../Helpers/HelpersWx.h"
 #include "../FrameChildren/FramePlaybackMods/FramePlaybackMods.h"
 #include "../FrameChildren/FramePrefs/FramePrefs.h"
+#include "../FrameChildren/FrameTuneInfo/FrameTuneInfo.h"
 #include <wx/aboutdlg.h>
 #include <wx/display.h>
 #include <wx/webrequest.h>
@@ -341,9 +342,10 @@ void FramePlayer::SetupUiElements()
 void FramePlayer::DeferredInit()
 {
     InitSonglengthsDatabase();
+    InitStilInfo();
 
-    // Init STIL info
-    EnableStilInfo(_app.currentSettings->GetOption(Settings::AppSettings::ID::StilInfoEnabled)->GetValueAsBool());
+    // Show/hide STIL info
+    EnableStilInfoDisplay(_app.currentSettings->GetOption(Settings::AppSettings::ID::StilInfoEnabled)->GetValueAsBool());
 
     // Apply window topmost preference
     if (_app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->GetValueAsBool() != IsTopmost())
@@ -521,26 +523,16 @@ void FramePlayer::ToggleVisualizationEnabled()
 
 void FramePlayer::ToggleStilInfoEnabled()
 {
-    EnableStilInfo(!_stilInfo.IsLoaded());
-    _app.currentSettings->GetOption(Settings::AppSettings::ID::StilInfoEnabled)->UpdateValue(_stilInfo.IsLoaded());
+    const bool toggle = !_app.currentSettings->GetOption(Settings::AppSettings::ID::StilInfoEnabled)->GetValueAsBool();
+    EnableStilInfoDisplay(toggle);
+    _app.currentSettings->GetOption(Settings::AppSettings::ID::StilInfoEnabled)->UpdateValue(toggle);
 }
 
-void FramePlayer::EnableStilInfo(bool enable)
+void FramePlayer::EnableStilInfoDisplay(bool enable)
 {
-    // Init/deinit
-    if (enable)
-    {
-        InitStilInfo();
-    }
-    else
-    {
-        _stilInfo.Unload();
-    }
+    const bool shouldShow = enable && _stilInfo.IsLoaded();
 
-    // Refresh UI elements
-    const bool loaded = _stilInfo.IsLoaded();
-
-    if (loaded && _app.GetPlaybackInfo().IsValidSongLoaded())
+    if (shouldShow && _app.GetPlaybackInfo().IsValidSongLoaded())
     {
         DisplayCurrentSongInfo();
     }
@@ -551,10 +543,10 @@ void FramePlayer::EnableStilInfo(bool enable)
         _ui->labelStilComment->SetText("");
     }
 
-    _ui->sizerStilRight->Show(loaded);
+    _ui->sizerStilRight->Show(shouldShow);
     _ui->sizerStilRight->GetContainingWindow()->Layout();
 
-    _ui->menuBar->Check(static_cast<int>(FrameElements::ElementsPlayer::MenuItemId_Player::StilInfoEnabled), loaded);
+    _ui->menuBar->Check(static_cast<int>(FrameElements::ElementsPlayer::MenuItemId_Player::StilInfoEnabled), shouldShow);
 }
 
 void FramePlayer::EnableVisualization(bool enable)
@@ -565,6 +557,20 @@ void FramePlayer::EnableVisualization(bool enable)
     _panel->Layout();
 
     _ui->menuBar->Check(static_cast<int>(FrameElements::ElementsPlayer::MenuItemId_Player::VisualizationEnabled), enable);
+}
+
+void FramePlayer::ShowTuneInfo()
+{
+    // Open (if exists)
+    if (_frameTuneInfo != nullptr)
+    {
+        _frameTuneInfo->ShowAndUpdate(_ui->treePlaylist->GetActiveSong());
+        return;
+    }
+
+    // First-time create
+    _frameTuneInfo = new FrameTuneInfo(this, Strings::TuneInfo::WINDOW_TITLE, wxDefaultPosition, wxSize(640, 480), _app.GetPlaybackInfo(), _stilInfo);
+    _frameTuneInfo->ShowAndUpdate(_ui->treePlaylist->GetActiveSong());
 }
 
 bool FramePlayer::IsTopmost() const

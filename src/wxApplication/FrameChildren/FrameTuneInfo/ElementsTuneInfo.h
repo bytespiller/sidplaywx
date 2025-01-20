@@ -16,19 +16,32 @@
  * along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-#include "ElementsPrefs.h"
+#pragma once
+
+#include <wx/wxprec.h>
+#ifndef WX_PRECOMP
+	#include <wx/wx.h>
+#endif
+
+#include <wx/propgrid/manager.h>
 
 namespace FrameElements
 {
-	static constexpr int BORDER = 10; // To make the resizing widget easily accessible on MSW.
-
-	ElementsPrefs::ElementsPrefs(wxDialog& dialog)
+	class ElementsTuneInfo
 	{
-		wxBoxSizer* const sizer = new wxBoxSizer(wxVERTICAL);
-		propertyGrid = new wxPropertyGridManager(&dialog, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_LIMITED_EDITING | wxPG_NO_INTERNAL_BORDER | wxPG_BOLD_MODIFIED | wxPG_DESCRIPTION);
-		//propertyGrid->SetExtraStyle(wxPG_EX_HELP_AS_TOOLTIPS);
-		sizer->Add(propertyGrid, 1, wxEXPAND, 0);
-		sizer->Add(dialog.CreateButtonSizer(wxAPPLY | wxCANCEL | wxOK), 0, wxEXPAND | wxALL, BORDER);
-		dialog.SetSizer(sizer);
-	}
+	public:
+		ElementsTuneInfo() = delete;
+		ElementsTuneInfo(const ElementsTuneInfo&) = delete;
+		ElementsTuneInfo& operator=(const ElementsTuneInfo&) = delete;
+
+		explicit ElementsTuneInfo(wxDialog& dialog);
+
+	private:
+		void AddProperty(wxPropertyGridPage* page, const char* const title);
+
+	public:
+		wxPropertyGridManager* propertyGrid = nullptr;
+		wxCheckBox* checkboxFollowPlayback = nullptr;
+		wxButton* buttonBrowse = nullptr;
+	};
 }
