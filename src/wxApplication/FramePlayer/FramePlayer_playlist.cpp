@@ -205,8 +205,29 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                     subsongDurations.emplace_back(TryGetHvscInfo(hvscInfoMain.md5, i).duration);
                 }
 
+                // Determine subsong titles (from STIL where possible)
+                std::vector<wxString> subsongTitles;
+                subsongTitles.reserve(totalSubsongs);
+
+                {
+                    Stil::Info info = _stilInfo.Get(mainSongNodeNew->hvscPath.ToStdString()); // Blank if unavailable.
+
+                    for (int i = 1; i <= totalSubsongs; ++i)
+                    {
+                        const std::wstring& title = info.GetFieldAsString(info.names, i);
+                        if (!title.empty()) // STIL title
+                        {
+                            subsongTitles.emplace_back(wxString::Format("  %s %i: %s", Strings::PlaylistTree::SUBSONG, i, title));
+                        }
+                        else // Generic subsong title
+                        {
+                            subsongTitles.emplace_back(wxString::Format("  %s %i", Strings::PlaylistTree::SUBSONG, i));
+                        }
+                    }
+                }
+
                 // Add subsongs
-                _ui->treePlaylist->AddSubsongs(subsongDurations, *mainSongNodeNew);
+                _ui->treePlaylist->AddSubsongs(subsongDurations, subsongTitles, *mainSongNodeNew);
             }
 
             // One tune (with any subsongs) added -----------------

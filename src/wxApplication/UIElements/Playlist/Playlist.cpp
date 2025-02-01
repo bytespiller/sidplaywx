@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2023-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2023-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,8 +60,10 @@ namespace UIElements
 			return *_model.entries.back().get();
 		}
 
-		void Playlist::AddSubsongs(const std::vector<uint_least32_t>& durations, PlaylistTreeModelNode& parent)
+		void Playlist::AddSubsongs(const std::vector<uint_least32_t>& durations, const std::vector<wxString>& titles, PlaylistTreeModelNode& parent)
 		{
+			assert(durations.size() == titles.size());
+
 			if (durations.size() == 0)
 			{
 				return;
@@ -75,7 +77,7 @@ namespace UIElements
 				for (const uint_least32_t duration : durations)
 				{
 					++cnt;
-					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(&parent, wxString::Format("  %s: %s %i", parent.title, Strings::PlaylistTree::SUBSONG, cnt), parent.filepath, cnt, duration, parent.hvscPath, parent.md5, "", "", parent.romRequirement, parent.IsPlayable()), {});
+					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(&parent, titles.at(cnt - 1), parent.filepath, cnt, duration, parent.hvscPath, parent.md5, "", "", parent.romRequirement, parent.IsPlayable()), {});
 					notifyItems.Add(wxDataViewItem(&newChildNode));
 
 					// Indicate if default subsong
