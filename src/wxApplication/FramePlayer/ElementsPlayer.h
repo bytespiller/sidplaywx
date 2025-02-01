@@ -47,6 +47,7 @@ namespace FrameElements
 		ExpandAll,
 		CollapseAll,
 		ScrollToCurrent,
+		BrowseLocation,
 		SkipSubsong
 	};
 

@@ -338,6 +338,7 @@ namespace FrameElements // Player class
 				{PlaylistContextMenuIconId::ExpandAll, LoadMenuIcon(themeData, "icon_expandall")},
 				{PlaylistContextMenuIconId::CollapseAll, LoadMenuIcon(themeData, "icon_collapseall")},
 				{PlaylistContextMenuIconId::ScrollToCurrent, LoadMenuIcon(themeData, "icon_scrolltocurrent")},
+				{PlaylistContextMenuIconId::BrowseLocation, LoadMenuIcon(themeData, "icon_browselocation")},
 				{PlaylistContextMenuIconId::SkipSubsong, LoadMenuIcon(themeData, "icon_removesongmenu")}
 			};
 		}

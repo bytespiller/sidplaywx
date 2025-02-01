@@ -37,7 +37,8 @@ namespace
         SkipUnskip,
         ExpandAll,
         CollapseAll,
-        ScrollToCurrent
+        ScrollToCurrent,
+        BrowseLocation
     };
 
     inline bool ShouldAutoPlay(const MyApp& app)
@@ -234,6 +235,14 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
         newItem->Enable(!_ui->treePlaylist->IsEmpty());
     }
 
+    // Browse location
+    {
+        menu->AppendSeparator();
+        wxMenuItem* newItem = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::BrowseLocation), Strings::Common::ACTION_BROWSE_LOCATION);
+        newItem->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::BrowseLocation));
+        newItem->Enable(!_ui->treePlaylist->IsEmpty());
+    }
+
     menu->Bind(wxEVT_COMMAND_MENU_SELECTED, [&node, this](wxCommandEvent& evt) { OnTreePlaylistContextItem(*node, evt); });
     PopupMenu(menu);
 }
@@ -273,6 +282,14 @@ void FramePlayer::OnTreePlaylistContextItem(PlaylistTreeModelNode& node, wxComma
                 _ui->treePlaylist->EnsureVisible(*activeSong);
                 _ui->treePlaylist->Select(*activeSong);
             }
+            break;
+
+        case PopupMenuItemId_Playlist::BrowseLocation:
+			const wxString& dir = wxPathOnly(node.filepath);
+			if (!dir.IsEmpty() && !wxLaunchDefaultApplication(dir))
+			{
+				wxMessageBox(dir, Strings::Common::GENERIC_NOT_FOUND, wxICON_WARNING);
+			}
             break;
     }
 }

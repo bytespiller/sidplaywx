@@ -28,6 +28,7 @@
     <Image type="svg" offset="0,0" scale="1.0" name="icon_expandall" path="svg/add-line.svg"/>
     <Image type="svg" offset="0,0" scale="1.0" name="icon_collapseall" path="svg/subtract-line.svg"/>
     <Image type="svg" offset="0,0" scale="1.0" name="icon_scrolltocurrent" path="svg/home-line.svg"/>
+    <Image type="svg" offset="0,0" scale="1.0" name="icon_browselocation" path="svg/folder-open-fill.svg"/>
     <Image type="svg" offset="0,0" scale="1.0" name="icon_stilnametitle" path="svg/album-fill.svg"/>
     <Image type="svg" offset="0,0" scale="1.0" name="icon_stilartistauthor" path="svg/mic-fill.svg"/>
     <Image type="svg" offset="0,0" scale="1.0" name="icon_stilcomment" path="svg/chat-quote-fill.svg"/>
