@@ -32,7 +32,7 @@ namespace FrameElements
 			wxBoxSizer* const sizer = new wxBoxSizer(wxVERTICAL);
 
 			// PropertyGrid
-			propertyGrid = new wxPropertyGridManager(&dialog, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_LIMITED_EDITING | wxPG_NO_INTERNAL_BORDER | wxPG_HIDE_MARGIN);
+			propertyGrid = new wxPropertyGridManager(&dialog, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxPG_LIMITED_EDITING | wxPG_NO_INTERNAL_BORDER | wxPG_HIDE_MARGIN | wxPG_DESCRIPTION);
 			sizer->Add(propertyGrid, 1, wxEXPAND);
 
 			// Secondary horizontal sizer below the PropertyGrid
@@ -42,6 +42,7 @@ namespace FrameElements
 
 				// Checkbox: Follow playback
 				checkboxFollowPlayback = new wxCheckBox(&dialog, wxID_ANY, Strings::TuneInfo::CHECKBOX_FOLLOW_PLAYBACK);
+				checkboxFollowPlayback->SetValue(true);
 				sizerHorzBelowPg->Add(checkboxFollowPlayback, 0, wxALIGN_CENTER_VERTICAL);
 
 				//sizerHorzBelowPg->AddStretchSpacer();

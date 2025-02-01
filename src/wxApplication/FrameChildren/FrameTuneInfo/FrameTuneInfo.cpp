@@ -34,7 +34,27 @@ FrameTuneInfo::FrameTuneInfo(wxWindow* parent, const wxString& title, const wxPo
 	_ui->propertyGrid->SetFont(GetFont());
 	_ui->checkboxFollowPlayback->SetFont(GetFont());
 
-	// Events
+	// *** Events ***
+
+	// Close this window on ESC key
+	Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& evt)
+	{
+		if (evt.GetKeyCode() == WXK_ESCAPE)
+		{
+			Close();
+		}
+
+		evt.Skip();
+	});
+
+	// Clear the PropertyGrid selection so that its Description Box defaults to HVSC comment again when this window is re-opened.
+	Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent& evt)
+	{
+		_ui->propertyGrid->ClearSelection();
+		evt.Skip();
+	});
+
+	// "Browse location" button
 	_ui->buttonBrowse->Bind(wxEVT_BUTTON, [this](wxCommandEvent& /*evt*/)
 	{
 		if (_playbackInfo.IsValidSongLoaded())
@@ -47,7 +67,7 @@ FrameTuneInfo::FrameTuneInfo(wxWindow* parent, const wxString& title, const wxPo
 		}
 	});
 
-	// Configure window
+	// *** Configure window ***
 	//SetDoubleBuffered(true); // No need at the moment.
 	CenterOnParent();
 	Layout();
@@ -96,21 +116,21 @@ void FrameTuneInfo::UpdateInfo(const PlaylistTreeModelNode* const node)
 	const SidTuneInfo& sidInfo = _playbackInfo.GetCurrentTuneSidInfo();
 
 	// General
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_TITLE, _playbackInfo.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Title));
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_AUTHOR, _playbackInfo.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author));
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_RELEASED, _playbackInfo.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released));
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_MUS_COMMENT, _playbackInfo.GetCurrentTuneMusComments());
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_PATH_FILE, _playbackInfo.GetCurrentTuneFilePath());
+	SetPropertyValue(Strings::TuneInfo::TUNE_TITLE, _playbackInfo.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Title));
+	SetPropertyValue(Strings::TuneInfo::TUNE_AUTHOR, _playbackInfo.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author));
+	SetPropertyValue(Strings::TuneInfo::TUNE_RELEASED, _playbackInfo.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released));
+	SetPropertyValue(Strings::TuneInfo::TUNE_MUS_COMMENT, _playbackInfo.GetCurrentTuneMusComments());
+	SetPropertyValue(Strings::TuneInfo::TUNE_PATH_FILE, _playbackInfo.GetCurrentTuneFilePath());
 
 	// Technical
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_ADDR_LOAD, wxString::Format("$%04x", sidInfo.loadAddr()).MakeUpper());
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_ADDR_INIT, wxString::Format("$%04x", sidInfo.initAddr()).MakeUpper());
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_ADDR_PLAY, wxString::Format("$%04x", sidInfo.playAddr()).MakeUpper());
+	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_LOAD, wxString::Format("$%04x", sidInfo.loadAddr()).MakeUpper());
+	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_INIT, wxString::Format("$%04x", sidInfo.initAddr()).MakeUpper());
+	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_PLAY, wxString::Format("$%04x", sidInfo.playAddr()).MakeUpper());
 
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_SIZE, wxString::Format("%i ($%04x) / %i ($%04x)", sidInfo.c64dataLen(), sidInfo.c64dataLen(), sidInfo.dataFileLen(), sidInfo.dataFileLen()).MakeUpper());
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_SUBSONG, wxString::Format("%i / %i (%i)", sidInfo.currentSong(), sidInfo.songs(), sidInfo.startSong()));
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_MODEL_SID, _playbackInfo.GetCurrentTuneSidDescription(false));
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_MODEL_C64, _playbackInfo.GetCurrentTuneSpeedDescription());
+	SetPropertyValue(Strings::TuneInfo::TUNE_SIZE, wxString::Format("%i ($%04x) / %i ($%04x)", sidInfo.c64dataLen(), sidInfo.c64dataLen(), sidInfo.dataFileLen(), sidInfo.dataFileLen()).MakeUpper());
+	SetPropertyValue(Strings::TuneInfo::TUNE_SUBSONG, wxString::Format("%i / %i (%i)", sidInfo.currentSong(), sidInfo.songs(), sidInfo.startSong()));
+	SetPropertyValue(Strings::TuneInfo::TUNE_MODEL_SID, _playbackInfo.GetCurrentTuneSidDescription(false));
+	SetPropertyValue(Strings::TuneInfo::TUNE_MODEL_C64, _playbackInfo.GetCurrentTuneSpeedDescription());
 
 	{ // ROM requirement
 		wxString romStr("-");
@@ -124,24 +144,47 @@ void FrameTuneInfo::UpdateInfo(const PlaylistTreeModelNode* const node)
 				break;
 		}
 
-		_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_ROM, romStr);
+		SetPropertyValue(Strings::TuneInfo::TUNE_ROM, romStr);
 	}
 
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::TUNE_TYPE, sidInfo.formatString());
+	SetPropertyValue(Strings::TuneInfo::TUNE_TYPE, sidInfo.formatString());
 
 	// HVSC
 	const Stil::Info& stilInfo = (_stil.IsLoaded() && node != nullptr) ? _stil.Get(node->hvscPath.ToStdString()) : Stil::Info();
 	const int subsong = sidInfo.currentSong();
 
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::HVSC_CANONICAL, (node != nullptr) ? node->hvscPath : "");
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::HVSC_NAME, stilInfo.GetFieldAsString(stilInfo.names, subsong));
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::HVSC_TITLE, stilInfo.GetFieldAsString(stilInfo.titles, subsong));
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::HVSC_ARTIST, stilInfo.GetFieldAsString(stilInfo.artists, subsong));
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::HVSC_AUTHOR, stilInfo.GetFieldAsString(stilInfo.authors, subsong));
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::HVSC_COMMENT, stilInfo.GetFieldAsString(stilInfo.comments, subsong));
-	_ui->propertyGrid->SetPropertyValueString(Strings::TuneInfo::HVSC_MD5, (node != nullptr) ? node->md5 : "");
+	SetPropertyValue(Strings::TuneInfo::HVSC_CANONICAL, (node != nullptr) ? node->hvscPath : "");
+	SetPropertyValue(Strings::TuneInfo::HVSC_NAME, stilInfo.GetFieldAsString(stilInfo.names, subsong, L"\n", true));
+	SetPropertyValue(Strings::TuneInfo::HVSC_TITLE, stilInfo.GetFieldAsString(stilInfo.titles, subsong, L"\n", true));
+	SetPropertyValue(Strings::TuneInfo::HVSC_ARTIST, stilInfo.GetFieldAsString(stilInfo.artists, subsong, L"\n", true));
+	SetPropertyValue(Strings::TuneInfo::HVSC_AUTHOR, stilInfo.GetFieldAsString(stilInfo.authors, subsong, L"\n", true));
+	SetPropertyValue(Strings::TuneInfo::HVSC_COMMENT, stilInfo.GetFieldAsString(stilInfo.comments, subsong, L"\n", true));
+	SetPropertyValue(Strings::TuneInfo::HVSC_MD5, (node != nullptr) ? node->md5 : "");
 
-	// FINAL
+	// *** FINAL ***
+
+	// Refresh the Description Box (must be done manually)
+	{
+		const wxPGProperty& prop = (_ui->propertyGrid->GetSelection() != nullptr)
+			? *_ui->propertyGrid->GetSelection() // Use selection.
+			: *_ui->propertyGrid->GetProperty(Strings::TuneInfo::HVSC_COMMENT); // No selection, display STIL comment by default.
+
+		_ui->propertyGrid->SetDescription(prop.GetLabel(), prop.GetHelpString());
+	}
+
 	_ui->propertyGrid->SetSplitterLeft();
 	_ui->propertyGrid->Refresh();
+}
+
+void FrameTuneInfo::SetPropertyValue(const char* name, const wxString& value)
+{
+	// Single-line copyable property
+	{
+		wxString valueNewlinesToSpaces(value);
+		valueNewlinesToSpaces.Replace('\n', "  ");
+		_ui->propertyGrid->SetPropertyValue(name, valueNewlinesToSpaces);
+	}
+
+	// Multi-line Description Box
+	_ui->propertyGrid->GetProperty(name)->SetHelpString(value);
 }

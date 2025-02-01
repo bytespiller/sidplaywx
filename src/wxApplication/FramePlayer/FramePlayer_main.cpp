@@ -569,7 +569,7 @@ void FramePlayer::ShowTuneInfo()
     }
 
     // First-time create
-    _frameTuneInfo = new FrameTuneInfo(this, Strings::TuneInfo::WINDOW_TITLE, wxDefaultPosition, wxSize(640, 480), _app.GetPlaybackInfo(), _stilInfo);
+    _frameTuneInfo = new FrameTuneInfo(this, Strings::TuneInfo::WINDOW_TITLE, wxDefaultPosition, wxSize(640, 490), _app.GetPlaybackInfo(), _stilInfo);
     _frameTuneInfo->ShowAndUpdate(_ui->treePlaylist->GetActiveSong());
 }
 
