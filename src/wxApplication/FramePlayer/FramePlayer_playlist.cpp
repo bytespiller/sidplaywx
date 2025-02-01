@@ -25,6 +25,15 @@
 #include "../UIElements/Playlist/Components/PlaylistModel.h"
 #include "../../Util/Const.h"
 
+namespace
+{
+    /// @brief └
+    constexpr int BOX_CHAR_L = 0x2514;
+
+    /// @brief ├
+    constexpr int BOX_CHAR_VERT_RIGHT = 0x251C;
+}
+
 std::vector<wxString> FramePlayer::GetCurrentPlaylistFilePaths(bool includeBlacklistedSongs)
 {
     const PlaylistTreeModelNodePtrArray& songs = _ui->treePlaylist->GetSongs();
@@ -214,14 +223,16 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
 
                     for (int i = 1; i <= totalSubsongs; ++i)
                     {
+                        const int boxChar = (i < totalSubsongs) ? BOX_CHAR_VERT_RIGHT : BOX_CHAR_L;
                         const std::wstring& title = info.GetFieldAsString(info.names, i);
+
                         if (!title.empty()) // STIL title
                         {
-                            subsongTitles.emplace_back(wxString::Format("  %s %i: %s", Strings::PlaylistTree::SUBSONG, i, title));
+                            subsongTitles.emplace_back(wxString::Format("%c %s %i: %s", boxChar, Strings::PlaylistTree::SUBSONG, i, title));
                         }
                         else // Generic subsong title
                         {
-                            subsongTitles.emplace_back(wxString::Format("  %s %i", Strings::PlaylistTree::SUBSONG, i));
+                            subsongTitles.emplace_back(wxString::Format("%c %s %i", boxChar, Strings::PlaylistTree::SUBSONG, i));
                         }
                     }
                 }
