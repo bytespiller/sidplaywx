@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2023-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2023-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ namespace UIElements
 			PlaylistTreeModelNode& AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable);
 
 			/// @brief Efficiently adds multiple subsongs at once.
-			void AddSubsongs(const std::vector<uint_least32_t>& durations, PlaylistTreeModelNode& parent);
+			void AddSubsongs(const std::vector<uint_least32_t>& durations, const std::vector<wxString>& titles, PlaylistTreeModelNode& parent);
 
 			/// @brief Removes a main song or a subsong item.
 			void Remove(PlaylistTreeModelNode& item);

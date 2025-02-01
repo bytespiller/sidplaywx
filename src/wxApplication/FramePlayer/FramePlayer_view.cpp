@@ -342,7 +342,10 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
         // Set song info labels
         if (node)
         {
-            _ui->labelTitle->SetLabelText(wxString(node->title).Trim(false));
+            _ui->labelTitle->SetLabelText((playback.GetTotalSubsongs() <= 1)
+                ? wxString(node->title).Trim(false) // Tune without subsongs.
+                : wxString::Format("%s: %s %i", playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Title), Strings::PlaylistTree::SUBSONG, subsong)); // Subsong
+
             _ui->labelAuthor->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author));
             _ui->labelCopyright->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released));
             _ui->labelSubsong->SetLabelText(wxString::Format("%i / %i", subsong, playback.GetTotalSubsongs()));
