@@ -40,6 +40,17 @@ namespace UIElements
 			_AddTextColumn(ColumnId::PlaceholderLast, "");
 
 			Bind(wxEVT_MOUSEWHEEL, &_OverrideScrollWheel, this); // Partial workaround for the smooth scrolling performance issues on MSW (especially with lots of icons in rows).
+
+			// Auto-fit the Title column upon the child item expansion
+			Bind(wxEVT_DATAVIEW_ITEM_EXPANDED, [this](const wxDataViewEvent& /*evt*/)
+			{
+				constexpr unsigned int colIndex = static_cast<unsigned int>(ColumnId::Title);
+				wxDataViewColumn* const col = GetColumn(colIndex);
+
+				const unsigned int padding = GetFont().GetPointSize() * 2; // Account for bold text.
+				const unsigned int newWidth = GetBestColumnWidth(colIndex) + padding;
+				col->SetWidth(newWidth);
+			});
 		}
 
 		wxWindow* Playlist::GetWxWindow()
