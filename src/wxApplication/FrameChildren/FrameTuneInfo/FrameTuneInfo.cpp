@@ -34,7 +34,18 @@ FrameTuneInfo::FrameTuneInfo(wxWindow* parent, const wxString& title, const wxPo
 	_ui->propertyGrid->SetFont(GetFont());
 	_ui->checkboxFollowPlayback->SetFont(GetFont());
 
-	// Events
+	// *** Events ***
+
+	// Close on ESC key
+	Bind(wxEVT_CHAR_HOOK, [this](const wxKeyEvent& evt)
+	{
+		if (evt.GetKeyCode() == WXK_ESCAPE)
+		{
+			Close();
+		}
+	});
+
+	// "Browse location" button
 	_ui->buttonBrowse->Bind(wxEVT_BUTTON, [this](wxCommandEvent& /*evt*/)
 	{
 		if (_playbackInfo.IsValidSongLoaded())
@@ -47,7 +58,7 @@ FrameTuneInfo::FrameTuneInfo(wxWindow* parent, const wxString& title, const wxPo
 		}
 	});
 
-	// Configure window
+	// *** Configure window ***
 	//SetDoubleBuffered(true); // No need at the moment.
 	CenterOnParent();
 	Layout();
