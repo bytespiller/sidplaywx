@@ -4,6 +4,7 @@
     <Image type="svg" offset="0,2" scale="1.0" name="icon_chip" path="svg/chip-memory.svg"/>
     <Image type="svg" offset="0,0" scale="1.0" name="icon_copyright" path="svg/copyright-line.svg"/>
     <Image type="svg" offset="4,4" scale="0.8" name="btn_eq" path="svg/equalizer-fill.svg"/>
+    <Image type="svg" offset="4,4" scale="0.8" name="btn_tuneinfo" path="svg/information-2-line.svg"/>
     <Image type="svg" offset="5,12" scale="0.74" name="btn_infinite" path="svg/infinity-loop.svg"/>
     <Image type="svg" offset="4,4" scale="0.8" name="btn_playonce" path="svg/lock-line.svg"/>
     <Image type="svg" offset="0,0" scale="1.0" name="icon_music" path="svg/music-fill.svg"/>

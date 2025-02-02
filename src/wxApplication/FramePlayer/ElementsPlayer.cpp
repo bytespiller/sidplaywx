@@ -160,7 +160,7 @@ namespace FrameElements // Player class
 				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::VisualizationEnabled), wxString::Format(Strings::FramePlayer::MENU_ITEM_VISUALIZATION_ENABLED));
 				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::StilInfoEnabled), wxString::Format(Strings::FramePlayer::MENU_ITEM_STIL_INFO));
 				viewMenu->AppendSeparator();
-				viewMenu->Append(static_cast<int>(MenuItemId_Player::TuneInfo), wxString::Format("%s\tCtrl+I", Strings::FramePlayer::MENU_ITEM_TUNE_INFO));
+				viewMenu->Append(static_cast<int>(MenuItemId_Player::TuneInfo), wxString::Format("%s\tF1", Strings::FramePlayer::MENU_ITEM_TUNE_INFO));
 
 				menuBar->Append(viewMenu, Strings::FramePlayer::MENU_VIEW);
 			}
@@ -249,8 +249,13 @@ namespace FrameElements // Player class
 
 		gridSizerPlaybackButtons->Add(0, 0, wxEXPAND, 0); // This "spacer" makes the playback control buttons horizontally centered (without it, they'd be right-aligned).
 
+		// TuneInfo button
+		btnTuneInfo = AttachSimplePlaybackControlButton(themeData.GetImage("btn_tuneinfo"), _parentPanel, gridSizerPlaybackButtons);
+		btnTuneInfo->SetToolTip(Strings::FramePlayer::TOOLTIP_SHOW_REFRESH_TUNE_INFO);
+
 		// Playback modifier button
 		btnPlaybackMod = AttachSimplePlaybackControlButton(themeData.GetImage("btn_eq"), _parentPanel, gridSizerPlaybackButtons);
+		btnPlaybackMod->SetToolTip(Strings::PlaybackMods::WINDOW_TITLE);
 
 		AttachFixedSizeSeparator(DpiSize(0, 1 + 4), sizerMain, _parentPanel); // TODO: magic number
 
@@ -368,6 +373,7 @@ namespace FrameElements // Player class
 		btnNextTrack->Enable(enabled);
 		labelSubsong->Enable(enabled);
 		labelTime->Enable(enabled);
+		btnTuneInfo->Enable(enabled);
 	}
 
 	void ElementsPlayer::OnVolumeSliderContextMenuOpen(wxContextMenuEvent& /*evt*/)
