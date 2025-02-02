@@ -249,8 +249,13 @@ namespace FrameElements // Player class
 
 		gridSizerPlaybackButtons->Add(0, 0, wxEXPAND, 0); // This "spacer" makes the playback control buttons horizontally centered (without it, they'd be right-aligned).
 
+		// TuneInfo button
+		btnTuneInfo = AttachSimplePlaybackControlButton(themeData.GetImage("btn_tuneinfo"), _parentPanel, gridSizerPlaybackButtons);
+		btnTuneInfo->SetToolTip(Strings::TuneInfo::WINDOW_TITLE);
+
 		// Playback modifier button
 		btnPlaybackMod = AttachSimplePlaybackControlButton(themeData.GetImage("btn_eq"), _parentPanel, gridSizerPlaybackButtons);
+		btnPlaybackMod->SetToolTip(Strings::PlaybackMods::WINDOW_TITLE);
 
 		AttachFixedSizeSeparator(DpiSize(0, 1 + 4), sizerMain, _parentPanel); // TODO: magic number
 
@@ -368,6 +373,7 @@ namespace FrameElements // Player class
 		btnNextTrack->Enable(enabled);
 		labelSubsong->Enable(enabled);
 		labelTime->Enable(enabled);
+		btnTuneInfo->Enable(enabled);
 	}
 
 	void ElementsPlayer::OnVolumeSliderContextMenuOpen(wxContextMenuEvent& /*evt*/)

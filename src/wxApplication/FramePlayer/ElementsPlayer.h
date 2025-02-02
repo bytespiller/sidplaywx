@@ -138,6 +138,7 @@ namespace FrameElements
 		UIElements::PlayPauseButton* btnPlayPause;
 		wxButton* btnNextSubsong;
 		wxButton* btnNextTrack;
+		wxButton* btnTuneInfo;
 		wxButton* btnPlaybackMod;
 
 		// Other disableable

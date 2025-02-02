@@ -295,6 +295,13 @@ void FramePlayer::SetupUiElements()
     _ui->btnNextTrack->Bind(wxEVT_BUTTON, &OnButtonTuneNext, this);
     _ui->btnPrevTrack->Bind(wxEVT_BUTTON, &OnButtonTunePrev, this);
     _ui->btnPlaybackMod->Bind(wxEVT_BUTTON, &OnButtonPlaybackMod, this);
+    _ui->btnTuneInfo->Bind(wxEVT_BUTTON, [this](const wxCommandEvent& /*evt*/)
+    {
+        if (_app.GetPlaybackInfo().IsValidSongLoaded())
+        {
+            ShowTuneInfo();
+        }
+    });
 
     _ui->sliderVolume->Bind(wxEVT_SLIDER, &OnVolumeSlider, this); // Reminder: context menu is bound in the FrameElementsPlayer to keep stuff tidy.
     _ui->btnRepeatMode->Bind(wxEVT_BUTTON, &OnButtonRepeatMode, this);
