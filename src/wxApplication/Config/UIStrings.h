@@ -107,6 +107,8 @@ namespace Strings
 		inline constexpr const char* const TOOLTIP_STIL_NAME_TITLE("STIL Name - Title");
 		inline constexpr const char* const TOOLTIP_STIL_ARTIST_AUTHOR("STIL Artist (Author)");
 		inline constexpr const char* const TOOLTIP_STIL_COMMENT("STIL Comment");
+
+		inline constexpr const char* const TOOLTIP_SHOW_REFRESH_TUNE_INFO("Show/refresh current Tune Info");
 	}
 
 	namespace PlaylistTree
@@ -151,7 +153,7 @@ namespace Strings
 	namespace TuneInfo
 	{
 		inline constexpr const char* const WINDOW_TITLE("Tune Info");
-		inline constexpr const char* const CHECKBOX_FOLLOW_PLAYBACK("Follow playback");
+		inline constexpr const char* const CHECKBOX_FOLLOW_PLAYBACK("Follow navigation");
 
 		inline constexpr const char* const CATEGORY_BASIC("General");
 		inline constexpr const char* const TUNE_TITLE("Title");

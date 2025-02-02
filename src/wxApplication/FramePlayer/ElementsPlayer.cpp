@@ -251,7 +251,7 @@ namespace FrameElements // Player class
 
 		// TuneInfo button
 		btnTuneInfo = AttachSimplePlaybackControlButton(themeData.GetImage("btn_tuneinfo"), _parentPanel, gridSizerPlaybackButtons);
-		btnTuneInfo->SetToolTip(Strings::TuneInfo::WINDOW_TITLE);
+		btnTuneInfo->SetToolTip(Strings::FramePlayer::TOOLTIP_SHOW_REFRESH_TUNE_INFO);
 
 		// Playback modifier button
 		btnPlaybackMod = AttachSimplePlaybackControlButton(themeData.GetImage("btn_eq"), _parentPanel, gridSizerPlaybackButtons);
