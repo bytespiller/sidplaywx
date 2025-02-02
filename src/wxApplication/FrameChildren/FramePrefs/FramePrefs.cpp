@@ -67,8 +67,8 @@ FramePrefs::FramePrefs(wxWindow* parent, const wxString& title, const wxPoint& p
     _ui->propertyGrid->Bind(wxEVT_PG_CHANGING, &OnPropertyGridChanging, this);
     _ui->propertyGrid->Bind(wxEVT_PG_CHANGED, &OnPropertyGridChanged, this);
 
-    FindWindowById(wxID_APPLY, this)->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &OnButtonApply, this);
-    FindWindowById(wxID_OK, this)->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &OnButtonOk, this);
+    FindWindowById(wxID_APPLY, this)->Bind(wxEVT_BUTTON, &OnButtonApply, this);
+    FindWindowById(wxID_OK, this)->Bind(wxEVT_BUTTON, &OnButtonOk, this);
 }
 
 void FramePrefs::AddWrappedProp(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString)
