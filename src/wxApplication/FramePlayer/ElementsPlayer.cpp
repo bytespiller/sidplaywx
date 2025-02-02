@@ -160,7 +160,7 @@ namespace FrameElements // Player class
 				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::VisualizationEnabled), wxString::Format(Strings::FramePlayer::MENU_ITEM_VISUALIZATION_ENABLED));
 				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::StilInfoEnabled), wxString::Format(Strings::FramePlayer::MENU_ITEM_STIL_INFO));
 				viewMenu->AppendSeparator();
-				viewMenu->Append(static_cast<int>(MenuItemId_Player::TuneInfo), wxString::Format("%s\tCtrl+I", Strings::FramePlayer::MENU_ITEM_TUNE_INFO));
+				viewMenu->Append(static_cast<int>(MenuItemId_Player::TuneInfo), wxString::Format("%s\tF1", Strings::FramePlayer::MENU_ITEM_TUNE_INFO));
 
 				menuBar->Append(viewMenu, Strings::FramePlayer::MENU_VIEW);
 			}
