@@ -288,13 +288,13 @@ void FramePlayer::SetupUiElements()
     }
 
     // Bindings
-    _ui->btnPlayPause->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &OnButtonPlayPause, this);
-    _ui->btnStop->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &OnButtonStop, this);
-    _ui->btnNextSubsong->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &OnButtonSubsongNext, this);
-    _ui->btnPrevSubsong->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &OnButtonSubsongPrev, this);
-    _ui->btnNextTrack->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &OnButtonTuneNext, this);
-    _ui->btnPrevTrack->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &OnButtonTunePrev, this);
-    _ui->btnPlaybackMod->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &OnButtonPlaybackMod, this);
+    _ui->btnPlayPause->Bind(wxEVT_BUTTON, &OnButtonPlayPause, this);
+    _ui->btnStop->Bind(wxEVT_BUTTON, &OnButtonStop, this);
+    _ui->btnNextSubsong->Bind(wxEVT_BUTTON, &OnButtonSubsongNext, this);
+    _ui->btnPrevSubsong->Bind(wxEVT_BUTTON, &OnButtonSubsongPrev, this);
+    _ui->btnNextTrack->Bind(wxEVT_BUTTON, &OnButtonTuneNext, this);
+    _ui->btnPrevTrack->Bind(wxEVT_BUTTON, &OnButtonTunePrev, this);
+    _ui->btnPlaybackMod->Bind(wxEVT_BUTTON, &OnButtonPlaybackMod, this);
 
     _ui->sliderVolume->Bind(wxEVT_SLIDER, &OnVolumeSlider, this); // Reminder: context menu is bound in the FrameElementsPlayer to keep stuff tidy.
     _ui->btnRepeatMode->Bind(wxEVT_BUTTON, &OnButtonRepeatMode, this);
