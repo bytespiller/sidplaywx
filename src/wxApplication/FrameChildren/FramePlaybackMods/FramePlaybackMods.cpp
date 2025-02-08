@@ -207,5 +207,8 @@ void FramePlaybackMods::OnCharHook(wxKeyEvent& evt)
     if (evt.GetKeyCode() == WXK_ESCAPE)
     {
         Close();
+        return;
     }
+
+    evt.Skip();
 }
