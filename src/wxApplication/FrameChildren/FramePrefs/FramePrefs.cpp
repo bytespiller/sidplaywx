@@ -404,8 +404,10 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     }
                     else if (prop.first == Settings::AppSettings::ID::TaskbarProgress)
                     {
+#ifdef MSW
                         const int opt = _app.currentSettings->GetOption(Settings::AppSettings::ID::TaskbarProgress)->GetValueAsInt();
 	                    _framePlayer.GetUIElements({}).compositeSeekbar->SetTaskbarProgressOption(static_cast<UIElements::CompositeSeekBar::TaskbarProgressOption>(opt));
+#endif
                     }
                     else if (prop.first == Settings::AppSettings::ID::RememberPlaylist)
                     {
@@ -439,18 +441,18 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     }
                     else if (prop.first == Settings::AppSettings::ID::SonglengthsPath)
                     {
-                        const std::wstring& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
+                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
                         option.UpdateValue(relPath);
                     }
                     else if (prop.first == Settings::AppSettings::ID::StilPath)
                     {
-                        const std::wstring& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
+                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
                         option.UpdateValue(relPath);
                         _framePlayer.InitStilInfo({});
                     }
                     else if (prop.first == Settings::AppSettings::ID::RomKernalPath || prop.first == Settings::AppSettings::ID::RomBasicPath || prop.first == Settings::AppSettings::ID::RomChargenPath)
                     {
-                        const std::wstring& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
+                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
                         option.UpdateValue(relPath);
                     }
 

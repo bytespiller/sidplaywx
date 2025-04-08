@@ -384,7 +384,9 @@ namespace FrameElements // Player class
 		{
 			const std::string strVol = std::to_string(sliderVolume->GetValue());
 			wxMenuItem* title = new wxMenuItem(&menu, wxID_ANY, wxString::Format("%s %s%", Strings::FramePlayer::VOL_MENU_PREFIX, strVol));
+#ifdef MSW // TODO: make it work in Linux too
 			title->SetFont(title->GetFont().MakeBold());
+#endif
 			menu.Append(title);
 			menu.AppendSeparator();
 		}

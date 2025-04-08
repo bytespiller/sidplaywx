@@ -67,7 +67,11 @@ void SimpleTimer::Restart()
 		while ((_elapsedMs < _delayMs) && !_aborting)
 		{
 			const auto start = std::chrono::high_resolution_clock::now();
+#ifdef _WIN32
 			Sleep(RESOLUTION_MS);
+#else
+			usleep(RESOLUTION_MS * 1000); // POSIX function (takes microseconds). There is also a more modern nanosleep() function but is more ugly to use.
+#endif
 			const auto end = std::chrono::high_resolution_clock::now();
 			const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 

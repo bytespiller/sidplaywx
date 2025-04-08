@@ -64,7 +64,9 @@ void FramePlayer::UpdateUiState()
             _ui->btnStop->Enable(false);
             _ui->labelTime->Enable(false);
             _ui->compositeSeekbar->ResetPlaybackPosition(0); // Will also auto disable/enable itself.
+#ifdef MSW
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_NO_PROGRESS);
+#endif
 
             _ui->waveformVisualization->Clear();
 
@@ -74,21 +76,27 @@ void FramePlayer::UpdateUiState()
         {
             _ui->btnPlayPause->SetPause();
             _ui->compositeSeekbar->ResetPlaybackPosition(GetEffectiveSongDuration(*_ui->treePlaylist->GetActiveSong()));
+#ifdef MSW
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_NORMAL);
+#endif
 
             break;
         }
         case PlaybackController::State::Paused:
         {
             _ui->btnPlayPause->SetPlay();
+#ifdef MSW
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_PAUSED);
+#endif
             break;
         }
         case PlaybackController::State::Seeking:
         {
             const PlaybackController::State resumeState = playback.GetResumeState();
             (resumeState == PlaybackController::State::Paused) ? _ui->btnPlayPause->SetPlay() : _ui->btnPlayPause->SetPause();
+#ifdef MSW
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_INDETERMINATE);
+#endif
             break;
         }
         default:

@@ -18,6 +18,7 @@
 
 #include "SidDecoder.h"
 
+#include "../../../Util/HelpersGeneral.h"
 #include <sidplayfp/SidTuneInfo.h>
 #include <cmath>
 #include <fstream>
@@ -29,7 +30,7 @@ namespace
     char* loadRom(const std::wstring& path, size_t romSize)
     {
         char* buffer = 0;
-        std::ifstream is(path.c_str(), std::ios::binary);
+        std::ifstream is(Helpers::General::WideStringToUtf8(path), std::ios::binary);
         if (is.good())
         {
             buffer = new char[romSize];

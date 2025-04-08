@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 3.11.0)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+project(sidplaywx CXX)
+
+#set(THREADS_PREFER_PTHREAD_FLAG ON)
+
+# external headers
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/include/linux/libsidplayfp)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/include/linux/portaudio)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/include/linux/wxWidgets)
+
+# external libs
+include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/linux/CMakeLists_libsidplayfp.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/linux/CMakeLists_portaudio.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/linux/CMakeLists_wxWidgets.txt)
+
+# exe
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*)
+#message(STATUS "[INFO] SRC_FILES: ${SRC_FILES}")
+
+#set(SRC_FILES ${SRC_FILES} ../dev/resources.rc) # MSW manifest & stuff
+
+add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+# libs
+find_package(Threads)
+target_link_libraries(${PROJECT_NAME}
+    libsidplayfp
+    libportaudio
+    asound sndio pulse jack # needed for PortAudio on Linux, must be defined *after* libportaudio
+    Threads::Threads
+    #-static-libgcc -static-libstdc++ # needed for MinGW posix threading
+
+    wxWidgets_propgrid wxWidgets_adv # prefs window (must be included before others)
+    wxWidgets_core wxWidgets_base #wxWidgets_regex
+    #wxWidgets_jpeg wxWidgets_tiff wxWidgets_png wxWidgets_zlib
+    wxWidgets_xml # wx XML support (except: wxWidgets_libwxexpat)
+    wxWidgets_net # for "Check for updates" support
+)
+
+set(CXX_FLAGS -I/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.2 -I/usr/include/wx-3.2 -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__ -pthread) # get this via /dist/wx-config --cxxflags
+
+target_compile_options(${PROJECT_NAME} PRIVATE -fms-extensions -Werror -DHAVE_CONFIG_H -DHAVE_CXX11 ${CXX_FLAGS})
+#target_compile_options(${PROJECT_NAME} PUBLIC -g -O0 -Werror -Wall -Wextra -pedantic) # TEMP!!!
+
+# CPack
+#set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+#set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+#include(CPack)

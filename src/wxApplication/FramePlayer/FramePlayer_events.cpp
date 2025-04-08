@@ -23,6 +23,10 @@
 #include "../FrameChildren/FramePrefs/FramePrefs.h"
 #include "../Helpers/HelpersWx.h"
 
+#ifndef MSW
+#include <wx/tooltip.h>
+#endif
+
 namespace
 {
     using RepeatMode = UIElements::RepeatModeButton::RepeatMode;

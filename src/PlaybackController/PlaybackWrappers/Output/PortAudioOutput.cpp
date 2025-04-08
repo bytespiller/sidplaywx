@@ -21,6 +21,7 @@
 #include <atomic>
 #include <cstdint>
 #include <iostream>
+#include <string.h> // memcpy (Linux)
 #include <memory>
 
 class VisualizationBuffer

@@ -95,8 +95,8 @@ namespace Helpers
 			static const std::string FILE_EXTENSION_PLAYLIST = ".m3u8";
 			static const std::string DEFAULT_PLAYLIST_NAME = "default" + FILE_EXTENSION_PLAYLIST;
 
-			std::wstring AsAbsolutePathIfPossible(const std::wstring& relPath);
-			std::wstring AsRelativePathIfPossible(const std::wstring& absPath);
+			wxString AsAbsolutePathIfPossible(const wxString& relPath);
+			wxString AsRelativePathIfPossible(const wxString& absPath);
 			wxArrayString GetValidFiles(const wxArrayString& rawFileList);
 
 			inline bool IsZipFile(const wxString& filename)

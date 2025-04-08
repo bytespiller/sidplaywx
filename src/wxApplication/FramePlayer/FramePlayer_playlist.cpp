@@ -300,12 +300,14 @@ void FramePlayer::PadColumnsWidth()
 
 void FramePlayer::PadColumnWidth(PlaylistTreeModel::ColumnId columnId)
 {
+#ifdef MSW // TODO: investigate DataViewCtrl::GetBestColumnWidth not existing on GTK3
     const unsigned int colIndex = static_cast<unsigned int>(columnId);
     wxDataViewColumn* const col = _ui->treePlaylist->GetColumn(colIndex);
 
     const unsigned int padding = _ui->treePlaylist->GetFont().GetPointSize() * 2;
     const unsigned int newWidth = _ui->treePlaylist->GetBestColumnWidth(colIndex) + padding;
     col->SetWidth(newWidth);
+#endif
 }
 
 void FramePlayer::UpdateIgnoredSongs(PassKey<FramePrefs>)

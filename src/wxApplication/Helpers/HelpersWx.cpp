@@ -89,25 +89,25 @@ namespace Helpers
 	{
 		namespace Files
 		{
-			std::wstring AsAbsolutePathIfPossible(const std::wstring& relPath)
+			wxString AsAbsolutePathIfPossible(const wxString& relPath)
 			{
 				if (relPath.empty())
 				{
 					return relPath;
 				}
 
-				std::wstring absPath(std::filesystem::weakly_canonical(relPath));
+				wxString absPath(std::filesystem::weakly_canonical(relPath.ToStdWstring()));
 				return (absPath.empty()) ? relPath : absPath; // If it doesn't exist, return the original path unchanged.
 			}
 
-			std::wstring AsRelativePathIfPossible(const std::wstring& absPath)
+			wxString AsRelativePathIfPossible(const wxString& absPath)
 			{
 				if (absPath.empty())
 				{
 					return absPath;
 				}
 
-				std::wstring relPath(std::filesystem::relative(absPath));
+				wxString relPath(std::filesystem::relative(absPath.ToStdWstring()));
 				return (relPath.empty()) ? absPath : relPath; // If it doesn't exist, return the original path unchanged.
 			}
 

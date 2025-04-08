@@ -27,6 +27,9 @@
 #include "../FrameChildren/FrameTuneInfo/FrameTuneInfo.h"
 #include <wx/aboutdlg.h>
 #include <wx/display.h>
+#ifndef MSW
+#include <wx/tooltip.h>
+#endif
 #include <wx/webrequest.h>
 
 using RepeatMode = UIElements::RepeatModeButton::RepeatMode;
@@ -39,7 +42,9 @@ FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize
     : wxFrame(NULL, wxID_ANY, title, pos, size),
     _app(app)
 {
+#ifdef MSW // TODO: make it work on Linux too
     SetIcon(wxICON(appicon)); // Comes from .rc
+#endif
 
     _themeManager.LoadTheme("default");
     SetupUiElements();
@@ -284,7 +289,9 @@ void FramePlayer::SetupUiElements()
 
     { // Taskbar progress indication
         const int opt = _app.currentSettings->GetOption(Settings::AppSettings::ID::TaskbarProgress)->GetValueAsInt();
+#ifdef MSW // TODO
 	    _ui->compositeSeekbar->SetTaskbarProgressOption(static_cast<UIElements::CompositeSeekBar::TaskbarProgressOption>(opt));
+#endif
     }
 
     // Bindings
@@ -596,9 +603,13 @@ void FramePlayer::ForceStopPlayback(PassKey<FramePrefs>)
     OnButtonStop();
 }
 
+#ifdef MSW
 static std::unique_ptr<wxWebRequest> requestUpdateCheck = nullptr;
+#endif
+
 void FramePlayer::CheckUpdates()
 {
+#ifdef MSW
     if (requestUpdateCheck != nullptr)
     {
         requestUpdateCheck->Cancel(); // Cancel any previous check that may still be in progress or stuck.
@@ -651,6 +662,9 @@ void FramePlayer::CheckUpdates()
     });
 
     requestUpdateCheck->Start();
+#else
+    wxMessageBox("Checking for updates not supported on your platform."); // TODO
+#endif
 }
 
 void FramePlayer::DisplayAboutBox()

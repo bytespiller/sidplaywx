@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "Components\PlaylistModel.h"
-#include "..\..\Config\AppSettings.h"
+#include "Components/PlaylistModel.h"
+#include "../../Config/AppSettings.h"
 #include <wx/dataview.h>
 
 #include <memory>
@@ -125,7 +125,9 @@ namespace UIElements
 			// Reminder 2: wxCOL_REORDERABLE is crashy due to use of OnColumnsCountChanged().
 			wxDataViewColumn* _AddTextColumn(PlaylistTreeModel::ColumnId columnIndex, const wxString& title, wxAlignment align = wxALIGN_LEFT, int flags = wxCOL_RESIZABLE);
 
+#ifdef MSW
 			void _OverrideScrollWheel(wxMouseEvent& evt);
+#endif
 
 		private:
 			PlaylistTreeModel& _model;

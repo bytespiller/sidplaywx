@@ -29,7 +29,7 @@ namespace
 {
     wxMilliClock_t lastFileListReceptionTime = 0;
 
-    void WarnRomLoadFailed(const std::wstring& romPath, const char* errMessage)
+    void WarnRomLoadFailed(const wxString& romPath, const char* errMessage)
     {
         const wxString additionalInfo = wxFileExists(romPath) ? "" : wxString::Format("\n%s", Strings::Error::MSG_ERR_ROM_FILE_NOT_FOUND);
         wxMessageBox(errMessage + additionalInfo, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
@@ -162,10 +162,10 @@ bool MyApp::OnInit()
         if (initSuccess)
         {
             // Load ROMs
-            const std::wstring romPathKernal = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomKernalPath)->GetValueAsString().ToStdWstring());
-            const std::wstring romPathBasic = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomBasicPath)->GetValueAsString().ToStdWstring());
-            const std::wstring romPathChargen = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomChargenPath)->GetValueAsString().ToStdWstring());
-            const RomUtil::RomStatus& romStatus = _playback->TrySetRoms(romPathKernal, romPathBasic, romPathChargen);
+            const wxString& romPathKernal = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomKernalPath)->GetValueAsString().ToStdWstring());
+            const wxString& romPathBasic = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomBasicPath)->GetValueAsString().ToStdWstring());
+            const wxString& romPathChargen = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomChargenPath)->GetValueAsString().ToStdWstring());
+            const RomUtil::RomStatus& romStatus = _playback->TrySetRoms(romPathKernal.ToStdWstring(), romPathBasic.ToStdWstring(), romPathChargen.ToStdWstring());
 
             if (!romPathKernal.empty() && !romStatus.IsValidated(RomUtil::RomType::Kernal))
             {

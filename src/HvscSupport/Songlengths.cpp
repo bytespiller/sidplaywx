@@ -39,7 +39,7 @@ bool Songlengths::TryLoad(const std::wstring& songlengthsMd5Filepath)
 {
 	Unload();
 
-	std::ifstream file(songlengthsMd5Filepath.c_str());
+	std::ifstream file(Helpers::General::WideStringToUtf8(songlengthsMd5Filepath)); // TODO: test if this works with unicode paths under both Linux and Windows.
 
 	bool inDatabaseSection = false;
 	std::string line;
@@ -47,6 +47,11 @@ bool Songlengths::TryLoad(const std::wstring& songlengthsMd5Filepath)
 	std::string songHvscPath;
 	while (std::getline(file, line))
 	{
+		if (line.at(line.length() - 1) == '\r') // Clipping the CR is needed on Linux.
+		{
+			line.erase(line.length() - 1);
+		}
+
 		const char& firstChar = line.front();
 
 		// Ignore if not within Database section(s)

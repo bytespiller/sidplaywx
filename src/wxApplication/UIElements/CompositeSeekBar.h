@@ -57,8 +57,11 @@ namespace UIElements
 		double GetNormalizedFillTarget() const;
 		bool IsSeekPreviewing() const;
 		long GetDurationValue() const;
+
+#ifdef MSW
 		void SetTaskbarProgressOption(TaskbarProgressOption option);
 		void SetTaskbarProgressState(wxTaskBarButtonState state);
+#endif
 
 	private:
 		void Render(wxDC& dc);

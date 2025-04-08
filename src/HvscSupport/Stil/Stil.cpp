@@ -18,6 +18,7 @@
 
 #include "Stil.h"
 #include "PreIndex.h"
+#include "../../Util/HelpersGeneral.h"
 
 static const std::wstring STIL_VERSION_PREFIX(L"#  STIL v");
 static constexpr const char STIL_CHAR_COMMENT = '#';
@@ -115,7 +116,7 @@ bool Stil::TryLoad(const std::wstring& stilFilepath)
 
 	// Lock & load the STIL.txt file
 	{
-		_stilDataStream.open(stilFilepath.c_str(), std::ios::binary);
+		_stilDataStream.open(Helpers::General::WideStringToUtf8(stilFilepath), std::ios::binary);
 		_stilDataStream.clear();
 		if (!_stilDataStream.good())
 		{

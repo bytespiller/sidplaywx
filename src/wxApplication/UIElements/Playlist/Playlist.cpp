@@ -39,7 +39,9 @@ namespace UIElements
 			_AddTextColumn(ColumnId::Copyright, Strings::PlaylistTree::COLUMN_COPYRIGHT);
 			_AddTextColumn(ColumnId::PlaceholderLast, "");
 
+#ifdef MSW
 			Bind(wxEVT_MOUSEWHEEL, &_OverrideScrollWheel, this); // Partial workaround for the smooth scrolling performance issues on MSW (especially with lots of icons in rows).
+#endif
 
 			// Auto-fit the Title column upon the child item expansion
 			Bind(wxEVT_DATAVIEW_ITEM_EXPANDED, [this](const wxDataViewEvent& /*evt*/)
@@ -48,8 +50,11 @@ namespace UIElements
 				wxDataViewColumn* const col = GetColumn(colIndex);
 
 				const unsigned int padding = GetFont().GetPointSize() * 2; // Account for bold text.
+
+#ifdef MSW
 				const unsigned int newWidth = GetBestColumnWidth(colIndex) + padding;
 				col->SetWidth(newWidth);
+#endif
 			});
 		}
 
@@ -539,6 +544,7 @@ namespace UIElements
 			return AppendTextColumn(title, static_cast<unsigned int>(columnIndex), wxDATAVIEW_CELL_INERT, wxCOL_WIDTH_AUTOSIZE, align, flags);
 		}
 
+#ifdef MSW
 		void Playlist::_OverrideScrollWheel(wxMouseEvent& evt)
 		{
 			// This method prevents smooth scrolling due to performance issues in the wxDataViewCtrl on MSW.
@@ -551,5 +557,6 @@ namespace UIElements
      		const int lines = (evt.GetWheelRotation() / evt.GetWheelDelta()) * evt.GetLinesPerAction();
 			DoScroll(GetScrollPos(wxHORIZONTAL), std::max(0, GetScrollPos(wxVERTICAL) - lines)); // Not using the ScrollLines() since it uses the performance-problematic smooth scrolling.
 		}
+#endif
 	}
 }

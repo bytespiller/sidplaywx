@@ -19,7 +19,7 @@
 #pragma once
 
 #include "../Settings/SettingsBase.h"
-#include "../UIElements/CompositeSeekbar.h"
+#include "../UIElements/CompositeSeekBar.h"
 #include "../UIElements/RepeatModeButton.h"
 
 namespace Settings

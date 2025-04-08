@@ -145,6 +145,7 @@ namespace UIElements
 		return _duration;
 	}
 
+#ifdef MSW
 	void CompositeSeekBar::SetTaskbarProgressOption(TaskbarProgressOption option)
 	{
 		_taskbarProgressOption = option;
@@ -165,6 +166,7 @@ namespace UIElements
 			tb->SetProgressState(applyState);
 		}
 	}
+#endif
 
 	// Called by the system of wxWidgets when the panel needs to be redrawn. You can also trigger this call by calling Refresh()/Update().
 	void CompositeSeekBar::OnPaintEvent(wxPaintEvent& /*evt*/)

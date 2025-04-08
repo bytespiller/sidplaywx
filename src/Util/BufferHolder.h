@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 
 struct BufferHolder // Designed for holding a buffered SID Tune (when loaded from a Zip file) for use with libsidplayfp.
