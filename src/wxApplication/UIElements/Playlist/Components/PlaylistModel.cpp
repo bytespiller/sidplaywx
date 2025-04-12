@@ -93,7 +93,7 @@ UIElements::Playlist::PlaylistIconId PlaylistTreeModelNode::GetIconId() const
 PlaylistTreeModelNode& PlaylistTreeModelNode::AddChild(PlaylistTreeModelNode* childToAdopt, PlaylistTreeModelNode::PassKey<UIElements::Playlist::Playlist>)
 {
 	assert(_parent == nullptr); // Adding children to children is unexpected usecase.
-	return *_children.emplace_back(std::move(childToAdopt)).get();
+	return *_children.emplace_back(childToAdopt).get();
 }
 
 wxDataViewItemAttr& PlaylistTreeModelNode::GetItemAttr(PlaylistTreeModelNode::PassKey<UIElements::Playlist::Playlist>)
