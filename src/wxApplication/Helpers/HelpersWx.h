@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,6 +88,9 @@ namespace Helpers
 
 			return FastJoin(Helpers::General::GetZeroPaddedString(min), ":", Helpers::General::GetZeroPaddedString(sec).c_str());
 		}
+
+		/// @brief Songlengths.md5, STIL.txt and .sid files use the Windows1252 encoding for strings.
+		wxString StringFromWin1252(const std::string_view& input);
 
 		namespace Files
 		{

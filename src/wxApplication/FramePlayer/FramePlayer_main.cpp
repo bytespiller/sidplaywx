@@ -25,18 +25,21 @@
 #include "../FrameChildren/FramePlaybackMods/FramePlaybackMods.h"
 #include "../FrameChildren/FramePrefs/FramePrefs.h"
 #include "../FrameChildren/FrameTuneInfo/FrameTuneInfo.h"
+
 #include <wx/aboutdlg.h>
 #include <wx/display.h>
+
 #ifndef MSW
 #include <wx/tooltip.h>
 #endif
+
 #include <wx/webrequest.h>
 
 using RepeatMode = UIElements::RepeatModeButton::RepeatMode;
 
 static constexpr size_t VISUALIZATION_WAVE_WINDOW_MS = 100;
-static wxString bundledSonglengthsPath("bundled-Songlengths.md5");
-static wxString bundledStilPath("bundled-STIL.txt");
+static const wxString bundledSonglengthsPath("bundled-Songlengths.md5");
+static const wxString bundledStilPath("bundled-STIL.txt");
 
 FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize& size, MyApp& app)
     : wxFrame(NULL, wxID_ANY, title, pos, size),

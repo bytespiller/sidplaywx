@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2024-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,13 +66,13 @@ bool PreIndex::TryLoadFromCache(const std::string& stilVersion, HvscPathsIndex& 
 	return success;
 }
 
-void PreIndex::RebuildIndexAndCache(const std::string& stilVersion, HvscPathsIndex& pathsIndex, std::wifstream& stilDataStream)
+void PreIndex::RebuildIndexAndCache(const std::string& stilVersion, HvscPathsIndex& pathsIndex, std::ifstream& stilDataStream)
 {
 	// Do the actual (slow) pre-indexing
 	{
 		stilDataStream.clear(); // Rewind (just in case).
 
-		std::wstring line;
+		std::string line;
 		while (std::getline(stilDataStream, line))
 		{
 			if (line.front() == '/')

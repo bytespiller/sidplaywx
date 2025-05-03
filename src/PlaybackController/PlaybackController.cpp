@@ -168,7 +168,7 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
     return result;
 }
 
-RomUtil::RomStatus PlaybackController::TrySetRoms(const std::wstring& pathKernal, const std::wstring& pathBasic, const std::wstring& pathChargen)
+RomUtil::RomStatus PlaybackController::TrySetRoms(const std::filesystem::path& pathKernal, const std::filesystem::path& pathBasic, const std::filesystem::path& pathChargen)
 {
     const RomUtil::RomStatus& preCheckStatus = RomUtil::PreCheckRoms(pathKernal, pathBasic, pathChargen);
     if (!preCheckStatus.AreAllValidated())
@@ -180,7 +180,7 @@ RomUtil::RomStatus PlaybackController::TrySetRoms(const std::wstring& pathKernal
     return _loadedRoms;
 }
 
-bool PlaybackController::TryPlayFromBuffer(const std::wstring& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs)
+bool PlaybackController::TryPlayFromBuffer(const std::filesystem::path& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs)
 {
     PrepareTryPlay();
     _activeTuneHolder = std::make_unique<TuneHolder>(filepathForUid, loadedBufferToAdopt);
@@ -429,9 +429,9 @@ std::string PlaybackController::GetCurrentTuneMusComments() const
     return _sidDecoder->GetCurrentTuneMusComments();
 }
 
-std::wstring PlaybackController::GetCurrentTuneFilePath() const
+std::filesystem::path PlaybackController::GetCurrentTuneFilePath() const
 {
-    return (_activeTuneHolder != nullptr) ? _activeTuneHolder->filepath : L"";
+    return (_activeTuneHolder != nullptr) ? _activeTuneHolder->filepath : std::filesystem::path();
 }
 
 const SidTuneInfo& PlaybackController::GetCurrentTuneSidInfo() const

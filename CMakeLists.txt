@@ -34,6 +34,7 @@ target_link_libraries(${PROJECT_NAME}
     setupapi dsound dxguid winmm # Windows-specific (for audio)
     Threads::Threads
     -static-libgcc -static-libstdc++ # needed for MinGW posix threading
+    -liconv # string encoding operations (manual)
 
     -mwindows # WxWidgets, don't open console/terminal
     liboleacc.a # WxWidgets MSW, must be defined BEFORE the wxWidgets_core

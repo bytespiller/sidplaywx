@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2024-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ public:
 
 public:
 	static bool TryLoadFromCache(const std::string& stilVersion, HvscPathsIndex& pathsIndex);
-	static void RebuildIndexAndCache(const std::string& stilVersion, HvscPathsIndex& pathsIndex, std::wifstream& stilDataStream);
+	static void RebuildIndexAndCache(const std::string& stilVersion, HvscPathsIndex& pathsIndex, std::ifstream& stilDataStream);
 
 private:
 	// Reads the next line of a stream (advancing it) and checks its content against a given one. This function allows for chained one-liners.

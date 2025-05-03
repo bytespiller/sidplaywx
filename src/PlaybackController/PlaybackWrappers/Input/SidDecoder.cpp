@@ -27,10 +27,10 @@
 namespace
 {
     // Load ROM dump from file. Allocate the buffer if file exists, otherwise return 0.
-    char* loadRom(const std::wstring& path, size_t romSize)
+    char* loadRom(const std::filesystem::path& path, size_t romSize)
     {
         char* buffer = 0;
-        std::ifstream is(Helpers::General::WideStringToUtf8(path), std::ios::binary);
+        std::ifstream is(path, std::ios::binary);
         if (is.good())
         {
             buffer = new char[romSize];
@@ -103,7 +103,7 @@ bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig
     return true;
 }
 
-RomUtil::RomStatus SidDecoder::TrySetRoms(const std::wstring& pathKernal, const std::wstring& pathBasic, const std::wstring& pathChargen)
+RomUtil::RomStatus SidDecoder::TrySetRoms(const std::filesystem::path& pathKernal, const std::filesystem::path& pathBasic, const std::filesystem::path& pathChargen)
 {
     char* kernal = loadRom(pathKernal, RomUtil::ROM_SIZE_KERNAL);
     char* basic = loadRom(pathBasic, RomUtil::ROM_SIZE_BASIC);
@@ -132,12 +132,12 @@ void SidDecoder::PrepareLoadSong()
     UnloadActiveTune();
 }
 
-bool SidDecoder::TryLoadSong(const char* filepath, unsigned int subsong)
+bool SidDecoder::TryLoadSong(const std::filesystem::path& filepath, unsigned int subsong)
 {
     PrepareLoadSong();
 
     // Load new tune from file
-    _tune = std::make_unique<SidTune>(filepath);
+    _tune = std::make_unique<SidTune>(filepath.generic_string().c_str());
 
     // Do rest
     return TrySetSubsong(subsong);

@@ -18,10 +18,7 @@
 
 #pragma once
 
-#include <codecvt>
-#include <fstream> // TEMP
 #include <limits>
-#include <locale> // TEMP
 #include <string>
 #include <vector>
 
@@ -72,12 +69,6 @@ namespace Helpers
 			}
 
 			return items;
-		}
-
-		inline std::string WideStringToUtf8(const std::wstring& wstr) // TODO: get rid of this temporary patch for initial Linux build
-		{
-			std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-			return converter.to_bytes(wstr);
 		}
 	}
 }

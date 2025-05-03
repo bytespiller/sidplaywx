@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2024-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Common.h"
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <unordered_map>
@@ -28,17 +29,17 @@ class Stil
 {
 public:
 	/// @brief Field that may contain multiple entries.
-	using Field = std::unordered_map<int, std::vector<std::wstring>>;
+	using Field = std::unordered_map<int, std::vector<std::string>>;
 
 	struct Info
 	{
 		Info() = default;
 
 		/// @brief Returns subsong-specific STIL field entries if possible, or the main field entries.
-		std::vector<std::wstring> GetField(const Field& field, int subsong) const;
+		std::vector<std::string> GetField(const Field& field, int subsong) const;
 
 		/// @brief Returns as a comma-separated (by default) string: subsong-specific STIL field entries if possible, or the main field entries.
-		std::wstring GetFieldAsString(const Field& field, int subsong, const std::wstring& separator = L", ", bool countSeparators = false) const;
+		std::string GetFieldAsString(const Field& field, int subsong, const std::string& separator = ", ", bool countSeparators = false) const;
 
 		Field names;
 		Field titles;
@@ -52,7 +53,7 @@ public:
 	~Stil();
 
 public:
-	bool TryLoad(const std::wstring& stilFilepath);
+	bool TryLoad(const std::filesystem::path& stilFilepath);
 	void Unload();
 
 	bool IsLoaded() const;
@@ -60,7 +61,7 @@ public:
 	Info Get(const std::string& tuneHvscPath);
 
 private:
-	std::wstring _stilFilepath;
-	std::wifstream _stilDataStream;
+	std::filesystem::path _stilFilepath;
+	std::ifstream _stilDataStream;
 	HvscPathsIndex _hvscPathsIndex;
 };

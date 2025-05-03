@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include <sidplayfp/SidTune.h>
 
 #include <cstdint>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -65,7 +66,7 @@ public:
     Songlengths() = default;
 
 public:
-    bool TryLoad(const std::wstring& songlengthsMd5Filepath);
+    bool TryLoad(const std::filesystem::path& songlengthsMd5Filepath);
     void Unload();
 
     bool IsLoaded() const;

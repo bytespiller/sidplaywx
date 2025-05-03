@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,9 +40,9 @@ namespace RomUtil
 
 namespace RomUtil
 {
-	RomStatus PreCheckRoms(const std::wstring& pathKernal, const std::wstring& pathBasic, const std::wstring& pathChargen)
+	RomStatus PreCheckRoms(const std::filesystem::path& pathKernal, const std::filesystem::path& pathBasic, const std::filesystem::path& pathChargen)
 	{
-		using PathSizePair = std::pair<std::wstring, size_t>;
+		using PathSizePair = std::pair<std::filesystem::path, size_t>;
 		const std::unordered_map<RomType, PathSizePair> info
 		{
 			{RomType::Kernal, {pathKernal, ROM_SIZE_KERNAL}},
@@ -55,7 +55,7 @@ namespace RomUtil
 		{
 			const RomType romType = romInfo.first;
 			const PathSizePair& pathSize = romInfo.second;
-			const std::wstring& romPath = pathSize.first;
+			const std::filesystem::path& romPath = pathSize.first;
 			const size_t romSize = pathSize.second;
 
 			const bool preCheckPassed = romPath.empty() || (std::filesystem::exists(romPath) && std::filesystem::file_size(romPath) == romSize);

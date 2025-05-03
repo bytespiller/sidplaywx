@@ -173,8 +173,8 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
             const Songlengths::HvscInfo& hvscInfoMain = TryGetHvscInfo(_silentSidInfoDecoder.CalcCurrentTuneMd5());
 
             {
-                const wxString author = _silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author); // Don't use reference.
-                const wxString copyright = _silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released); // Don't use reference.
+                const wxString author = Helpers::Wx::StringFromWin1252(_silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author)); // Don't use reference.
+                const wxString copyright = Helpers::Wx::StringFromWin1252(_silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released)); // Don't use reference.
 
                 // Determine ROM requirement
                 PlaylistTreeModelNode::RomRequirement nodeRom = PlaylistTreeModelNode::RomRequirement::None;
@@ -194,7 +194,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                         throw(Strings::Internal::UNHANDLED_SWITCH_CASE);
                 }
 
-                mainSongNodeNew = &_ui->treePlaylist->AddMainSong(songTitle, filepath, defaultSubsong, hvscInfoMain.duration, hvscInfoMain.hvscPath, hvscInfoMain.md5, author, copyright, nodeRom, playable);
+                mainSongNodeNew = &_ui->treePlaylist->AddMainSong(Helpers::Wx::StringFromWin1252(songTitle.ToStdString()), filepath, defaultSubsong, hvscInfoMain.duration, hvscInfoMain.hvscPath, hvscInfoMain.md5, author, copyright, nodeRom, playable);
             }
 
             if (playable)
@@ -224,11 +224,11 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                     for (int i = 1; i <= totalSubsongs; ++i)
                     {
                         const int boxChar = (i < totalSubsongs) ? BOX_CHAR_VERT_RIGHT : BOX_CHAR_L;
-                        const std::wstring& title = info.GetFieldAsString(info.names, i);
+                        const std::string& title = info.GetFieldAsString(info.names, i);
 
                         if (!title.empty()) // STIL title
                         {
-                            subsongTitles.emplace_back(wxString::Format("%c %s %i: %s", boxChar, Strings::PlaylistTree::SUBSONG, i, title));
+                            subsongTitles.emplace_back(wxString::Format("%c %s %i: %s", boxChar, Strings::PlaylistTree::SUBSONG, i, Helpers::Wx::StringFromWin1252(title)));
                         }
                         else // Generic subsong title
                         {

@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,11 @@
 #include <wx/dir.h>
 #include <wx/stdpaths.h>
 #include <wx/textfile.h>
-#include <portaudio.h>
+
+#include <cstring>
 #include <filesystem>
+#include <iconv.h>
+#include <portaudio.h>
 
 namespace
 {
@@ -87,6 +90,43 @@ namespace Helpers
 {
 	namespace Wx
 	{
+		wxString StringFromWin1252(const std::string_view& input)
+		{
+			// Open a conversion descriptor from "WINDOWS-1252" to "UTF-8" and wrap it in a unique_ptr with custom deleter (for RAII behavior)
+			std::unique_ptr<std::remove_pointer_t<iconv_t>, decltype(&iconv_close)> conv(iconv_open("UTF-8", "WINDOWS-1252"), iconv_close);
+			if (conv.get() == reinterpret_cast<iconv_t>(-1))
+			{
+				throw std::runtime_error("iconv_open failed: " + std::string(std::strerror(errno)));
+			}
+
+			// Set how many input bytes we have
+			size_t inBytesLeft = input.size();
+
+			constexpr size_t expansionFactor = 4; // Each input byte may expand up to 4 bytes.
+
+			// Calculate the output buffer size
+			size_t outBytesLeft = inBytesLeft * expansionFactor;
+
+			// Pre-allocate a (null filled) string to hold the UTF-8 output
+			std::string output(outBytesLeft, '\0');
+
+			char* inbuf = const_cast<char*>(input.data()); // iconv() requires non-const pointers.
+			char* outbuf = output.data(); // Beginning of the output buffer.
+
+			// Attempt the conversion
+			if (auto result = iconv(conv.get(), &inbuf, &inBytesLeft, &outbuf, &outBytesLeft);
+				result == (size_t)-1)
+			{
+				throw std::runtime_error("iconv conversion error: " + std::string(std::strerror(errno)));
+			}
+
+			// Resize 'output' to the actual number of bytes written.
+			// 'outBytesLeft' now contains the unused space in the buffer.
+			output.resize(output.size() - outBytesLeft);
+
+			return wxString::FromUTF8(output);
+		}
+
 		namespace Files
 		{
 			wxString AsAbsolutePathIfPossible(const wxString& relPath)

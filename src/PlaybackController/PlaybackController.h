@@ -110,13 +110,13 @@ private:
     struct TuneHolder
     {
         TuneHolder() = delete;
-        TuneHolder(const std::wstring& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt) :
+        TuneHolder(const std::filesystem::path& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt) :
             filepath(filepathForUid),
             bufferHolder(std::move(loadedBufferToAdopt))
         {
         }
 
-        const std::wstring filepath;
+        const std::filesystem::path filepath;
         const std::unique_ptr<const BufferHolder> bufferHolder;
     };
 
@@ -131,10 +131,10 @@ public:
     SwitchAudioDeviceResult TrySwitchPlaybackConfiguration(const SyncedPlaybackConfig& newConfig);
 
     // Paths should be absolute.
-    RomUtil::RomStatus TrySetRoms(const std::wstring& pathKernal, const std::wstring& pathBasic, const std::wstring& pathChargen);
+    RomUtil::RomStatus TrySetRoms(const std::filesystem::path& pathKernal, const std::filesystem::path& pathBasic, const std::filesystem::path& pathChargen);
 
 public:
-    bool TryPlayFromBuffer(const std::wstring& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs);
+    bool TryPlayFromBuffer(const std::filesystem::path& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs);
     bool TryReplayCurrentSong(int preRenderDurationMs, bool reusePreRender = false);
     bool TryPlaySubsong(unsigned int subsong, int preRenderDurationMs, bool reusePreRender = false);
 
@@ -168,7 +168,7 @@ public:
     std::string GetCurrentTuneSpeedDescription() const;
     std::string GetCurrentTuneSidDescription(bool includeEffective = true) const;
     std::string GetCurrentTuneTypeDescription() const;
-    std::wstring GetCurrentTuneFilePath() const;
+    std::filesystem::path GetCurrentTuneFilePath() const;
     const SidTuneInfo& GetCurrentTuneSidInfo() const;
     int GetCurrentTuneSidChipsRequired() const;
     bool IsValidSongLoaded() const;
