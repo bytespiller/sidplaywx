@@ -184,6 +184,8 @@ public:
 	explicit PlaylistTreeModel(const UIElements::Playlist::PlaylistIcons& playlistIcons);
 
 public:
+	/// @brief Should be called before modifying the model state. Encapsulates a BeforeReset & AfterReset sequence safely which is needed on Linux (GTK). On MSW it uses a notifier mechanism instead which is more stable.
+	[[nodiscard]] std::unique_ptr<void, std::function<void(void*)>> PrepareDirty(std::function<void()> notifier);
 	PlaylistTreeModelNodePtrArray entries;
 
 public:

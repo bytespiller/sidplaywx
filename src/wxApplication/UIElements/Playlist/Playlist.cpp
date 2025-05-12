@@ -86,6 +86,10 @@ namespace UIElements
 			}
 
 			wxDataViewItemArray notifyItems(durations.size());
+			const auto _ = _model.PrepareDirty([&]()
+			{
+				_model.ItemsAdded(wxDataViewItem(&parent), notifyItems); // Notify the wx base control of change (MSW).
+			});
 
 			// Create multiple items at once
 			{
@@ -103,9 +107,6 @@ namespace UIElements
 					}
 				}
 			}
-
-			// Notify the wx base control of change
-			_model.ItemsAdded(wxDataViewItem(&parent), notifyItems);
 		}
 
 		void Playlist::Remove(PlaylistTreeModelNode& item)
