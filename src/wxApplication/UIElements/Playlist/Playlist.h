@@ -107,7 +107,7 @@ namespace UIElements
 			bool IsEmpty() const;
 
 			/// @brief Applies the tag to the node with corresponding functional and visual changes. Ignores unplayable nodes by default unless forced.
-			void SetItemTag(PlaylistTreeModelNode& node, PlaylistTreeModelNode::ItemTag tag, bool force = false); // TODO: consider renaming to SetItemStatus (and "tag" concept to "status" concept)?
+			void SetItemTag(PlaylistTreeModelNode& node, PlaylistTreeModelNode::ItemTag tag, bool force = false);
 
 			/// @brief Soft-selects (highlights) a node in the tree.
 			bool Select(const PlaylistTreeModelNode& node);
@@ -118,7 +118,13 @@ namespace UIElements
 			/// @brief Convenience getter for use with wx bindings such as sizers and events.
 			wxWindow* GetWxWindow();
 
+			/// @brief Use this for auto-fitting the **text** columns, since the GetBestColumnWidth is unavailable on Linux (wxGTK).
+			void AutoFitTextColumn(PlaylistTreeModel::ColumnId column);
+
 		private:
+			/// @brief There is no GetBestColumnWidth on Linux for some reason, so we've rolled our own here that should work everywhere for text columns at least.
+			int _GetBestTextColumnWidth(PlaylistTreeModel::ColumnId column);
+
 			wxDataViewColumn* _AddBitmapColumn(PlaylistTreeModel::ColumnId columnIndex, wxAlignment align = wxALIGN_CENTER, int flags = 0);
 
 			// Reminder 1: wxCOL_SORTABLE would mess up the navigation since the wxDataViewCtrl is feature-incomplete (it sorts visually only and its tree path is inaccessible). Using the wxEVT_DATAVIEW_COLUMN_SORTED to manually sort the model entries proved to be problematic so I gave up for now.

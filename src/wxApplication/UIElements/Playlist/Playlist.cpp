@@ -23,6 +23,8 @@ namespace UIElements
 {
 	namespace Playlist
 	{
+		static constexpr unsigned int COL_PADDING = 10; // Column padding in the respective wxDataViewCtrl, we use this hardcoded value here to avoid PITA.
+
 		using ColumnId = PlaylistTreeModel::ColumnId;
 
 		Playlist::Playlist(wxPanel* parent, const PlaylistIcons& playlistIcons, Settings::AppSettings& appSettings, unsigned long style) :
@@ -46,21 +48,65 @@ namespace UIElements
 			// Auto-fit the Title column upon the child item expansion
 			Bind(wxEVT_DATAVIEW_ITEM_EXPANDED, [this](const wxDataViewEvent& /*evt*/)
 			{
-				constexpr unsigned int colIndex = static_cast<unsigned int>(ColumnId::Title);
-				wxDataViewColumn* const col = GetColumn(colIndex);
-
-				const unsigned int padding = GetFont().GetPointSize() * 2; // Account for bold text.
-
-#ifdef MSW
-				const unsigned int newWidth = GetBestColumnWidth(colIndex) + padding;
-				col->SetWidth(newWidth);
-#endif
+				AutoFitTextColumn(ColumnId::Title);
 			});
 		}
 
 		wxWindow* Playlist::GetWxWindow()
 		{
 			return this;
+		}
+
+		void Playlist::AutoFitTextColumn(PlaylistTreeModel::ColumnId column)
+		{
+			const unsigned int newWidth = _GetBestTextColumnWidth(column);
+			wxDataViewColumn* const col = GetColumn(static_cast<unsigned int>(column));
+			col->SetWidth(newWidth);
+		}
+
+		int Playlist::_GetBestTextColumnWidth(PlaylistTreeModel::ColumnId column)
+		{
+			int width = 10; // Initial value is minimum width.
+
+			{
+				wxClientDC dc(this);
+				dc.SetFont(GetFont().MakeBold());
+
+				wxVariant text;
+
+				const auto DoUpdateWidth = [&](const wxDataViewItem& item) -> void
+				{
+					_model.GetValue(text, item, static_cast<unsigned int>(column));
+
+					const wxSize& size = dc.GetTextExtent(text.GetString());
+					width = std::max(width, size.GetWidth());
+				};
+
+				std::for_each(_model.entries.cbegin(), _model.entries.cend(), [&](const PlaylistTreeModelNodePtr& song)
+				{
+					const wxDataViewItem& songNode = PlaylistTreeModel::ModelNodeToTreeItem(*song);
+					if (!songNode.IsOk())
+					{
+						return;
+					}
+
+					// Update by subsongs' titles (if parent expanded)
+					const PlaylistTreeModelNodePtrArray& subsongs = song->GetChildren();
+					if (!subsongs.empty() && IsExpanded(songNode))
+					{
+						std::for_each(subsongs.cbegin(), subsongs.cend(), [&](const PlaylistTreeModelNodePtr& subsong)
+						{
+							const wxDataViewItem& subsongNode = PlaylistTreeModel::ModelNodeToTreeItem(*subsong);
+							DoUpdateWidth(subsongNode);
+						});
+					}
+
+					// Update by the main song title
+					DoUpdateWidth(songNode);
+				});
+			}
+
+			return width + COL_PADDING;
 		}
 
 		PlaylistTreeModelNode& Playlist::AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable)
@@ -536,7 +582,12 @@ namespace UIElements
 
 		wxDataViewColumn* Playlist::_AddBitmapColumn(PlaylistTreeModel::ColumnId columnIndex, wxAlignment align, int flags)
 		{
-			constexpr int COL_WIDTH = 48; // Col width 48 comes from: 16 * 3 where 16 is playlist icon size and 3 is magic number.
+#ifdef MSW
+			static constexpr int PAD = 0;
+#else
+			static constexpr int PAD = COL_PADDING;
+#endif
+			static constexpr int COL_WIDTH = 48 + PAD; // Col width 48 comes from: 16 * 3 where 16 is playlist icon size and 3 is magic number.
 			return AppendBitmapColumn(wxEmptyString, static_cast<unsigned int>(columnIndex), wxDATAVIEW_CELL_INERT, COL_WIDTH, align, flags);
 		}
 

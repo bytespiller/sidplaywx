@@ -191,9 +191,11 @@ public:
 public:
 	virtual wxDataViewItem GetParent(const wxDataViewItem& item) const override;
 
+public: // Implementation of base class virtuals to define model (normally protected)
+	virtual void GetValue(wxVariant& variant, const wxDataViewItem& item, unsigned int col) const override;
+
 protected: // Implementation of base class virtuals to define model
 	virtual bool HasContainerColumns(const wxDataViewItem& item) const override;
-	virtual void GetValue(wxVariant& variant, const wxDataViewItem& item, unsigned int col) const override;
 	virtual bool SetValue(const wxVariant& variant, const wxDataViewItem& item, unsigned int col) override;
 
 	virtual bool IsContainer(const wxDataViewItem& item) const override;
