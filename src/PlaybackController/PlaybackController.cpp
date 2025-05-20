@@ -766,6 +766,10 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
             {
                 TryResetAudioOutput(GetAudioConfig(), true);
             }
+            else
+            {
+                _portAudioOutput->ResetStream(GetAudioConfig().sampleRate * _playbackSpeedFactor);
+            }
 
             if (!reusePreRender || _preRender->GetPreRenderProgressFactor() != 1.0)
             {
@@ -778,6 +782,10 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
             if (_preRender != nullptr)
             {
                 TryResetAudioOutput(GetAudioConfig(), false); // Destroy _preRender
+            }
+            else
+            {
+                _portAudioOutput->ResetStream(GetAudioConfig().sampleRate * _playbackSpeedFactor);
             }
         }
 
