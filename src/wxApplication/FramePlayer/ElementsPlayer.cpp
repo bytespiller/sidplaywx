@@ -383,8 +383,8 @@ namespace FrameElements // Player class
 		// Title (don't use the built-in title functionality, it crashes on selection)
 		{
 			const std::string strVol = std::to_string(sliderVolume->GetValue());
-			wxMenuItem* title = new wxMenuItem(&menu, wxID_ANY, wxString::Format("%s %s%", Strings::FramePlayer::VOL_MENU_PREFIX, strVol));
-#ifdef MSW // TODO: make it work in Linux too
+			wxMenuItem* title = new wxMenuItem(&menu, wxID_ANY, wxString::Format("%s %s%%", Strings::FramePlayer::VOL_MENU_PREFIX, strVol));
+#ifndef __WXGTK__
 			title->SetFont(title->GetFont().MakeBold());
 #endif
 			menu.Append(title);
@@ -394,7 +394,8 @@ namespace FrameElements // Player class
 		// Set max volume
 		menu.Append(static_cast<int>(PopupMenuItemId_VolumeSlider::ResetVolume), Strings::FramePlayer::VOL_SET_MAX);
 
-		// Toggle slider
+#ifdef MSW // On wxGTK & wxOSX, disabled controls still block the click event propagation to their parent and they themselves do not react on them, so there'd be no way to re-enable the slider.
+		// Toggle slider (MSW only)
 		if (sliderVolume->IsEnabled())
 		{
 			menu.Append(static_cast<int>(PopupMenuItemId_VolumeSlider::DisableControl), Strings::FramePlayer::VOL_SLIDER_DISABLE);
@@ -403,6 +404,7 @@ namespace FrameElements // Player class
 		{
 			menu.Append(static_cast<int>(PopupMenuItemId_VolumeSlider::EnableControl), Strings::FramePlayer::VOL_SLIDER_ENABLE);
 		}
+#endif
 
 		// Bind & show
 		menu.Bind(wxEVT_COMMAND_MENU_SELECTED, &OnVolumeSliderPopupMenuItemClick, this);

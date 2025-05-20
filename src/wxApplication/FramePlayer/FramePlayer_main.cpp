@@ -282,8 +282,10 @@ void FramePlayer::SetupUiElements()
     const int cVolume = _app.currentSettings->GetOption(Settings::AppSettings::ID::Volume)->GetValueAsInt();
     _app.SetVolume(static_cast<float>(cVolume) / _ui->sliderVolume->GetMax());
     _ui->sliderVolume->SetValue(cVolume);
-    _ui->sliderVolume->SetToolTip(new wxToolTip(wxString::Format("%i%", cVolume)));
+    _ui->sliderVolume->SetToolTip(new wxToolTip(wxString::Format("%i%%", cVolume)));
+#ifdef MSW // Toggle is problematic on wxGTK & wxOSX (control must always stay enabled).
     _ui->sliderVolume->Enable(_app.currentSettings->GetOption(Settings::AppSettings::ID::VolumeControlEnabled)->GetValueAsBool());
+#endif
 
     { // RepeatMode
         const int modeImageIndex = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode)->GetValueAsInt() - 1;
