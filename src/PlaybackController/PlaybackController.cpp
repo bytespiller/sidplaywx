@@ -1,20 +1,20 @@
 /*
- * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html
- */
+* This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
+* Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html
+*/
 
 #include "PlaybackController.h"
 #include "../Util/HelpersGeneral.h"
@@ -125,20 +125,20 @@ bool PlaybackController::TryInit(const SyncedPlaybackConfig& config)
 PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybackConfiguration(const SyncedPlaybackConfig& newConfig)
 {
     const bool needResetSidDecoder = (newConfig.sidConfig.frequency != _sidDecoder->GetSidConfig().frequency) ||
-                                     (newConfig.sidConfig.playback != _sidDecoder->GetSidConfig().playback) ||
-                                     (newConfig.sidConfig.defaultC64Model != _sidDecoder->GetSidConfig().defaultC64Model) ||
-                                     (newConfig.sidConfig.defaultSidModel != _sidDecoder->GetSidConfig().defaultSidModel) ||
-                                     (newConfig.sidConfig.forceC64Model != _sidDecoder->GetSidConfig().forceC64Model) ||
-                                     (newConfig.sidConfig.forceSidModel != _sidDecoder->GetSidConfig().forceSidModel) ||
-                                     (newConfig.sidConfig.digiBoost != _sidDecoder->GetSidConfig().digiBoost) ||
-                                     (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Curve, _sidDecoder->GetFilterConfig().filter6581Curve)) ||
-                                     (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve));
+                                    (newConfig.sidConfig.playback != _sidDecoder->GetSidConfig().playback) ||
+                                    (newConfig.sidConfig.defaultC64Model != _sidDecoder->GetSidConfig().defaultC64Model) ||
+                                    (newConfig.sidConfig.defaultSidModel != _sidDecoder->GetSidConfig().defaultSidModel) ||
+                                    (newConfig.sidConfig.forceC64Model != _sidDecoder->GetSidConfig().forceC64Model) ||
+                                    (newConfig.sidConfig.forceSidModel != _sidDecoder->GetSidConfig().forceSidModel) ||
+                                    (newConfig.sidConfig.digiBoost != _sidDecoder->GetSidConfig().digiBoost) ||
+                                    (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Curve, _sidDecoder->GetFilterConfig().filter6581Curve)) ||
+                                    (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve));
 
     const bool needResetAudioOutput = (needResetSidDecoder && _preRender != nullptr) || // -> Reset the prerender (in Instant Seeking mode) when the SID decoder gets reset since it'd hold an invalid reference to it then.
-                                      (newConfig.audioConfig.lowLatency != _portAudioOutput->GetAudioConfig().lowLatency) ||
-                                      (newConfig.audioConfig.channelCount != _portAudioOutput->GetAudioConfig().channelCount) ||
-                                      (newConfig.audioConfig.preferredOutputDevice != _portAudioOutput->GetAudioConfig().preferredOutputDevice) ||
-                                      (newConfig.audioConfig.sampleRate != _portAudioOutput->GetAudioConfig().sampleRate);
+                                    (newConfig.audioConfig.lowLatency != _portAudioOutput->GetAudioConfig().lowLatency) ||
+                                    (newConfig.audioConfig.channelCount != _portAudioOutput->GetAudioConfig().channelCount) ||
+                                    (newConfig.audioConfig.preferredOutputDevice != _portAudioOutput->GetAudioConfig().preferredOutputDevice) ||
+                                    (newConfig.audioConfig.sampleRate != _portAudioOutput->GetAudioConfig().sampleRate);
 
     SwitchAudioDeviceResult result = SwitchAudioDeviceResult::OnTheFly;
     bool success = true;
@@ -180,12 +180,25 @@ RomUtil::RomStatus PlaybackController::TrySetRoms(const std::filesystem::path& p
     return _loadedRoms;
 }
 
-bool PlaybackController::TryPlayFromBuffer(const std::filesystem::path& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs)
+PlaybackController::PlaybackAttemptStatus PlaybackController::TryPlayFromBuffer(const std::filesystem::path& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs)
 {
     PrepareTryPlay();
+
     _activeTuneHolder = std::make_unique<TuneHolder>(filepathForUid, loadedBufferToAdopt);
-    const bool success = _sidDecoder->TryLoadSong(_activeTuneHolder->bufferHolder->buffer, _activeTuneHolder->bufferHolder->size, subsong);
-    return FinalizeTryPlay(success, preRenderDurationMs);
+    const bool successInput = _sidDecoder->TryLoadSong(_activeTuneHolder->bufferHolder->buffer, _activeTuneHolder->bufferHolder->size, subsong);
+    const bool successOutput = FinalizeTryPlay(successInput, preRenderDurationMs);
+
+    PlaybackAttemptStatus status = PlaybackAttemptStatus::Success;
+    if (!successInput)
+    {
+        status = PlaybackAttemptStatus::InputError;
+    }
+    else if (!successOutput)
+    {
+        status = PlaybackAttemptStatus::OutputError;
+    }
+
+    return status;
 }
 
 bool PlaybackController::TryReplayCurrentSong(int preRenderDurationMs, bool reusePreRender)
@@ -809,8 +822,8 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
 bool PlaybackController::TryReplayCurrentSongFromBuffer(unsigned int subsong, int preRenderDurationMs, bool reusePreRender)
 {
     PrepareTryPlay();
-    const bool success = _sidDecoder->TrySetSubsong(subsong);
-    return FinalizeTryPlay(success, preRenderDurationMs, reusePreRender);
+    const bool successInput = _sidDecoder->TrySetSubsong(subsong);
+    return FinalizeTryPlay(successInput, preRenderDurationMs, reusePreRender);
 }
 
 bool PlaybackController::OnSeekStatusReceived(uint_least32_t cTimeMs, bool done)

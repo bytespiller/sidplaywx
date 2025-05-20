@@ -194,7 +194,7 @@ namespace Strings
 		// Audio Output
 		inline constexpr const char* const CATEGORY_AUDIO_OUTPUT("Audio output");
 		inline constexpr const char* const OPT_DEVICE("Device");
-		inline constexpr const char* const DESC_DEVICE("- Modifying the playback speed is not supported on all device interfaces (e.g., WASAPI).\nNote: ongoing playback will stop when changing this setting.");
+		inline constexpr const char* const DESC_DEVICE("- Modifying the playback speed is not supported on all audio backends.\nNote: ongoing playback will stop when changing this setting.");
 
 		inline constexpr const char* const OPT_LOW_LATENCY("Low latency");
 		inline constexpr const char* const DESC_LOW_LATENCY("Enable for more responsive controls.\nDisable if experiencing stuttering.\nNote: ongoing playback will stop when changing this setting.");
@@ -352,6 +352,7 @@ namespace Strings
 		inline constexpr const char* const MSG_ERR_TUNE_FILE("Unable to read tune file.");
 
 		inline constexpr const char* const MSG_ERR_AUDIO_CONFIG("Incorrect audio device configuration, reverting settings.");
+		inline constexpr const char* const MSG_ERR_AUDIO_OUTPUT("Unable to play sound. Try choosing another audio output device in Preferences.");
 	}
 
 	namespace Common

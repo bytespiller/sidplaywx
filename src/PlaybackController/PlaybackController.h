@@ -57,6 +57,13 @@ public:
         Failure
     };
 
+    enum class PlaybackAttemptStatus
+    {
+        Success,
+        InputError,
+        OutputError
+    };
+
     using FilterConfig = SidDecoder::FilterConfig;
     using SongInfoCategory = SidDecoder::SongInfoCategory;
 
@@ -134,7 +141,7 @@ public:
     RomUtil::RomStatus TrySetRoms(const std::filesystem::path& pathKernal, const std::filesystem::path& pathBasic, const std::filesystem::path& pathChargen);
 
 public:
-    bool TryPlayFromBuffer(const std::filesystem::path& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs);
+    PlaybackAttemptStatus TryPlayFromBuffer(const std::filesystem::path& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs);
     bool TryReplayCurrentSong(int preRenderDurationMs, bool reusePreRender = false);
     bool TryPlaySubsong(unsigned int subsong, int preRenderDurationMs, bool reusePreRender = false);
 

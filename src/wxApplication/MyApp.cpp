@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -263,7 +263,7 @@ void MyApp::Play(const wxString& filename, unsigned int subsong, int preRenderDu
 
     StopPlayback();
 
-    bool success = false;
+    PlaybackController::PlaybackAttemptStatus status = PlaybackController::PlaybackAttemptStatus::Success;
 
     {
         std::unique_ptr<BufferHolder> bufferHolder;
@@ -277,16 +277,24 @@ void MyApp::Play(const wxString& filename, unsigned int subsong, int preRenderDu
             bufferHolder = Helpers::Wx::Files::GetFileContentFromDisk(filename);
         }
 
-        success = (bufferHolder == nullptr) ? false : _playback->TryPlayFromBuffer(filename.ToStdWstring(), bufferHolder, subsong, preRenderDurationMs);
+        status = (bufferHolder == nullptr) ? PlaybackController::PlaybackAttemptStatus::InputError : _playback->TryPlayFromBuffer(filename.ToStdWstring(), bufferHolder, subsong, preRenderDurationMs);
     }
 
-    if (success)
+    switch (status)
     {
-        FinalizePlaybackStarted();
-    }
-    else
-    {
-        wxMessageBox(wxString::Format("%s\n%s", Strings::Error::MSG_ERR_TUNE_FILE, filename), Strings::FramePlayer::WINDOW_TITLE, wxICON_WARNING);
+        case PlaybackController::PlaybackAttemptStatus::Success:
+            FinalizePlaybackStarted();
+            break;
+
+        case PlaybackController::PlaybackAttemptStatus::OutputError:
+            wxMessageBox(Strings::Error::MSG_ERR_AUDIO_OUTPUT, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
+            break;
+
+        case PlaybackController::PlaybackAttemptStatus::InputError:
+            // fall-through
+        default:
+            wxMessageBox(wxString::Format("%s\n%s", Strings::Error::MSG_ERR_TUNE_FILE, filename), Strings::FramePlayer::WINDOW_TITLE, wxICON_WARNING);
+            break;
     }
 }
 
