@@ -293,14 +293,9 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
 void FramePlayer::PadColumnsWidth()
 {
     // Pad the Title, Author and Copyright column widths a little because the bold text takes up some extra width so the text could become cutoff when hard-selected.
-    PadColumnWidth(PlaylistTreeModel::ColumnId::Title);
-    PadColumnWidth(PlaylistTreeModel::ColumnId::Author);
-    PadColumnWidth(PlaylistTreeModel::ColumnId::Copyright);
-}
-
-void FramePlayer::PadColumnWidth(PlaylistTreeModel::ColumnId columnId)
-{
-    _ui->treePlaylist->AutoFitTextColumn(columnId);
+    _ui->treePlaylist->AutoFitTextColumn(PlaylistTreeModel::ColumnId::Title);
+    _ui->treePlaylist->AutoFitTextColumn(PlaylistTreeModel::ColumnId::Author);
+    _ui->treePlaylist->AutoFitTextColumn(PlaylistTreeModel::ColumnId::Copyright);
 }
 
 void FramePlayer::UpdateIgnoredSongs(PassKey<FramePrefs>)

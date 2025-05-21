@@ -129,7 +129,6 @@ public:
 private:
     void SendFilesToPlaylist(const wxArrayString& files, bool clearPrevious = true, bool autoPlayFirstImmediately = true);
     void PadColumnsWidth();
-    void PadColumnWidth(PlaylistTreeModel::ColumnId columnId);
     void UpdateIgnoredSongs();
     void UpdateIgnoredSong(PlaylistTreeModelNode& mainSongNode);
     long GetEffectiveSongDuration(const PlaylistTreeModelNode& node) const;
