@@ -66,16 +66,15 @@ namespace UIElements
 
 		int Playlist::_GetBestTextColumnWidth(PlaylistTreeModel::ColumnId column)
 		{
-			int width = 10; // Initial value is minimum width.
+			wxClientDC dc(this);
+			dc.SetFont(GetFont().MakeBold());
+
+			int width = std::max(10, dc.GetTextExtent(GetColumn(static_cast<unsigned int>(column))->GetTitle()).GetWidth()); // Initial value is minimum auto-width (fit column title).
 
 			{
-				wxClientDC dc(this);
-				dc.SetFont(GetFont().MakeBold());
-
-				wxVariant text;
-
 				const auto DoUpdateWidth = [&](const wxDataViewItem& item) -> void
 				{
+					wxVariant text;
 					_model.GetValue(text, item, static_cast<unsigned int>(column));
 
 					const wxSize& size = dc.GetTextExtent(text.GetString());

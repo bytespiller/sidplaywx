@@ -213,6 +213,7 @@ std::string SidDecoder::GetCurrentTuneInfoString(SongInfoCategory category) cons
     const unsigned int index = static_cast<unsigned int>(category);
 
     std::string retStr(info.infoString(index));
+    trimString(retStr);
 
     // Try get similar MUS fields in case this is a MUS file
     if (category != SongInfoCategory::Title && retStr.empty()) [[unlikely]]
