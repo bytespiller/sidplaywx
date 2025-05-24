@@ -265,6 +265,7 @@ void FramePlayer::SetupUiElements()
 
     // Visuals
     _panel = new wxPanel(this);
+    SetBackgroundColour(_panel->GetBackgroundColour()); // Ensure the global GetBackgroundColour() returns the panel's (visible) color, not the underlying Window color (which is obscured by the panel).
     _panel->SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     _panel->SetDoubleBuffered(true); // Panel must be double-buffered, otherwise there's child controls' flicker, and seekbar would not refresh properly.
 

@@ -33,7 +33,9 @@ namespace UIElements
 		wxWindow(parent, wxID_ANY),
 		_themedData(themedData),
 		_timer(this),
-		_justify(justify)
+		_justify(justify),
+		_bgColor(GetBackgroundColour()),
+		_bgTransparentColor(_bgColor.Red(), _bgColor.Green(), _bgColor.Blue(), 0)
 	{
 		SetBackgroundStyle(wxBG_STYLE_PAINT);
 		SetForegroundColour(_themedData.GetPropertyColor("textColor"));
@@ -144,18 +146,16 @@ namespace UIElements
 		}
 
 		// Create a gradient brush (for feathered overlay)
-		const wxColour& bgColour = GetBackgroundColour();
-
 		// Draw a rectangle with the gradient brush
 		const wxSize& size = GetClientSize();
 		const float startPos = std::min(0.5f, FEATHERING / std::max(1, size.GetWidth()));
 		const float endPos = 1.0f - startPos;
 
-		wxGraphicsGradientStops stops(bgColour, wxTransparentColour);
-		stops.Add(bgColour, 0.0f);
-		stops.Add(wxTransparentColour, startPos);
-		stops.Add(wxTransparentColour, endPos);
-		stops.Add(bgColour, 1.0f);
+		wxGraphicsGradientStops stops(_bgColor, _bgTransparentColor);
+		stops.Add(_bgColor, 0.0f);
+		stops.Add(_bgTransparentColor, startPos);
+		stops.Add(_bgTransparentColor, endPos);
+		stops.Add(_bgColor, 1.0f);
 
 		const wxGraphicsBrush& brush = gc.CreateLinearGradientBrush(0, 0, size.GetWidth(), 0, stops);
 		gc.SetBrush(brush);
@@ -166,7 +166,9 @@ namespace UIElements
 	void ScrollingLabel::OnPaintEvent(wxPaintEvent& /*evt*/)
 	{
 		wxAutoBufferedPaintDC dc(this);
+#ifndef __WXGTK__
 		dc.Clear();
+#endif
 		wxGraphicsContext* const gc = wxGraphicsContext::Create(dc);
 		Render(*gc);
 		delete gc;
