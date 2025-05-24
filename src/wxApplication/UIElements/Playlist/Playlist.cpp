@@ -440,10 +440,13 @@ namespace UIElements
 				return false;
 			}
 
+			wxDataViewItemArray notifyItems;
+
 			// Handle old node
 			if (_activeItem.IsOk())
 			{
 				PlaylistTreeModelNode& oldNode = *GetActiveSong();
+				notifyItems.Add(wxDataViewItem(&oldNode));
 
 				// Collapse old if necessary
 				if (autoexpand && oldNode.type == PlaylistTreeModelNode::ItemType::Subsong)
@@ -458,18 +461,23 @@ namespace UIElements
 				PlaylistTreeModelNode* parent = oldNode.GetParent();
 				if (parent != nullptr)
 				{
+					notifyItems.Add(wxDataViewItem(parent));
 					parent->ResetItemAttr({});
 				}
 			}
 
 			// Highlight new node
 			_activeItem = PlaylistTreeModel::ModelNodeToTreeItem(node);
+			notifyItems.Add(_activeItem);
 			GetActiveSong()->GetItemAttr({}).SetBold(true);
 
 			// Also highlight the parent node if this is a child node
 			if (node.type == PlaylistTreeModelNode::ItemType::Subsong)
 			{
-				wxDataViewItemAttr& attr = GetActiveSong()->GetParent()->GetItemAttr({});
+				PlaylistTreeModelNode* const activeParent = GetActiveSong()->GetParent();
+				notifyItems.Add(wxDataViewItem(activeParent));
+
+				wxDataViewItemAttr& attr = activeParent->GetItemAttr({});
 				attr.SetBold(true);
 				attr.SetColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT)); // TODO: define the color in the theme XML instead of here.
 			}
@@ -480,7 +488,12 @@ namespace UIElements
 				Expand(_model.GetParent(_activeItem)); // Expand parent item.
 			}
 
-			Refresh(); // Must be done at the end.
+			// Must be done at the end
+#ifdef __WXGTK__
+			_model.ItemsChanged(notifyItems); // Not necessary on MSW.
+#endif
+			Refresh();
+
 			return true;
 		}
 
@@ -605,7 +618,7 @@ namespace UIElements
 				return;
 			}
 
-     		const int lines = (evt.GetWheelRotation() / evt.GetWheelDelta()) * evt.GetLinesPerAction();
+			const int lines = (evt.GetWheelRotation() / evt.GetWheelDelta()) * evt.GetLinesPerAction();
 			DoScroll(GetScrollPos(wxHORIZONTAL), std::max(0, GetScrollPos(wxVERTICAL) - lines)); // Not using the ScrollLines() since it uses the performance-problematic smooth scrolling.
 		}
 #endif
