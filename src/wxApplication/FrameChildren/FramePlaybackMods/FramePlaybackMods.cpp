@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,9 @@ FramePlaybackMods::FramePlaybackMods(wxWindow* parent, const wxString& title, co
     : wxDialog(parent, wxID_ANY, title, pos, size, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxSTAY_ON_TOP),
     _app(app)
 {
+    SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+
     _panel = new wxPanel(this, wxID_ANY);
-    _panel->SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     _panel->SetDoubleBuffered(true);
     _ui = std::make_unique<FrameElements::ElementsPlaybackMods>(*_panel);
 

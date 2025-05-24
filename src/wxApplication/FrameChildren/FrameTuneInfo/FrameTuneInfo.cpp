@@ -29,11 +29,8 @@ FrameTuneInfo::FrameTuneInfo(wxWindow* parent, const wxString& title, const wxPo
 	_playbackInfo(playbackInfo),
 	_stil(stil)
 {
+	SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)); // Must be done before elements init.
 	_ui = std::make_unique<FrameElements::ElementsTuneInfo>(*this);
-
-	SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-	_ui->propertyGrid->SetFont(GetFont());
-	_ui->checkboxFollowPlayback->SetFont(GetFont());
 
 	// *** Events ***
 

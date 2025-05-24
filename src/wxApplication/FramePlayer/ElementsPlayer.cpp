@@ -241,8 +241,9 @@ namespace FrameElements // Player class
 		btnPrevTrack = AttachSimplePlaybackControlButton(themeData.GetImage("btn_skipback"), _parentPanel, gridSizerPlaybackButtons);
 		btnPrevSubsong = AttachSimplePlaybackControlButton(themeData.GetImage("btn_prevsubsong"), _parentPanel, gridSizerPlaybackButtons);
 
-		labelSubsong = new wxStaticText(&_parentPanel, wxID_ANY, "00 / 00", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-		gridSizerPlaybackButtons->Add(labelSubsong, 1, wxALIGN_CENTER_VERTICAL, TEMP_LABEL_BORDER_SIZE);
+		labelSubsong = new wxStaticText(&_parentPanel, wxID_ANY, "000 / 000", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER | wxST_NO_AUTORESIZE);
+		labelSubsong->SetMinSize(labelSubsong->GetBestSize()); // Needed on GTK (additional padding with zeros as well).
+		gridSizerPlaybackButtons->Add(labelSubsong, 1, wxALIGN_CENTER_VERTICAL);
 
 		btnNextSubsong = AttachSimplePlaybackControlButton(themeData.GetImage("btn_nextsubsong"), _parentPanel, gridSizerPlaybackButtons);
 		btnNextTrack = AttachSimplePlaybackControlButton(themeData.GetImage("btn_skipforward"), _parentPanel, gridSizerPlaybackButtons);

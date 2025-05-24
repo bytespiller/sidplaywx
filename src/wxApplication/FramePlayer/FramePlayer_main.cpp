@@ -503,9 +503,7 @@ void FramePlayer::OpenPlaybackModFrame()
     }
 
     // First-time create
-    static constexpr int EXTRA_SPACING = 50;
-    _framePlaybackMods = new FramePlaybackMods(this, Strings::PlaybackMods::WINDOW_TITLE, wxDefaultPosition, wxDefaultSize, _app);
-    _framePlaybackMods->SetSize(_framePlaybackMods->GetSize().GetWidth() + EXTRA_SPACING, _framePlaybackMods->GetSize().GetHeight() + EXTRA_SPACING);
+    _framePlaybackMods = new FramePlaybackMods(this, Strings::PlaybackMods::WINDOW_TITLE, wxDefaultPosition, wxSize(600, 350), _app);
     _framePlaybackMods->Show();
 }
 

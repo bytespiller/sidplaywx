@@ -136,12 +136,14 @@ namespace FrameElements
 		// Playback speed
 	    wxStaticBoxSizer* sizer_6 = new wxStaticBoxSizer(wxVERTICAL, &_parentPanel, Strings::PlaybackMods::SPEED_SLIDER);
 	    sizerParent->Add(sizer_6, 0, wxEXPAND | wxTOP, BOX_BORDER_SIZE);
-	    sliderPlaybackSpeed = new wxSlider(sizer_6->GetStaticBox(), wxID_ANY, 100, 50, 200, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+	    sliderPlaybackSpeed = new wxSlider(sizer_6->GetStaticBox(), wxID_ANY, 100, 50, 200, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_VALUE_LABEL);
 		sliderPlaybackSpeed->SetPageSize(5);
 	    sizer_6->Add(sliderPlaybackSpeed, 0, wxEXPAND, 0);
 
 		// Setup
-	    _parentPanel.SetSizer(sizerParent);
+		wxBoxSizer* sizerPadding = new wxBoxSizer(wxVERTICAL);
+		sizerPadding->Add(sizerParent, 1, wxEXPAND | wxALL, BOX_BORDER_SIZE);
+	    _parentPanel.SetSizer(sizerPadding);
 	    _parentPanel.Layout();
 
 		// Simple UI bindings
@@ -151,11 +153,11 @@ namespace FrameElements
 		}
 
 #ifdef __WXGTK__
-		sliderPlaybackSpeed->Bind(wxEVT_RIGHT_UP, [&](wxMouseEvent& evt)
+		/*sliderPlaybackSpeed->Bind(wxEVT_RIGHT_UP, [&](wxMouseEvent& evt)
 		{
 			// wxGTK has a native right-click behavior above & beyond our control, so we have to inject a context menu event here. Note: this behavior is caused by the wxSL_LABELS flag in the wxSlider constructor.
 			sliderPlaybackSpeed->WXSendContextMenuEvent(evt.GetPosition());
-		});
+		});*/
 #endif
 
 		sliderPlaybackSpeed->Bind(wxEVT_CONTEXT_MENU, &OnSliderPlaybackSpeedContextMenuOpen, this);

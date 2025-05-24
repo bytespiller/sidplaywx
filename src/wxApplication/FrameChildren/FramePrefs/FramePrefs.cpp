@@ -49,10 +49,10 @@ FramePrefs::FramePrefs(wxWindow* parent, const wxString& title, const wxPoint& p
     _app(app),
     _framePlayer(framePlayer)
 {
-    _ui = std::make_unique<FrameElements::ElementsPrefs>(*this);
-
     SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     SetDoubleBuffered(true);
+
+    _ui = std::make_unique<FrameElements::ElementsPrefs>(*this);
 
     // Configure UI
     CenterOnParent();
