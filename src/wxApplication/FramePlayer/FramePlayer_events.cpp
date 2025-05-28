@@ -300,26 +300,40 @@ void FramePlayer::OnTreePlaylistContextItem(PlaylistTreeModelNode& node, wxComma
 
 void FramePlayer::OnTreePlaylistKeyPressed(wxKeyEvent& evt)
 {
+    // Handle the DELETE key
     const int keycode = evt.GetKeyCode();
-    if (keycode != WXK_DELETE && keycode != WXK_NUMPAD_DELETE)
+    if (keycode == WXK_DELETE || keycode == WXK_NUMPAD_DELETE)
     {
-        evt.Skip();
+        const wxDataViewItem& item = _ui->treePlaylist->GetSelection();
+        if (item.IsOk())
+        {
+            PlaylistTreeModelNode* node = PlaylistTreeModel::TreeItemToModelNode(item);
+            if (node->type == PlaylistTreeModelNode::ItemType::Song)
+            {
+                DoRemoveSongTreeItem(*node);
+            }
+            else
+            {
+                DoToggleSubsongBlacklistState(*node);
+            }
+        }
+
         return;
     }
 
-    const wxDataViewItem& item = _ui->treePlaylist->GetSelection();
-    if (item.IsOk())
+    // Skip the event processing otherwise
+#ifdef __WXGTK__
+    // Prevent the GTK hijacking the CTRL+F
+    if (evt.ControlDown())
     {
-        PlaylistTreeModelNode* node = PlaylistTreeModel::TreeItemToModelNode(item);
-        if (node->type == PlaylistTreeModelNode::ItemType::Song)
-        {
-            DoRemoveSongTreeItem(*node);
-        }
-        else
-        {
-            DoToggleSubsongBlacklistState(*node);
-        }
+        _ui->btnRepeatMode->SetFocus(); // A hack to cause the player window's menu key combos to be evaluated. This button is never disabled, so it's safe to focus it for this purpose.
     }
+
+    // Disable the GTK's native type-ahead feature (doesn't work in the wxDataViewCtrl)
+    evt.Skip(false);
+#else
+    evt.Skip();
+#endif
 }
 
 void FramePlayer::OnDropFilesFramePlayer(wxDropFilesEvent& evt)
