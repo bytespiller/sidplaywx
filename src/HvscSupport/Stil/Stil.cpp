@@ -131,7 +131,7 @@ bool Stil::TryLoad(const std::filesystem::path& stilFilepath)
 				if (line.substr(0, len) == STIL_VERSION_PREFIX)
 				{
 					const size_t end = line.find(' ', len);
-					if (end != std::wstring::npos)
+					if (end != std::string::npos)
 					{
 						stilVersion = line.substr(len, end - len);
 					}

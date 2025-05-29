@@ -39,7 +39,7 @@ bool Songlengths::TryLoad(const std::filesystem::path& songlengthsMd5Filepath)
 {
 	Unload();
 
-	std::ifstream file(songlengthsMd5Filepath); // TODO: test if this works with unicode paths under both Linux and Windows.
+	std::ifstream file(songlengthsMd5Filepath);
 
 	bool inDatabaseSection = false;
 	std::string line;

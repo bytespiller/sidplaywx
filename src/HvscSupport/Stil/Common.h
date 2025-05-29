@@ -24,15 +24,6 @@
 using HvscPathsIndex = std::unordered_map<std::string, int>;
 
 // Removes final CR from the string if present.
-inline void ClipCarriageReturn(std::wstring& str)
-{
-	if (str.back() == L'\r')
-	{
-		str.pop_back();
-	}
-}
-
-// Removes final CR from the string if present.
 inline void ClipCarriageReturn(std::string& str)
 {
 	if (str.back() == '\r')

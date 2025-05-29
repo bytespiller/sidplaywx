@@ -71,7 +71,7 @@ namespace Static
             case SidTuneInfo::SIDMODEL_ANY:
                 return "SID 6581/8580";
             case SidTuneInfo::SIDMODEL_UNKNOWN:
-                // fall-through
+                [[fallthrough]];
             default:
                 return "Unknown";
         }
@@ -479,7 +479,7 @@ SidConfig::sid_model_t PlaybackController::GetCurrentlyEffectiveSidModel() const
                 effectiveSidChipModel = SidConfig::sid_model_t::MOS8580;
                 break;
             case SidTuneInfo::model_t::SIDMODEL_ANY:
-                // fall-through
+                [[fallthrough]];
             case SidTuneInfo::model_t::SIDMODEL_UNKNOWN:
                 // leave existing value (effectiveSidChipModel)
                 break;

@@ -611,7 +611,7 @@ void FramePlayer::OnButtonPlayPause()
         switch (_app.GetPlaybackInfo().GetState())
         {
             case PlaybackController::State::Seeking:
-                // Fall-through: when seeking is underway we just toggle the resume state silently.
+                [[fallthrough]]; // When seeking is underway we just toggle the resume state silently.
             case PlaybackController::State::Paused:
                 _app.ResumePlayback();
                 break;

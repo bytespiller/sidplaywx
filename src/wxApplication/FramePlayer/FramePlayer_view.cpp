@@ -53,9 +53,7 @@ void FramePlayer::UpdateUiState()
     switch (playbackState)
     {
         case PlaybackController::State::Undefined:
-        {
-            // fall-through to Stopped
-        }
+            [[fallthrough]]; // to Stopped
         case PlaybackController::State::Stopped:
         {
             UpdatePeriodicDisplays(0);

@@ -18,7 +18,6 @@
 
 #include "SidDecoder.h"
 
-#include "../../../Util/HelpersGeneral.h"
 #include <sidplayfp/SidTuneInfo.h>
 #include <cmath>
 #include <fstream>

@@ -291,7 +291,7 @@ void MyApp::Play(const wxString& filename, unsigned int subsong, int preRenderDu
             break;
 
         case PlaybackController::PlaybackAttemptStatus::InputError:
-            // fall-through
+            [[fallthrough]];
         default:
             wxMessageBox(wxString::Format("%s\n%s", Strings::Error::MSG_ERR_TUNE_FILE, filename), Strings::FramePlayer::WINDOW_TITLE, wxICON_WARNING);
             break;

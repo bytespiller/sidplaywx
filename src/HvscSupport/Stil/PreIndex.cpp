@@ -78,7 +78,7 @@ void PreIndex::RebuildIndexAndCache(const std::string& stilVersion, HvscPathsInd
 			if (line.front() == '/')
 			{
 				ClipCarriageReturn(line); // Reminder: any existing "line" iterators are invalid now.
-				pathsIndex[std::string(line.begin(), line.end())] = stilDataStream.tellg(); // Reminder: we naively convert wstring to string here since the HVSC paths are always ASCII so there's no need for complications.
+				pathsIndex[line] = stilDataStream.tellg();
 			}
 		}
 	}
