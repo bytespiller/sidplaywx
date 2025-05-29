@@ -23,7 +23,7 @@
 #include "../FrameChildren/FramePrefs/FramePrefs.h"
 #include "../Helpers/HelpersWx.h"
 
-#ifndef MSW
+#ifndef WIN32
 #include <wx/tooltip.h>
 #endif
 

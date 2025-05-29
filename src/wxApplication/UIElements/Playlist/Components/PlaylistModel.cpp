@@ -137,7 +137,7 @@ PlaylistTreeModel::PlaylistTreeModel(const UIElements::Playlist::PlaylistIcons& 
 
 std::unique_ptr<void, std::function<void(void*)>> PlaylistTreeModel::PrepareDirty(std::function<void()> notifier)
 {
-#ifndef MSW
+#ifndef WIN32
 	BeforeReset();
 #endif
 
@@ -149,7 +149,7 @@ std::unique_ptr<void, std::function<void(void*)>> PlaylistTreeModel::PrepareDirt
 	(
 		dummy, [this, notifier = std::move(notifier)](void*)
 		{
-#ifndef MSW
+#ifndef WIN32
 			AfterReset();
 #else
 			notifier();

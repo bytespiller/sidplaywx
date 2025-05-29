@@ -395,7 +395,7 @@ namespace FrameElements // Player class
 		// Set max volume
 		menu.Append(static_cast<int>(PopupMenuItemId_VolumeSlider::ResetVolume), Strings::FramePlayer::VOL_SET_MAX);
 
-#ifdef MSW // On wxGTK & wxOSX, disabled controls still block the click event propagation to their parent and they themselves do not react on them, so there'd be no way to re-enable the slider.
+#ifdef WIN32 // On wxGTK & wxOSX, disabled controls still block the click event propagation to their parent and they themselves do not react on them, so there'd be no way to re-enable the slider.
 		// Toggle slider (MSW only)
 		if (sliderVolume->IsEnabled())
 		{

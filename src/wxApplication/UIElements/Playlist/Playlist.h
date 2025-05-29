@@ -131,7 +131,7 @@ namespace UIElements
 			// Reminder 2: wxCOL_REORDERABLE is crashy due to use of OnColumnsCountChanged().
 			wxDataViewColumn* _AddTextColumn(PlaylistTreeModel::ColumnId columnIndex, const wxString& title, wxAlignment align = wxALIGN_LEFT, int flags = wxCOL_RESIZABLE);
 
-#ifdef MSW
+#ifdef WIN32
 			void _OverrideScrollWheel(wxMouseEvent& evt);
 #endif
 

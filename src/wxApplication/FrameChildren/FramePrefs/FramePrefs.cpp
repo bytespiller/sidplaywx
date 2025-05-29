@@ -404,7 +404,7 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     }
                     else if (prop.first == Settings::AppSettings::ID::TaskbarProgress)
                     {
-#ifdef MSW
+#ifdef WIN32
                         const int opt = _app.currentSettings->GetOption(Settings::AppSettings::ID::TaskbarProgress)->GetValueAsInt();
 	                    _framePlayer.GetUIElements({}).compositeSeekbar->SetTaskbarProgressOption(static_cast<UIElements::CompositeSeekBar::TaskbarProgressOption>(opt));
 #endif

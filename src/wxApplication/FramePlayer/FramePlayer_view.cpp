@@ -64,7 +64,7 @@
              _ui->btnStop->Enable(false);
              _ui->labelTime->Enable(false);
              _ui->compositeSeekbar->ResetPlaybackPosition(0); // Will also auto disable/enable itself.
- #ifdef MSW
+ #ifdef WIN32
              _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_NO_PROGRESS);
  #endif
 
@@ -76,7 +76,7 @@
          {
              _ui->btnPlayPause->SetPause();
              _ui->compositeSeekbar->ResetPlaybackPosition(GetEffectiveSongDuration(*_ui->treePlaylist->GetActiveSong()));
- #ifdef MSW
+ #ifdef WIN32
              _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_NORMAL);
  #endif
 
@@ -85,7 +85,7 @@
          case PlaybackController::State::Paused:
          {
              _ui->btnPlayPause->SetPlay();
- #ifdef MSW
+ #ifdef WIN32
              _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_PAUSED);
  #endif
              break;
@@ -94,7 +94,7 @@
          {
              const PlaybackController::State resumeState = playback.GetResumeState();
              (resumeState == PlaybackController::State::Paused) ? _ui->btnPlayPause->SetPlay() : _ui->btnPlayPause->SetPause();
- #ifdef MSW
+ #ifdef WIN32
              _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_INDETERMINATE);
  #endif
              break;

@@ -58,7 +58,7 @@ namespace UIElements
 		bool IsSeekPreviewing() const;
 		long GetDurationValue() const;
 
-#ifdef MSW
+#ifdef WIN32
 		void SetTaskbarProgressOption(TaskbarProgressOption option);
 		void SetTaskbarProgressState(wxTaskBarButtonState state);
 #endif

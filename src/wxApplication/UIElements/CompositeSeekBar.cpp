@@ -145,7 +145,7 @@ namespace UIElements
 		return _duration;
 	}
 
-#ifdef MSW
+#ifdef WIN32
 	void CompositeSeekBar::SetTaskbarProgressOption(TaskbarProgressOption option)
 	{
 		_taskbarProgressOption = option;

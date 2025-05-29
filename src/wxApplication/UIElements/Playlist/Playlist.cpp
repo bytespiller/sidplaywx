@@ -41,7 +41,7 @@ namespace UIElements
 			_AddTextColumn(ColumnId::Copyright, Strings::PlaylistTree::COLUMN_COPYRIGHT);
 			_AddTextColumn(ColumnId::PlaceholderLast, "");
 
-#ifdef MSW
+#ifdef WIN32
 			Bind(wxEVT_MOUSEWHEEL, &_OverrideScrollWheel, this); // Partial workaround for the smooth scrolling performance issues on MSW (especially with lots of icons in rows).
 #endif
 
@@ -594,7 +594,7 @@ namespace UIElements
 
 		wxDataViewColumn* Playlist::_AddBitmapColumn(PlaylistTreeModel::ColumnId columnIndex, wxAlignment align, int flags)
 		{
-#ifdef MSW
+#ifdef WIN32
 			static constexpr int PAD = 0;
 #else
 			static constexpr int PAD = COL_PADDING;
@@ -608,7 +608,7 @@ namespace UIElements
 			return AppendTextColumn(title, static_cast<unsigned int>(columnIndex), wxDATAVIEW_CELL_INERT, wxCOL_WIDTH_AUTOSIZE, align, flags);
 		}
 
-#ifdef MSW
+#ifdef WIN32
 		void Playlist::_OverrideScrollWheel(wxMouseEvent& evt)
 		{
 			// This method prevents smooth scrolling due to performance issues in the wxDataViewCtrl on MSW.

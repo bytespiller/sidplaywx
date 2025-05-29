@@ -46,7 +46,7 @@ FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize
     : wxFrame(NULL, wxID_ANY, title, pos, size),
     _app(app)
 {
-#ifdef MSW
+#ifdef WIN32
     SetIcon(wxICON(appicon)); // Comes from .rc
 #else
     SetIcon(wxICON(sidplaywx_icon_64px)); // Comes from .xpm file (variable in there needs to be const, GIMP saves it wrongly)
@@ -287,7 +287,7 @@ void FramePlayer::SetupUiElements()
     _app.SetVolume(static_cast<float>(cVolume) / _ui->sliderVolume->GetMax());
     _ui->sliderVolume->SetValue(cVolume);
     _ui->sliderVolume->SetToolTip(new wxToolTip(wxString::Format("%i%%", cVolume)));
-#ifdef MSW // Toggle is problematic on wxGTK & wxOSX (control must always stay enabled).
+#ifdef WIN32 // Toggle is problematic on wxGTK & wxOSX (control must always stay enabled).
     _ui->sliderVolume->Enable(_app.currentSettings->GetOption(Settings::AppSettings::ID::VolumeControlEnabled)->GetValueAsBool());
 #endif
 
@@ -298,7 +298,7 @@ void FramePlayer::SetupUiElements()
 
     { // Taskbar progress indication
         const int opt = _app.currentSettings->GetOption(Settings::AppSettings::ID::TaskbarProgress)->GetValueAsInt();
-#ifdef MSW // TODO
+#ifdef WIN32 // TODO
 	    _ui->compositeSeekbar->SetTaskbarProgressOption(static_cast<UIElements::CompositeSeekBar::TaskbarProgressOption>(opt));
 #endif
     }

@@ -4,7 +4,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(sidplaywx CXX)
-add_compile_definitions(MSW) # Define MSW in our code
 
 #set(THREADS_PREFER_PTHREAD_FLAG ON)
 
