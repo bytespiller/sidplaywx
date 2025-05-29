@@ -171,6 +171,7 @@ void FramePrefs::FillPropertyGrid()
         AddWrappedProp(Settings::AppSettings::ID::SelectionFollowsPlayback, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SELECTION_FOLLOWS_PLAYBACK), *page, Effective::Immediately, Strings::Preferences::DESC_SELECTION_FOLLOWS_PLAYBACK);
         AddWrappedProp(Settings::AppSettings::ID::AutoExpandSubsongs, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_AUTOEXPAND_SUBSONGS), *page, Effective::Immediately, Strings::Preferences::DESC_AUTOEXPAND_SUBSONGS);
 
+#ifdef WIN32
         {
             wxArrayString taskbarProgressOptions;
             taskbarProgressOptions.push_back(Strings::Preferences::ITEM_TASKBAR_PROGRESS_ENABLED);
@@ -183,6 +184,7 @@ void FramePrefs::FillPropertyGrid()
             const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
             prop->SetChoiceSelection(selection);
         }
+#endif
     }
 
     // HVSC
@@ -404,10 +406,8 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     }
                     else if (prop.first == Settings::AppSettings::ID::TaskbarProgress)
                     {
-#ifdef WIN32
                         const int opt = _app.currentSettings->GetOption(Settings::AppSettings::ID::TaskbarProgress)->GetValueAsInt();
 	                    _framePlayer.GetUIElements({}).compositeSeekbar->SetTaskbarProgressOption(static_cast<UIElements::CompositeSeekBar::TaskbarProgressOption>(opt));
-#endif
                     }
                     else if (prop.first == Settings::AppSettings::ID::RememberPlaylist)
                     {

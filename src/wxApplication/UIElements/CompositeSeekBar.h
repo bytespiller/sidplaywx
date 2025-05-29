@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,21 @@
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+	#include <wx/wx.h>
 #endif
 
-#include <wx/appprogress.h>
-#include <wx/taskbarbutton.h>
+#ifdef WIN32
+	#include <wx/appprogress.h>
+	#include <wx/taskbarbutton.h>
+#else
+	enum wxTaskBarButtonState // Placeholder with invalid values. Use static_assert to ensure this is never actually used.
+	{
+		wxTASKBAR_BUTTON_NO_PROGRESS = -1,
+		wxTASKBAR_BUTTON_NORMAL = -1,
+		wxTASKBAR_BUTTON_PAUSED = -1,
+		wxTASKBAR_BUTTON_INDETERMINATE = -1
+	};
+#endif
 
 namespace ThemeData
 {
@@ -36,7 +46,10 @@ namespace UIElements
 	wxDECLARE_EVENT(EVT_CSB_SeekForward, wxCommandEvent);
 	wxDECLARE_EVENT(EVT_CSB_SeekBackward, wxCommandEvent);
 
-	class CompositeSeekBar : public wxWindow, public wxAppProgressIndicator::wxAppProgressIndicator
+	class CompositeSeekBar : public wxWindow
+#ifdef WIN32
+							, public wxAppProgressIndicator::wxAppProgressIndicator
+#endif
 	{
 	public:
 		enum class TaskbarProgressOption : int
@@ -58,10 +71,8 @@ namespace UIElements
 		bool IsSeekPreviewing() const;
 		long GetDurationValue() const;
 
-#ifdef WIN32
 		void SetTaskbarProgressOption(TaskbarProgressOption option);
 		void SetTaskbarProgressState(wxTaskBarButtonState state);
-#endif
 
 	private:
 		void Render(wxDC& dc);

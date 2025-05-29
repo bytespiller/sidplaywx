@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,9 @@ namespace UIElements
 
 	CompositeSeekBar::CompositeSeekBar(wxPanel* parent, const ThemeData::ThemedElementData& themedData) :
 		wxWindow(parent, wxID_ANY),
+#ifdef WIN32
 		wxAppProgressIndicator(wxTheApp->GetTopWindow(), TASKBAR_PROGRESS_MAX_VALUE),
+#endif
 		_themedData(themedData)
 	{
 		// Reminder: parent panel MUST be double buffered.
@@ -117,7 +119,9 @@ namespace UIElements
 		_progressFillFactor = 0.0;
 		_targetFillFactor = 0.0;
 		_duration = std::max(1.0, static_cast<double>(duration));
+#ifdef WIN32
 		wxAppProgressIndicator::SetValue(0);
+#endif
 
 		_preRenderFillFactor = 0.0;
 
@@ -145,9 +149,9 @@ namespace UIElements
 		return _duration;
 	}
 
-#ifdef WIN32
 	void CompositeSeekBar::SetTaskbarProgressOption(TaskbarProgressOption option)
 	{
+#ifdef WIN32
 		_taskbarProgressOption = option;
 		UpdateTaskbarIndicator();
 
@@ -156,17 +160,21 @@ namespace UIElements
 			wxAppProgressIndicator::SetValue(0);
 			SetTaskbarProgressState(wxTASKBAR_BUTTON_NO_PROGRESS);
 		}
+#endif
 	}
 
 	void CompositeSeekBar::SetTaskbarProgressState(wxTaskBarButtonState state)
 	{
+#ifdef WIN32
+		static_assert(wxTaskBarButtonState::wxTASKBAR_BUTTON_NORMAL != -1);
+
 		if (wxTaskBarButton* tb = dynamic_cast<wxFrame*>(wxTheApp->GetTopWindow())->MSWGetTaskBarButton())
 		{
 			const wxTaskBarButtonState applyState = (_taskbarProgressOption == TaskbarProgressOption::Disabled) ? wxTASKBAR_BUTTON_NO_PROGRESS : state;
 			tb->SetProgressState(applyState);
 		}
-	}
 #endif
+	}
 
 	// Called by the system of wxWidgets when the panel needs to be redrawn. You can also trigger this call by calling Refresh()/Update().
 	void CompositeSeekBar::OnPaintEvent(wxPaintEvent& /*evt*/)
@@ -297,6 +305,7 @@ namespace UIElements
 
 	void CompositeSeekBar::UpdateTaskbarIndicator()
 	{
+#ifdef WIN32
 		if (_taskbarProgressOption != TaskbarProgressOption::Disabled)
 		{
 			if(IsSeekTargetReached())
@@ -311,6 +320,7 @@ namespace UIElements
 				}
 			}
 		}
+#endif
 	}
 
 	void CompositeSeekBar::OnMouseLeftDown(wxMouseEvent& evt)

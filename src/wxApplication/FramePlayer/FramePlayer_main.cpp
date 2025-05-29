@@ -291,16 +291,16 @@ void FramePlayer::SetupUiElements()
     _ui->sliderVolume->Enable(_app.currentSettings->GetOption(Settings::AppSettings::ID::VolumeControlEnabled)->GetValueAsBool());
 #endif
 
-    { // RepeatMode
+    // RepeatMode
+    {
         const int modeImageIndex = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode)->GetValueAsInt() - 1;
         _ui->btnRepeatMode->SetRepeatModeImage(static_cast<RepeatMode>(modeImageIndex));
     }
 
-    { // Taskbar progress indication
+    // Taskbar progress indication
+    {
         const int opt = _app.currentSettings->GetOption(Settings::AppSettings::ID::TaskbarProgress)->GetValueAsInt();
-#ifdef WIN32 // TODO
 	    _ui->compositeSeekbar->SetTaskbarProgressOption(static_cast<UIElements::CompositeSeekBar::TaskbarProgressOption>(opt));
-#endif
     }
 
     // Bindings
@@ -477,7 +477,7 @@ void FramePlayer::CloseApplication()
 
     _app.currentSettings->TrySave();
 
-#if defined(_WIN32) && defined(wxUSE_DDE_FOR_IPC)
+#if defined(WIN32) && defined(wxUSE_DDE_FOR_IPC)
     new wxLogNull; // Suppress popup-errors (irrelevant DDE DMLERR_INVALIDPARAMETER edge-case message which I think might be a wx library defect and I can't do anything about it).
 #endif
 
