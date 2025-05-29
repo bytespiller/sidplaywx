@@ -29,8 +29,9 @@
 #include <wx/aboutdlg.h>
 #include <wx/display.h>
 
-#ifndef MSW
+#ifndef WIN32
 #include <wx/tooltip.h>
+#include "../../../dev/icon_src/sidplaywx_icon_64x64.xpm" // sidplaywx_icon_64px[_xpm]
 #endif
 
 #include <wx/webrequest.h>
@@ -45,8 +46,10 @@ FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize
     : wxFrame(NULL, wxID_ANY, title, pos, size),
     _app(app)
 {
-#ifdef MSW // TODO: make it work on Linux too
+#ifdef MSW
     SetIcon(wxICON(appicon)); // Comes from .rc
+#else
+    SetIcon(wxICON(sidplaywx_icon_64px)); // Comes from .xpm file (variable in there needs to be const, GIMP saves it wrongly)
 #endif
 
     _themeManager.LoadTheme("default");
@@ -684,6 +687,10 @@ void FramePlayer::DisplayAboutBox()
                           );
 
     aboutInfo.AddArtist(Strings::About::HVSC);
+
+#ifndef WIN32
+    aboutInfo.SetIcon(wxICON(sidplaywx_icon_64px));
+#endif
 
     wxAboutBox(aboutInfo);
 }

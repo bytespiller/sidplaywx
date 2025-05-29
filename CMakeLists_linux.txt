@@ -21,8 +21,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/linux/CMakeLists_wxWidgets.txt)
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*)
 #message(STATUS "[INFO] SRC_FILES: ${SRC_FILES}")
 
-#set(SRC_FILES ${SRC_FILES} ../dev/resources.rc) # MSW manifest & stuff
-
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
 # libs
@@ -32,7 +30,6 @@ target_link_libraries(${PROJECT_NAME}
     libportaudio
     asound sndio pulse jack # needed for PortAudio on Linux, must be defined *after* libportaudio
     Threads::Threads
-    #-static-libgcc -static-libstdc++ # needed for MinGW posix threading
 
     wxWidgets_propgrid wxWidgets_adv # prefs window (must be included before others)
     wxWidgets_core wxWidgets_base #wxWidgets_regex
