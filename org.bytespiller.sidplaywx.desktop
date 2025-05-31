@@ -1,0 +1,9 @@
+[Desktop Entry]
+X-AppImage-Arch=x86_64
+Name=sidplaywx
+Comment=A GUI player for Commodore 64 SID music files
+Exec=sidplaywx
+Terminal=false
+Icon=sidplaywx_icon
+Type=Application
+Categories=Audio;Player;GTK;
