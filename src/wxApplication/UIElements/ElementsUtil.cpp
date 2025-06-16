@@ -34,7 +34,12 @@ namespace UIElements
 			wxBitmapBundle bb = wxBitmapBundle::FromSVG(data->buffer, data->size, scaledImageSize);
 			wxImage destImage = bb.GetBitmap(scaledImageSize).ConvertToImage().Resize(wxSize(scaledImageSize.GetWidth() / scale, scaledImageSize.GetHeight() / scale), wxPoint(artOffset.x * scale, artOffset.y * scale));
 
-			if (color != nullptr)
+			if (color == nullptr)
+			{
+				const wxColor& color = wxSystemSettings::GetColour(wxSystemColour::wxSYS_COLOUR_CAPTIONTEXT);
+				destImage.SetRGB(destImage.GetSize(), color.GetRed(), color.GetGreen(), color.GetBlue());
+			}
+			else
 			{
 				destImage.SetRGB(destImage.GetSize(), color->GetRed(), color->GetGreen(), color->GetBlue());
 			}
