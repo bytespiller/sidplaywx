@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ namespace UIElements
 		{
 			const std::unique_ptr<BufferHolder>& data = Helpers::Wx::Files::GetFileContentFromDisk(image);
 			assert(data.get() != nullptr); // File not found.
+
 			const wxSize scaledImageSize = size * scale;
 			wxBitmapBundle bb = wxBitmapBundle::FromSVG(data->buffer, data->size, scaledImageSize);
 			wxImage destImage = bb.GetBitmap(scaledImageSize).ConvertToImage().Resize(wxSize(scaledImageSize.GetWidth() / scale, scaledImageSize.GetHeight() / scale), wxPoint(artOffset.x * scale, artOffset.y * scale));
@@ -43,8 +44,7 @@ namespace UIElements
 
 		wxButton* NewSvgButton(const ThemeData::ThemeImage& themeImage, const wxSize& size, wxPanel& panel)
 		{
-			wxButton* button = new wxButton(&panel, wxID_ANY, wxEmptyString);
-			button->SetMinSize(size);
+			wxButton* button = new wxButton(&panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 			button->SetBitmap(*LoadRasterizedSvg(themeImage.path.c_str(), size, themeImage.offset, themeImage.scale));
 			return button;
 		}

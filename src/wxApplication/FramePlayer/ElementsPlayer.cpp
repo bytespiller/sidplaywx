@@ -26,7 +26,7 @@
 namespace FrameElements // Static vars
 {
 	// TODO: these TEMP_* things could be defined in the theme XML?
-	static constexpr int TEMP_BUTTON_SIZE = 30;
+	static constexpr int TEMP_BUTTON_SIZE = 25; // Bitmap size. Careful, sizes below 30 cause blurry SVG bitmap for some reason...
 	static constexpr int TEMP_BUTTON_BORDER_SIZE = 1;
 	static constexpr int TEMP_LABEL_BORDER_SIZE = 2;
 	static constexpr int TEMP_LABEL_TIME_BORDER_SIZE = 2;
@@ -233,7 +233,7 @@ namespace FrameElements // Player class
 		// Playback controls & other buttons
 		btnStop = AttachSimplePlaybackControlButton(themeData.GetImage("btn_stop"), _parentPanel, gridSizerPlaybackButtons);
 
-		btnPlayPause = new UIElements::PlayPauseButton(themeData.GetImage("btn_play"), themeData.GetImage("btn_pause"), DpiSize(TEMP_BUTTON_SIZE), _parentPanel);
+		btnPlayPause = new UIElements::PlayPauseButton(themeData.GetImage("btn_play"), themeData.GetImage("btn_pause"), wxSize(TEMP_BUTTON_SIZE, TEMP_BUTTON_SIZE), _parentPanel);
 		gridSizerPlaybackButtons->Add(btnPlayPause, 0, wxALL, TEMP_BUTTON_BORDER_SIZE);
 
 		gridSizerPlaybackButtons->Add(0, 0, wxEXPAND, 0); // This "spacer" makes the playback control buttons horizontally centered (without it, they'd be left-aligned).

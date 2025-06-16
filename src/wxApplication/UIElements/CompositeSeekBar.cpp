@@ -196,6 +196,9 @@ namespace UIElements
 		dc.SetBrush(ThemedColors::color.at(ThemedColors::fillColorBackground));
 		dc.DrawRectangle(0, barY, seekAreaWidth, barHeight);
 
+		// Remember system border color
+		const wxPen borderPen(dc.GetPen());
+
 		// Disable border
 		dc.SetPen(*wxTRANSPARENT_PEN);
 
@@ -235,7 +238,7 @@ namespace UIElements
 		}
 
 		// Re-enable the border
-		dc.SetPen(wxNullPen);
+		dc.SetPen(borderPen);
 
 		// Thumb
 		if (IsEnabled())

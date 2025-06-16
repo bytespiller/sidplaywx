@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,8 @@
 namespace UIElements
 {
 	MultiImageButton::MultiImageButton(const MultiImageButton::ImageList& images, const wxSize& size, wxPanel& panel) :
-		wxButton(&panel, wxID_ANY, wxEmptyString)
+		wxButton(&panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT)
 	{
-		assert(size != wxDefaultSize);
-		SetMinSize(size);
-
 		for (const ThemeData::ThemeImage& themeImage : images)
 		{
 			_indexedBitmaps.emplace_back(UIElements::Util::LoadRasterizedSvg(themeImage.path.c_str(), size, themeImage.offset, themeImage.scale));
