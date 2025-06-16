@@ -22,7 +22,14 @@
 #include <stdexcept>
 #include <string.h>
 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
 static size_t GRANULARITY = 4096; // Buffer granularity in thread fill-loop.
+constexpr int SEEK_CHECK_SLEEP_MS = 1; // milliseconds
 
 PreRender::~PreRender()
 {
@@ -130,6 +137,12 @@ void PreRender::SeekTo(int timeMs, const SeekStatusCallback& callback)
 		{
 			return;
 		}
+
+#ifdef _WIN32
+		Sleep(SEEK_CHECK_SLEEP_MS);
+#else
+		usleep(SEEK_CHECK_SLEEP_MS * 1000); // POSIX function (takes microseconds). There is also a more modern nanosleep() function but is more ugly to use.
+#endif
 
 		availTimeMs = (_preRenderedSize / sizeof(short)) / _stridePerMs;
 	}
