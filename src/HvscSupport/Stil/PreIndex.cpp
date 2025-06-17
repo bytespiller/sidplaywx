@@ -17,8 +17,10 @@
  */
 
 #include "PreIndex.h"
+#include "../../wxApplication/Helpers/HelpersWx.h"
+#include <filesystem>
 
-static constexpr const char* PRE_INDEX_FILE_NAME = "stil.index";
+static const std::filesystem::path PRE_INDEX_FILE_PATH(Helpers::Wx::Files::GetConfigFilePath("stil.index").ToStdWstring());
 static constexpr const char* PRE_INDEX_FORMAT_VERSION = "1";
 static constexpr const char PRE_INDEX_NEWLINE = '\n';
 
@@ -26,7 +28,7 @@ bool PreIndex::TryLoadFromCache(const std::string& stilVersion, HvscPathsIndex& 
 {
 	bool success = false;
 
-	std::ifstream preIndexInStream(PRE_INDEX_FILE_NAME);
+	std::ifstream preIndexInStream(PRE_INDEX_FILE_PATH);
 	if (preIndexInStream.good())
 	{
 		std::string line;
@@ -85,7 +87,14 @@ void PreIndex::RebuildIndexAndCache(const std::string& stilVersion, HvscPathsInd
 
 	// Write a new index file so that we can skip the expensive pre-indexing next time
 	{
-		std::ofstream preIndexOutStream(PRE_INDEX_FILE_NAME, std::ios::trunc | std::ios::binary);
+#ifndef WIN32
+		if (!wxDirExists(PRE_INDEX_FILE_PATH.generic_wstring()))
+		{
+			wxFileName::Mkdir(wxFileName(PRE_INDEX_FILE_PATH.generic_wstring()).GetPath(), wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+		}
+#endif
+
+		std::ofstream preIndexOutStream(PRE_INDEX_FILE_PATH, std::ios::trunc | std::ios::binary);
 
 		if (preIndexOutStream.good())
 		{
