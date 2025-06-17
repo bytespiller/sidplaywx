@@ -388,10 +388,19 @@ void FramePlayer::DeferredInit()
     }
     else if (_app.currentSettings->GetOption(Settings::AppSettings::ID::RememberPlaylist)->GetValueAsBool())
     {
-        if (wxFileExists(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME))
+        wxString playlistPath = Helpers::Wx::Files::GetConfigFilePath(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME);
+
+#ifndef WIN32
+        if (!wxFileExists(playlistPath))
+        {
+            playlistPath = Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME; // Use default (read only)
+        }
+#endif
+
+        if (wxFileExists(playlistPath))
         {
             // Load default playlist from file
-            const wxArrayString& playlistFiles = Helpers::Wx::Files::LoadPathsFromPlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME);
+            const wxArrayString& playlistFiles = Helpers::Wx::Files::LoadPathsFromPlaylist(playlistPath);
             DiscoverFilesAndSendToPlaylist(playlistFiles, true, false); // Reminder: this line can take a long time but is asynchronous and the program can be used before the next line is reached.
 
             // Restore last song selection (unless already playing something, e.g., user selected a song while the large playlist is still loading)
@@ -460,7 +469,7 @@ void FramePlayer::CloseApplication()
     _app.currentSettings->GetOption(Settings::AppSettings::ID::Volume)->UpdateValue(_ui->sliderVolume->GetValue());
     _app.currentSettings->GetOption(Settings::AppSettings::ID::VolumeControlEnabled)->UpdateValue(_ui->sliderVolume->IsEnabled());
 
-    // Save the current playlist or delete it if empty...
+    // Save the current playlist
     if (_app.currentSettings->GetOption(Settings::AppSettings::ID::RememberPlaylist)->GetValueAsBool())
     {
         // Save playlist...
