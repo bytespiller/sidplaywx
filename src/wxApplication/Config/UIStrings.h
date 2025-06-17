@@ -45,6 +45,7 @@ namespace Strings
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_OPEN("Open...");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_SAVE("Save As...");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_CLEAR("Clear");
+		inline constexpr const char* const MENU_ITEM_PLAYLIST_RESET_DEMO("Demo songs");
 
 		inline constexpr const char* const MENU_ITEM_EXIT("E&xit");
 

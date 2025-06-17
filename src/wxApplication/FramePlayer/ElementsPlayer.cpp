@@ -131,6 +131,11 @@ namespace FrameElements // Player class
 				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistSave), Strings::FramePlayer::MENU_ITEM_PLAYLIST_SAVE);
 				playlistSubMenu->AppendSeparator();
 				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistClear), Strings::FramePlayer::MENU_ITEM_PLAYLIST_CLEAR);
+#ifndef WIN32
+				playlistSubMenu->AppendSeparator();
+				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistResetDemo), Strings::FramePlayer::MENU_ITEM_PLAYLIST_RESET_DEMO);
+#endif
+
 				fileMenu->AppendSubMenu(playlistSubMenu, Strings::FramePlayer::MENU_ITEM_SUBMENU_PLAYLIST);
 				// **
 				fileMenu->AppendSeparator();

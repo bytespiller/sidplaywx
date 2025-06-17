@@ -453,12 +453,21 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             TrySaveCurrentPlaylist();
             break;
 
+        case MenuItemId_Player::PlaylistResetDemo:
+            [[fallthrough]];
         case MenuItemId_Player::PlaylistClear:
             OnButtonStop();
             _enqueuedFiles.Clear(); // Clear any pending files.
             _addingFilesToPlaylist = false; // Break the loop.
             _ui->treePlaylist->Clear();
             UpdateUiState();
+
+            if (id == MenuItemId_Player::PlaylistResetDemo)
+            {
+                const wxArrayString& rawPaths = Helpers::Wx::Files::LoadPathsFromPlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME);
+                DiscoverFilesAndSendToPlaylist(rawPaths, true, false);
+            }
+
             break;
 
         // --- Edit ---

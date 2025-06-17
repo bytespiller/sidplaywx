@@ -73,6 +73,7 @@ namespace FrameElements
 			PlaylistOpen,
 			PlaylistSave,
 			PlaylistClear,
+			PlaylistResetDemo,
 			// ----------------
 			Exit,
 
