@@ -283,7 +283,15 @@ void FramePrefs::FillPropertyGrid()
         AddWrappedProp(Settings::AppSettings::ID::RememberPlaylist, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_REMEMBER_PLAYLIST), *page, Effective::Immediately, Strings::Preferences::DESC_REMEMBER_PLAYLIST);
         AddWrappedProp(Settings::AppSettings::ID::MediaKeys, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_MEDIA_KEYS), *page, Effective::Immediately, Strings::Preferences::DESC_MEDIA_KEYS);
         AddWrappedProp(Settings::AppSettings::ID::SingleInstance, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SINGLE_INSTANCE), *page, Effective::Immediately, Strings::Preferences::DESC_SINGLE_INSTANCE);
-        AddWrappedProp(Settings::AppSettings::ID::RestoreDefaults, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_RESTORE_DEFAULTS), *page, Effective::Immediately, Strings::Preferences::DESC_RESTORE_DEFAULTS);
+
+        wxString descRestoreDefaultsStr(Strings::Preferences::DESC_RESTORE_DEFAULTS);
+#ifndef WIN32
+        descRestoreDefaultsStr
+            .Append('\n')
+            .Append(Strings::Preferences::DESC_RESTORE_DEFAULTS_LINUX)
+            .Append(_app.currentSettings->GetSettingsFilePath());
+#endif
+        AddWrappedProp(Settings::AppSettings::ID::RestoreDefaults, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_RESTORE_DEFAULTS), *page, Effective::Immediately, descRestoreDefaultsStr);
     }
 
     // Final

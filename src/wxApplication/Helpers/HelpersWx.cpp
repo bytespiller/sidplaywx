@@ -282,16 +282,11 @@ namespace Helpers
 				return bufferHolder;
 			}
 
-			bool TrySavePlaylist(const wxString& fullpath, const std::vector<wxString>& fileList)
+			bool TrySavePlaylist(wxString fullpath, const std::vector<wxString>& fileList)
 			{
-				// If new file list is empty, just delete the old playlist file...
-				if (fileList.empty())
+				if (fullpath == DEFAULT_PLAYLIST_NAME)
 				{
-					if (wxFileExists(fullpath))
-					{
-						return wxRemoveFile(fullpath);
-					}
-					return true;
+					fullpath = GetConfigFilePath(fullpath);
 				}
 
 				// Save to playlist...

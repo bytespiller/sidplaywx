@@ -27,6 +27,9 @@
 	#include <wx/wx.h>
 #endif
 
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
+
 #include <wx/fs_zip.h>
 #include <wx/zipstrm.h>
 #include <wx/wfstream.h>
@@ -117,8 +120,30 @@ namespace Helpers
 			/// @brief Like GetFileContentFromZip but for regular files, supporting unicode paths (can't just naively load them directly via libsidplayfp's loader unfortunately due to lack of unicode paths support there).
 			std::unique_ptr<BufferHolder> GetFileContentFromDisk(const wxString& filename);
 
-			bool TrySavePlaylist(const wxString& fullpath, const std::vector<wxString>& fileList);
+			bool TrySavePlaylist(wxString fullpath, const std::vector<wxString>& fileList);
 			wxArrayString LoadPathsFromPlaylist(const wxString& fullpath);
+
+			/// @brief Returns a canonical destination path for sidplaywx config files.
+			inline wxString GetConfigFilePath(const wxString& filename)
+			{
+#ifdef WIN32
+				return filename; // Simply save to the app folder (portable). If changing this in the future, don't forget to create the target dir(s) in the downstream (like Linux code).
+#elif __WXGTK__
+				wxFileName path(wxStandardPaths::Get().GetUserConfigDir() + wxFILE_SEP_PATH);
+
+				if (path.GetDirs().IsEmpty() || path.GetDirs().Last() != ".config")
+				{
+					path.AppendDir(".config");
+				}
+
+				path.AppendDir("sidplaywx");
+				path.SetFullName(filename);
+
+				return path.GetFullPath();
+#else
+				#error "Please define a config file path logic for this platform." // Possibly OSX (~/Library/Application Support/sidplaywx/$filename)?
+#endif
+			}
 		}
 
 		namespace Audio

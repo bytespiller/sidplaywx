@@ -316,7 +316,8 @@ namespace Strings
 		inline constexpr const char* const DESC_SINGLE_INSTANCE("Do not spawn multiple instances of the app, reuse an existing instance whenever possible.");
 
 		inline constexpr const char* const OPT_RESTORE_DEFAULTS("Restore defaults");
-		inline constexpr const char* const DESC_RESTORE_DEFAULTS("Enable this to reset the application settings.\nPlease note: the application will close to apply this option.");
+		inline constexpr const char* const DESC_RESTORE_DEFAULTS("Enable this to reset the application settings.\n- Please note: the application will close to apply this option.");
+		inline constexpr const char* const DESC_RESTORE_DEFAULTS_LINUX("- Preferences file: ");
 	}
 
 	namespace About
