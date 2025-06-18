@@ -195,7 +195,14 @@ namespace Strings
 		// Audio Output
 		inline constexpr const char* const CATEGORY_AUDIO_OUTPUT("Audio output");
 		inline constexpr const char* const OPT_DEVICE("Device");
-		inline constexpr const char* const DESC_DEVICE("- Modifying the playback speed is not supported on all audio backends.\nNote: ongoing playback will stop when changing this setting.");
+
+#ifdef __WXGTK__
+		inline constexpr const char* const DESC_DEVICE("- PulseAudio is recommended.\n- Modifying the playback speed is not supported on all audio backends.\n\nNote: ongoing playback will stop when changing this setting.");
+#elif WIN32
+		inline constexpr const char* const DESC_DEVICE("- \"MME: Microsoft Sound Mapper\" is recommended (supports bluetooth auto-switch && more).\n- Modifying the playback speed is not supported on all audio backends.\n\nNote: ongoing playback will stop when changing this setting.");
+#else
+		inline constexpr const char* const DESC_DEVICE("- Modifying the playback speed is not supported on all audio backends.\n\nNote: ongoing playback will stop when changing this setting.");
+#endif
 
 		inline constexpr const char* const OPT_LOW_LATENCY("Low latency");
 		inline constexpr const char* const DESC_LOW_LATENCY("Enable for more responsive controls.\nDisable if experiencing stuttering.\nNote: ongoing playback will stop when changing this setting.");
@@ -222,7 +229,7 @@ namespace Strings
 		inline constexpr const char* const DESC_FALLBACK_DURATION("Song duration (in seconds) when its real duration is unknown (i.e., song is not in a Songlengths.md5 database).");
 
 		inline constexpr const char* const OPT_SKIP_SHORTER("Auto-skip shorter");
-		inline constexpr const char* const DESC_SKIP_SHORTER("Auto-skip (sub)songs with durations below the specified threshold (in seconds). Affected (sub)songs will be indicated with a timer icon. You can still force playback by activating them in the playlist directly.\nSet to 0 to disable this feature.\n\nNOTE: displaying lots of timer icons degrades the playlist scrolling performance (wxWidgets issue).");
+		inline constexpr const char* const DESC_SKIP_SHORTER("Auto-skip (sub)songs with durations below the specified threshold (in seconds). Affected (sub)songs will be indicated with a timer icon. You can still force playback by activating them in the playlist directly. Set to 0 to disable this feature.\n\nNOTE: displaying lots of timer icons degrades the playlist scrolling performance (wxWidgets issue).");
 
 		inline constexpr const char* const OPT_POP_SILENCER("Pop suppression");
 		inline constexpr const char* const DESC_POP_SILENCER("Mute duration (in milliseconds) on song start to try reduce the audible pop.");
@@ -333,7 +340,7 @@ namespace Strings
 	{
 		inline constexpr const char* const ERR_INIT_PLAYBACK("Fatal error: failed to initialize playback subsystems.");
 
-		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_RECOVERY("Critical init failure.\nDo you want to reset all settings to defaults?\n(Selecting No will close the application.)");
+		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_RECOVERY("Critical init failure.\nDo you want to reset all settings to defaults?\n\n(Selecting \"No\" will close the application so you can retry with original settings.)");
 		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_EXIT("Critical init failure.\nDo you want to reset all settings to defaults?\n(Note: you will have to relaunch the application.)");
 
 		inline constexpr const char* const MSG_ERR_SONGLENGTHS_NOT_FOUND("Songlengths database not found. Note: we use relative paths, so if you've moved the executable that could be the reason.");
@@ -354,7 +361,7 @@ namespace Strings
 		inline constexpr const char* const MSG_ERR_TUNE_FILE("Unable to read tune file.");
 
 		inline constexpr const char* const MSG_ERR_AUDIO_CONFIG("Incorrect audio device configuration, reverting settings.");
-		inline constexpr const char* const MSG_ERR_AUDIO_OUTPUT("Unable to play sound. Try choosing another audio output device in Preferences.");
+		inline constexpr const char* const MSG_ERR_AUDIO_OUTPUT("Playback failed. Try choosing another audio output device in Preferences.");
 	}
 
 	namespace Common

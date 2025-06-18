@@ -44,12 +44,16 @@ namespace
     };
 }
 
+static bool __destroyed = false;
+
 FramePrefs::FramePrefs(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, MyApp& app, FramePlayer& framePlayer)
     : wxDialog(parent, wxID_ANY, title, pos, size, wxCAPTION | wxRESIZE_BORDER | wxSTAY_ON_TOP),
     _app(app),
     _framePlayer(framePlayer)
 {
-    SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+    __destroyed = false;
+
+    //SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     SetDoubleBuffered(true);
 
     _ui = std::make_unique<FrameElements::ElementsPrefs>(*this);
@@ -69,6 +73,12 @@ FramePrefs::FramePrefs(wxWindow* parent, const wxString& title, const wxPoint& p
 
     FindWindowById(wxID_APPLY, this)->Bind(wxEVT_BUTTON, &OnButtonApply, this);
     FindWindowById(wxID_OK, this)->Bind(wxEVT_BUTTON, &OnButtonOk, this);
+}
+
+bool FramePrefs::Destroy()
+{
+    __destroyed = true;
+    return wxDialog::Destroy();
 }
 
 void FramePrefs::AddWrappedProp(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString)
@@ -501,7 +511,10 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
 void FramePrefs::OnButtonOk(wxCommandEvent& evt)
 {
     OnButtonApply(evt);
-    Destroy();
+    if (!__destroyed)
+    {
+        Destroy();
+    }
 }
 
 void FramePrefs::OnButtonCancel(wxCommandEvent& /*evt*/)

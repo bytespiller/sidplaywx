@@ -367,11 +367,6 @@ bool MyApp::ReapplyPlaybackSettings()
     const PlaybackController::SwitchAudioDeviceResult result =_playback->TrySwitchPlaybackConfiguration(PlaybackController::SyncedPlaybackConfig(LoadAudioConfig(*currentSettings),
                                                                                                                                                  LoadSidConfig(_playback->GetSidConfig(), *currentSettings),
                                                                                                                                                  LoadFilterConfig(*currentSettings)));
-    if (result != PlaybackController::SwitchAudioDeviceResult::OnTheFly)
-    {
-        StopPlayback();
-    }
-
     return result != PlaybackController::SwitchAudioDeviceResult::Failure;
 }
 

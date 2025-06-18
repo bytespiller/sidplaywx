@@ -825,39 +825,25 @@ void FramePlayer::OnRepeatModeExtraOptionToggled(ExtraOptionId extraOptionId)
     }
 }
 
-int audioDeviceRevertCount = 0;
 void FramePlayer::OnAudioDeviceChanged(bool success)
 {
-    ++audioDeviceRevertCount;
-
     UpdateUiState();
+
     if (!success)
     {
-        if (_framePrefs != nullptr && _framePrefs->IsVisible())
-        {
-            _framePrefs->Destroy();
-        }
-
-        if (audioDeviceRevertCount == 1)
-        {
-            wxMessageBox(Strings::Error::MSG_ERR_AUDIO_CONFIG, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
-            _app.ReapplyPlaybackSettings();
-        }
-        else
+        _app.CallAfter([&]() // Call this next frame because the Prefs window is still not done in the current frame and would cause all kinds of problems.
         {
             const bool didReset = _app.ResetToDefaultsRecovery(Strings::Error::MSG_ERR_RESET_DEFAULTS_RECOVERY);
-            if (didReset)
+            if (didReset) // User selected "Yes"
             {
                 _app.ReapplyPlaybackSettings();
             }
-            else
+            else // User selected "No"
             {
                 CloseApplication();
             }
-        }
+        });
     }
-
-    audioDeviceRevertCount = 0;
 }
 
 PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const PlaylistTreeModelNode& startNode, bool forwardDirection, bool restart)

@@ -125,20 +125,20 @@ bool PlaybackController::TryInit(const SyncedPlaybackConfig& config)
 PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybackConfiguration(const SyncedPlaybackConfig& newConfig)
 {
     const bool needResetSidDecoder = (newConfig.sidConfig.frequency != _sidDecoder->GetSidConfig().frequency) ||
-                                    (newConfig.sidConfig.playback != _sidDecoder->GetSidConfig().playback) ||
-                                    (newConfig.sidConfig.defaultC64Model != _sidDecoder->GetSidConfig().defaultC64Model) ||
-                                    (newConfig.sidConfig.defaultSidModel != _sidDecoder->GetSidConfig().defaultSidModel) ||
-                                    (newConfig.sidConfig.forceC64Model != _sidDecoder->GetSidConfig().forceC64Model) ||
-                                    (newConfig.sidConfig.forceSidModel != _sidDecoder->GetSidConfig().forceSidModel) ||
-                                    (newConfig.sidConfig.digiBoost != _sidDecoder->GetSidConfig().digiBoost) ||
-                                    (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Curve, _sidDecoder->GetFilterConfig().filter6581Curve)) ||
-                                    (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve));
+                                     (newConfig.sidConfig.playback != _sidDecoder->GetSidConfig().playback) ||
+                                     (newConfig.sidConfig.defaultC64Model != _sidDecoder->GetSidConfig().defaultC64Model) ||
+                                     (newConfig.sidConfig.defaultSidModel != _sidDecoder->GetSidConfig().defaultSidModel) ||
+                                     (newConfig.sidConfig.forceC64Model != _sidDecoder->GetSidConfig().forceC64Model) ||
+                                     (newConfig.sidConfig.forceSidModel != _sidDecoder->GetSidConfig().forceSidModel) ||
+                                     (newConfig.sidConfig.digiBoost != _sidDecoder->GetSidConfig().digiBoost) ||
+                                     (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Curve, _sidDecoder->GetFilterConfig().filter6581Curve)) ||
+                                     (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve));
 
     const bool needResetAudioOutput = (needResetSidDecoder && _preRender != nullptr) || // -> Reset the prerender (in Instant Seeking mode) when the SID decoder gets reset since it'd hold an invalid reference to it then.
-                                    (newConfig.audioConfig.lowLatency != _portAudioOutput->GetAudioConfig().lowLatency) ||
-                                    (newConfig.audioConfig.channelCount != _portAudioOutput->GetAudioConfig().channelCount) ||
-                                    (newConfig.audioConfig.preferredOutputDevice != _portAudioOutput->GetAudioConfig().preferredOutputDevice) ||
-                                    (newConfig.audioConfig.sampleRate != _portAudioOutput->GetAudioConfig().sampleRate);
+                                      (newConfig.audioConfig.lowLatency != _portAudioOutput->GetAudioConfig().lowLatency) ||
+                                      (newConfig.audioConfig.channelCount != _portAudioOutput->GetAudioConfig().channelCount) ||
+                                      (newConfig.audioConfig.preferredOutputDevice != _portAudioOutput->GetAudioConfig().preferredOutputDevice) ||
+                                      (newConfig.audioConfig.sampleRate != _portAudioOutput->GetAudioConfig().sampleRate);
 
     SwitchAudioDeviceResult result = SwitchAudioDeviceResult::OnTheFly;
     bool success = true;
@@ -158,9 +158,12 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
     {
         Stop();
         success = TryResetAudioOutput(newConfig.audioConfig, enablePreRender);
-        result = (success) ? result : SwitchAudioDeviceResult::Failure;
+        result = (success) ? SwitchAudioDeviceResult::Stopped : SwitchAudioDeviceResult::Failure;
 
-        TrySetPlaybackSpeed(_playbackSpeedFactor);
+        if (success && _playbackSpeedFactor != 1.0)
+        {
+            TrySetPlaybackSpeed(_playbackSpeedFactor);
+        }
     }
 
     EmitSignal(SignalsPlaybackController::SIGNAL_AUDIO_DEVICE_CHANGED, static_cast<int>(success));

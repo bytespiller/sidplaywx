@@ -522,12 +522,8 @@ void FramePlayer::OpenPlaybackModFrame()
 
 void FramePlayer::OpenPrefsFrame()
 {
-    _framePrefs = new FramePrefs(this, Strings::Preferences::WINDOW_TITLE, wxDefaultPosition, DpiSize(430, 500), _app, *this);
-    _framePrefs->ShowModal(); // Reminder: this one gets Destroy()-ed, not Close()-d.
-    if (_exitingApplication)
-    {
-        CloseApplication();
-    }
+    _framePrefs = new FramePrefs(this, Strings::Preferences::WINDOW_TITLE, wxDefaultPosition, DpiSize(430, 600), _app, *this);
+    _framePrefs->ShowModal(); // Reminder: this one gets Destroy()-ed, not Close()-d.    
 }
 
 void FramePlayer::ToggleTopmost()

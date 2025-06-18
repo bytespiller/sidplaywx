@@ -164,6 +164,11 @@ bool PortAudioOutput::PreInitPortAudioLibrary()
 
 bool PortAudioOutput::TryInit(const AudioConfig& audioConfig, IBufferWriter* bufferWriter)
 {
+    if (_stream != nullptr && Pa_IsStreamActive(_stream))
+    {
+        StopStream(true);
+    }
+
     _bufferWriter = bufferWriter;
 
     bool success = _paInitialized || PreInitPortAudioLibrary();
@@ -205,14 +210,8 @@ void PortAudioOutput::StopStream(bool immediate)
 
 PaError PortAudioOutput::ResetStream(double samplerate)
 {
-    if (_stream != nullptr && Pa_IsStreamActive(_stream))
-    {
-        PaError err = Pa_CloseStream(_stream);
-        if (LogAnyError("ResetStream: Pa_CloseStream", err))
-        {
-            return err;
-        }
-    }
+    Pa_AbortStream(_stream);
+    Pa_CloseStream(_stream);
 
     // Open an audio I/O stream.
     const unsigned long safeFramesPerBuffer = samplerate * LIBSIDPLAYFP_MIN_BUFFER_LATENCY;
