@@ -75,6 +75,7 @@ void FramePlayer::UpdateUiState()
         {
             _ui->btnPlayPause->SetPause();
             _ui->compositeSeekbar->ResetPlaybackPosition(GetEffectiveSongDuration(*_ui->treePlaylist->GetActiveSong()));
+            _ui->compositeSeekbar->UpdatePlaybackPosition(_app.GetPlaybackInfo().GetTime());
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_NORMAL);
             break;
         }
