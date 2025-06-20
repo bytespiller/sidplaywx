@@ -110,6 +110,8 @@ namespace Strings
 		inline constexpr const char* const TOOLTIP_STIL_COMMENT("STIL Comment");
 
 		inline constexpr const char* const TOOLTIP_SHOW_REFRESH_TUNE_INFO("Show/refresh current Tune Info");
+
+		inline constexpr const char* const MSG_MEDIA_KEYS_TAKEN("Media keys already in use by another application.");
 	}
 
 	namespace PlaylistTree
@@ -368,6 +370,7 @@ namespace Strings
 	{
 		inline constexpr const char* const ACTION_BROWSE_LOCATION("Browse location");
 		inline constexpr const char* const GENERIC_NOT_FOUND("Not found");
+		inline constexpr const char* const GENERIC_RETRY("Retry");
 	}
 
 	namespace Internal

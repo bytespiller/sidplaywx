@@ -171,10 +171,5 @@ namespace Helpers
 			/// @return Absolute index of the specified audio device, or of a default device or paNoDevice if nothing is available.
 			int TryGetAudioDeviceIndex(const wxString& deviceName);
 		}
-
-		namespace Input
-		{
-			wxKeyCode GetMediaKeyCommand();
-		}
 	}
 }

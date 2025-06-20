@@ -265,6 +265,12 @@ namespace FrameElements // Player class
 
 		AttachFixedSizeSeparator(DpiSize(0, 1 + 4), sizerMain, _parentPanel); // TODO: magic number
 
+		// Info bar: Media keys taken
+		infoBarMediaKeysTaken = new wxInfoBar(&_parentPanel);
+		infoBarMediaKeysTaken->AddButton(wxID_RETRY, Strings::Common::GENERIC_RETRY);
+		infoBarMediaKeysTaken->AddButton(wxID_OK);
+		sizerMain->Add(infoBarMediaKeysTaken, 0, wxEXPAND, 0);
+
 		// Seekbar area...
 		wxBoxSizer* sizerSeekbar = new wxBoxSizer(wxHORIZONTAL);
 		sizerMain->Add(sizerSeekbar, 0, wxEXPAND, 0);

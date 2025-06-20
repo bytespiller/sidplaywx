@@ -42,6 +42,16 @@ static constexpr size_t VISUALIZATION_WAVE_WINDOW_MS = 100;
 static const wxString bundledSonglengthsPath("bundled-Songlengths.md5");
 static const wxString bundledStilPath("bundled-STIL.txt");
 
+#ifdef WIN32
+static constexpr int MEDIA_KEYS[] = // Must use Win32 VK_* codes here, not WXK_* (even though the WXK_* codes are received in the event handler).
+{
+    VK_MEDIA_PLAY_PAUSE,
+    VK_MEDIA_STOP,
+    VK_MEDIA_NEXT_TRACK,
+    VK_MEDIA_PREV_TRACK
+};
+#endif
+
 FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize& size, MyApp& app)
     : wxFrame(NULL, wxID_ANY, title, pos, size),
     _app(app)
@@ -261,6 +271,16 @@ void FramePlayer::InitStilInfo(PassKey<FramePrefs>)
     InitStilInfo();
 }
 
+bool FramePlayer::TryRegisterMediaKeys(PassKey<FramePrefs>)
+{
+    return TryRegisterMediaKeys();
+}
+
+void FramePlayer::UnregisterMediaKeys(PassKey<FramePrefs>)
+{
+    UnregisterMediaKeys();
+}
+
 void FramePlayer::SetupUiElements()
 {
     assert(!_initialized);
@@ -376,10 +396,27 @@ void FramePlayer::DeferredInit()
         ToggleTopmost();
     }
 
-    // Global hotkeys-polling timer
-    _timerGlobalHotkeysPolling = std::make_unique<wxTimer>(this);
-    Bind(wxEVT_TIMER, &OnTimerGlobalHotkeysPolling, this, _timerGlobalHotkeysPolling->GetId());
-    _timerGlobalHotkeysPolling->Start(TIMER_INTERVAL_GLOBAL_HOTKEYS_POLLING);
+#ifdef WIN32
+    // Media keys support
+    _ui->infoBarMediaKeysTaken->Bind(wxEVT_BUTTON, [&](wxCommandEvent& evt)
+    {
+        _ui->infoBarMediaKeysTaken->Dismiss();
+        if (evt.GetId() == wxID_RETRY)
+        {
+            TryRegisterMediaKeys();
+        }
+    });
+
+    for (int key : MEDIA_KEYS)
+    {
+        Bind(wxEVT_HOTKEY, &FramePlayer::OnGlobalHotkey, this);
+    }
+
+    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::MediaKeys)->GetValueAsBool())
+    {
+        TryRegisterMediaKeys();
+    }
+#endif
 
     // Handle the "Open With" situation (not done in a constructor in order to have the wxYield/Refresh work while adding to playlist).
     if (_app.argc > 1)
@@ -440,14 +477,41 @@ void FramePlayer::SetRefreshTimerInterval(int desiredInterval)
     }
 }
 
+bool FramePlayer::TryRegisterMediaKeys()
+{
+#ifdef WIN32
+    for (const int key : MEDIA_KEYS)
+    {
+        const bool success = RegisterHotKey(key, wxMOD_NONE, key);
+        if (!success)
+        {
+            UnregisterMediaKeys();
+            _ui->infoBarMediaKeysTaken->ShowMessage(Strings::FramePlayer::MSG_MEDIA_KEYS_TAKEN);
+            return false;
+        }
+    }
+
+    return true;
+#else
+    return false;
+#endif
+}
+
+void FramePlayer::UnregisterMediaKeys()
+{
+#ifdef WIN32
+    for (const int key : MEDIA_KEYS)
+    {
+        UnregisterHotKey(key);
+    }
+#endif
+}
+
 void FramePlayer::CloseApplication()
 {
     _exitingApplication = true;
 
-    if (_timerGlobalHotkeysPolling != nullptr)
-    {
-        _timerGlobalHotkeysPolling->Stop();
-    }
+    UnregisterMediaKeys();
 
     if (_timerRefresh != nullptr)
     {
@@ -523,7 +587,7 @@ void FramePlayer::OpenPlaybackModFrame()
 void FramePlayer::OpenPrefsFrame()
 {
     _framePrefs = new FramePrefs(this, Strings::Preferences::WINDOW_TITLE, wxDefaultPosition, DpiSize(430, 600), _app, *this);
-    _framePrefs->ShowModal(); // Reminder: this one gets Destroy()-ed, not Close()-d.    
+    _framePrefs->ShowModal(); // Reminder: this one gets Destroy()-ed, not Close()-d.
 }
 
 void FramePlayer::ToggleTopmost()

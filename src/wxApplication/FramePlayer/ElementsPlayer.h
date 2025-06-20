@@ -23,6 +23,8 @@
     #include <wx/wx.h>
 #endif
 
+#include <wx/infobar.h>
+
 #include "../Theme/ThemeData/ThemeData.h"
 #include "../UIElements/CompositeSeekBar.h"
 #include "../UIElements/PlayPauseButton.h"
@@ -131,6 +133,7 @@ namespace FrameElements
 		UIElements::ScrollingLabel* labelStilNameTitle; // NAME - TITLE
 		UIElements::ScrollingLabel* labelStilArtistAuthor; // ARTIST (AUTHOR)
 		UIElements::ScrollingLabel* labelStilComment;
+		wxInfoBar* infoBarMediaKeysTaken;
 
 		// Playback controls
 		wxButton* btnPrevTrack;

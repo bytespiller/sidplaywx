@@ -67,23 +67,6 @@ namespace
 
 		return flatfileList;
 	}
-
-	inline wxKeyCode GetMediaKeyDown()
-	{
-		static std::vector<wxKeyCode> mediaKeys {WXK_MEDIA_STOP, WXK_MEDIA_PLAY_PAUSE, WXK_MEDIA_NEXT_TRACK, WXK_MEDIA_PREV_TRACK};
-		wxKeyCode activeMediaKey = WXK_NONE;
-
-		for (const wxKeyCode key : mediaKeys)
-		{
-			if (wxGetKeyState(key))
-			{
-				activeMediaKey = key;
-				break;
-			}
-		}
-
-		return activeMediaKey;
-	}
 }
 
 namespace Helpers
@@ -403,18 +386,6 @@ namespace Helpers
 				}
 
 				return paNoDevice; // Stored device no longer present.
-			}
-		}
-
-		namespace Input
-		{
-			bool mediaKeyDownProcessed = true;
-			wxKeyCode GetMediaKeyCommand()
-			{
-				const wxKeyCode activeMediaKey = GetMediaKeyDown();
-				const wxKeyCode retMediaKey = (mediaKeyDownProcessed) ? WXK_NONE : activeMediaKey; // Return real key only if we didn't process this particular KeyDown "event" already (to prevent repeating).
-				mediaKeyDownProcessed = activeMediaKey != WXK_NONE;
-				return retMediaKey;
 			}
 		}
 	}

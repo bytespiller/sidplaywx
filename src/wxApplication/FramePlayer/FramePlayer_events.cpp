@@ -531,51 +531,46 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
     }
 }
 
-void FramePlayer::OnTimerGlobalHotkeysPolling(wxTimerEvent& /*evt*/)
+void FramePlayer::OnGlobalHotkey(wxKeyEvent& evt)
 {
-    // Media Keys
-    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::MediaKeys)->GetValueAsBool())
+    PlaybackController::State cState = _app.GetPlaybackInfo().GetState();
+    switch(evt.GetKeyCode()) // Because the RegisterHotKey is only implemented under MSW, we use this universal solution for now.
     {
-        PlaybackController::State cState = _app.GetPlaybackInfo().GetState();
-
-        switch(Helpers::Wx::Input::GetMediaKeyCommand()) // Because the RegisterHotKey is only implemented under MSW, we use this universal solution for now.
+        case WXK_MEDIA_PLAY_PAUSE:
         {
-            case WXK_MEDIA_PLAY_PAUSE:
+            if (cState != PlaybackController::State::Undefined && _ui->treePlaylist->GetActiveSong() != nullptr)
             {
-                if (cState != PlaybackController::State::Undefined && _ui->treePlaylist->GetActiveSong() != nullptr)
-                {
-                    OnButtonPlayPause();
-                }
-                break;
+                OnButtonPlayPause();
             }
-            case WXK_MEDIA_STOP:
+            break;
+        }
+        case WXK_MEDIA_STOP:
+        {
+            if (cState != PlaybackController::State::Stopped && cState != PlaybackController::State::Undefined)
             {
-                if (cState != PlaybackController::State::Stopped && cState != PlaybackController::State::Undefined)
-                {
-                    OnButtonStop();
-                }
-                break;
+                OnButtonStop();
             }
-            case WXK_MEDIA_NEXT_TRACK:
+            break;
+        }
+        case WXK_MEDIA_NEXT_TRACK:
+        {
+            const bool optIncludeSubsongs = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
+            const bool lastSubsong = _ui->treePlaylist->GetNextSubsong() == nullptr;
+            if (!(optIncludeSubsongs && !lastSubsong && OnButtonSubsongNext()))
             {
-                const bool optIncludeSubsongs = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
-                const bool lastSubsong = _ui->treePlaylist->GetNextSubsong() == nullptr;
-                if (!(optIncludeSubsongs && !lastSubsong && OnButtonSubsongNext()))
-                {
-                    OnButtonTuneNext();
-                }
-                break;
+                OnButtonTuneNext();
             }
-            case WXK_MEDIA_PREV_TRACK:
+            break;
+        }
+        case WXK_MEDIA_PREV_TRACK:
+        {
+            const bool optIncludeSubsongs = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
+            const bool firstSubsong = _ui->treePlaylist->GetPrevSubsong() == nullptr;
+            if (!(optIncludeSubsongs && !firstSubsong && OnButtonSubsongPrev()))
             {
-                const bool optIncludeSubsongs = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
-                const bool firstSubsong = _ui->treePlaylist->GetPrevSubsong() == nullptr;
-                if (!(optIncludeSubsongs && !firstSubsong && OnButtonSubsongPrev()))
-                {
-                    OnButtonTunePrev();
-                }
-                break;
+                OnButtonTunePrev();
             }
+            break;
         }
     }
 }

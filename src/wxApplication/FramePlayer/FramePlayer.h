@@ -78,6 +78,9 @@ public:
     void ForceStopPlayback(PassKey<FramePrefs>);
     void InitStilInfo(PassKey<FramePrefs>);
 
+    bool TryRegisterMediaKeys(PassKey<FramePrefs>);
+    void UnregisterMediaKeys(PassKey<FramePrefs>);
+
 private:
     bool TryRestoreMainWindowPositionAndSize();
     void InitSonglengthsDatabase();
@@ -85,6 +88,12 @@ private:
     void SetupUiElements();
     void DeferredInit();
     void SetRefreshTimerInterval(int desiredInterval);
+
+    /// @brief MSW only. Registers playback media keys, if any fails, unregisters all and returns false.
+    bool TryRegisterMediaKeys();
+
+    /// @brief MSW only.
+    void UnregisterMediaKeys();
 
     // File
     void CloseApplication();
@@ -187,7 +196,7 @@ private:
     void OnMenuOpening(wxMenuEvent& evt);
     void OnMenuItemSelected(wxCommandEvent& evt);
 
-    void OnTimerGlobalHotkeysPolling(wxTimerEvent& evt);
+    void OnGlobalHotkey(wxKeyEvent& evt);
     void OnTimerRefresh(wxTimerEvent& evt);
 
     void OnIconize(wxIconizeEvent& evt);
@@ -233,7 +242,6 @@ private:
 
     std::unique_ptr<FrameElements::ElementsPlayer> _ui;
     std::unique_ptr<wxTimer> _timerRefresh;
-    std::unique_ptr<wxTimer> _timerGlobalHotkeysPolling;
     int _canonicalTimerRefreshInterval = TIMER_REFRESH_INTERVAL_IDLE;
 
     FramePlaybackMods* _framePlaybackMods = nullptr;

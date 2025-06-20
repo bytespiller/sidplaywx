@@ -291,7 +291,9 @@ void FramePrefs::FillPropertyGrid()
     page->Append(new wxPropertyCategory(Strings::Preferences::CATEGORY_APPLICATION));
     {
         AddWrappedProp(Settings::AppSettings::ID::RememberPlaylist, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_REMEMBER_PLAYLIST), *page, Effective::Immediately, Strings::Preferences::DESC_REMEMBER_PLAYLIST);
+#ifdef WIN32
         AddWrappedProp(Settings::AppSettings::ID::MediaKeys, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_MEDIA_KEYS), *page, Effective::Immediately, Strings::Preferences::DESC_MEDIA_KEYS);
+#endif
         AddWrappedProp(Settings::AppSettings::ID::SingleInstance, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SINGLE_INSTANCE), *page, Effective::Immediately, Strings::Preferences::DESC_SINGLE_INSTANCE);
 
         wxString descRestoreDefaultsStr(Strings::Preferences::DESC_RESTORE_DEFAULTS);
@@ -439,6 +441,17 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     else if (prop.first == Settings::AppSettings::ID::RestoreDefaults)
                     {
                         restoreDefaults = propertyValueInt == 1;
+                    }
+                    else if (prop.first == Settings::AppSettings::ID::MediaKeys)
+                    {
+                        if (propertyValueInt == 1)
+                        {
+                            _framePlayer.TryRegisterMediaKeys({});
+                        }
+                        else
+                        {
+                            _framePlayer.UnregisterMediaKeys({});
+                        }
                     }
 
                     break;
