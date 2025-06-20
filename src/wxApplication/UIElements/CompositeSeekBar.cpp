@@ -99,7 +99,7 @@ namespace UIElements
 	{
 		_progressFillFactor = (_duration > 1.0) ? std::min(1.0, time / _duration) : 0.0;
 		const bool seeking = !IsSeekTargetReached();
-		if (!_pressedDown && !seeking)
+		if (!_pressedDown && !seeking && _cancelableSeekPreviewFillFactor == CLEAR_SEEK_PREVIEW)
 		{
 			_targetFillFactor = _progressFillFactor;
 		}
