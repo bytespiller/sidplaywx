@@ -240,6 +240,9 @@ void PlaybackController::Resume()
 {
     if (_state == State::Paused || _state == State::Playing)
     {
+#ifdef __WXGTK__
+        _portAudioOutput->ResetStream(_portAudioOutput->GetAudioConfig().sampleRate * _playbackSpeedFactor); // Needed for stability on Linux.
+#endif
         _portAudioOutput->TryStartStream();
         _state = State::Playing;
     }
