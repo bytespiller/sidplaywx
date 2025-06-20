@@ -150,7 +150,7 @@ public:
     void Stop();
 
     void SeekTo(uint_least32_t targetTimeMs);
-    void AbortSeek(bool resumePlaybackState = true);
+    void AbortSeek();
 
     // Gets the target time milliseconds parameter of the last SeekTo() call or zero.
     uint_least32_t GetLastSeekTargetMs() const;

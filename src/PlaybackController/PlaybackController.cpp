@@ -238,7 +238,7 @@ void PlaybackController::Pause()
 
 void PlaybackController::Resume()
 {
-    if (_state == State::Paused)
+    if (_state == State::Paused || _state == State::Playing)
     {
         _portAudioOutput->TryStartStream();
         _state = State::Playing;
@@ -249,7 +249,7 @@ void PlaybackController::Resume()
     }
     else
     {
-        Warn("Resume called while not paused or seeking, ignored.");
+        Warn("Resume called in unexpected state, ignored.");
     }
 }
 
@@ -263,7 +263,7 @@ void PlaybackController::Stop()
 
     if (_state == State::Seeking)
     {
-        AbortSeek(false);
+        AbortSeek();
     }
 
     if (_state == State::Stopped)
@@ -299,9 +299,7 @@ void PlaybackController::SeekTo(uint_least32_t targetTimeMs)
     }
     else if (_state == State::Seeking)
     {
-        PlaybackController::State restoreState = _seekOperation.resumeToState;
-        AbortSeek(false); // This now becomes a synchronous call and the OnSeekStatusReceived() will be called before the next line.
-        _state = restoreState; // Replace OnSeekStatusReceived()'s "Paused" change -- due to AbortSeek(false) -- with previous state.
+        AbortSeek(); // This now becomes a synchronous call and the OnSeekStatusReceived() will be called before further lines.
     }
     else if (_state == State::Playing)
     {
@@ -339,15 +337,10 @@ void PlaybackController::SeekTo(uint_least32_t targetTimeMs)
     });
 }
 
-void PlaybackController::AbortSeek(bool resumePlaybackState)
+void PlaybackController::AbortSeek()
 {
     if (_state == State::Seeking)
     {
-        if (!resumePlaybackState)
-        {
-            _seekOperation.resumeToState = State::Paused;
-        }
-
         _seekOperation.abortFlag = true;
         _seekOperation.seekThread.join();
     }
@@ -753,7 +746,7 @@ void PlaybackController::PrepareTryPlay()
 {
     if (_state == State::Seeking)
     {
-        AbortSeek(false);
+        AbortSeek();
     }
 
     if (_state == State::Playing)

@@ -415,10 +415,8 @@ void MyApp::OnSeekingCeased()
 {
     RunOnMainThread([this]()
     {
-        const PlaybackController::State cState = _playback->GetState();
-        if (cState == PlaybackController::State::Playing)
+        if (_playback->GetState() == PlaybackController::State::Playing)
         {
-            _playback->Pause(); // Will remain paused in case the Resume() fails.
             _playback->Resume();
         }
 
