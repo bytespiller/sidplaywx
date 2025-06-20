@@ -190,6 +190,7 @@ bool MyApp::OnInit()
 
             lastFileListReceptionTime = wxGetLocalTimeMillis(); // Must be before FramePlayer init.
             _framePlayer = new FramePlayer(Strings::FramePlayer::WINDOW_TITLE, wxDefaultPosition, wxDefaultSize, *this);
+            _framePlayer->SetClientSize(_framePlayer->GetClientSize().GetWidth() + 30, _framePlayer->GetClientSize().GetHeight());
             _framePlayer->Show();
 
             _instanceManager->RegisterFileListIncomingNotifyCallback([this]()
