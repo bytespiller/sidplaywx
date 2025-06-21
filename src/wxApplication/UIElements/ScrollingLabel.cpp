@@ -99,11 +99,16 @@ namespace UIElements
 
 	void ScrollingLabel::GetTrueTextExtent(const wxString& text, int& width, int& height)
 	{
-		int w, h;
-		GetTextExtent(text, &w, &h);
+		wxGraphicsContext* const gc = wxGraphicsContext::Create(wxClientDC(this));
+		gc->SetFont(GetFont(), GetForegroundColour());
 
-		width = std::ceil(w) + 1;
-		height = std::ceil(h);
+		double w, h;
+		gc->GetTextExtent(text, &w, &h); // Calling regular GetTextExtent comes short (on MSW) so we have to use the one from the wxGraphicsContext.
+
+		width = static_cast<int>(std::ceil(w) + 1);
+		height = static_cast<int>(std::ceil(h));
+
+		delete gc;
 	}
 
 	void ScrollingLabel::Render(wxGraphicsContext& gc)
