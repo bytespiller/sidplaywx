@@ -161,11 +161,13 @@ void FramePrefs::FillPropertyGrid()
         AddWrappedProp(Settings::AppSettings::ID::PopSilencer, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_POP_SILENCER), *page, Effective::Immediately, Strings::Preferences::DESC_POP_SILENCER, MIN_POP_SILENCER, MAX_POP_SILENCER);
 
         {
-            wxArrayString dragDropModeOptions;
-            dragDropModeOptions.push_back(Strings::Preferences::ITEM_DRAGDROP_MODE_DUAL);
-            dragDropModeOptions.push_back(Strings::Preferences::ITEM_DRAGDROP_MODE_REPLACE);
-            dragDropModeOptions.push_back(Strings::Preferences::ITEM_DRAGDROP_MODE_ENQUEUE);
-            dragDropModeOptions.push_back(Strings::Preferences::ITEM_DRAGDROP_MODE_DISABLED);
+            const wxArrayString dragDropModeOptions =
+            {
+                Strings::Preferences::ITEM_DRAGDROP_MODE_DUAL,
+                Strings::Preferences::ITEM_DRAGDROP_MODE_REPLACE,
+                Strings::Preferences::ITEM_DRAGDROP_MODE_ENQUEUE,
+                Strings::Preferences::ITEM_DRAGDROP_MODE_DISABLED
+            };
 
             const char* SettingId = Settings::AppSettings::ID::DragDropMode;
             wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_DRAGDROP_MODE, SettingId, dragDropModeOptions);
@@ -178,6 +180,23 @@ void FramePrefs::FillPropertyGrid()
     // Visual
     page->Append(new wxPropertyCategory(Strings::Preferences::CATEGORY_VISUAL_BEHAVIOR));
     {
+#ifdef WIN32
+        {
+            const wxArrayString systemThemeOptions =
+            {
+                Strings::Preferences::ITEM_SYSTEM_THEME_AUTO,
+                Strings::Preferences::ITEM_SYSTEM_THEME_LIGHT,
+                Strings::Preferences::ITEM_SYSTEM_THEME_DARK
+            };
+
+            const char* SettingId = Settings::AppSettings::ID::SystemTheme;
+            wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_SYSTEM_THEME, SettingId, systemThemeOptions);
+            AddWrappedProp(SettingId, TypeSerialized::Int, prop, *page, Effective::AfterRestart, Strings::Preferences::DESC_SYSTEM_THEME);
+            const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
+            prop->SetChoiceSelection(selection);
+        }
+#endif
+
         AddWrappedProp(Settings::AppSettings::ID::SelectionFollowsPlayback, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SELECTION_FOLLOWS_PLAYBACK), *page, Effective::Immediately, Strings::Preferences::DESC_SELECTION_FOLLOWS_PLAYBACK);
         AddWrappedProp(Settings::AppSettings::ID::AutoExpandSubsongs, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_AUTOEXPAND_SUBSONGS), *page, Effective::Immediately, Strings::Preferences::DESC_AUTOEXPAND_SUBSONGS);
 

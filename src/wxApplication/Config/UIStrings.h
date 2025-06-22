@@ -246,6 +246,12 @@ namespace Strings
 		// Visual
 		inline constexpr const char* const CATEGORY_VISUAL_BEHAVIOR("Visual");
 
+		inline constexpr const char* const OPT_SYSTEM_THEME("System theme");
+		inline constexpr const char* const DESC_SYSTEM_THEME("You can enable the experimental dark theme on Windows here.\nDark theme will be improved in the future.");
+		inline constexpr const char* const ITEM_SYSTEM_THEME_AUTO("Auto");
+		inline constexpr const char* const ITEM_SYSTEM_THEME_LIGHT("Light");
+		inline constexpr const char* const ITEM_SYSTEM_THEME_DARK("Dark (experimental)");
+
 		inline constexpr const char* const OPT_SELECTION_FOLLOWS_PLAYBACK("Autoselect active song");
 		inline constexpr const char* const DESC_SELECTION_FOLLOWS_PLAYBACK("Selection will automatically follow the playback and the active (sub)song will be scrolled into view. Tunes with subsongs will be expanded.");
 

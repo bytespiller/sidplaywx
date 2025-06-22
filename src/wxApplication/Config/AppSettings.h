@@ -47,6 +47,7 @@ namespace Settings
 			static constexpr const char* const RepeatModeIncludeSubsongs = "RepeatModeIncludeSubsongs";
 			static constexpr const char* const RepeatModeDefaultSubsong = "RepeatModeDefaultSubsong";
 
+			static constexpr const char* const SystemTheme = "SystemTheme";
 			static constexpr const char* const SelectionFollowsPlayback = "SelectionFollowsPlayback";
 			static constexpr const char* const AutoExpandSubsongs = "AutoExpandSubsongs";
 			static constexpr const char* const TaskbarProgress = "TaskbarProgress";
@@ -87,6 +88,13 @@ namespace Settings
 			static constexpr const char* const MainWindowPosition = "MainWindowPosition";
 			static constexpr const char* const MainWindowSize = "MainWindowSize";
 			static constexpr const char* const MainWindowMaximized = "MainWindowMaximized";
+		};
+
+		enum class SystemTheme
+		{
+			Auto = 0,
+			ForceLight = 1,
+			ForceDark = 2,
 		};
 
 		enum class DragDropMode
@@ -151,6 +159,7 @@ namespace Settings
 				DefaultOption(ID::PopSilencer, 100),
 				DefaultOption(ID::DragDropMode, static_cast<int>(DragDropMode::Dual)),
 
+				DefaultOption(ID::SystemTheme, static_cast<int>(SystemTheme::ForceLight)), // TODO: make it default to Auto once this wxWidgets' feature is out of beta.
 				DefaultOption(ID::SelectionFollowsPlayback, true),
 				DefaultOption(ID::AutoExpandSubsongs, true),
 				DefaultOption(ID::TaskbarProgress, static_cast<int>(UIElements::CompositeSeekBar::TaskbarProgressOption::Enabled)),
