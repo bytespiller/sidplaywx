@@ -84,32 +84,32 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 - GCC version with C++17 support is required (minimum I've tried is gcc-12).
 - Don't forget the `sudo apt-get update` and `sudo apt-get install build-essential` as well as `sudo apt-get install cmake`
 
-	#### libsidplayfp
-	* **NOTE:** Building the libsidplayfp from its git master branch is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
-	1. To enable C++20 set in the terminal `CXXFLAGS="$CXXFLAGS -std=c++20"`
-	2. Commands to build statically: `./configure LDFLAGS="-static" && make`
-	3. Copy the following *includes* (with their folder structures) to the appropriate `include` folder in the sidplaywx's `/deps/`:
-		- `/builders/residfp.h`
-		- `sidbuilder.h`, `SidConfig.h`, `siddefs.h`, `SidInfo.h`, `sidplayfp.h`, `SidTune.h`, `SidTuneInfo.h`, `sidversion.h`
-	4. Copy the `/src/.libs/libsidplayfp.a` (`.libs` is a *hidden* folder) to the appropriate `lib` folder in the sidplaywx's `/deps/`
-	
-	#### PortAudio
-	0. Prerequisites: you must have installed the `libpulse-dev`, ALSA (`libasound2-dev`), `libsndio-dev`, `libjack-dev` BEFORE building the PortAudio, otherwise the resultant PortAudio may not find any devices.
-		1. See the main CMakeLists.txt for which ones are relevant.
-	1. `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S . -B dist && cmake --build dist`
-		1. Note: I had to use the git master version, had no luck with the stable version on the Xubuntu 24.04
-	2. Copy files from `/dist/include/` folder & the `libportaudio.a` file to the appropriate sidplaywx's `/deps/` folders.
-	
-	#### wxWidgets
-	0. Prerequisites: if needed, install the `libgtk-3-dev` and `libcurl-dev` (the last one is needed for our "Check for updates" function).
-	1. `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S . -B dist && cmake --build dist`
-		1. Exceptional cases (if you get an `#include` error when building the sidplaywx):
-			1. You may need to call the `wx-config --cxxflags` to get necessary flags and update the equivalent variable in our sidplaywx CMakeLists.txt
-			2. May also be of interest:
-				1. `wx-config --libs`
-				2. https://wiki.wxwidgets.org/Wx-Config
-				3. https://docs.wxwidgets.org/3.2/overview_cmake.html
-	2. Copy files from `/dist/include/` & `/dist/lib/` to the appropriate sidplaywx's `/deps/` folders.
+##### (libsidplayfp)
+* **NOTE:** Building the libsidplayfp from its git master branch is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
+1. To enable C++20 set in the terminal `CXXFLAGS="$CXXFLAGS -std=c++20"`
+2. Commands to build statically: `./configure LDFLAGS="-static" && make`
+3. Copy the following *includes* (with their folder structures) to the appropriate `include` folder in the sidplaywx's `/deps/`:
+	- `/builders/residfp.h`
+	- `sidbuilder.h`, `SidConfig.h`, `siddefs.h`, `SidInfo.h`, `sidplayfp.h`, `SidTune.h`, `SidTuneInfo.h`, `sidversion.h`
+4. Copy the `/src/.libs/libsidplayfp.a` (`.libs` is a *hidden* folder) to the appropriate `lib` folder in the sidplaywx's `/deps/`
+
+##### (PortAudio)
+0. Prerequisites: you must have installed the `libpulse-dev`, ALSA (`libasound2-dev`), `libsndio-dev`, `libjack-dev` BEFORE building the PortAudio, otherwise the resultant PortAudio may not find any devices.
+	- See the main CMakeLists.txt for which ones are relevant.
+1. `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S . -B dist && cmake --build dist`
+	- Note: I had to use the git master version, had no luck with the stable version on the Xubuntu 24.04
+2. Copy files from `/dist/include/` folder & the `libportaudio.a` file to the appropriate sidplaywx's `/deps/` folders.
+
+##### (wxWidgets)
+0. Prerequisites: if needed, install the `libgtk-3-dev` and `libcurl-dev` (the last one is needed for our "Check for updates" function).
+1. `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S . -B dist && cmake --build dist`
+	- Exceptional cases (if you get an `#include` error when building the sidplaywx):
+		- You may need to call the `wx-config --cxxflags` to get necessary flags and update the equivalent variable in our sidplaywx CMakeLists.txt
+		- May also be of interest:
+			- `wx-config --libs`
+			- https://wiki.wxwidgets.org/Wx-Config
+			- https://docs.wxwidgets.org/3.2/overview_cmake.html
+2. Copy files from `/dist/include/` & `/dist/lib/` to the appropriate sidplaywx's `/deps/` folders.
 
 #### Building the sidplaywx
 1. Copy contents of the `dev` folder (except the `icon_src` folder and the `SystemColorViewer.pyw`) to the `build` folder (create a `build` folder next to the `dev` folder)
@@ -136,31 +136,31 @@ Once installed you need to **first-time configure** it like so:
 - Extra if you need to install gdb separately for some reason: `pacman -S mingw-w64-ucrt-x86_64-gdb`
 - IMPORTANT: run the terminal via **ucrt64.exe**, **not** default msys2 terminal (otherwise the proper gcc variant might not be used)!
 
-	#### libsidplayfp:
-	* **NOTE:** Building the libsidplayfp from its git master branch is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
-	1. `cd` (with MSYS2 i.e., UCRT64.exe terminal) into the libsidplayfp's root.
-	2. To specify either:
-		1. C++20 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++20"` (new)
-		2. C++14 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++0x"` (older versions of libsidplayfp)
-	3. Finally, run: `./configure LDFLAGS="-static" && make && make install`
-		1. TIP: if doing this for the first time, break down these 3 commands (i.e., they are separated by `&&`) and run them one by one so you can catch any problems more easily.
-	4. Note: the lib will be automatically found by our cmake later (if you've installed the msys into the `C:\msys64\`) and it will get linked statically.
+##### (libsidplayfp)
+* **NOTE:** Building the libsidplayfp from its git master branch is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
+1. `cd` (with MSYS2 i.e., UCRT64.exe terminal) into the libsidplayfp's root.
+2. To specify either:
+	1. C++20 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++20"` (new)
+	2. C++14 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++0x"` (older versions of libsidplayfp)
+3. Finally, run: `./configure LDFLAGS="-static" && make && make install`
+	1. TIP: if doing this for the first time, break down these 3 commands (i.e., they are separated by `&&`) and run them one by one so you can catch any problems more easily.
+4. Note: the lib will be automatically found by our cmake later (if you've installed the msys into the `C:\msys64\`) and it will get linked statically.
 	
-	#### PortAudio
-	1. [Download](http://files.portaudio.com/download.html) the PortAudio stable source release or the master [from the github](https://github.com/PortAudio/portaudio).
-	2. You can use the regular Windows cmd:
-		1. `cd` into the PortAudio's root.
-		2. `cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release`
-		3. `mingw32-make`
-	3. Copy files from `/dist/include/` folder & the `libportaudio.a` file to the appropriate sidplaywx's `/deps/` folders.
+##### (PortAudio)
+1. [Download](http://files.portaudio.com/download.html) the PortAudio stable source release or the master [from the github](https://github.com/PortAudio/portaudio).
+2. You can use the regular Windows cmd:
+	1. `cd` into the PortAudio's root.
+	2. `cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release`
+	3. `mingw32-make`
+3. Copy files from `/dist/include/` folder & the `libportaudio.a` file to the appropriate sidplaywx's `/deps/` folders.
 	
-	#### wxWidgets
-	1. Simply [download](https://www.wxwidgets.org/downloads/) the appropriate pre-built binaries for your compiler (e.g., GCC v14).
-	2. Copy headers & libs to the appropriate sidplaywx's `/deps/` folders.
-	3. IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following wxWidgets' `.dll` files into the sidplaywx's **build** folder: `wxbaseVER_SUFFIX.dll`, `wxbaseVER_xml_SUFFIX.dll`, `wxmswVER_core_SUFFIX.dll`, `wxmswVER_propgrid_SUFFIX.dll` (the exact `VER` version and `_SUFFIX` suffix differs depending on wxWidgets & gcc version etc.).
-	4. TIP: You can also build the wxWidgets yourself in the similar manner to building the PortAudio (in case you want to use a specific GCC version not offered among pre-built binaries).
+##### (wxWidgets)
+1. Simply [download](https://www.wxwidgets.org/downloads/) the appropriate pre-built binaries for your compiler (e.g., GCC v14).
+2. Copy headers & libs to the appropriate sidplaywx's `/deps/` folders.
+3. IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following wxWidgets' `.dll` files into the sidplaywx's **build** folder: `wxbaseVER_SUFFIX.dll`, `wxbaseVER_xml_SUFFIX.dll`, `wxmswVER_core_SUFFIX.dll`, `wxmswVER_propgrid_SUFFIX.dll` (the exact `VER` version and `_SUFFIX` suffix differs depending on wxWidgets & gcc version etc.).
+4. TIP: You can also build the wxWidgets yourself in the similar manner to building the PortAudio (in case you want to use a specific GCC version not offered among pre-built binaries).
 
-#### Building the sidplaywx itself
+#### Building the sidplaywx
 1. The main `CMakeLists.txt` should do the trick (I myself use the Visual Studio Code).
 2. IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following files into the sidplaywx's **build** folder:
 	1. `libgcc_s_seh-1.dll`, `libstdc++-6.dll`, `libwinpthread-1.dll` found in your appropriate MSYS bin folders (e.g., ucrt64 or mingw64).
