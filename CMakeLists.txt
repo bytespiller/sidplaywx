@@ -8,14 +8,15 @@ project(sidplaywx CXX)
 #set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # external headers
-include(${CMAKE_SOURCE_DIR}/deps/include/msw/libsidplayfp/CMakeLists.txt)
-include(${CMAKE_SOURCE_DIR}/deps/include/msw/portaudio/CMakeLists.txt)
-include(${CMAKE_SOURCE_DIR}/deps/include/msw/wxWidgets/CMakeLists.txt)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/include/msw/libsidplayfp)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/include/msw/portaudio)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/wxWidgets/mswu) # must come before the regular wxWidgets include
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/include/msw/wxWidgets)
 
 # external libs
-include(${CMAKE_SOURCE_DIR}/deps/lib/msw/libsidplayfp/CMakeLists.txt)
-include(${CMAKE_SOURCE_DIR}/deps/lib/msw/portaudio/CMakeLists.txt)
-include(${CMAKE_SOURCE_DIR}/deps/lib/msw/wxWidgets/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/CMakeLists_libsidplayfp.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/CMakeLists_portaudio.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/CMakeLists_wxWidgets.txt)
 
 # exe
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*)
