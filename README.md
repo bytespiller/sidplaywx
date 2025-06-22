@@ -26,25 +26,26 @@ The **sidplaywx** uses [libsidplayfp](https://github.com/libsidplayfp/libsidplay
 |Each setting in the Preferences is accompanied with a help-text displayed in the bottom area. This way the Preferences also serves as a documentation/help source for sidplaywx's many features.|
 
 ## Platforms
-While the project uses GCC and CMake, at the moment the focus is on the Windows version. A proper Linux support is planned before the v1.0 release.
+This project uses the GCC and the CMake, and at the moment Windows and Linux are supported.
 
 ## Planned features for v1.0
-The current version of the sidplaywx is 0.x.x, so in addition to bugfixes and common sense updates, I consider at least _these_ features are needed before the sidplaywx can graduate to version 1.0:
+The current version of the sidplaywx is 0.x.x (alpha), so in addition to bugfixes and common sense updates, I consider at least _these_ features are needed before the sidplaywx can graduate to version 1.0:
 - Playlist improvements such as <del>duration columns</del>, reordering<del>, remembering last state and playlist file save/load</del> etc.
-- Misc. necessary features such as remembering window size & position etc.
+- Misc. necessary features <del>such as remembering window size & position</del> etc.
 - Exporting tunes to WAV
 - [<del>STIL</del>](https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/STIL.txt) <del>support for displaying tune comments</del>
-- Native Linux support
-  - Side note: while it currently works fine under Wine, there are some glitches such as STIL not being displayed (due to a layout problem) etc.
-- Theming support / dark theme
+- <del>Native Linux support</del>
+- <del>Theming support / dark theme</del>
 
 ## Download
 * You can find a pre-built ready-to-use binary distribution(s) in the [Releases](https://github.com/bytespiller/sidplaywx/releases) sidebar.
+	* More package formats are planned for Linux (only AppImage at the moment).
 
 ## Alternatives
 Some alternatives to sidplaywx for playing the SID tunes I've tried and liked are:
 * Windows: foobar2000 + foo_sid plugin
 * Linux: DeaDBeeF player (note: it uses older/no longer maintained libsidplay2)
+* Mac: I don't have a Mac so I haven't tried it, but this looks great: https://github.com/Alexco500/sidplay5
 
 ## Contributing, ideas, comments, issues
 If you have an idea or a comment, feel free to post it in the [Discussions](https://github.com/bytespiller/sidplaywx/discussions). Issues can be reported [here](https://github.com/bytespiller/sidplaywx/issues). There is also an email address provided in the application's Help > About box.
@@ -77,68 +78,93 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 <details>
   <summary>Click to expand!</summary>
 
-### Windows (7, 10, 11)
+### Linux
+
+#### Prerequisites
+- GCC version with C++17 support is required (minimum I've tried is gcc-12).
+- Don't forget the `sudo apt-get update` and `sudo apt-get install build-essential` as well as `sudo apt-get install cmake`
+
+	#### libsidplayfp
+	* **NOTE:** Building the libsidplayfp from its git master branch is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
+	1. To enable C++20 set in the terminal `CXXFLAGS="$CXXFLAGS -std=c++20"`
+	2. Commands to build statically: `./configure LDFLAGS="-static" && make`
+	3. Copy the following *includes* (with their folder structures) to the appropriate `include` folder in the sidplaywx's `/deps/`:
+		- `/builders/residfp.h`
+		- `sidbuilder.h`, `SidConfig.h`, `siddefs.h`, `SidInfo.h`, `sidplayfp.h`, `SidTune.h`, `SidTuneInfo.h`, `sidversion.h`
+	4. Copy the `/src/.libs/libsidplayfp.a` (`.libs` is a *hidden* folder) to the appropriate `lib` folder in the sidplaywx's `/deps/`
+	
+	#### PortAudio
+	0. Prerequisites: you must have installed the `libpulse-dev`, ALSA (`libasound2-dev`), `libsndio-dev`, `libjack-dev` BEFORE building the PortAudio, otherwise the resultant PortAudio may not find any devices.
+		1. See the main CMakeLists.txt for which ones are relevant.
+	1. `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S . -B dist && cmake --build dist`
+		1. Note: I had to use the git master version, had no luck with the stable version on the Xubuntu 24.04
+	2. Copy files from `/dist/include/` folder & the `libportaudio.a` file to the appropriate sidplaywx's `/deps/` folders.
+	
+	#### wxWidgets
+	0. Prerequisites: if needed, install the `libgtk-3-dev` and `libcurl-dev` (the last one is needed for our "Check for updates" function).
+	1. `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S . -B dist && cmake --build dist`
+		1. Exceptional cases (if you get an `#include` error when building the sidplaywx):
+			1. You may need to call the `wx-config --cxxflags` to get necessary flags and update the equivalent variable in our sidplaywx CMakeLists.txt
+			2. May also be of interest:
+				1. `wx-config --libs`
+				2. https://wiki.wxwidgets.org/Wx-Config
+				3. https://docs.wxwidgets.org/3.2/overview_cmake.html
+	2. Copy files from `/dist/include/` & `/dist/lib/` to the appropriate sidplaywx's `/deps/` folders.
+
+#### Building the sidplaywx
+1. Copy contents of the `dev` folder (except the `icon_src` folder and the `SystemColorViewer.pyw`) to the `build` folder (create a `build` folder next to the `dev` folder)
+2. You can rename the `CMakeLists_linux.txt` to `CMakeLists.txt`
+3. `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S . -B build && cmake --build build`
+- Tip: If the sidplaywx fails to launch after it was successfully built, try via terminal to see if something is missing.
+- Tip: if trying to execute the sidplaywx in VSCode and getting exit code 177, you need to edit your config: `"terminal.integrated.env.linux": { "GTK_PATH": null }` and restart VSCode (or for one-off thing run this in VS terminal: `unset GTK_PATH`)
+
+***
+
+### Windows (10, 11)
+
+#### Prerequisites
 At the moment, the easiest way to build the sidplaywx on Windows is probably by using the [MSYS2](https://www.msys2.org/) environment.<br>
-Note: you should install it into the default `C:\msys64\` path in order for hardcoded cmake paths to work out-of-the-box.
+Note: you should install it into the default `C:\msys64\` path in order for some hardcoded cmake paths to work out-of-the-box.
 
 Once installed you need to **first-time configure** it like so:
-* **NOTE:** MSYS2 supports modern UCRT64 and legacy MINGW environments. UCRT64 is recommended these days.
-* Update package lists etc.: `pacman -Syu` and after restart (if needed): `pacman -Su`
-* Prerequisites: `pacman -S base-devel`
-* msvcrt-compatible gcc:
-  * UCRT64: `pacman -S mingw-w64-ucrt-x86_64-gcc`
-  * MINGW: `pacman -S mingw-w64-x86_64-gcc`
-* Tools (e.g., PortAudio needs those):
-	 * UCRT64: `pacman -S mingw-w64-ucrt-x86_64-cmake && pacman -S mingw-w64-ucrt-x86_64-make`
-	 * MINGW: `pacman -S mingw-w64-x86_64-cmake && pacman -S mingw-w64-x86_64-make`
-* Extra if you need to install gdb separately for some reason:
-	 * UCRT64: `pacman -S mingw-w64-ucrt-x86_64-gdb`
-	 * MINGW: `pacman -S mingw-w64-x86_64-gdb`
-* In your PATH environment variable add either the:
-	 * UCRT64: "C:\msys64\ucrt64\bin"
-	 * MINGW: "C:\msys64\mingw64\bin"
-* IMPORTANT: run the terminal via **ucrt64.exe** (or mingw64.exe respectively), **not** default msys2 terminal (otherwise the proper gcc variant might not be used)!
+- **NOTE:** MSYS2 supports modern UCRT64 and legacy MINGW environments. UCRT64 is recommended these days, and these instructions assume using it.
+1. Update package lists etc.: `pacman -Syu` and after restart (if needed): `pacman -Su`
+2. Install develpment prerequisites: `pacman -S base-devel`
+3. Install msvcrt-compatible gcc: `pacman -S mingw-w64-ucrt-x86_64-gcc`
+4. Install cmake & make tools (e.g., PortAudio needs those): `pacman -S mingw-w64-ucrt-x86_64-cmake && pacman -S mingw-w64-ucrt-x86_64-make`
+5. In your PATH environment variable add: "C:\msys64\ucrt64\bin"
+- Extra if you need to install gdb separately for some reason: `pacman -S mingw-w64-ucrt-x86_64-gdb`
+- IMPORTANT: run the terminal via **ucrt64.exe**, **not** default msys2 terminal (otherwise the proper gcc variant might not be used)!
 
-Building libsidplayfp:
-* **NOTE:** Building the libsidplayfp from the master is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
-* `cd` (with MSYS2 e.g., UCRT64.exe terminal) into the libsidplayfp's root.
-* To specify either:
-  * C++20 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++20"` (new)
-  * C++14 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++0x"` (older versions of libsidplayfp)
-* Finally, run: `./configure LDFLAGS="-static" && make && make install`
-  * TIP: if doing this for the first time, break down these 3 commands (i.e., they are separated by `&&`) and run them one by one so you can catch any problems more easily.
-* Note: the lib will be automatically found by our cmake later (if you've installed the msys into the `C:\msys64\`) and it will get linked statically.
+	#### libsidplayfp:
+	* **NOTE:** Building the libsidplayfp from its git master branch is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
+	1. `cd` (with MSYS2 i.e., UCRT64.exe terminal) into the libsidplayfp's root.
+	2. To specify either:
+		1. C++20 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++20"` (new)
+		2. C++14 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++0x"` (older versions of libsidplayfp)
+	3. Finally, run: `./configure LDFLAGS="-static" && make && make install`
+		1. TIP: if doing this for the first time, break down these 3 commands (i.e., they are separated by `&&`) and run them one by one so you can catch any problems more easily.
+	4. Note: the lib will be automatically found by our cmake later (if you've installed the msys into the `C:\msys64\`) and it will get linked statically.
+	
+	#### PortAudio
+	1. [Download](http://files.portaudio.com/download.html) the PortAudio stable source release or the master [from the github](https://github.com/PortAudio/portaudio).
+	2. You can use the regular Windows cmd:
+		1. `cd` into the PortAudio's root.
+		2. `cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release`
+		3. `mingw32-make`
+	3. Copy files from `/dist/include/` folder & the `libportaudio.a` file to the appropriate sidplaywx's `/deps/` folders.
+	
+	#### wxWidgets
+	1. Simply [download](https://www.wxwidgets.org/downloads/) the appropriate pre-built binaries for your compiler (e.g., GCC v14).
+	2. Copy headers & libs to the appropriate sidplaywx's `/deps/` folders.
+	3. IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following wxWidgets' `.dll` files into the sidplaywx's **build** folder: `wxbaseVER_SUFFIX.dll`, `wxbaseVER_xml_SUFFIX.dll`, `wxmswVER_core_SUFFIX.dll`, `wxmswVER_propgrid_SUFFIX.dll` (the exact `VER` version and `_SUFFIX` suffix differs depending on wxWidgets & gcc version etc.).
+	4. TIP: You can also build the wxWidgets yourself in the similar manner to building the PortAudio (in case you want to use a specific GCC version not offered among pre-built binaries).
 
-Building Portaudio:
-* [Download](http://files.portaudio.com/download.html) the PortAudio stable source release.
-* `cd` (with MSYS2 e.g., UCRT64.exe terminal) into the PortAudio's root.
-* `cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release`
-* `mingw32-make`
-* Copy headers and libs into the following new folder (so our cmake can find it automatically):
-  * _headers_ into the `C:\Program Files\PortAudio\include\`
-  * _libs_ into the `C:\Program Files\PortAudio\include\lib\`
-
-wxWidgets:
-* Simply [download](https://www.wxwidgets.org/downloads/) the appropriate pre-built binaries for your compiler (e.g., GCC v13).
-* Copy them into the new folder:
-  * _headers_ into the `C:\wxWidgets\include\` (with `msvc` and `wx` subfolders in there)
-  * _libs_ into the `C:\wxWidgets\gcc_lib\`
-* IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following wxWidgets' `.dll` files into the sidplaywx's **build** folder: `wxbase315u_SUFFIX.dll`, `wxbase315u_xml_SUFFIX.dll`, `wxmsw315u_core_SUFFIX.dll`, `wxmsw315u_propgrid_SUFFIX.dll` (the exact `_SUFFIX` suffixes differ depending on gcc version etc.).
-* TIP: You can also build the wxWidgets yourself in the similar manner to building the PortAudio (in case you want to use a specific GCC version not offered among pre-built binaries).
-
-Finally building the actual **sidplaywx** application:
-* The main `CMakeLists.txt` should do the trick (I myself use the Visual Studio Code).
-* IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following files into the sidplaywx's **build** folder:
-  * `libgcc_s_seh-1.dll`, `libstdc++-6.dll`, `libwinpthread-1.dll` found in your appropriate MSYS bin folders (e.g., ucrt64 or mingw64).
-  * The entire `dev\theme` folder (so you end up with `build\theme`).
-  * The `dev\bundled-Songlengths.md5` file (so you end up with `build\bundled-Songlengths.md5`).
-  * The `dev\bundled-STIL.txt` file (so you end up with `build\bundled-STIL.txt`).
-  * Tip: you can see the [release](https://github.com/bytespiller/sidplaywx/releases) package for example of bundled dependency files if you get stuck.
-
----
-
-### Linux
-_Coming soon, stay tuned..._
-<br><br>
-Please note that while the sidplaywx application runs fine under Wine, it is not fully supported that way (e.g., STIL isn't displayed due to a layout problem where the label is zero width, and there may be issues with text colors, styles etc.).
-</details>
+#### Building the sidplaywx itself
+1. The main `CMakeLists.txt` should do the trick (I myself use the Visual Studio Code).
+2. IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following files into the sidplaywx's **build** folder:
+	1. `libgcc_s_seh-1.dll`, `libstdc++-6.dll`, `libwinpthread-1.dll` found in your appropriate MSYS bin folders (e.g., ucrt64 or mingw64).
+	2. The entire `dev\theme` folder (so you end up with `build\theme`).
+	3. The `dev\bundled-Songlengths.md5` file (so you end up with `build\bundled-Songlengths.md5`).
+	4. The `dev\bundled-STIL.txt` file (so you end up with `build\bundled-STIL.txt`).
+	- Tip: you can see the [release](https://github.com/bytespiller/sidplaywx/releases) package for example of bundled dependency files if you get stuck.
