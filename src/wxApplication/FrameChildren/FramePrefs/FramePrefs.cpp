@@ -321,7 +321,7 @@ void FramePrefs::OnPropertyGridChanging(wxPropertyGridEvent& evt)
         if (!wxFileExists(pendingValue))
         {
             evt.Veto();
-            evt.SetValidationFailureBehavior(wxPG_VFB_BEEP | wxPG_VFB_MARK_CELL);
+            evt.SetValidationFailureBehavior(wxPGVFBFlags::Beep | wxPGVFBFlags::MarkCell);
         }
     }
     else if (strcmp(cId, Settings::AppSettings::ID::RomKernalPath) == 0)
@@ -331,7 +331,7 @@ void FramePrefs::OnPropertyGridChanging(wxPropertyGridEvent& evt)
         if (!seemsOk)
         {
             evt.Veto();
-            evt.SetValidationFailureBehavior(wxPG_VFB_BEEP | wxPG_VFB_MARK_CELL);
+            evt.SetValidationFailureBehavior(wxPGVFBFlags::Beep | wxPGVFBFlags::MarkCell);
             wxMessageBox(Strings::Error::MSG_ERR_ROM_KERNAL, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
         }
         else if (SidDecoder _tempSidDecoder; _tempSidDecoder.TrySetRoms(pendingValue, L"", L"").IsValidated(RomUtil::RomType::Kernal))
@@ -346,7 +346,7 @@ void FramePrefs::OnPropertyGridChanging(wxPropertyGridEvent& evt)
         if (!seemsOk)
         {
             evt.Veto();
-            evt.SetValidationFailureBehavior(wxPG_VFB_BEEP | wxPG_VFB_MARK_CELL);
+            evt.SetValidationFailureBehavior(wxPGVFBFlags::Beep | wxPGVFBFlags::MarkCell);
             wxMessageBox(Strings::Error::MSG_ERR_ROM_BASIC, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
         }
         else if (SidDecoder _tempSidDecoder; _tempSidDecoder.TrySetRoms(L"", pendingValue, L"").IsValidated(RomUtil::RomType::Basic))
@@ -361,7 +361,7 @@ void FramePrefs::OnPropertyGridChanging(wxPropertyGridEvent& evt)
         if (!seemsOk)
         {
             evt.Veto();
-            evt.SetValidationFailureBehavior(wxPG_VFB_BEEP | wxPG_VFB_MARK_CELL);
+            evt.SetValidationFailureBehavior(wxPGVFBFlags::Beep | wxPGVFBFlags::MarkCell);
             wxMessageBox(Strings::Error::MSG_ERR_ROM_CHARGEN, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
         }
         else if (SidDecoder _tempSidDecoder; _tempSidDecoder.TrySetRoms(L"", L"", pendingValue).IsValidated(RomUtil::RomType::Chargen))
