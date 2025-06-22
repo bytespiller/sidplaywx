@@ -19,7 +19,7 @@
 #pragma once
 
 #include "../Settings/SettingsBase.h"
-#include "../UIElements/CompositeSeekbar.h"
+#include "../UIElements/CompositeSeekBar.h"
 #include "../UIElements/RepeatModeButton.h"
 
 namespace Settings
@@ -126,12 +126,18 @@ namespace Settings
 		}
 
 	public:
+#if __WXGTK__
+		static constexpr char PREFERRED_DEFAULT_AUDIO_DEVICE_NAME[] = "PulseAudio: Default Sink";
+#else
+		static constexpr char PREFERRED_DEFAULT_AUDIO_DEVICE_NAME[] = "";
+#endif
+
 		std::vector<Option> GetDefaultSettings() const override
 		{
 			return
 			{
 				// Prefs
-				DefaultOption(ID::AudioOutputDevice, ""),
+				DefaultOption(ID::AudioOutputDevice, PREFERRED_DEFAULT_AUDIO_DEVICE_NAME),
 				DefaultOption(ID::LowLatency, true),
 				DefaultOption(ID::ForceMono, false),
 

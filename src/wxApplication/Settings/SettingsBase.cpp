@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,11 @@
 
 #include "SettingsBase.h"
 #include "../Config/UIStrings.h"
+#include "../Helpers/HelpersWx.h"
+
+#include <wx/filename.h>
 #include <wx/xml/xml.h>
+
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -57,7 +61,7 @@ namespace Settings
 	// Main class -------------------------------------------------
 
 	SettingsBase::SettingsBase(const char* const filename) :
-		_filename(filename)
+		_filepath(Helpers::Wx::Files::GetConfigFilePath(filename))
 	{
 	}
 
@@ -66,7 +70,7 @@ namespace Settings
 		ResetTo(defaults); // Defaults are a base on which the values from the config file are applied. Any Options in the config file which don't exist in the defaults (e.g., deprecated Options in the config file) will be ignored.
 
 		std::unique_ptr<wxXmlDocument> doc = std::make_unique<wxXmlDocument>();
-		if (!wxFileExists(_filename) || !doc->Load(_filename))
+		if (!wxFileExists(_filepath) || !doc->Load(_filepath))
 		{
 			return false;
 		}
@@ -138,7 +142,15 @@ namespace Settings
 		}
 
 		doc->SetRoot(root);
-		return doc->Save(_filename);
+
+#ifndef WIN32
+		if (!wxDirExists(_filepath))
+		{
+			wxFileName::Mkdir(wxFileName(_filepath).GetPath(), wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+		}
+#endif
+
+		return doc->Save(_filepath);
 	}
 
 	Option* SettingsBase::GetOption(const wxString& name)
@@ -174,6 +186,11 @@ namespace Settings
 		{
 			AddOption(dOpt);
 		}
+	}
+
+	const wxString& SettingsBase::GetSettingsFilePath() const
+	{
+		return _filepath;
 	}
 
 	bool SettingsBase::TryUpdateOption(const Option& option)

@@ -1,0 +1,2 @@
+add_library(libportaudio STATIC IMPORTED)
+set_target_properties(libportaudio PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_LIST_DIR}/portaudio/libportaudio.a")

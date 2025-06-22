@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 
@@ -53,5 +54,5 @@ namespace RomUtil
 	};
 
 	// Sanity check if non-empty paths point to a missing or obviously incorrect files. Paths should be absolute.
-    RomStatus PreCheckRoms(const std::wstring& pathKernal, const std::wstring& pathBasic, const std::wstring& pathChargen);
+    RomStatus PreCheckRoms(const std::filesystem::path& pathKernal, const std::filesystem::path& pathBasic, const std::filesystem::path& pathChargen);
 }

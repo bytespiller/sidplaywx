@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2024-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #include "Stil.h"
 #include "PreIndex.h"
 
-static const std::wstring STIL_VERSION_PREFIX(L"#  STIL v");
+static const std::string STIL_VERSION_PREFIX("#  STIL v");
 static constexpr const char STIL_CHAR_COMMENT = '#';
 static constexpr size_t STIL_LABEL_LENGTH = 9; // Labels (NAME, TITLE, ARTIST, AUTHOR, COMMENT) always end with a colon and a space and have 9 characters total (all padded with spaces except the COMMENT).
 
@@ -28,24 +28,24 @@ static constexpr size_t STIL_LABEL_LENGTH = 9; // Labels (NAME, TITLE, ARTIST, A
 namespace
 {
 	// Joins the vector to a string.
-	inline std::wstring Join(const std::vector<std::wstring>& data, const std::wstring& separator = L", ", bool showCount = false)
+	inline std::string Join(const std::vector<std::string>& data, const std::string& separator = ", ", bool showCount = false)
 	{
 		if (data.empty())
 		{
-			return L"";
+			return "";
 		}
 
-		std::wstring ret;
+		std::string ret;
 
 		size_t cnt = 0;
 		const size_t len = data.size();
-		for (const std::wstring& item : data)
+		for (const std::string& item : data)
 		{
 			++cnt;
 
 			if (showCount && len > 1)
 			{
-				ret.append(std::to_wstring(cnt) + L") ");
+				ret.append(std::to_string(cnt) + ") ");
 			}
 
 			ret.append(item);
@@ -60,7 +60,7 @@ namespace
 	}
 
 	// Adds a line content (skipping the label prefix) into the target field under an existing key.
-	inline void AddLineContent(Stil::Field& target, int key, const std::wstring& line)
+	inline void AddLineContent(Stil::Field& target, int key, const std::string& line)
 	{
 		target[key].emplace_back(line.substr(STIL_LABEL_LENGTH));
 	}
@@ -69,11 +69,11 @@ namespace
 #pragma endregion
 #pragma region Info struct
 
-std::vector<std::wstring> Stil::Info::GetField(const Field& field, int subsong) const
+std::vector<std::string> Stil::Info::GetField(const Field& field, int subsong) const
 {
 	if (field.empty())
 	{
-		return std::vector<std::wstring>();
+		return std::vector<std::string>();
 	}
 
 	if (field.find(subsong) != field.end())
@@ -86,12 +86,12 @@ std::vector<std::wstring> Stil::Info::GetField(const Field& field, int subsong) 
 		return field.at(1); // Fallback to the first and only one.
 	}
 
-	return std::vector<std::wstring>(); // Any others are specific to some other sub-songs, so we came up empty for this particular subsong.
+	return std::vector<std::string>(); // Any others are specific to some other sub-songs, so we came up empty for this particular subsong.
 }
 
-std::wstring Stil::Info::GetFieldAsString(const Field& field, int subsong, const std::wstring& separator, bool showCount) const
+std::string Stil::Info::GetFieldAsString(const Field& field, int subsong, const std::string& separator, bool showCount) const
 {
-	const std::vector<std::wstring>& data = Stil::Info::GetField(field, subsong);
+	const std::vector<std::string>& data = Stil::Info::GetField(field, subsong);
 	return Join(data, separator, showCount);
 }
 
@@ -108,14 +108,14 @@ Stil::~Stil()
 	Unload();
 }
 
-bool Stil::TryLoad(const std::wstring& stilFilepath)
+bool Stil::TryLoad(const std::filesystem::path& stilFilepath)
 {
 	Unload();
 	std::string stilVersion;
 
 	// Lock & load the STIL.txt file
 	{
-		_stilDataStream.open(stilFilepath.c_str(), std::ios::binary);
+		_stilDataStream.open(stilFilepath, std::ios::binary);
 		_stilDataStream.clear();
 		if (!_stilDataStream.good())
 		{
@@ -124,17 +124,16 @@ bool Stil::TryLoad(const std::wstring& stilFilepath)
 
 		// Determine the STIL.txt version
 		{
-			std::wstring line;
+			std::string line;
 			const size_t len = STIL_VERSION_PREFIX.length();
 			while (std::getline(_stilDataStream, line))
 			{
 				if (line.substr(0, len) == STIL_VERSION_PREFIX)
 				{
-					const size_t end = line.find(L' ', len);
-					if (end != std::wstring::npos)
+					const size_t end = line.find(' ', len);
+					if (end != std::string::npos)
 					{
-						const std::wstring& wideStilVersion = line.substr(len, end - len);
-						stilVersion = std::string(wideStilVersion.begin(), wideStilVersion.end()); // Reminder: we naively convert wstring to string here since the HVSC version is always ASCII so there's no need for complications.
+						stilVersion = line.substr(len, end - len);
 					}
 					break;
 				}
@@ -195,7 +194,8 @@ Stil::Info Stil::Get(const std::string& tuneHvscPath)
 			_stilDataStream.seekg(itStart->second);
 
 			int subsongKey = 1; // Reminder: this is not index, but an unordered dict key!
-			std::wstring line;
+			std::string line;
+
 			while (std::getline(_stilDataStream, line))
 			{
 				ClipCarriageReturn(line); // Reminder: any existing "line" iterators are invalid now.
@@ -206,10 +206,10 @@ Stil::Info Stil::Get(const std::string& tuneHvscPath)
 					break;
 				}
 
-				const wchar_t firstChar = line.front(); // Reminder: shouldn't call .front() on an empty string, thus we have a preceding check for it above.
+				const char firstChar = line.front(); // Reminder: shouldn't call .front() on an empty string, thus we have a preceding check for it above.
 
 				// Treat beginning of the next tune as the end of this tune's data
-				if (firstChar == L'/')
+				if (firstChar == '/')
 				{
 					break;
 				}
@@ -221,7 +221,7 @@ Stil::Info Stil::Get(const std::string& tuneHvscPath)
 				}
 
 				// Subsong selector
-				if (firstChar == L'(' && line.length() > 2 && line.at(1) == L'#')
+				if (firstChar == '(' && line.length() > 2 && line.at(1) == '#')
 				{
 					subsongKey = std::stoi(line.substr(2, line.length() - 1));
 					continue;
@@ -230,43 +230,43 @@ Stil::Info Stil::Get(const std::string& tuneHvscPath)
 				// Extract NAME, TITLE, ARTIST, AUTHOR, COMMENT fields
 				if (line.length() > STIL_LABEL_LENGTH)
 				{
-					const std::wstring& fieldLabel = line.substr(0, STIL_LABEL_LENGTH);
+					const std::string& fieldLabel = line.substr(0, STIL_LABEL_LENGTH);
 
-					if (fieldLabel == L"   NAME: ")
+					if (fieldLabel == "   NAME: ")
 					{
 						AddLineContent(data.names, subsongKey, line);
 						continue;
 					}
 
-					if (fieldLabel == L"  TITLE: ")
+					if (fieldLabel == "  TITLE: ")
 					{
 						AddLineContent(data.titles, subsongKey, line);
 						continue;
 					}
 
-					if (fieldLabel == L" ARTIST: ")
+					if (fieldLabel == " ARTIST: ")
 					{
 						AddLineContent(data.artists, subsongKey, line);
 						continue;
 					}
 
-					if (fieldLabel == L" AUTHOR: ")
+					if (fieldLabel == " AUTHOR: ")
 					{
 						AddLineContent(data.authors, subsongKey, line);
 						continue;
 					}
 
-					if (fieldLabel == L"COMMENT: ")
+					if (fieldLabel == "COMMENT: ")
 					{
 						AddLineContent(data.comments, subsongKey, line);
 						continue;
 					}
-					else if (fieldLabel == L"         ") // Multi-line comment's next line.
+					else if (fieldLabel == "         ") // Multi-line comment's next line.
 					{
 						// Append it only if an actual comment exists (it would be weird if not, but we do this check anyway)
 						if (data.comments.find(subsongKey) != data.comments.end() && !data.comments.at(subsongKey).back().empty())
 						{
-							data.comments[subsongKey].back().append(L" ").append(line.substr(STIL_LABEL_LENGTH));
+							data.comments[subsongKey].back().append(" ").append(line.substr(STIL_LABEL_LENGTH));
 						}
 
 						continue;

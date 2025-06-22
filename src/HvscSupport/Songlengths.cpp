@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,11 +35,11 @@ static constexpr const char* const INI_SECTION_DATABASE = "[Database]";
 
 // -----------------------------------------------------------
 
-bool Songlengths::TryLoad(const std::wstring& songlengthsMd5Filepath)
+bool Songlengths::TryLoad(const std::filesystem::path& songlengthsMd5Filepath)
 {
 	Unload();
 
-	std::ifstream file(songlengthsMd5Filepath.c_str());
+	std::ifstream file(songlengthsMd5Filepath);
 
 	bool inDatabaseSection = false;
 	std::string line;
@@ -47,6 +47,11 @@ bool Songlengths::TryLoad(const std::wstring& songlengthsMd5Filepath)
 	std::string songHvscPath;
 	while (std::getline(file, line))
 	{
+		if (line.at(line.length() - 1) == '\r') // Clipping the CR is needed on Linux.
+		{
+			line.erase(line.length() - 1);
+		}
+
 		const char& firstChar = line.front();
 
 		// Ignore if not within Database section(s)

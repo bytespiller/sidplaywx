@@ -8,14 +8,15 @@ project(sidplaywx CXX)
 #set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # external headers
-include(${CMAKE_SOURCE_DIR}/deps/include/sidplayfp/CMakeLists_msw.txt)
-include(${CMAKE_SOURCE_DIR}/deps/include/portaudio/CMakeLists_msw.txt)
-include(${CMAKE_SOURCE_DIR}/deps/include/wxWidgets/CMakeLists_msw.txt)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/include/msw/libsidplayfp)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/include/msw/portaudio)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/wxWidgets/mswu) # must come before the regular wxWidgets include
+include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/include/msw/wxWidgets)
 
 # external libs
-include(${CMAKE_SOURCE_DIR}/deps/lib/sidplayfp/CMakeLists_msw.txt)
-include(${CMAKE_SOURCE_DIR}/deps/lib/portaudio/CMakeLists_msw.txt)
-include(${CMAKE_SOURCE_DIR}/deps/lib/wxWidgets/CMakeLists_msw.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/CMakeLists_libsidplayfp.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/CMakeLists_portaudio.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/CMakeLists_wxWidgets.txt)
 
 # exe
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*)
@@ -33,6 +34,7 @@ target_link_libraries(${PROJECT_NAME}
     setupapi dsound dxguid winmm # Windows-specific (for audio)
     Threads::Threads
     -static-libgcc -static-libstdc++ # needed for MinGW posix threading
+    -liconv # string encoding operations (manual)
 
     -mwindows # WxWidgets, don't open console/terminal
     liboleacc.a # WxWidgets MSW, must be defined BEFORE the wxWidgets_core
@@ -46,10 +48,10 @@ target_link_libraries(${PROJECT_NAME}
     uxtheme kernel32 user32 gdi32 comdlg32 winspool winmm shell32 comctl32 ole32 oleaut32 uuid rpcrt4 advapi32 # wxWidgets MSW
 )
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Werror -DHAVE_CONFIG_H -DHAVE_CXX11)
+target_compile_options(${PROJECT_NAME} PRIVATE -Werror -DHAVE_CONFIG_H -DHAVE_CXX11) # TODO: try -fno-ms-extensions for extra errors (ISO standard violations and such)
 #target_compile_options(${PROJECT_NAME} PUBLIC -g -O0 -Werror -Wall -Wextra -pedantic) # TEMP!!!
 
 # CPack
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+#set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+#set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+#include(CPack)

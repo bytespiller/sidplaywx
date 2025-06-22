@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2023-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2023-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ UIElements::Playlist::PlaylistIconId PlaylistTreeModelNode::GetIconId() const
 PlaylistTreeModelNode& PlaylistTreeModelNode::AddChild(PlaylistTreeModelNode* childToAdopt, PlaylistTreeModelNode::PassKey<UIElements::Playlist::Playlist>)
 {
 	assert(_parent == nullptr); // Adding children to children is unexpected usecase.
-	return *_children.emplace_back(std::move(childToAdopt)).get();
+	return *_children.emplace_back(childToAdopt).get();
 }
 
 wxDataViewItemAttr& PlaylistTreeModelNode::GetItemAttr(PlaylistTreeModelNode::PassKey<UIElements::Playlist::Playlist>)
@@ -135,6 +135,29 @@ PlaylistTreeModel::PlaylistTreeModel(const UIElements::Playlist::PlaylistIcons& 
 {
 }
 
+std::unique_ptr<void, std::function<void(void*)>> PlaylistTreeModel::PrepareDirty(std::function<void()> notifier)
+{
+#ifndef WIN32
+	BeforeReset();
+#endif
+
+	// Use a dummy non-null pointer so that the deleter always runs
+	void* const dummy = reinterpret_cast<void*>(1);
+
+	// Return a unique_ptr with a custom deleter lambda. When the unique_ptr goes out of scope, our lambda gets called, automatically invoking the AfterReset() / notifier.
+	return std::unique_ptr<void, std::function<void(void*)>>
+	(
+		dummy, [this, notifier = std::move(notifier)](void*)
+		{
+#ifndef WIN32
+			AfterReset();
+#else
+			notifier();
+#endif
+		}
+	);
+}
+
 bool PlaylistTreeModel::HasContainerColumns(const wxDataViewItem& item) const
 {
 	const PlaylistTreeModelNode* const node = TreeItemToModelNode(item);
@@ -154,6 +177,10 @@ void PlaylistTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& item,
 			if (nodeIconId != UIElements::Playlist::PlaylistIconId::NoIcon)
 			{
 				variant = wxVariant(*_playlistIcons.GetIconList().at(nodeIconId)); // This severely impacts the scrolling performance on MSW (issue with wxWidgets' wxDataViewCtrl indirection design).
+			}
+			else
+			{
+				variant = wxVariant(wxNullBitmap);
 			}
 			break;
 		}
@@ -176,6 +203,10 @@ void PlaylistTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& item,
 			{
 				variant = Helpers::Wx::GetTimeFormattedString(node->duration, true);
 			}
+			else
+			{
+				variant = wxEmptyString;
+			}
 			break;
 		}
 		case ColumnId::Author:
@@ -188,8 +219,8 @@ void PlaylistTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& item,
 			variant = node->copyright;
 			break;
 		}
-		default:
-			throw std::out_of_range(std::to_string(col)); // Note: wxWidgets will eat this and won't throw any visible errors. Only useful for setting a breakpoint here.
+		//default: // Reminder: dummy column always ends up here.
+			//throw std::out_of_range(std::to_string(col)); // Note: wxWidgets will eat this and won't throw any visible errors. We shouldn't throw here as it's expensive in vain.
 	}
 }
 

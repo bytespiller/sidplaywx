@@ -35,5 +35,16 @@
 /build/*
 /src/build/*
 /src/.vscode/*
+
+# Built dependencies
+/deps/include/**
+!/deps/include/**/
+!deps/include/**/*.txt
+
+/deps/lib/**
+!/deps/lib/**/
+!/deps/lib/**/*.txt
+
+# Misc. generated stuff
 *.log
 *.pdb

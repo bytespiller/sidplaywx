@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ namespace
 {
     wxMilliClock_t lastFileListReceptionTime = 0;
 
-    void WarnRomLoadFailed(const std::wstring& romPath, const char* errMessage)
+    void WarnRomLoadFailed(const wxString& romPath, const char* errMessage)
     {
         const wxString additionalInfo = wxFileExists(romPath) ? "" : wxString::Format("\n%s", Strings::Error::MSG_ERR_ROM_FILE_NOT_FOUND);
         wxMessageBox(errMessage + additionalInfo, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
@@ -162,10 +162,10 @@ bool MyApp::OnInit()
         if (initSuccess)
         {
             // Load ROMs
-            const std::wstring romPathKernal = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomKernalPath)->GetValueAsString().ToStdWstring());
-            const std::wstring romPathBasic = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomBasicPath)->GetValueAsString().ToStdWstring());
-            const std::wstring romPathChargen = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomChargenPath)->GetValueAsString().ToStdWstring());
-            const RomUtil::RomStatus& romStatus = _playback->TrySetRoms(romPathKernal, romPathBasic, romPathChargen);
+            const wxString& romPathKernal = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomKernalPath)->GetValueAsString().ToStdWstring());
+            const wxString& romPathBasic = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomBasicPath)->GetValueAsString().ToStdWstring());
+            const wxString& romPathChargen = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomChargenPath)->GetValueAsString().ToStdWstring());
+            const RomUtil::RomStatus& romStatus = _playback->TrySetRoms(romPathKernal.ToStdWstring(), romPathBasic.ToStdWstring(), romPathChargen.ToStdWstring());
 
             if (!romPathKernal.empty() && !romStatus.IsValidated(RomUtil::RomType::Kernal))
             {
@@ -190,6 +190,7 @@ bool MyApp::OnInit()
 
             lastFileListReceptionTime = wxGetLocalTimeMillis(); // Must be before FramePlayer init.
             _framePlayer = new FramePlayer(Strings::FramePlayer::WINDOW_TITLE, wxDefaultPosition, wxDefaultSize, *this);
+            _framePlayer->SetClientSize(_framePlayer->GetClientSize().GetWidth() + 30, _framePlayer->GetClientSize().GetHeight());
             _framePlayer->Show();
 
             _instanceManager->RegisterFileListIncomingNotifyCallback([this]()
@@ -263,7 +264,7 @@ void MyApp::Play(const wxString& filename, unsigned int subsong, int preRenderDu
 
     StopPlayback();
 
-    bool success = false;
+    PlaybackController::PlaybackAttemptStatus status = PlaybackController::PlaybackAttemptStatus::Success;
 
     {
         std::unique_ptr<BufferHolder> bufferHolder;
@@ -277,16 +278,24 @@ void MyApp::Play(const wxString& filename, unsigned int subsong, int preRenderDu
             bufferHolder = Helpers::Wx::Files::GetFileContentFromDisk(filename);
         }
 
-        success = (bufferHolder == nullptr) ? false : _playback->TryPlayFromBuffer(filename.ToStdWstring(), bufferHolder, subsong, preRenderDurationMs);
+        status = (bufferHolder == nullptr) ? PlaybackController::PlaybackAttemptStatus::InputError : _playback->TryPlayFromBuffer(filename.ToStdWstring(), bufferHolder, subsong, preRenderDurationMs);
     }
 
-    if (success)
+    switch (status)
     {
-        FinalizePlaybackStarted();
-    }
-    else
-    {
-        wxMessageBox(wxString::Format("%s\n%s", Strings::Error::MSG_ERR_TUNE_FILE, filename), Strings::FramePlayer::WINDOW_TITLE, wxICON_WARNING);
+        case PlaybackController::PlaybackAttemptStatus::Success:
+            FinalizePlaybackStarted();
+            break;
+
+        case PlaybackController::PlaybackAttemptStatus::OutputError:
+            wxMessageBox(Strings::Error::MSG_ERR_AUDIO_OUTPUT, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
+            break;
+
+        case PlaybackController::PlaybackAttemptStatus::InputError:
+            [[fallthrough]];
+        default:
+            wxMessageBox(wxString::Format("%s\n%s", Strings::Error::MSG_ERR_TUNE_FILE, filename), Strings::FramePlayer::WINDOW_TITLE, wxICON_WARNING);
+            break;
     }
 }
 
@@ -359,11 +368,6 @@ bool MyApp::ReapplyPlaybackSettings()
     const PlaybackController::SwitchAudioDeviceResult result =_playback->TrySwitchPlaybackConfiguration(PlaybackController::SyncedPlaybackConfig(LoadAudioConfig(*currentSettings),
                                                                                                                                                  LoadSidConfig(_playback->GetSidConfig(), *currentSettings),
                                                                                                                                                  LoadFilterConfig(*currentSettings)));
-    if (result != PlaybackController::SwitchAudioDeviceResult::OnTheFly)
-    {
-        StopPlayback();
-    }
-
     return result != PlaybackController::SwitchAudioDeviceResult::Failure;
 }
 
@@ -411,10 +415,8 @@ void MyApp::OnSeekingCeased()
 {
     RunOnMainThread([this]()
     {
-        const PlaybackController::State cState = _playback->GetState();
-        if (cState == PlaybackController::State::Playing)
+        if (_playback->GetState() == PlaybackController::State::Playing)
         {
-            _playback->Pause(); // Will remain paused in case the Resume() fails.
             _playback->Resume();
         }
 

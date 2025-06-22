@@ -26,6 +26,7 @@
 #include <sidplayfp/SidTune.h>
 #include <sidplayfp/builders/residfp.h>
 
+#include <filesystem>
 #include <memory>
 #include <vector>
 
@@ -73,10 +74,10 @@ public:
     // Needed for playback. Can be skipped if intending to just read tunes' info.
     bool TryInitEmulation(const SidConfig& sidConfig, const FilterConfig& filterConfig);
 
-    RomUtil::RomStatus TrySetRoms(const std::wstring& pathKernal, const std::wstring& pathBasic, const std::wstring& pathChargen);
+    RomUtil::RomStatus TrySetRoms(const std::filesystem::path& pathKernal, const std::filesystem::path& pathBasic, const std::filesystem::path& pathChargen);
 
     // Unicode paths not supported for filepath variant, rather use the oneFileFormatSidtune variant and do custom file loading.
-    bool TryLoadSong(const char* filepath, unsigned int subsong = 0);
+    bool TryLoadSong(const std::filesystem::path& filepath, unsigned int subsong = 0);
     bool TryLoadSong(const uint_least8_t* oneFileFormatSidtune, uint_least32_t sidtuneLength, unsigned int subsong = 0);
 
     bool TrySetSubsong(unsigned int subsong);

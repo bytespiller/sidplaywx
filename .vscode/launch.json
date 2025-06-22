@@ -5,7 +5,7 @@
 			"name": "g++ - Build and debug (mingw32-make)",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}\\build\\${workspaceFolderBasename}.exe",
+			"program": "${workspaceFolder}\\build\\sidplaywx.exe",
 			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",
@@ -21,6 +21,26 @@
 				}
 			],
 			"preLaunchTask": "C/C++: mingw32-make"
+		},
+		{
+			"name": "g++ - Build and debug (Linux make)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/build/sidplaywx",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				}
+			],
+			"preLaunchTask": "C/C++: Linux make"
 		}
 	]
 }

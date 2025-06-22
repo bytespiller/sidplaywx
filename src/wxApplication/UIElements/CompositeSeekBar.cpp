@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,9 @@ namespace UIElements
 
 	CompositeSeekBar::CompositeSeekBar(wxPanel* parent, const ThemeData::ThemedElementData& themedData) :
 		wxWindow(parent, wxID_ANY),
+#ifdef WIN32
 		wxAppProgressIndicator(wxTheApp->GetTopWindow(), TASKBAR_PROGRESS_MAX_VALUE),
+#endif
 		_themedData(themedData)
 	{
 		// Reminder: parent panel MUST be double buffered.
@@ -97,7 +99,7 @@ namespace UIElements
 	{
 		_progressFillFactor = (_duration > 1.0) ? std::min(1.0, time / _duration) : 0.0;
 		const bool seeking = !IsSeekTargetReached();
-		if (!_pressedDown && !seeking)
+		if (!_pressedDown && !seeking && _cancelableSeekPreviewFillFactor == CLEAR_SEEK_PREVIEW)
 		{
 			_targetFillFactor = _progressFillFactor;
 		}
@@ -117,7 +119,9 @@ namespace UIElements
 		_progressFillFactor = 0.0;
 		_targetFillFactor = 0.0;
 		_duration = std::max(1.0, static_cast<double>(duration));
+#ifdef WIN32
 		wxAppProgressIndicator::SetValue(0);
+#endif
 
 		_preRenderFillFactor = 0.0;
 
@@ -147,6 +151,7 @@ namespace UIElements
 
 	void CompositeSeekBar::SetTaskbarProgressOption(TaskbarProgressOption option)
 	{
+#ifdef WIN32
 		_taskbarProgressOption = option;
 		UpdateTaskbarIndicator();
 
@@ -155,15 +160,20 @@ namespace UIElements
 			wxAppProgressIndicator::SetValue(0);
 			SetTaskbarProgressState(wxTASKBAR_BUTTON_NO_PROGRESS);
 		}
+#endif
 	}
 
 	void CompositeSeekBar::SetTaskbarProgressState(wxTaskBarButtonState state)
 	{
+#ifdef WIN32
+		static_assert(wxTaskBarButtonState::wxTASKBAR_BUTTON_NORMAL != -1);
+
 		if (wxTaskBarButton* tb = dynamic_cast<wxFrame*>(wxTheApp->GetTopWindow())->MSWGetTaskBarButton())
 		{
 			const wxTaskBarButtonState applyState = (_taskbarProgressOption == TaskbarProgressOption::Disabled) ? wxTASKBAR_BUTTON_NO_PROGRESS : state;
 			tb->SetProgressState(applyState);
 		}
+#endif
 	}
 
 	// Called by the system of wxWidgets when the panel needs to be redrawn. You can also trigger this call by calling Refresh()/Update().
@@ -185,6 +195,9 @@ namespace UIElements
 		// Fill background
 		dc.SetBrush(ThemedColors::color.at(ThemedColors::fillColorBackground));
 		dc.DrawRectangle(0, barY, seekAreaWidth, barHeight);
+
+		// Remember system border color
+		const wxPen borderPen(dc.GetPen());
 
 		// Disable border
 		dc.SetPen(*wxTRANSPARENT_PEN);
@@ -225,7 +238,7 @@ namespace UIElements
 		}
 
 		// Re-enable the border
-		dc.SetPen(wxNullPen);
+		dc.SetPen(borderPen);
 
 		// Thumb
 		if (IsEnabled())
@@ -295,6 +308,7 @@ namespace UIElements
 
 	void CompositeSeekBar::UpdateTaskbarIndicator()
 	{
+#ifdef WIN32
 		if (_taskbarProgressOption != TaskbarProgressOption::Disabled)
 		{
 			if(IsSeekTargetReached())
@@ -309,6 +323,7 @@ namespace UIElements
 				}
 			}
 		}
+#endif
 	}
 
 	void CompositeSeekBar::OnMouseLeftDown(wxMouseEvent& evt)

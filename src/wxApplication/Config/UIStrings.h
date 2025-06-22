@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.15.0"); // Reminder: don't forget to increase.
+	inline constexpr const char* const APP_VERSION_TAG("0.16.0"); // Reminder: don't forget to increase.
 
 	namespace FramePlayer
 	{
@@ -45,6 +45,7 @@ namespace Strings
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_OPEN("Open...");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_SAVE("Save As...");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_CLEAR("Clear");
+		inline constexpr const char* const MENU_ITEM_PLAYLIST_RESET_DEMO("Demo songs");
 
 		inline constexpr const char* const MENU_ITEM_EXIT("E&xit");
 
@@ -109,6 +110,8 @@ namespace Strings
 		inline constexpr const char* const TOOLTIP_STIL_COMMENT("STIL Comment");
 
 		inline constexpr const char* const TOOLTIP_SHOW_REFRESH_TUNE_INFO("Show/refresh current Tune Info");
+
+		inline constexpr const char* const MSG_MEDIA_KEYS_TAKEN("Media keys already in use by another application.");
 	}
 
 	namespace PlaylistTree
@@ -194,7 +197,14 @@ namespace Strings
 		// Audio Output
 		inline constexpr const char* const CATEGORY_AUDIO_OUTPUT("Audio output");
 		inline constexpr const char* const OPT_DEVICE("Device");
-		inline constexpr const char* const DESC_DEVICE("- Modifying the playback speed is not supported on all device interfaces (e.g., WASAPI).\nNote: ongoing playback will stop when changing this setting.");
+
+#ifdef __WXGTK__
+		inline constexpr const char* const DESC_DEVICE("- PulseAudio is recommended.\n- Modifying the playback speed is not supported on all audio backends.\n\nNote: ongoing playback will stop when changing this setting.");
+#elif WIN32
+		inline constexpr const char* const DESC_DEVICE("- \"MME: Microsoft Sound Mapper\" is recommended (supports bluetooth auto-switch && more).\n- Modifying the playback speed is not supported on all audio backends.\n\nNote: ongoing playback will stop when changing this setting.");
+#else
+		inline constexpr const char* const DESC_DEVICE("- Modifying the playback speed is not supported on all audio backends.\n\nNote: ongoing playback will stop when changing this setting.");
+#endif
 
 		inline constexpr const char* const OPT_LOW_LATENCY("Low latency");
 		inline constexpr const char* const DESC_LOW_LATENCY("Enable for more responsive controls.\nDisable if experiencing stuttering.\nNote: ongoing playback will stop when changing this setting.");
@@ -221,7 +231,7 @@ namespace Strings
 		inline constexpr const char* const DESC_FALLBACK_DURATION("Song duration (in seconds) when its real duration is unknown (i.e., song is not in a Songlengths.md5 database).");
 
 		inline constexpr const char* const OPT_SKIP_SHORTER("Auto-skip shorter");
-		inline constexpr const char* const DESC_SKIP_SHORTER("Auto-skip (sub)songs with durations below the specified threshold (in seconds). Affected (sub)songs will be indicated with a timer icon. You can still force playback by activating them in the playlist directly.\nSet to 0 to disable this feature.\n\nNOTE: displaying lots of timer icons degrades the playlist scrolling performance (wxWidgets issue).");
+		inline constexpr const char* const DESC_SKIP_SHORTER("Auto-skip (sub)songs with durations below the specified threshold (in seconds). Affected (sub)songs will be indicated with a timer icon. You can still force playback by activating them in the playlist directly. Set to 0 to disable this feature.\n\nNOTE: displaying lots of timer icons degrades the playlist scrolling performance (wxWidgets issue).");
 
 		inline constexpr const char* const OPT_POP_SILENCER("Pop suppression");
 		inline constexpr const char* const DESC_POP_SILENCER("Mute duration (in milliseconds) on song start to try reduce the audible pop.");
@@ -316,7 +326,8 @@ namespace Strings
 		inline constexpr const char* const DESC_SINGLE_INSTANCE("Do not spawn multiple instances of the app, reuse an existing instance whenever possible.");
 
 		inline constexpr const char* const OPT_RESTORE_DEFAULTS("Restore defaults");
-		inline constexpr const char* const DESC_RESTORE_DEFAULTS("Enable this to reset the application settings.\nPlease note: the application will close to apply this option.");
+		inline constexpr const char* const DESC_RESTORE_DEFAULTS("Enable this to reset the application settings.\n- Please note: the application will close to apply this option.");
+		inline constexpr const char* const DESC_RESTORE_DEFAULTS_LINUX("- Preferences file: ");
 	}
 
 	namespace About
@@ -331,7 +342,7 @@ namespace Strings
 	{
 		inline constexpr const char* const ERR_INIT_PLAYBACK("Fatal error: failed to initialize playback subsystems.");
 
-		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_RECOVERY("Critical init failure.\nDo you want to reset all settings to defaults?\n(Selecting No will close the application.)");
+		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_RECOVERY("Critical init failure.\nDo you want to reset all settings to defaults?\n\n(Selecting \"No\" will close the application so you can retry with original settings.)");
 		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_EXIT("Critical init failure.\nDo you want to reset all settings to defaults?\n(Note: you will have to relaunch the application.)");
 
 		inline constexpr const char* const MSG_ERR_SONGLENGTHS_NOT_FOUND("Songlengths database not found. Note: we use relative paths, so if you've moved the executable that could be the reason.");
@@ -352,12 +363,14 @@ namespace Strings
 		inline constexpr const char* const MSG_ERR_TUNE_FILE("Unable to read tune file.");
 
 		inline constexpr const char* const MSG_ERR_AUDIO_CONFIG("Incorrect audio device configuration, reverting settings.");
+		inline constexpr const char* const MSG_ERR_AUDIO_OUTPUT("Playback failed. Try choosing another audio output device in Preferences.");
 	}
 
 	namespace Common
 	{
 		inline constexpr const char* const ACTION_BROWSE_LOCATION("Browse location");
 		inline constexpr const char* const GENERIC_NOT_FOUND("Not found");
+		inline constexpr const char* const GENERIC_RETRY("Retry");
 	}
 
 	namespace Internal

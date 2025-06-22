@@ -26,7 +26,7 @@
 namespace FrameElements // Static vars
 {
 	// TODO: these TEMP_* things could be defined in the theme XML?
-	static constexpr int TEMP_BUTTON_SIZE = 30;
+	static constexpr int TEMP_BUTTON_SIZE = 25; // Bitmap size. Careful, sizes below 30 cause blurry SVG bitmap for some reason...
 	static constexpr int TEMP_BUTTON_BORDER_SIZE = 1;
 	static constexpr int TEMP_LABEL_BORDER_SIZE = 2;
 	static constexpr int TEMP_LABEL_TIME_BORDER_SIZE = 2;
@@ -131,6 +131,11 @@ namespace FrameElements // Player class
 				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistSave), Strings::FramePlayer::MENU_ITEM_PLAYLIST_SAVE);
 				playlistSubMenu->AppendSeparator();
 				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistClear), Strings::FramePlayer::MENU_ITEM_PLAYLIST_CLEAR);
+#ifndef WIN32
+				playlistSubMenu->AppendSeparator();
+				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistResetDemo), Strings::FramePlayer::MENU_ITEM_PLAYLIST_RESET_DEMO);
+#endif
+
 				fileMenu->AppendSubMenu(playlistSubMenu, Strings::FramePlayer::MENU_ITEM_SUBMENU_PLAYLIST);
 				// **
 				fileMenu->AppendSeparator();
@@ -233,7 +238,7 @@ namespace FrameElements // Player class
 		// Playback controls & other buttons
 		btnStop = AttachSimplePlaybackControlButton(themeData.GetImage("btn_stop"), _parentPanel, gridSizerPlaybackButtons);
 
-		btnPlayPause = new UIElements::PlayPauseButton(themeData.GetImage("btn_play"), themeData.GetImage("btn_pause"), DpiSize(TEMP_BUTTON_SIZE), _parentPanel);
+		btnPlayPause = new UIElements::PlayPauseButton(themeData.GetImage("btn_play"), themeData.GetImage("btn_pause"), wxSize(TEMP_BUTTON_SIZE, TEMP_BUTTON_SIZE), _parentPanel);
 		gridSizerPlaybackButtons->Add(btnPlayPause, 0, wxALL, TEMP_BUTTON_BORDER_SIZE);
 
 		gridSizerPlaybackButtons->Add(0, 0, wxEXPAND, 0); // This "spacer" makes the playback control buttons horizontally centered (without it, they'd be left-aligned).
@@ -241,8 +246,9 @@ namespace FrameElements // Player class
 		btnPrevTrack = AttachSimplePlaybackControlButton(themeData.GetImage("btn_skipback"), _parentPanel, gridSizerPlaybackButtons);
 		btnPrevSubsong = AttachSimplePlaybackControlButton(themeData.GetImage("btn_prevsubsong"), _parentPanel, gridSizerPlaybackButtons);
 
-		labelSubsong = new wxStaticText(&_parentPanel, wxID_ANY, "00 / 00", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-		gridSizerPlaybackButtons->Add(labelSubsong, 1, wxALIGN_CENTER_VERTICAL, TEMP_LABEL_BORDER_SIZE);
+		labelSubsong = new wxStaticText(&_parentPanel, wxID_ANY, "000 / 000", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER | wxST_NO_AUTORESIZE);
+		labelSubsong->SetMinSize(labelSubsong->GetBestSize()); // Needed on GTK (additional padding with zeros as well).
+		gridSizerPlaybackButtons->Add(labelSubsong, 1, wxALIGN_CENTER_VERTICAL);
 
 		btnNextSubsong = AttachSimplePlaybackControlButton(themeData.GetImage("btn_nextsubsong"), _parentPanel, gridSizerPlaybackButtons);
 		btnNextTrack = AttachSimplePlaybackControlButton(themeData.GetImage("btn_skipforward"), _parentPanel, gridSizerPlaybackButtons);
@@ -258,6 +264,12 @@ namespace FrameElements // Player class
 		btnPlaybackMod->SetToolTip(Strings::PlaybackMods::WINDOW_TITLE);
 
 		AttachFixedSizeSeparator(DpiSize(0, 1 + 4), sizerMain, _parentPanel); // TODO: magic number
+
+		// Info bar: Media keys taken
+		infoBarMediaKeysTaken = new wxInfoBar(&_parentPanel);
+		infoBarMediaKeysTaken->AddButton(wxID_RETRY, Strings::Common::GENERIC_RETRY);
+		infoBarMediaKeysTaken->AddButton(wxID_OK);
+		sizerMain->Add(infoBarMediaKeysTaken, 0, wxEXPAND, 0);
 
 		// Seekbar area...
 		wxBoxSizer* sizerSeekbar = new wxBoxSizer(wxHORIZONTAL);
@@ -383,8 +395,10 @@ namespace FrameElements // Player class
 		// Title (don't use the built-in title functionality, it crashes on selection)
 		{
 			const std::string strVol = std::to_string(sliderVolume->GetValue());
-			wxMenuItem* title = new wxMenuItem(&menu, wxID_ANY, wxString::Format("%s %s%", Strings::FramePlayer::VOL_MENU_PREFIX, strVol));
+			wxMenuItem* title = new wxMenuItem(&menu, wxID_ANY, wxString::Format("%s %s%%", Strings::FramePlayer::VOL_MENU_PREFIX, strVol));
+#ifndef __WXGTK__
 			title->SetFont(title->GetFont().MakeBold());
+#endif
 			menu.Append(title);
 			menu.AppendSeparator();
 		}
@@ -392,7 +406,8 @@ namespace FrameElements // Player class
 		// Set max volume
 		menu.Append(static_cast<int>(PopupMenuItemId_VolumeSlider::ResetVolume), Strings::FramePlayer::VOL_SET_MAX);
 
-		// Toggle slider
+#ifdef WIN32 // On wxGTK & wxOSX, disabled controls still block the click event propagation to their parent and they themselves do not react on them, so there'd be no way to re-enable the slider.
+		// Toggle slider (MSW only)
 		if (sliderVolume->IsEnabled())
 		{
 			menu.Append(static_cast<int>(PopupMenuItemId_VolumeSlider::DisableControl), Strings::FramePlayer::VOL_SLIDER_DISABLE);
@@ -401,6 +416,7 @@ namespace FrameElements // Player class
 		{
 			menu.Append(static_cast<int>(PopupMenuItemId_VolumeSlider::EnableControl), Strings::FramePlayer::VOL_SLIDER_ENABLE);
 		}
+#endif
 
 		// Bind & show
 		menu.Bind(wxEVT_COMMAND_MENU_SELECTED, &OnVolumeSliderPopupMenuItemClick, this);

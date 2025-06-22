@@ -48,7 +48,7 @@ public:
 
 private:
 	void UpdateInfo(const PlaylistTreeModelNode* const node);
-	void SetPropertyValue(const char* name, const wxString& value);
+	void SetPropertyValue(const char* name, const std::string_view& value);
 
 private:
 	const PlaybackController& _playbackInfo;

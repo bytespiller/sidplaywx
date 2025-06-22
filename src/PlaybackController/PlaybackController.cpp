@@ -1,20 +1,20 @@
 /*
- * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html
- */
+* This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
+* Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html
+*/
 
 #include "PlaybackController.h"
 #include "../Util/HelpersGeneral.h"
@@ -71,7 +71,7 @@ namespace Static
             case SidTuneInfo::SIDMODEL_ANY:
                 return "SID 6581/8580";
             case SidTuneInfo::SIDMODEL_UNKNOWN:
-                // fall-through
+                [[fallthrough]];
             default:
                 return "Unknown";
         }
@@ -158,9 +158,12 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
     {
         Stop();
         success = TryResetAudioOutput(newConfig.audioConfig, enablePreRender);
-        result = (success) ? result : SwitchAudioDeviceResult::Failure;
+        result = (success) ? SwitchAudioDeviceResult::Stopped : SwitchAudioDeviceResult::Failure;
 
-        TrySetPlaybackSpeed(_playbackSpeedFactor);
+        if (success && _playbackSpeedFactor != 1.0)
+        {
+            TrySetPlaybackSpeed(_playbackSpeedFactor);
+        }
     }
 
     EmitSignal(SignalsPlaybackController::SIGNAL_AUDIO_DEVICE_CHANGED, static_cast<int>(success));
@@ -168,7 +171,7 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
     return result;
 }
 
-RomUtil::RomStatus PlaybackController::TrySetRoms(const std::wstring& pathKernal, const std::wstring& pathBasic, const std::wstring& pathChargen)
+RomUtil::RomStatus PlaybackController::TrySetRoms(const std::filesystem::path& pathKernal, const std::filesystem::path& pathBasic, const std::filesystem::path& pathChargen)
 {
     const RomUtil::RomStatus& preCheckStatus = RomUtil::PreCheckRoms(pathKernal, pathBasic, pathChargen);
     if (!preCheckStatus.AreAllValidated())
@@ -180,12 +183,25 @@ RomUtil::RomStatus PlaybackController::TrySetRoms(const std::wstring& pathKernal
     return _loadedRoms;
 }
 
-bool PlaybackController::TryPlayFromBuffer(const std::wstring& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs)
+PlaybackController::PlaybackAttemptStatus PlaybackController::TryPlayFromBuffer(const std::filesystem::path& filepathForUid, std::unique_ptr<BufferHolder>& loadedBufferToAdopt, unsigned int subsong, int preRenderDurationMs)
 {
     PrepareTryPlay();
+
     _activeTuneHolder = std::make_unique<TuneHolder>(filepathForUid, loadedBufferToAdopt);
-    const bool success = _sidDecoder->TryLoadSong(_activeTuneHolder->bufferHolder->buffer, _activeTuneHolder->bufferHolder->size, subsong);
-    return FinalizeTryPlay(success, preRenderDurationMs);
+    const bool successInput = _sidDecoder->TryLoadSong(_activeTuneHolder->bufferHolder->buffer, _activeTuneHolder->bufferHolder->size, subsong);
+    const bool successOutput = FinalizeTryPlay(successInput, preRenderDurationMs);
+
+    PlaybackAttemptStatus status = PlaybackAttemptStatus::Success;
+    if (!successInput)
+    {
+        status = PlaybackAttemptStatus::InputError;
+    }
+    else if (!successOutput)
+    {
+        status = PlaybackAttemptStatus::OutputError;
+    }
+
+    return status;
 }
 
 bool PlaybackController::TryReplayCurrentSong(int preRenderDurationMs, bool reusePreRender)
@@ -222,8 +238,11 @@ void PlaybackController::Pause()
 
 void PlaybackController::Resume()
 {
-    if (_state == State::Paused)
+    if (_state == State::Paused || _state == State::Playing)
     {
+#ifdef __WXGTK__
+        _portAudioOutput->ResetStream(_portAudioOutput->GetAudioConfig().sampleRate * _playbackSpeedFactor); // Needed for stability on Linux.
+#endif
         _portAudioOutput->TryStartStream();
         _state = State::Playing;
     }
@@ -233,7 +252,7 @@ void PlaybackController::Resume()
     }
     else
     {
-        Warn("Resume called while not paused or seeking, ignored.");
+        Warn("Resume called in unexpected state, ignored.");
     }
 }
 
@@ -247,7 +266,7 @@ void PlaybackController::Stop()
 
     if (_state == State::Seeking)
     {
-        AbortSeek(false);
+        AbortSeek();
     }
 
     if (_state == State::Stopped)
@@ -283,9 +302,7 @@ void PlaybackController::SeekTo(uint_least32_t targetTimeMs)
     }
     else if (_state == State::Seeking)
     {
-        PlaybackController::State restoreState = _seekOperation.resumeToState;
-        AbortSeek(false); // This now becomes a synchronous call and the OnSeekStatusReceived() will be called before the next line.
-        _state = restoreState; // Replace OnSeekStatusReceived()'s "Paused" change -- due to AbortSeek(false) -- with previous state.
+        AbortSeek(); // This now becomes a synchronous call and the OnSeekStatusReceived() will be called before further lines.
     }
     else if (_state == State::Playing)
     {
@@ -323,15 +340,10 @@ void PlaybackController::SeekTo(uint_least32_t targetTimeMs)
     });
 }
 
-void PlaybackController::AbortSeek(bool resumePlaybackState)
+void PlaybackController::AbortSeek()
 {
     if (_state == State::Seeking)
     {
-        if (!resumePlaybackState)
-        {
-            _seekOperation.resumeToState = State::Paused;
-        }
-
         _seekOperation.abortFlag = true;
         _seekOperation.seekThread.join();
     }
@@ -429,9 +441,9 @@ std::string PlaybackController::GetCurrentTuneMusComments() const
     return _sidDecoder->GetCurrentTuneMusComments();
 }
 
-std::wstring PlaybackController::GetCurrentTuneFilePath() const
+std::filesystem::path PlaybackController::GetCurrentTuneFilePath() const
 {
-    return (_activeTuneHolder != nullptr) ? _activeTuneHolder->filepath : L"";
+    return (_activeTuneHolder != nullptr) ? _activeTuneHolder->filepath : std::filesystem::path();
 }
 
 const SidTuneInfo& PlaybackController::GetCurrentTuneSidInfo() const
@@ -466,7 +478,7 @@ SidConfig::sid_model_t PlaybackController::GetCurrentlyEffectiveSidModel() const
                 effectiveSidChipModel = SidConfig::sid_model_t::MOS8580;
                 break;
             case SidTuneInfo::model_t::SIDMODEL_ANY:
-                // fall-through
+                [[fallthrough]];
             case SidTuneInfo::model_t::SIDMODEL_UNKNOWN:
                 // leave existing value (effectiveSidChipModel)
                 break;
@@ -737,7 +749,7 @@ void PlaybackController::PrepareTryPlay()
 {
     if (_state == State::Seeking)
     {
-        AbortSeek(false);
+        AbortSeek();
     }
 
     if (_state == State::Playing)
@@ -766,6 +778,10 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
             {
                 TryResetAudioOutput(GetAudioConfig(), true);
             }
+            else
+            {
+                _portAudioOutput->ResetStream(GetAudioConfig().sampleRate * _playbackSpeedFactor);
+            }
 
             if (!reusePreRender || _preRender->GetPreRenderProgressFactor() != 1.0)
             {
@@ -778,6 +794,10 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
             if (_preRender != nullptr)
             {
                 TryResetAudioOutput(GetAudioConfig(), false); // Destroy _preRender
+            }
+            else
+            {
+                _portAudioOutput->ResetStream(GetAudioConfig().sampleRate * _playbackSpeedFactor);
             }
         }
 
@@ -801,8 +821,8 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
 bool PlaybackController::TryReplayCurrentSongFromBuffer(unsigned int subsong, int preRenderDurationMs, bool reusePreRender)
 {
     PrepareTryPlay();
-    const bool success = _sidDecoder->TrySetSubsong(subsong);
-    return FinalizeTryPlay(success, preRenderDurationMs, reusePreRender);
+    const bool successInput = _sidDecoder->TrySetSubsong(subsong);
+    return FinalizeTryPlay(successInput, preRenderDurationMs, reusePreRender);
 }
 
 bool PlaybackController::OnSeekStatusReceived(uint_least32_t cTimeMs, bool done)

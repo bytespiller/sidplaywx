@@ -5,12 +5,25 @@
 			"type": "shell",
 			"label": "C/C++: mingw32-make",
 			"command": "mingw32-make",
-			"args": [
-			],
+			"args": [],
 			"options": {
 				"cwd": "${workspaceFolder}//build"
 			},
 			"group": "build"
+		},
+		{
+			"type": "shell",
+			"label": "C/C++: Linux make",
+			"command": "make",
+			"args": [],
+			"options": {
+				"cwd": "${workspaceFolder}//build"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": []
 		}
 	]
 }

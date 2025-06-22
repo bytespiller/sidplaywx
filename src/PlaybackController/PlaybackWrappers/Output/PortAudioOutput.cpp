@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,10 @@
 #include <atomic>
 #include <cstdint>
 #include <iostream>
+#include <string.h> // memcpy (Linux)
 #include <memory>
+
+static constexpr double LIBSIDPLAYFP_MIN_BUFFER_LATENCY = 5.6 / 1000.0; // Ensure safe minimum buffer size due to libsidplayfp change in commit 1a6d9016e8bc35fa88d429c1ca77f31c5f5f6831 causing crash with ALSA & PulseAudio when using the paFramesPerBufferUnspecified (auto-size).
 
 class VisualizationBuffer
 {
@@ -161,6 +164,11 @@ bool PortAudioOutput::PreInitPortAudioLibrary()
 
 bool PortAudioOutput::TryInit(const AudioConfig& audioConfig, IBufferWriter* bufferWriter)
 {
+    if (_stream != nullptr && Pa_IsStreamActive(_stream))
+    {
+        StopStream(true);
+    }
+
     _bufferWriter = bufferWriter;
 
     bool success = _paInitialized || PreInitPortAudioLibrary();
@@ -202,18 +210,13 @@ void PortAudioOutput::StopStream(bool immediate)
 
 PaError PortAudioOutput::ResetStream(double samplerate)
 {
-    if (_stream != nullptr && Pa_IsStreamActive(_stream))
-    {
-        PaError err = Pa_CloseStream(_stream);
-        if (LogAnyError("ResetStream: Pa_CloseStream", err))
-        {
-            return err;
-        }
-    }
+    Pa_AbortStream(_stream);
+    Pa_CloseStream(_stream);
 
     // Open an audio I/O stream.
+    const unsigned long safeFramesPerBuffer = samplerate * LIBSIDPLAYFP_MIN_BUFFER_LATENCY;
     PaError err = Pa_OpenStream(&_stream, NULL, &currentAudioConfig, samplerate,
-                                paFramesPerBufferUnspecified,
+                                safeFramesPerBuffer, // Don't use the paFramesPerBufferUnspecified due to libsidplayfp issue (see comment on the constant).
                                 paNoFlag,
                                 PlaybackCallback,
                                 _bufferWriter);

@@ -44,15 +44,19 @@ namespace
     };
 }
 
+static bool __destroyed = false;
+
 FramePrefs::FramePrefs(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, MyApp& app, FramePlayer& framePlayer)
     : wxDialog(parent, wxID_ANY, title, pos, size, wxCAPTION | wxRESIZE_BORDER | wxSTAY_ON_TOP),
     _app(app),
     _framePlayer(framePlayer)
 {
-    _ui = std::make_unique<FrameElements::ElementsPrefs>(*this);
+    __destroyed = false;
 
-    SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+    //SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     SetDoubleBuffered(true);
+
+    _ui = std::make_unique<FrameElements::ElementsPrefs>(*this);
 
     // Configure UI
     CenterOnParent();
@@ -69,6 +73,12 @@ FramePrefs::FramePrefs(wxWindow* parent, const wxString& title, const wxPoint& p
 
     FindWindowById(wxID_APPLY, this)->Bind(wxEVT_BUTTON, &OnButtonApply, this);
     FindWindowById(wxID_OK, this)->Bind(wxEVT_BUTTON, &OnButtonOk, this);
+}
+
+bool FramePrefs::Destroy()
+{
+    __destroyed = true;
+    return wxDialog::Destroy();
 }
 
 void FramePrefs::AddWrappedProp(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString)
@@ -171,6 +181,7 @@ void FramePrefs::FillPropertyGrid()
         AddWrappedProp(Settings::AppSettings::ID::SelectionFollowsPlayback, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SELECTION_FOLLOWS_PLAYBACK), *page, Effective::Immediately, Strings::Preferences::DESC_SELECTION_FOLLOWS_PLAYBACK);
         AddWrappedProp(Settings::AppSettings::ID::AutoExpandSubsongs, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_AUTOEXPAND_SUBSONGS), *page, Effective::Immediately, Strings::Preferences::DESC_AUTOEXPAND_SUBSONGS);
 
+#ifdef WIN32
         {
             wxArrayString taskbarProgressOptions;
             taskbarProgressOptions.push_back(Strings::Preferences::ITEM_TASKBAR_PROGRESS_ENABLED);
@@ -183,6 +194,7 @@ void FramePrefs::FillPropertyGrid()
             const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
             prop->SetChoiceSelection(selection);
         }
+#endif
     }
 
     // HVSC
@@ -279,9 +291,19 @@ void FramePrefs::FillPropertyGrid()
     page->Append(new wxPropertyCategory(Strings::Preferences::CATEGORY_APPLICATION));
     {
         AddWrappedProp(Settings::AppSettings::ID::RememberPlaylist, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_REMEMBER_PLAYLIST), *page, Effective::Immediately, Strings::Preferences::DESC_REMEMBER_PLAYLIST);
+#ifdef WIN32
         AddWrappedProp(Settings::AppSettings::ID::MediaKeys, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_MEDIA_KEYS), *page, Effective::Immediately, Strings::Preferences::DESC_MEDIA_KEYS);
+#endif
         AddWrappedProp(Settings::AppSettings::ID::SingleInstance, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SINGLE_INSTANCE), *page, Effective::Immediately, Strings::Preferences::DESC_SINGLE_INSTANCE);
-        AddWrappedProp(Settings::AppSettings::ID::RestoreDefaults, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_RESTORE_DEFAULTS), *page, Effective::Immediately, Strings::Preferences::DESC_RESTORE_DEFAULTS);
+
+        wxString descRestoreDefaultsStr(Strings::Preferences::DESC_RESTORE_DEFAULTS);
+#ifndef WIN32
+        descRestoreDefaultsStr
+            .Append('\n')
+            .Append(Strings::Preferences::DESC_RESTORE_DEFAULTS_LINUX)
+            .Append(_app.currentSettings->GetSettingsFilePath());
+#endif
+        AddWrappedProp(Settings::AppSettings::ID::RestoreDefaults, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_RESTORE_DEFAULTS), *page, Effective::Immediately, descRestoreDefaultsStr);
     }
 
     // Final
@@ -299,7 +321,7 @@ void FramePrefs::OnPropertyGridChanging(wxPropertyGridEvent& evt)
         if (!wxFileExists(pendingValue))
         {
             evt.Veto();
-            evt.SetValidationFailureBehavior(wxPG_VFB_BEEP | wxPG_VFB_MARK_CELL);
+            evt.SetValidationFailureBehavior(wxPGVFBFlags::Beep | wxPGVFBFlags::MarkCell);
         }
     }
     else if (strcmp(cId, Settings::AppSettings::ID::RomKernalPath) == 0)
@@ -309,7 +331,7 @@ void FramePrefs::OnPropertyGridChanging(wxPropertyGridEvent& evt)
         if (!seemsOk)
         {
             evt.Veto();
-            evt.SetValidationFailureBehavior(wxPG_VFB_BEEP | wxPG_VFB_MARK_CELL);
+            evt.SetValidationFailureBehavior(wxPGVFBFlags::Beep | wxPGVFBFlags::MarkCell);
             wxMessageBox(Strings::Error::MSG_ERR_ROM_KERNAL, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
         }
         else if (SidDecoder _tempSidDecoder; _tempSidDecoder.TrySetRoms(pendingValue, L"", L"").IsValidated(RomUtil::RomType::Kernal))
@@ -324,7 +346,7 @@ void FramePrefs::OnPropertyGridChanging(wxPropertyGridEvent& evt)
         if (!seemsOk)
         {
             evt.Veto();
-            evt.SetValidationFailureBehavior(wxPG_VFB_BEEP | wxPG_VFB_MARK_CELL);
+            evt.SetValidationFailureBehavior(wxPGVFBFlags::Beep | wxPGVFBFlags::MarkCell);
             wxMessageBox(Strings::Error::MSG_ERR_ROM_BASIC, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
         }
         else if (SidDecoder _tempSidDecoder; _tempSidDecoder.TrySetRoms(L"", pendingValue, L"").IsValidated(RomUtil::RomType::Basic))
@@ -339,7 +361,7 @@ void FramePrefs::OnPropertyGridChanging(wxPropertyGridEvent& evt)
         if (!seemsOk)
         {
             evt.Veto();
-            evt.SetValidationFailureBehavior(wxPG_VFB_BEEP | wxPG_VFB_MARK_CELL);
+            evt.SetValidationFailureBehavior(wxPGVFBFlags::Beep | wxPGVFBFlags::MarkCell);
             wxMessageBox(Strings::Error::MSG_ERR_ROM_CHARGEN, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
         }
         else if (SidDecoder _tempSidDecoder; _tempSidDecoder.TrySetRoms(L"", L"", pendingValue).IsValidated(RomUtil::RomType::Chargen))
@@ -420,6 +442,17 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     {
                         restoreDefaults = propertyValueInt == 1;
                     }
+                    else if (prop.first == Settings::AppSettings::ID::MediaKeys)
+                    {
+                        if (propertyValueInt == 1)
+                        {
+                            _framePlayer.TryRegisterMediaKeys({});
+                        }
+                        else
+                        {
+                            _framePlayer.UnregisterMediaKeys({});
+                        }
+                    }
 
                     break;
 
@@ -439,18 +472,18 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     }
                     else if (prop.first == Settings::AppSettings::ID::SonglengthsPath)
                     {
-                        const std::wstring& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
+                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
                         option.UpdateValue(relPath);
                     }
                     else if (prop.first == Settings::AppSettings::ID::StilPath)
                     {
-                        const std::wstring& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
+                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
                         option.UpdateValue(relPath);
                         _framePlayer.InitStilInfo({});
                     }
                     else if (prop.first == Settings::AppSettings::ID::RomKernalPath || prop.first == Settings::AppSettings::ID::RomBasicPath || prop.first == Settings::AppSettings::ID::RomChargenPath)
                     {
-                        const std::wstring& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
+                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
                         option.UpdateValue(relPath);
                     }
 
@@ -491,7 +524,10 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
 void FramePrefs::OnButtonOk(wxCommandEvent& evt)
 {
     OnButtonApply(evt);
-    Destroy();
+    if (!__destroyed)
+    {
+        Destroy();
+    }
 }
 
 void FramePrefs::OnButtonCancel(wxCommandEvent& /*evt*/)

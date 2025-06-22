@@ -51,7 +51,7 @@
     <GuiElement name="WaveformVisualization">
       <Colors>
         <Color type="wxSYS" value="wxSYS_COLOUR_HIGHLIGHT" property="waveColor"/>
-        <Color type="Val" value="white" property="gradientTo"/>
+        <Color type="wxSYS" value="wxSYS_COLOUR_WINDOW" property="gradientTo"/>
       </Colors>
     </GuiElement>
     <GuiElement name="StilInfo">

@@ -25,21 +25,42 @@
 #include "../FrameChildren/FramePlaybackMods/FramePlaybackMods.h"
 #include "../FrameChildren/FramePrefs/FramePrefs.h"
 #include "../FrameChildren/FrameTuneInfo/FrameTuneInfo.h"
+
 #include <wx/aboutdlg.h>
 #include <wx/display.h>
+
+#ifndef WIN32
+#include <wx/tooltip.h>
+#include "../../../dev/icon_src/sidplaywx_icon_64x64.xpm" // sidplaywx_icon_64px[_xpm]
+#endif
+
 #include <wx/webrequest.h>
 
 using RepeatMode = UIElements::RepeatModeButton::RepeatMode;
 
 static constexpr size_t VISUALIZATION_WAVE_WINDOW_MS = 100;
-static wxString bundledSonglengthsPath("bundled-Songlengths.md5");
-static wxString bundledStilPath("bundled-STIL.txt");
+static const wxString bundledSonglengthsPath("bundled-Songlengths.md5");
+static const wxString bundledStilPath("bundled-STIL.txt");
+
+#ifdef WIN32
+static constexpr int MEDIA_KEYS[] = // Must use Win32 VK_* codes here, not WXK_* (even though the WXK_* codes are received in the event handler).
+{
+    VK_MEDIA_PLAY_PAUSE,
+    VK_MEDIA_STOP,
+    VK_MEDIA_NEXT_TRACK,
+    VK_MEDIA_PREV_TRACK
+};
+#endif
 
 FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize& size, MyApp& app)
     : wxFrame(NULL, wxID_ANY, title, pos, size),
     _app(app)
 {
+#ifdef WIN32
     SetIcon(wxICON(appicon)); // Comes from .rc
+#else
+    SetIcon(wxICON(sidplaywx_icon_64px)); // Comes from .xpm file (variable in there needs to be const, GIMP saves it wrongly)
+#endif
 
     _themeManager.LoadTheme("default");
     SetupUiElements();
@@ -250,6 +271,16 @@ void FramePlayer::InitStilInfo(PassKey<FramePrefs>)
     InitStilInfo();
 }
 
+bool FramePlayer::TryRegisterMediaKeys(PassKey<FramePrefs>)
+{
+    return TryRegisterMediaKeys();
+}
+
+void FramePlayer::UnregisterMediaKeys(PassKey<FramePrefs>)
+{
+    UnregisterMediaKeys();
+}
+
 void FramePlayer::SetupUiElements()
 {
     assert(!_initialized);
@@ -257,6 +288,7 @@ void FramePlayer::SetupUiElements()
 
     // Visuals
     _panel = new wxPanel(this);
+    SetBackgroundColour(_panel->GetBackgroundColour()); // Ensure the global GetBackgroundColour() returns the panel's (visible) color, not the underlying Window color (which is obscured by the panel).
     _panel->SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     _panel->SetDoubleBuffered(true); // Panel must be double-buffered, otherwise there's child controls' flicker, and seekbar would not refresh properly.
 
@@ -274,15 +306,19 @@ void FramePlayer::SetupUiElements()
     const int cVolume = _app.currentSettings->GetOption(Settings::AppSettings::ID::Volume)->GetValueAsInt();
     _app.SetVolume(static_cast<float>(cVolume) / _ui->sliderVolume->GetMax());
     _ui->sliderVolume->SetValue(cVolume);
-    _ui->sliderVolume->SetToolTip(new wxToolTip(wxString::Format("%i%", cVolume)));
+    _ui->sliderVolume->SetToolTip(new wxToolTip(wxString::Format("%i%%", cVolume)));
+#ifdef WIN32 // Toggle is problematic on wxGTK & wxOSX (control must always stay enabled).
     _ui->sliderVolume->Enable(_app.currentSettings->GetOption(Settings::AppSettings::ID::VolumeControlEnabled)->GetValueAsBool());
+#endif
 
-    { // RepeatMode
+    // RepeatMode
+    {
         const int modeImageIndex = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode)->GetValueAsInt() - 1;
         _ui->btnRepeatMode->SetRepeatModeImage(static_cast<RepeatMode>(modeImageIndex));
     }
 
-    { // Taskbar progress indication
+    // Taskbar progress indication
+    {
         const int opt = _app.currentSettings->GetOption(Settings::AppSettings::ID::TaskbarProgress)->GetValueAsInt();
 	    _ui->compositeSeekbar->SetTaskbarProgressOption(static_cast<UIElements::CompositeSeekBar::TaskbarProgressOption>(opt));
     }
@@ -360,10 +396,27 @@ void FramePlayer::DeferredInit()
         ToggleTopmost();
     }
 
-    // Global hotkeys-polling timer
-    _timerGlobalHotkeysPolling = std::make_unique<wxTimer>(this);
-    Bind(wxEVT_TIMER, &OnTimerGlobalHotkeysPolling, this, _timerGlobalHotkeysPolling->GetId());
-    _timerGlobalHotkeysPolling->Start(TIMER_INTERVAL_GLOBAL_HOTKEYS_POLLING);
+#ifdef WIN32
+    // Media keys support
+    _ui->infoBarMediaKeysTaken->Bind(wxEVT_BUTTON, [&](wxCommandEvent& evt)
+    {
+        _ui->infoBarMediaKeysTaken->Dismiss();
+        if (evt.GetId() == wxID_RETRY)
+        {
+            TryRegisterMediaKeys();
+        }
+    });
+
+    for (int key : MEDIA_KEYS)
+    {
+        Bind(wxEVT_HOTKEY, &FramePlayer::OnGlobalHotkey, this);
+    }
+
+    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::MediaKeys)->GetValueAsBool())
+    {
+        TryRegisterMediaKeys();
+    }
+#endif
 
     // Handle the "Open With" situation (not done in a constructor in order to have the wxYield/Refresh work while adding to playlist).
     if (_app.argc > 1)
@@ -372,10 +425,19 @@ void FramePlayer::DeferredInit()
     }
     else if (_app.currentSettings->GetOption(Settings::AppSettings::ID::RememberPlaylist)->GetValueAsBool())
     {
-        if (wxFileExists(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME))
+        wxString playlistPath = Helpers::Wx::Files::GetConfigFilePath(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME);
+
+#ifndef WIN32
+        if (!wxFileExists(playlistPath))
+        {
+            playlistPath = Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME; // Use default (read only)
+        }
+#endif
+
+        if (wxFileExists(playlistPath))
         {
             // Load default playlist from file
-            const wxArrayString& playlistFiles = Helpers::Wx::Files::LoadPathsFromPlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME);
+            const wxArrayString& playlistFiles = Helpers::Wx::Files::LoadPathsFromPlaylist(playlistPath);
             DiscoverFilesAndSendToPlaylist(playlistFiles, true, false); // Reminder: this line can take a long time but is asynchronous and the program can be used before the next line is reached.
 
             // Restore last song selection (unless already playing something, e.g., user selected a song while the large playlist is still loading)
@@ -415,14 +477,41 @@ void FramePlayer::SetRefreshTimerInterval(int desiredInterval)
     }
 }
 
+bool FramePlayer::TryRegisterMediaKeys()
+{
+#ifdef WIN32
+    for (const int key : MEDIA_KEYS)
+    {
+        const bool success = RegisterHotKey(key, wxMOD_NONE, key);
+        if (!success)
+        {
+            UnregisterMediaKeys();
+            _ui->infoBarMediaKeysTaken->ShowMessage(Strings::FramePlayer::MSG_MEDIA_KEYS_TAKEN);
+            return false;
+        }
+    }
+
+    return true;
+#else
+    return false;
+#endif
+}
+
+void FramePlayer::UnregisterMediaKeys()
+{
+#ifdef WIN32
+    for (const int key : MEDIA_KEYS)
+    {
+        UnregisterHotKey(key);
+    }
+#endif
+}
+
 void FramePlayer::CloseApplication()
 {
     _exitingApplication = true;
 
-    if (_timerGlobalHotkeysPolling != nullptr)
-    {
-        _timerGlobalHotkeysPolling->Stop();
-    }
+    UnregisterMediaKeys();
 
     if (_timerRefresh != nullptr)
     {
@@ -444,7 +533,7 @@ void FramePlayer::CloseApplication()
     _app.currentSettings->GetOption(Settings::AppSettings::ID::Volume)->UpdateValue(_ui->sliderVolume->GetValue());
     _app.currentSettings->GetOption(Settings::AppSettings::ID::VolumeControlEnabled)->UpdateValue(_ui->sliderVolume->IsEnabled());
 
-    // Save the current playlist or delete it if empty...
+    // Save the current playlist
     if (_app.currentSettings->GetOption(Settings::AppSettings::ID::RememberPlaylist)->GetValueAsBool())
     {
         // Save playlist...
@@ -461,7 +550,7 @@ void FramePlayer::CloseApplication()
 
     _app.currentSettings->TrySave();
 
-#if defined(_WIN32) && defined(wxUSE_DDE_FOR_IPC)
+#if defined(WIN32) && defined(wxUSE_DDE_FOR_IPC)
     new wxLogNull; // Suppress popup-errors (irrelevant DDE DMLERR_INVALIDPARAMETER edge-case message which I think might be a wx library defect and I can't do anything about it).
 #endif
 
@@ -491,20 +580,14 @@ void FramePlayer::OpenPlaybackModFrame()
     }
 
     // First-time create
-    static constexpr int EXTRA_SPACING = 50;
-    _framePlaybackMods = new FramePlaybackMods(this, Strings::PlaybackMods::WINDOW_TITLE, wxDefaultPosition, wxDefaultSize, _app);
-    _framePlaybackMods->SetSize(_framePlaybackMods->GetSize().GetWidth() + EXTRA_SPACING, _framePlaybackMods->GetSize().GetHeight() + EXTRA_SPACING);
+    _framePlaybackMods = new FramePlaybackMods(this, Strings::PlaybackMods::WINDOW_TITLE, wxDefaultPosition, wxSize(600, 350), _app);
     _framePlaybackMods->Show();
 }
 
 void FramePlayer::OpenPrefsFrame()
 {
-    _framePrefs = new FramePrefs(this, Strings::Preferences::WINDOW_TITLE, wxDefaultPosition, DpiSize(430, 500), _app, *this);
+    _framePrefs = new FramePrefs(this, Strings::Preferences::WINDOW_TITLE, wxDefaultPosition, DpiSize(430, 600), _app, *this);
     _framePrefs->ShowModal(); // Reminder: this one gets Destroy()-ed, not Close()-d.
-    if (_exitingApplication)
-    {
-        CloseApplication();
-    }
 }
 
 void FramePlayer::ToggleTopmost()
@@ -596,22 +679,24 @@ void FramePlayer::ForceStopPlayback(PassKey<FramePrefs>)
     OnButtonStop();
 }
 
-static std::unique_ptr<wxWebRequest> requestUpdateCheck = nullptr;
+static int requestUpdateLastId = 0;
 void FramePlayer::CheckUpdates()
 {
-    if (requestUpdateCheck != nullptr)
-    {
-        requestUpdateCheck->Cancel(); // Cancel any previous check that may still be in progress or stuck.
-    }
+    ++requestUpdateLastId; // Workaround: can't cancel the previous wxWebRequest due to its problematic lifecycle on Linux (a known wxWidgets defect from the year 2024). Using the unique_ptr or vector of requests causes a segfault on Linux in wxWidgets v3.2.7 when the check is repeated or the app is closing.
+    wxWebRequest requestUpdateCheck = wxWebSession::GetDefault().CreateRequest(this, "https://api.github.com/repos/bytespiller/sidplaywx/releases/latest", requestUpdateLastId);
 
-    requestUpdateCheck = std::make_unique<wxWebRequest>(wxWebSession::GetDefault().CreateRequest(this, "https://api.github.com/repos/bytespiller/sidplaywx/releases/latest"));
-    requestUpdateCheck->SetHeader("User-Agent", "sidplaywx (update check)");
-    //requestUpdateCheck->SetHeader("Accept-Encoding", "gzip"); // I never got the GitHub API to return compressed response (checked via headers).
-    requestUpdateCheck->SetHeader("Accept", "application/vnd.github+json");
-    requestUpdateCheck->SetHeader("X-GitHub-Api-Version", "2022-11-28"); // If you specify an API version that is no longer supported, you will receive a 400 error.
+    requestUpdateCheck.SetHeader("User-Agent", "sidplaywx (update check)");
+    //requestUpdateCheck.SetHeader("Accept-Encoding", "gzip"); // I never got the GitHub API to return compressed response (checked via headers).
+    requestUpdateCheck.SetHeader("Accept", "application/vnd.github+json");
+    requestUpdateCheck.SetHeader("X-GitHub-Api-Version", "2022-11-28"); // If you specify an API version that is no longer supported, you will receive a 400 error.
 
     Bind(wxEVT_WEBREQUEST_STATE, [&](wxWebRequestEvent& evt)
     {
+        if (evt.GetId() != requestUpdateLastId)
+        {
+            return; // React only on the latest one (workaround for not being able to fully wxWebRequest::Cancel the previous request reliably).
+        }
+
         switch (evt.GetState())
         {
             case wxWebRequest::State_Completed:
@@ -650,7 +735,7 @@ void FramePlayer::CheckUpdates()
         }
     });
 
-    requestUpdateCheck->Start();
+    requestUpdateCheck.Start();
 }
 
 void FramePlayer::DisplayAboutBox()
@@ -671,6 +756,10 @@ void FramePlayer::DisplayAboutBox()
                           );
 
     aboutInfo.AddArtist(Strings::About::HVSC);
+
+#ifndef WIN32
+    aboutInfo.SetIcon(wxICON(sidplaywx_icon_64px));
+#endif
 
     wxAboutBox(aboutInfo);
 }

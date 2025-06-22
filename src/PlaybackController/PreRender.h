@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "PlaybackWrappers\IBufferWriter.h"
+#include "PlaybackWrappers/IBufferWriter.h"
 #include <atomic>
 #include <memory>
 #include <thread>

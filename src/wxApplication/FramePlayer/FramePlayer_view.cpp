@@ -53,16 +53,17 @@ void FramePlayer::UpdateUiState()
     switch (playbackState)
     {
         case PlaybackController::State::Undefined:
-        {
-            // fall-through to Stopped
-        }
+            [[fallthrough]]; // to Stopped
         case PlaybackController::State::Stopped:
         {
             UpdatePeriodicDisplays(0);
+
             _ui->btnPlayPause->SetPlay();
             _ui->btnPlayPause->Enable(hasSomethingPlayable);
+
             _ui->btnStop->Enable(false);
             _ui->labelTime->Enable(false);
+
             _ui->compositeSeekbar->ResetPlaybackPosition(0); // Will also auto disable/enable itself.
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_NO_PROGRESS);
 
@@ -74,8 +75,8 @@ void FramePlayer::UpdateUiState()
         {
             _ui->btnPlayPause->SetPause();
             _ui->compositeSeekbar->ResetPlaybackPosition(GetEffectiveSongDuration(*_ui->treePlaylist->GetActiveSong()));
+            _ui->compositeSeekbar->UpdatePlaybackPosition(_app.GetPlaybackInfo().GetTime());
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_NORMAL);
-
             break;
         }
         case PlaybackController::State::Paused:
@@ -343,59 +344,59 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
         if (node)
         {
             _ui->labelTitle->SetLabelText((playback.GetTotalSubsongs() <= 1)
-                ? wxString(node->title).Trim(false) // Tune without subsongs.
+                ? Helpers::Wx::StringFromWin1252(node->title.ToStdString()).Trim(false) // Tune without subsongs.
                 : wxString::Format("%s: %s %i", playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Title), Strings::PlaylistTree::SUBSONG, subsong)); // Subsong
 
-            _ui->labelAuthor->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author));
-            _ui->labelCopyright->SetLabelText(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released));
+            _ui->labelAuthor->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author)));
+            _ui->labelCopyright->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released)));
             _ui->labelSubsong->SetLabelText(wxString::Format("%i / %i", subsong, playback.GetTotalSubsongs()));
         }
 
         // Set STIL labels
         if (node)
         {
-            const std::wstring& NONE(L"/");
-            const std::wstring& SEPARATOR =  L"  |  ";
+            const std::string& NONE("/");
+            const std::string& SEPARATOR("  |  ");
 
             const Stil::Info& stil = _stilInfo.Get(node->hvscPath.ToStdString());
 
             // "Name - Title"
             {
-                std::wstring namesTitles = stil.GetFieldAsString(stil.names, subsong, SEPARATOR, true);
-                const std::wstring& titles = stil.GetFieldAsString(stil.titles, subsong, SEPARATOR, true);
+                std::string namesTitles = stil.GetFieldAsString(stil.names, subsong, SEPARATOR, true);
+                const std::string& titles = stil.GetFieldAsString(stil.titles, subsong, SEPARATOR, true);
                 if (!namesTitles.empty() && !titles.empty())
                 {
-                    namesTitles.append(L" - ");
+                    namesTitles.append(" - ");
                 }
 
-                const std::wstring& final = namesTitles.append(titles);
+                const wxString& final = Helpers::Wx::StringFromWin1252(namesTitles.append(titles));
                 _ui->labelStilNameTitle->SetText((final.empty()) ? NONE : final);
             }
 
             // "Artist (Author)"
             {
-                std::wstring artistsAuthors = stil.GetFieldAsString(stil.artists, subsong, SEPARATOR, true);
-                const std::wstring& authors = stil.GetFieldAsString(stil.authors, subsong, SEPARATOR, true);
+                std::string artistsAuthors = stil.GetFieldAsString(stil.artists, subsong, SEPARATOR, true);
+                const std::string& authors = stil.GetFieldAsString(stil.authors, subsong, SEPARATOR, true);
 
                 const bool bothPresent = !artistsAuthors.empty() && !authors.empty();
                 if (bothPresent)
                 {
-                    artistsAuthors.append(L" (");
+                    artistsAuthors.append(" (");
                 }
 
                 artistsAuthors.append(authors);
 
                 if (bothPresent)
                 {
-                    artistsAuthors.append(L")");
+                    artistsAuthors.append(")");
                 }
 
-                _ui->labelStilArtistAuthor->SetText((artistsAuthors.empty()) ? NONE : artistsAuthors);
+                _ui->labelStilArtistAuthor->SetText((artistsAuthors.empty()) ? NONE : Helpers::Wx::StringFromWin1252(artistsAuthors));
             }
 
             // Comment(s)
             {
-                std::wstring comments = stil.GetFieldAsString(stil.comments, subsong, SEPARATOR, true);
+                std::string comments = stil.GetFieldAsString(stil.comments, subsong, SEPARATOR, true);
 
                 if (comments.empty())
                 {
@@ -403,11 +404,11 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
                     const std::string& musComments = playback.GetCurrentTuneMusComments();
                     if (!musComments.empty())
                     {
-                        comments = std::wstring(musComments.begin(), musComments.end()); // MUS comments are always ASCII (well, PETSCII).
+                        comments = musComments;
                     }
                 }
 
-                _ui->labelStilComment->SetText((comments.empty()) ? NONE : comments);
+                _ui->labelStilComment->SetText((comments.empty()) ? NONE : Helpers::Wx::StringFromWin1252(comments));
             }
         }
     }

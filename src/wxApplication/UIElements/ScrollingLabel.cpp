@@ -1,20 +1,20 @@
 /*
- * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2024 Jasmin Rutic (bytespiller@gmail.com)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html
- */
+* This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
+* Copyright (C) 2024-2025 Jasmin Rutic (bytespiller@gmail.com)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html
+*/
 
 #include "ScrollingLabel.h"
 
@@ -33,7 +33,9 @@ namespace UIElements
 		wxWindow(parent, wxID_ANY),
 		_themedData(themedData),
 		_timer(this),
-		_justify(justify)
+		_justify(justify),
+		_bgColor(GetBackgroundColour()),
+		_bgTransparentColor(_bgColor.Red(), _bgColor.Green(), _bgColor.Blue(), 0)
 	{
 		SetBackgroundStyle(wxBG_STYLE_PAINT);
 		SetForegroundColour(_themedData.GetPropertyColor("textColor"));
@@ -66,7 +68,8 @@ namespace UIElements
 
 	void ScrollingLabel::SetText(const wxString& text)
 	{
-		wxString normalizedText = wxString(text.ToUTF8()).Trim(); // Normalize any codepaged strings (like in the STIL.txt which uses old-school Windows 1252 codepage for some reason).
+		wxString normalizedText = text;
+		normalizedText.Trim();
 
 		if (_text.IsSameAs(normalizedText))
 		{
@@ -100,7 +103,7 @@ namespace UIElements
 		gc->SetFont(GetFont(), GetForegroundColour());
 
 		double w, h;
-		gc->GetTextExtent(wxString::FromUTF8(text), &w, &h); // Calling regular GetTextExtent comes short so we have to use the one from the wxGraphicsContext.
+		gc->GetTextExtent(text, &w, &h); // Calling regular GetTextExtent comes short (on MSW) so we have to use the one from the wxGraphicsContext.
 
 		width = static_cast<int>(std::ceil(w) + 1);
 		height = static_cast<int>(std::ceil(h));
@@ -140,7 +143,7 @@ namespace UIElements
 
 		// Draw the text
 		gc.SetFont(GetFont(), GetForegroundColour());
-		gc.DrawText(wxString::FromUTF8(_text), -_posX, 0);
+		gc.DrawText(_text, -_posX, 0);
 
 		if (!shouldScroll)
 		{
@@ -148,18 +151,16 @@ namespace UIElements
 		}
 
 		// Create a gradient brush (for feathered overlay)
-		const wxColour& bgColour = GetBackgroundColour();
-
 		// Draw a rectangle with the gradient brush
 		const wxSize& size = GetClientSize();
 		const float startPos = std::min(0.5f, FEATHERING / std::max(1, size.GetWidth()));
 		const float endPos = 1.0f - startPos;
 
-		wxGraphicsGradientStops stops(bgColour, wxTransparentColour);
-		stops.Add(bgColour, 0.0f);
-		stops.Add(wxTransparentColour, startPos);
-		stops.Add(wxTransparentColour, endPos);
-		stops.Add(bgColour, 1.0f);
+		wxGraphicsGradientStops stops(_bgColor, _bgTransparentColor);
+		stops.Add(_bgColor, 0.0f);
+		stops.Add(_bgTransparentColor, startPos);
+		stops.Add(_bgTransparentColor, endPos);
+		stops.Add(_bgColor, 1.0f);
 
 		const wxGraphicsBrush& brush = gc.CreateLinearGradientBrush(0, 0, size.GetWidth(), 0, stops);
 		gc.SetBrush(brush);
@@ -170,7 +171,9 @@ namespace UIElements
 	void ScrollingLabel::OnPaintEvent(wxPaintEvent& /*evt*/)
 	{
 		wxAutoBufferedPaintDC dc(this);
+#ifndef __WXGTK__
 		dc.Clear();
+#endif
 		wxGraphicsContext* const gc = wxGraphicsContext::Create(dc);
 		Render(*gc);
 		delete gc;

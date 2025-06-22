@@ -23,6 +23,10 @@
 #include "../FrameChildren/FramePrefs/FramePrefs.h"
 #include "../Helpers/HelpersWx.h"
 
+#ifndef WIN32
+#include <wx/tooltip.h>
+#endif
+
 namespace
 {
     using RepeatMode = UIElements::RepeatModeButton::RepeatMode;
@@ -177,8 +181,9 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
             }
         }
 
-        wxMenuItem* newItem = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::SkipUnskip), menuTextSkipUnskip);
+        wxMenuItem* newItem = new wxMenuItem(menu, static_cast<int>(PopupMenuItemId_Playlist::SkipUnskip), menuTextSkipUnskip);
         newItem->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::SkipSubsong));
+        menu->Append(newItem);
         newItem->Enable(skipUnskipValidItem);
     }
 
@@ -187,22 +192,25 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
     {
         // Remove
         {
-            wxMenuItem* const item = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::Remove), Strings::PlaylistTree::MENU_ITEM_REMOVE);
+            wxMenuItem* const item = new wxMenuItem(menu, static_cast<int>(PopupMenuItemId_Playlist::Remove), Strings::PlaylistTree::MENU_ITEM_REMOVE);
             item->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::RemoveMainSong));
+            menu->Append(item);
         }
 
         // Remove all above
         {
-            wxMenuItem* const item = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::RemoveAllAbove), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_ABOVE);
-            item->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) > 0);
+            wxMenuItem* const item = new wxMenuItem(menu, static_cast<int>(PopupMenuItemId_Playlist::RemoveAllAbove), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_ABOVE);
             item->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::RemoveAllAbove));
+            menu->Append(item);
+            item->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) > 0);
         }
 
         // Remove all below
         {
-            wxMenuItem* const item = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::RemoveAllBelow), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_BELOW);
-            item->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) + 1 < _ui->treePlaylist->GetSongs().size());
+            wxMenuItem* const item = new wxMenuItem(menu, static_cast<int>(PopupMenuItemId_Playlist::RemoveAllBelow), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_BELOW);
             item->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::RemoveAllBelow));
+            menu->Append(item);
+            item->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) + 1 < _ui->treePlaylist->GetSongs().size());
         }
     }
 
@@ -214,15 +222,17 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
 
         // Expand all
         {
-            wxMenuItem* newItemExpand = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::ExpandAll), Strings::PlaylistTree::MENU_ITEM_EXPAND_ALL);
+            wxMenuItem* newItemExpand = new wxMenuItem(menu, static_cast<int>(PopupMenuItemId_Playlist::ExpandAll), Strings::PlaylistTree::MENU_ITEM_EXPAND_ALL);
             newItemExpand->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::ExpandAll));
+            menu->Append(newItemExpand);
             newItemExpand->Enable(relevant);
         }
 
         // Collapse all
         {
-            wxMenuItem* newItemCollapse = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::CollapseAll), Strings::PlaylistTree::MENU_ITEM_COLLAPSE_ALL);
+            wxMenuItem* newItemCollapse = new wxMenuItem(menu, static_cast<int>(PopupMenuItemId_Playlist::CollapseAll), Strings::PlaylistTree::MENU_ITEM_COLLAPSE_ALL);
             newItemCollapse->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::CollapseAll));
+            menu->Append(newItemCollapse);
             newItemCollapse->Enable(relevant);
         }
     }
@@ -230,16 +240,18 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
     // Scroll to current
     {
         menu->AppendSeparator();
-        wxMenuItem* newItem = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::ScrollToCurrent), Strings::PlaylistTree::MENU_ITEM_SCROLL_TO_CURRENT);
+        wxMenuItem* newItem = new wxMenuItem(menu, static_cast<int>(PopupMenuItemId_Playlist::ScrollToCurrent), Strings::PlaylistTree::MENU_ITEM_SCROLL_TO_CURRENT);
         newItem->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::ScrollToCurrent));
+        menu->Append(newItem);
         newItem->Enable(!_ui->treePlaylist->IsEmpty());
     }
 
     // Browse location
     {
         menu->AppendSeparator();
-        wxMenuItem* newItem = menu->Append(static_cast<int>(PopupMenuItemId_Playlist::BrowseLocation), Strings::Common::ACTION_BROWSE_LOCATION);
+        wxMenuItem* newItem = new wxMenuItem(menu, static_cast<int>(PopupMenuItemId_Playlist::BrowseLocation), Strings::Common::ACTION_BROWSE_LOCATION);
         newItem->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::BrowseLocation));
+        menu->Append(newItem);
         newItem->Enable(!_ui->treePlaylist->IsEmpty());
     }
 
@@ -296,26 +308,40 @@ void FramePlayer::OnTreePlaylistContextItem(PlaylistTreeModelNode& node, wxComma
 
 void FramePlayer::OnTreePlaylistKeyPressed(wxKeyEvent& evt)
 {
+    // Handle the DELETE key
     const int keycode = evt.GetKeyCode();
-    if (keycode != WXK_DELETE && keycode != WXK_NUMPAD_DELETE)
+    if (keycode == WXK_DELETE || keycode == WXK_NUMPAD_DELETE)
     {
-        evt.Skip();
+        const wxDataViewItem& item = _ui->treePlaylist->GetSelection();
+        if (item.IsOk())
+        {
+            PlaylistTreeModelNode* node = PlaylistTreeModel::TreeItemToModelNode(item);
+            if (node->type == PlaylistTreeModelNode::ItemType::Song)
+            {
+                DoRemoveSongTreeItem(*node);
+            }
+            else
+            {
+                DoToggleSubsongBlacklistState(*node);
+            }
+        }
+
         return;
     }
 
-    const wxDataViewItem& item = _ui->treePlaylist->GetSelection();
-    if (item.IsOk())
+    // Skip the event processing otherwise
+#ifdef __WXGTK__
+    // Prevent the GTK hijacking the CTRL+F
+    if (evt.ControlDown())
     {
-        PlaylistTreeModelNode* node = PlaylistTreeModel::TreeItemToModelNode(item);
-        if (node->type == PlaylistTreeModelNode::ItemType::Song)
-        {
-            DoRemoveSongTreeItem(*node);
-        }
-        else
-        {
-            DoToggleSubsongBlacklistState(*node);
-        }
+        _ui->btnRepeatMode->SetFocus(); // A hack to cause the player window's menu key combos to be evaluated. This button is never disabled, so it's safe to focus it for this purpose.
     }
+
+    // Disable the GTK's native type-ahead feature (doesn't work in the wxDataViewCtrl)
+    evt.Skip(false);
+#else
+    evt.Skip();
+#endif
 }
 
 void FramePlayer::OnDropFilesFramePlayer(wxDropFilesEvent& evt)
@@ -435,12 +461,21 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             TrySaveCurrentPlaylist();
             break;
 
+        case MenuItemId_Player::PlaylistResetDemo:
+            [[fallthrough]];
         case MenuItemId_Player::PlaylistClear:
             OnButtonStop();
             _enqueuedFiles.Clear(); // Clear any pending files.
             _addingFilesToPlaylist = false; // Break the loop.
             _ui->treePlaylist->Clear();
             UpdateUiState();
+
+            if (id == MenuItemId_Player::PlaylistResetDemo)
+            {
+                const wxArrayString& rawPaths = Helpers::Wx::Files::LoadPathsFromPlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME);
+                DiscoverFilesAndSendToPlaylist(rawPaths, true, false);
+            }
+
             break;
 
         // --- Edit ---
@@ -496,51 +531,46 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
     }
 }
 
-void FramePlayer::OnTimerGlobalHotkeysPolling(wxTimerEvent& /*evt*/)
+void FramePlayer::OnGlobalHotkey(wxKeyEvent& evt)
 {
-    // Media Keys
-    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::MediaKeys)->GetValueAsBool())
+    PlaybackController::State cState = _app.GetPlaybackInfo().GetState();
+    switch(evt.GetKeyCode()) // Because the RegisterHotKey is only implemented under MSW, we use this universal solution for now.
     {
-        PlaybackController::State cState = _app.GetPlaybackInfo().GetState();
-
-        switch(Helpers::Wx::Input::GetMediaKeyCommand()) // Because the RegisterHotKey is only implemented under MSW, we use this universal solution for now.
+        case WXK_MEDIA_PLAY_PAUSE:
         {
-            case WXK_MEDIA_PLAY_PAUSE:
+            if (cState != PlaybackController::State::Undefined && _ui->treePlaylist->GetActiveSong() != nullptr)
             {
-                if (cState != PlaybackController::State::Undefined && _ui->treePlaylist->GetActiveSong() != nullptr)
-                {
-                    OnButtonPlayPause();
-                }
-                break;
+                OnButtonPlayPause();
             }
-            case WXK_MEDIA_STOP:
+            break;
+        }
+        case WXK_MEDIA_STOP:
+        {
+            if (cState != PlaybackController::State::Stopped && cState != PlaybackController::State::Undefined)
             {
-                if (cState != PlaybackController::State::Stopped && cState != PlaybackController::State::Undefined)
-                {
-                    OnButtonStop();
-                }
-                break;
+                OnButtonStop();
             }
-            case WXK_MEDIA_NEXT_TRACK:
+            break;
+        }
+        case WXK_MEDIA_NEXT_TRACK:
+        {
+            const bool optIncludeSubsongs = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
+            const bool lastSubsong = _ui->treePlaylist->GetNextSubsong() == nullptr;
+            if (!(optIncludeSubsongs && !lastSubsong && OnButtonSubsongNext()))
             {
-                const bool optIncludeSubsongs = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
-                const bool lastSubsong = _ui->treePlaylist->GetNextSubsong() == nullptr;
-                if (!(optIncludeSubsongs && !lastSubsong && OnButtonSubsongNext()))
-                {
-                    OnButtonTuneNext();
-                }
-                break;
+                OnButtonTuneNext();
             }
-            case WXK_MEDIA_PREV_TRACK:
+            break;
+        }
+        case WXK_MEDIA_PREV_TRACK:
+        {
+            const bool optIncludeSubsongs = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
+            const bool firstSubsong = _ui->treePlaylist->GetPrevSubsong() == nullptr;
+            if (!(optIncludeSubsongs && !firstSubsong && OnButtonSubsongPrev()))
             {
-                const bool optIncludeSubsongs = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
-                const bool firstSubsong = _ui->treePlaylist->GetPrevSubsong() == nullptr;
-                if (!(optIncludeSubsongs && !firstSubsong && OnButtonSubsongPrev()))
-                {
-                    OnButtonTunePrev();
-                }
-                break;
+                OnButtonTunePrev();
             }
+            break;
         }
     }
 }
@@ -593,7 +623,7 @@ void FramePlayer::OnButtonPlayPause()
         switch (_app.GetPlaybackInfo().GetState())
         {
             case PlaybackController::State::Seeking:
-                // Fall-through: when seeking is underway we just toggle the resume state silently.
+                [[fallthrough]]; // When seeking is underway we just toggle the resume state silently.
             case PlaybackController::State::Paused:
                 _app.ResumePlayback();
                 break;
@@ -790,39 +820,25 @@ void FramePlayer::OnRepeatModeExtraOptionToggled(ExtraOptionId extraOptionId)
     }
 }
 
-int audioDeviceRevertCount = 0;
 void FramePlayer::OnAudioDeviceChanged(bool success)
 {
-    ++audioDeviceRevertCount;
-
     UpdateUiState();
+
     if (!success)
     {
-        if (_framePrefs != nullptr && _framePrefs->IsVisible())
-        {
-            _framePrefs->Destroy();
-        }
-
-        if (audioDeviceRevertCount == 1)
-        {
-            wxMessageBox(Strings::Error::MSG_ERR_AUDIO_CONFIG, Strings::FramePlayer::WINDOW_TITLE, wxICON_ERROR);
-            _app.ReapplyPlaybackSettings();
-        }
-        else
+        _app.CallAfter([&]() // Call this next frame because the Prefs window is still not done in the current frame and would cause all kinds of problems.
         {
             const bool didReset = _app.ResetToDefaultsRecovery(Strings::Error::MSG_ERR_RESET_DEFAULTS_RECOVERY);
-            if (didReset)
+            if (didReset) // User selected "Yes"
             {
                 _app.ReapplyPlaybackSettings();
             }
-            else
+            else // User selected "No"
             {
                 CloseApplication();
             }
-        }
+        });
     }
-
-    audioDeviceRevertCount = 0;
 }
 
 PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const PlaylistTreeModelNode& startNode, bool forwardDirection, bool restart)

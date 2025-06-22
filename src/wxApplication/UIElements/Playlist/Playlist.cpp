@@ -23,6 +23,8 @@ namespace UIElements
 {
 	namespace Playlist
 	{
+		static constexpr unsigned int COL_PADDING = 10; // Column padding in the respective wxDataViewCtrl, we use this hardcoded value here to avoid PITA.
+
 		using ColumnId = PlaylistTreeModel::ColumnId;
 
 		Playlist::Playlist(wxPanel* parent, const PlaylistIcons& playlistIcons, Settings::AppSettings& appSettings, unsigned long style) :
@@ -39,23 +41,71 @@ namespace UIElements
 			_AddTextColumn(ColumnId::Copyright, Strings::PlaylistTree::COLUMN_COPYRIGHT);
 			_AddTextColumn(ColumnId::PlaceholderLast, "");
 
+#ifdef WIN32
 			Bind(wxEVT_MOUSEWHEEL, &_OverrideScrollWheel, this); // Partial workaround for the smooth scrolling performance issues on MSW (especially with lots of icons in rows).
+#endif
 
 			// Auto-fit the Title column upon the child item expansion
 			Bind(wxEVT_DATAVIEW_ITEM_EXPANDED, [this](const wxDataViewEvent& /*evt*/)
 			{
-				constexpr unsigned int colIndex = static_cast<unsigned int>(ColumnId::Title);
-				wxDataViewColumn* const col = GetColumn(colIndex);
-
-				const unsigned int padding = GetFont().GetPointSize() * 2; // Account for bold text.
-				const unsigned int newWidth = GetBestColumnWidth(colIndex) + padding;
-				col->SetWidth(newWidth);
+				AutoFitTextColumn(ColumnId::Title);
 			});
 		}
 
 		wxWindow* Playlist::GetWxWindow()
 		{
 			return this;
+		}
+
+		void Playlist::AutoFitTextColumn(PlaylistTreeModel::ColumnId column)
+		{
+			const unsigned int newWidth = _GetBestTextColumnWidth(column);
+			wxDataViewColumn* const col = GetColumn(static_cast<unsigned int>(column));
+			col->SetWidth(newWidth);
+		}
+
+		int Playlist::_GetBestTextColumnWidth(PlaylistTreeModel::ColumnId column)
+		{
+			wxClientDC dc(this);
+			dc.SetFont(GetFont().MakeBold());
+
+			int width = std::max(10, dc.GetTextExtent(GetColumn(static_cast<unsigned int>(column))->GetTitle()).GetWidth()); // Initial value is minimum auto-width (fit column title).
+
+			{
+				const auto DoUpdateWidth = [&](const wxDataViewItem& item) -> void
+				{
+					wxVariant text;
+					_model.GetValue(text, item, static_cast<unsigned int>(column));
+
+					const wxSize& size = dc.GetTextExtent(text.GetString());
+					width = std::max(width, size.GetWidth());
+				};
+
+				std::for_each(_model.entries.cbegin(), _model.entries.cend(), [&](const PlaylistTreeModelNodePtr& song)
+				{
+					const wxDataViewItem& songNode = PlaylistTreeModel::ModelNodeToTreeItem(*song);
+					if (!songNode.IsOk())
+					{
+						return;
+					}
+
+					// Update by subsongs' titles (if parent expanded)
+					const PlaylistTreeModelNodePtrArray& subsongs = song->GetChildren();
+					if (!subsongs.empty() && IsExpanded(songNode))
+					{
+						std::for_each(subsongs.cbegin(), subsongs.cend(), [&](const PlaylistTreeModelNodePtr& subsong)
+						{
+							const wxDataViewItem& subsongNode = PlaylistTreeModel::ModelNodeToTreeItem(*subsong);
+							DoUpdateWidth(subsongNode);
+						});
+					}
+
+					// Update by the main song title
+					DoUpdateWidth(songNode);
+				});
+			}
+
+			return width + COL_PADDING;
 		}
 
 		PlaylistTreeModelNode& Playlist::AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable)
@@ -81,6 +131,10 @@ namespace UIElements
 			}
 
 			wxDataViewItemArray notifyItems(durations.size());
+			const auto _ = _model.PrepareDirty([&]()
+			{
+				_model.ItemsAdded(wxDataViewItem(&parent), notifyItems); // Notify the wx base control of change (MSW).
+			});
 
 			// Create multiple items at once
 			{
@@ -98,9 +152,6 @@ namespace UIElements
 					}
 				}
 			}
-
-			// Notify the wx base control of change
-			_model.ItemsAdded(wxDataViewItem(&parent), notifyItems);
 		}
 
 		void Playlist::Remove(PlaylistTreeModelNode& item)
@@ -389,10 +440,13 @@ namespace UIElements
 				return false;
 			}
 
+			wxDataViewItemArray notifyItems;
+
 			// Handle old node
 			if (_activeItem.IsOk())
 			{
 				PlaylistTreeModelNode& oldNode = *GetActiveSong();
+				notifyItems.Add(wxDataViewItem(&oldNode));
 
 				// Collapse old if necessary
 				if (autoexpand && oldNode.type == PlaylistTreeModelNode::ItemType::Subsong)
@@ -407,18 +461,23 @@ namespace UIElements
 				PlaylistTreeModelNode* parent = oldNode.GetParent();
 				if (parent != nullptr)
 				{
+					notifyItems.Add(wxDataViewItem(parent));
 					parent->ResetItemAttr({});
 				}
 			}
 
 			// Highlight new node
 			_activeItem = PlaylistTreeModel::ModelNodeToTreeItem(node);
+			notifyItems.Add(_activeItem);
 			GetActiveSong()->GetItemAttr({}).SetBold(true);
 
 			// Also highlight the parent node if this is a child node
 			if (node.type == PlaylistTreeModelNode::ItemType::Subsong)
 			{
-				wxDataViewItemAttr& attr = GetActiveSong()->GetParent()->GetItemAttr({});
+				PlaylistTreeModelNode* const activeParent = GetActiveSong()->GetParent();
+				notifyItems.Add(wxDataViewItem(activeParent));
+
+				wxDataViewItemAttr& attr = activeParent->GetItemAttr({});
 				attr.SetBold(true);
 				attr.SetColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT)); // TODO: define the color in the theme XML instead of here.
 			}
@@ -429,7 +488,12 @@ namespace UIElements
 				Expand(_model.GetParent(_activeItem)); // Expand parent item.
 			}
 
-			Refresh(); // Must be done at the end.
+			// Must be done at the end
+#ifdef __WXGTK__
+			_model.ItemsChanged(notifyItems); // Not necessary on MSW.
+#endif
+			Refresh();
+
 			return true;
 		}
 
@@ -530,7 +594,12 @@ namespace UIElements
 
 		wxDataViewColumn* Playlist::_AddBitmapColumn(PlaylistTreeModel::ColumnId columnIndex, wxAlignment align, int flags)
 		{
-			constexpr int COL_WIDTH = 48; // Col width 48 comes from: 16 * 3 where 16 is playlist icon size and 3 is magic number.
+#ifdef WIN32
+			static constexpr int PAD = 0;
+#else
+			static constexpr int PAD = COL_PADDING;
+#endif
+			static constexpr int COL_WIDTH = 48 + PAD; // Col width 48 comes from: 16 * 3 where 16 is playlist icon size and 3 is magic number.
 			return AppendBitmapColumn(wxEmptyString, static_cast<unsigned int>(columnIndex), wxDATAVIEW_CELL_INERT, COL_WIDTH, align, flags);
 		}
 
@@ -539,6 +608,7 @@ namespace UIElements
 			return AppendTextColumn(title, static_cast<unsigned int>(columnIndex), wxDATAVIEW_CELL_INERT, wxCOL_WIDTH_AUTOSIZE, align, flags);
 		}
 
+#ifdef WIN32
 		void Playlist::_OverrideScrollWheel(wxMouseEvent& evt)
 		{
 			// This method prevents smooth scrolling due to performance issues in the wxDataViewCtrl on MSW.
@@ -548,8 +618,9 @@ namespace UIElements
 				return;
 			}
 
-     		const int lines = (evt.GetWheelRotation() / evt.GetWheelDelta()) * evt.GetLinesPerAction();
+			const int lines = (evt.GetWheelRotation() / evt.GetWheelDelta()) * evt.GetLinesPerAction();
 			DoScroll(GetScrollPos(wxHORIZONTAL), std::max(0, GetScrollPos(wxVERTICAL) - lines)); // Not using the ScrollLines() since it uses the performance-problematic smooth scrolling.
 		}
+#endif
 	}
 }
