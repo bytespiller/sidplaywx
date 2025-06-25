@@ -44,7 +44,7 @@
         <Color type="wxSYS" value="wxSYS_COLOUR_HIGHLIGHT" property="fillColorBarSeeking"/>
         <Color type="wxSYS" value="wxSYS_COLOUR_3DDKSHADOW" property="fillColorBarPreviewDiscard"/>
         <Color type="Val" value="#99B4D1" property="fillColorBarSeekingRemaining"/>
-        <Color type="Val" value="#FFFFE1" property="fillColorBarPreRenderProgress"/>
+        <Color type="wxSYS" value="wxSYS_COLOUR_SCROLLBAR" property="fillColorBarPreRenderProgress"/>
         <Color type="wxSYS" value="wxSYS_COLOUR_WINDOW" property="thumbDisabledColor"/>
       </Colors>
     </GuiElement>
