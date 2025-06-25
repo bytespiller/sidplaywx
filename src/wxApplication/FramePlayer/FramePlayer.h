@@ -191,8 +191,6 @@ private:
     void OnDropFilesFramePlayer(wxDropFilesEvent& evt);
     void OnDropFilesPlaylist(wxDropFilesEvent& evt);
 
-    void OnLabelTitleMouseOver(wxMouseEvent& evt);
-
     void OnMenuOpening(wxMenuEvent& evt);
     void OnMenuItemSelected(wxCommandEvent& evt);
 

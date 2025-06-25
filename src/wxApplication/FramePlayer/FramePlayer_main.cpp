@@ -349,8 +349,6 @@ void FramePlayer::SetupUiElements()
     _ui->treePlaylist->Bind(wxEVT_DATAVIEW_ITEM_CONTEXT_MENU, &OnTreePlaylistContextMenuOpen, this);
     _ui->treePlaylist->Bind(wxEVT_KEY_DOWN, &OnTreePlaylistKeyPressed, this);
 
-    _ui->labelTitle->Bind(wxEVT_ENTER_WINDOW, &OnLabelTitleMouseOver, this);
-
     SubscribeMe(*_ui->btnRepeatMode, UIElements::SignalsRepeatModeButton::SIGNAL_EXTRA_OPTION_SELECTED, [this](int param)
     {
         OnRepeatModeExtraOptionToggled(static_cast<ExtraOptionId>(param));
