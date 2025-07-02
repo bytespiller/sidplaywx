@@ -77,22 +77,7 @@ FramePlayer::FramePlayer(const wxString& title, const wxPoint& pos, const wxSize
     SubscribeMe(*_ui->searchBar, UIElements::SignalsSearchBar::SIGNAL_FIND_PREV, std::bind(&OnFindSong, this, UIElements::SignalsSearchBar::SIGNAL_FIND_PREV));
 
     // Final
-    if (!TryRestoreMainWindowPositionAndSize())
-    {
-        // Default position is implied/automatic here
-        SetClientSize(DpiSize(640, 512)); // Hardcoded default size
-    }
-
-    const bool maximized = _app.currentSettings->GetOption(Settings::AppSettings::ID::MainWindowMaximized)->GetValueAsBool();
-    if (maximized)
-    {
-        Maximize();
-    }
-
     UpdateUiState();
-
-    Show(); // Allow update immediately.
-    Update(); // Immediately paint the window so it appears fully formed.
     CallAfter(&DeferredInit); // Init like this so the playlist control is immediately available rather than in a frozen state in case it's loading lots of items.
 }
 
@@ -127,9 +112,9 @@ bool FramePlayer::TryRestoreMainWindowPositionAndSize()
             return false;
         }
 
-        // DPI aware position & size
-        const wxPoint& restorePosition = FromDIP(wxPoint(x, y));
-        const wxSize& restoreSize = DpiSize(w, h);
+        // Position & size
+        const wxPoint restorePosition(x, y);
+        const wxSize restoreSize(w, h);
 
         // Restore window position & size (if it fits on the current screen/viewport)
         wxDisplay display(wxDisplay::GetFromWindow(this));
@@ -382,6 +367,23 @@ void FramePlayer::SetupUiElements()
 
 void FramePlayer::DeferredInit()
 {
+    // Restore window position & size (we have to do it here, otherwise the width would drift for some reason)
+    if (!TryRestoreMainWindowPositionAndSize())
+    {
+        // Default position is implied/automatic here
+        SetClientSize(DpiSize(640, 512)); // Hardcoded default size
+    }
+
+    const bool maximized = _app.currentSettings->GetOption(Settings::AppSettings::ID::MainWindowMaximized)->GetValueAsBool();
+    if (maximized)
+    {
+        Maximize();
+    }
+
+    Show(); // Allow update immediately.
+    Update(); // Immediately paint the window so it appears fully formed.
+
+    // Init potentially blocking items
     InitSonglengthsDatabase();
     InitStilInfo();
 
