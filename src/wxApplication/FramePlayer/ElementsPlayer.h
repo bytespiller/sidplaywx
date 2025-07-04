@@ -151,7 +151,7 @@ namespace FrameElements
 		UIElements::SearchBar* searchBar;
 
 		// Context menu icons
-		std::unordered_map<PlaylistContextMenuIconId, std::shared_ptr<wxBitmap>> playlistContextMenuIcons;
+		std::unordered_map<PlaylistContextMenuIconId, std::shared_ptr<wxBitmapBundle>> playlistContextMenuIcons;
 
 	private:
 		wxPanel& _parentPanel;

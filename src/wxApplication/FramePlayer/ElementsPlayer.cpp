@@ -19,7 +19,6 @@
 #include "ElementsPlayer.h"
 #include "../Config/AppSettings.h"
 #include "../Config/UIStrings.h"
-#include "../Helpers/DpiSize.h"
 #include "../UIElements/ElementsUtil.h"
 #include "../Theme/ThemeData/ThemeImage.h"
 
@@ -42,8 +41,8 @@ namespace FrameElements // Static functions
 		wxBoxSizer* sizerIconLabel = new wxBoxSizer(wxHORIZONTAL);
 		parentSizer->Add(sizerIconLabel, 1, wxEXPAND, 0);
 
-		const auto& img = UIElements::Util::LoadRasterizedSvg(themeImage.path.c_str(), DpiSize(TEMP_LABEL_ICON_SIZE), themeImage.offset, themeImage.scale);
-		wxStaticBitmap* bitmapIcon = new wxStaticBitmap(&parent, wxID_ANY, *img.get());
+		const std::shared_ptr<wxBitmapBundle>& img = UIElements::Util::LoadColorizedSvg(themeImage.path.c_str(), wxSize(TEMP_LABEL_ICON_SIZE, TEMP_LABEL_ICON_SIZE));
+		wxStaticBitmap* const bitmapIcon = new wxStaticBitmap(&parent, wxID_ANY, *img.get());
 		sizerIconLabel->Add(bitmapIcon, 0, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
 		bitmapIcon->SetToolTip(tooltip);
 
@@ -60,8 +59,8 @@ namespace FrameElements // Static functions
 
 		// Create icon
 		const wxColor iconColor = themedData.GetPropertyColor("iconColor");
-		const std::shared_ptr<wxBitmap>& img = UIElements::Util::LoadRasterizedSvg(themeImage.path.c_str(), DpiSize(TEMP_LABEL_ICON_SIZE), themeImage.offset, themeImage.scale, &iconColor);
-		wxStaticBitmap* bitmapIcon = new wxStaticBitmap(&parent, wxID_ANY, *img.get());
+		const std::shared_ptr<wxBitmapBundle>& img = UIElements::Util::LoadColorizedSvg(themeImage.path.c_str(), wxSize(TEMP_LABEL_ICON_SIZE, TEMP_LABEL_ICON_SIZE), &iconColor);
+		wxStaticBitmap* const bitmapIcon = new wxStaticBitmap(&parent, wxID_ANY, *img.get());
 		bitmapIcon->SetToolTip(tooltip);
 
 		// Create label
@@ -86,7 +85,7 @@ namespace FrameElements // Static functions
 
 	static wxButton* AttachSimplePlaybackControlButton(const ThemeData::ThemeImage& themeImage, wxPanel& parent, wxBoxSizer* parentSizer)
 	{
-		wxButton* newButton = UIElements::Util::NewSvgButton(themeImage, DpiSize(TEMP_BUTTON_SIZE), parent);
+		wxButton* newButton = UIElements::Util::NewSvgButton(themeImage, wxSize(TEMP_BUTTON_SIZE, TEMP_BUTTON_SIZE), parent);
 		parentSizer->Add(newButton, 0, wxALL, TEMP_BUTTON_BORDER_SIZE);
 		return newButton;
 	}
@@ -100,10 +99,10 @@ namespace FrameElements // Static functions
 		parentSizer->Add(separatorDummyPanel, 0, wxFIXED_MINSIZE | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
 	}
 
-	static std::shared_ptr<wxBitmap> LoadMenuIcon(const ThemeData::ThemeData& themeData, const std::string& themeIconName)
+	static std::shared_ptr<wxBitmapBundle> LoadMenuIcon(const ThemeData::ThemeData& themeData, const std::string& themeIconName)
 	{
 		const ThemeData::ThemeImage& img = themeData.GetImage(themeIconName);
-		return UIElements::Util::LoadRasterizedSvg(img.path.c_str(), DpiSize(TEMP_MENU_ICON_SIZE), img.offset, img.scale);
+		return UIElements::Util::LoadColorizedSvg(img.path.c_str(), wxSize(TEMP_MENU_ICON_SIZE, TEMP_MENU_ICON_SIZE));
 	}
 }
 
@@ -222,7 +221,7 @@ namespace FrameElements // Player class
 		waveformVisualization->SetMaxClientSize(wxSize(-1, 72));
 		sizerMain->Add(waveformVisualization, 1, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
 
-		AttachFixedSizeSeparator(DpiSize(0, 10 + 4), sizerMain, _parentPanel); // TODO: magic numbers
+		AttachFixedSizeSeparator(wxSize(0, 10 + 4), sizerMain, _parentPanel); // TODO: magic numbers
 
 		// Sizer below
 		wxBoxSizer* gridSizerPlaybackButtons = new wxBoxSizer(wxHORIZONTAL);
@@ -263,7 +262,7 @@ namespace FrameElements // Player class
 		btnPlaybackMod = AttachSimplePlaybackControlButton(themeData.GetImage("btn_eq"), _parentPanel, gridSizerPlaybackButtons);
 		btnPlaybackMod->SetToolTip(Strings::PlaybackMods::WINDOW_TITLE);
 
-		AttachFixedSizeSeparator(DpiSize(0, 1 + 4), sizerMain, _parentPanel); // TODO: magic number
+		AttachFixedSizeSeparator(wxSize(0, 1 + 4), sizerMain, _parentPanel); // TODO: magic number
 
 		// Info bar: Media keys taken
 		infoBarMediaKeysTaken = new wxInfoBar(&_parentPanel);
@@ -323,7 +322,7 @@ namespace FrameElements // Player class
 
 			// ------------------------------------------------
 
-			btnRepeatMode = new UIElements::RepeatModeButton(repeatModes, DpiSize(TEMP_BUTTON_SIZE), _parentPanel, extraOptionsHandler);
+			btnRepeatMode = new UIElements::RepeatModeButton(repeatModes, wxSize(TEMP_BUTTON_SIZE, TEMP_BUTTON_SIZE), _parentPanel, extraOptionsHandler);
 			sizerSeekbar->Add(btnRepeatMode, 0, wxALL, TEMP_LABEL_TIME_BORDER_SIZE);
 		}
 
@@ -334,7 +333,7 @@ namespace FrameElements // Player class
 		labelTime = new wxStaticText(&_parentPanel, wxID_ANY, wxT("000:00"), wxDefaultPosition, wxDefaultSize, wxSTB_DEFAULT_STYLE | wxTEXT_ALIGNMENT_CENTER); // Extra padding in text on purpose!
 		sizerSeekbar->Add(labelTime, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL, TEMP_LABEL_TIME_BORDER_SIZE);
 
-		AttachFixedSizeSeparator(DpiSize(TEMP_LABEL_BORDER_SIZE, 0), sizerSeekbar, _parentPanel);
+		AttachFixedSizeSeparator(wxSize(TEMP_LABEL_BORDER_SIZE, 0), sizerSeekbar, _parentPanel);
 
  		// Playlist
 		{

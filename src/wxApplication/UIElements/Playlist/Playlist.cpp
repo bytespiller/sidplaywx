@@ -599,7 +599,7 @@ namespace UIElements
 #else
 			static constexpr int PAD = COL_PADDING;
 #endif
-			static constexpr int COL_WIDTH = 48 + PAD; // Col width 48 comes from: 16 * 3 where 16 is playlist icon size and 3 is magic number.
+			static const int COL_WIDTH = (48 + PAD) * GetDPIScaleFactor(); // Col width 48 comes from: 16 * 3 where 16 is playlist icon size and 3 is magic number.
 			return AppendBitmapColumn(wxEmptyString, static_cast<unsigned int>(columnIndex), wxDATAVIEW_CELL_INERT, COL_WIDTH, align, flags);
 		}
 

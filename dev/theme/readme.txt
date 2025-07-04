@@ -1,1 +1,2 @@
-Full "theming" support not yet implemented.
+- SVG files must have fill="#000" or fill="currentColor" for their colors to be dynamically set (e.g., dark theme).
+- Full "theming" support not yet implemented.

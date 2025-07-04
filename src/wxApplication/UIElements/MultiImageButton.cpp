@@ -27,7 +27,7 @@ namespace UIElements
 	{
 		for (const ThemeData::ThemeImage& themeImage : images)
 		{
-			_indexedBitmaps.emplace_back(UIElements::Util::LoadRasterizedSvg(themeImage.path.c_str(), size, themeImage.offset, themeImage.scale));
+			_indexedBitmaps.emplace_back(UIElements::Util::LoadColorizedSvg(themeImage.path.c_str(), size));
 		}
 
 		SetActiveImage(0);

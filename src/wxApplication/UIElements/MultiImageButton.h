@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ namespace UIElements
 		int GetActiveImage() const;
 
 	private:
-		std::vector< std::shared_ptr<wxBitmap> > _indexedBitmaps;
+		std::vector< std::shared_ptr<wxBitmapBundle> > _indexedBitmaps;
 		int _activeBitmapIndex = 0;
 	};
 }

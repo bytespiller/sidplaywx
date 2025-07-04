@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,20 +51,6 @@ namespace ThemeLoader
 				throw std::runtime_error("Image type not supported!"); // Technically we support png etc. but since only the svg is used, let's keep things simple for now...
 			}
 
-			// Offset
-			const std::string& strOffset = child->GetAttribute(ThemeXml::Attr::Image::Offset).ToStdString();
-			const auto splRect = Helpers::General::SplitString(strOffset, ',');
-			assert(splRect.size() == 2);
-			const wxPoint imageOffset(stoi(splRect.at(0)), stoi(splRect.at(1)));
-
-			// Scale
-			double imageScale = 0.0;
-
-			{
-				const bool success = child->GetAttribute(ThemeXml::Attr::Image::Scale).ToDouble(&imageScale);
-				assert(success);
-			}
-
 			// Name
 			const std::string& imageName = child->GetAttribute(ThemeXml::Attr::Image::Name).ToStdString();
 
@@ -72,7 +58,7 @@ namespace ThemeLoader
 			const std::string& imagePath = themePath + "/" + child->GetAttribute(ThemeXml::Attr::Image::Path).ToStdString();
 
 			// Finalize ThemeImage
-			out.emplace_back(ThemeData::ThemeImage(imageName, imageOffset, imageScale, imagePath));
+			out.emplace_back(ThemeData::ThemeImage(imageName, imagePath));
 
 		} while (child = child->GetNext());
 

@@ -114,7 +114,7 @@ bool FramePlayer::TryRestoreMainWindowPositionAndSize()
 
         // Position & size
         const wxPoint restorePosition(x, y);
-        const wxSize restoreSize(w, h);
+        const wxSize restoreSize = DpiSize(w, h);
 
         // Restore window position & size (if it fits on the current screen/viewport)
         wxDisplay display(wxDisplay::GetFromWindow(this));
@@ -526,7 +526,9 @@ void FramePlayer::CloseApplication()
     if (!IsMaximized()) // Don't save position & size if maximized (remember non-maximized state).
     {
         _app.currentSettings->GetOption(Settings::AppSettings::ID::MainWindowPosition)->UpdateValue(wxString::Format("%i,%i", GetScreenPosition().x, GetScreenPosition().y));
-        _app.currentSettings->GetOption(Settings::AppSettings::ID::MainWindowSize)->UpdateValue(wxString::Format("%ix%i", GetClientSize().x, GetClientSize().y));
+
+        const wxSize& clientSize = ToDIP(GetClientSize());
+        _app.currentSettings->GetOption(Settings::AppSettings::ID::MainWindowSize)->UpdateValue(wxString::Format("%ix%i", clientSize.GetWidth(), clientSize.GetHeight()));
     }
 
     // Audio volume
@@ -580,13 +582,13 @@ void FramePlayer::OpenPlaybackModFrame()
     }
 
     // First-time create
-    _framePlaybackMods = new FramePlaybackMods(this, Strings::PlaybackMods::WINDOW_TITLE, wxDefaultPosition, wxSize(600, 350), _app);
+    _framePlaybackMods = new FramePlaybackMods(this, Strings::PlaybackMods::WINDOW_TITLE, wxDefaultPosition, DpiSize(600, 400), _app);
     _framePlaybackMods->Show();
 }
 
 void FramePlayer::OpenPrefsFrame()
 {
-    _framePrefs = new FramePrefs(this, Strings::Preferences::WINDOW_TITLE, wxDefaultPosition, DpiSize(430, 600), _app, *this);
+    _framePrefs = new FramePrefs(this, Strings::Preferences::WINDOW_TITLE, wxDefaultPosition, DpiSize(480, 600), _app, *this);
     _framePrefs->ShowModal(); // Reminder: this one gets Destroy()-ed, not Close()-d.
 }
 
@@ -659,7 +661,7 @@ void FramePlayer::ShowTuneInfo()
     }
 
     // First-time create
-    _frameTuneInfo = new FrameTuneInfo(this, Strings::TuneInfo::WINDOW_TITLE, wxDefaultPosition, wxSize(640, 490), _app.GetPlaybackInfo(), _stilInfo);
+    _frameTuneInfo = new FrameTuneInfo(this, Strings::TuneInfo::WINDOW_TITLE, wxDefaultPosition, DpiSize(640, 490), _app.GetPlaybackInfo(), _stilInfo);
     _frameTuneInfo->ShowAndUpdate(_ui->treePlaylist->GetActiveSong());
 }
 

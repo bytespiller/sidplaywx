@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Theme displayName="Default">
   <Images>
-    <Image type="svg" offset="0,2" scale="1.0" name="icon_chip" path="svg/chip-memory.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_copyright" path="svg/copyright-line.svg"/>
-    <Image type="svg" offset="4,4" scale="0.8" name="btn_eq" path="svg/equalizer-fill.svg"/>
-    <Image type="svg" offset="4,4" scale="0.8" name="btn_tuneinfo" path="svg/information-2-line.svg"/>
-    <Image type="svg" offset="5,12" scale="0.74" name="btn_infinite" path="svg/infinity-loop.svg"/>
-    <Image type="svg" offset="4,4" scale="0.8" name="btn_playonce" path="svg/lock-line.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_music" path="svg/music-fill.svg"/>
-    <Image type="svg" offset="4,4" scale="0.8" name="btn_sequential" path="svg/order-play-line.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="btn_pause" path="svg/pause-fill.svg"/>
-    <Image type="svg" offset="-2,0" scale="1.0" name="btn_play" path="svg/play-fill.svg"/>
-    <Image type="svg" offset="5,5" scale="0.74" name="btn_repeatall" path="svg/repeat-line.svg"/>
-    <Image type="svg" offset="4,4" scale="0.8" name="btn_repeatone" path="svg/repeat-one-line.svg"/>
-    <Image type="svg" offset="6,6" scale="0.72" name="btn_prevsubsong" path="svg/rewind-fill.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="btn_skipback" path="svg/skip-back-fill.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="btn_skipforward" path="svg/skip-forward-fill.svg"/>
-    <Image type="svg" offset="6,6" scale="0.72" name="btn_nextsubsong" path="svg/speed-fill.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="btn_stop" path="svg/stop-fill.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_author" path="svg/user-3-fill.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_defaultsubsong" path="svg/vip-crown-2-line.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_skipshort" path="svg/timer-fill.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_removesong" path="svg/dislike-fill.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_removesongmenu" path="svg/dislike-line.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_removemainsong" path="svg/close-line.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_removeallabove" path="svg/arrow-up-s-line.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_removeallbelow" path="svg/arrow-down-s-line.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_expandall" path="svg/add-line.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_collapseall" path="svg/subtract-line.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_scrolltocurrent" path="svg/home-line.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_browselocation" path="svg/folder-open-fill.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_stilnametitle" path="svg/album-fill.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_stilartistauthor" path="svg/mic-fill.svg"/>
-    <Image type="svg" offset="0,0" scale="1.0" name="icon_stilcomment" path="svg/chat-quote-fill.svg"/>
+    <Image type="svg" name="icon_chip" path="svg/chip-memory.svg"/>
+    <Image type="svg" name="icon_copyright" path="svg/copyright-line.svg"/>
+    <Image type="svg" name="btn_eq" path="svg/equalizer-fill.svg"/>
+    <Image type="svg" name="btn_tuneinfo" path="svg/information-2-line.svg"/>
+    <Image type="svg" name="btn_infinite" path="svg/infinity-line.svg"/>
+    <Image type="svg" name="btn_playonce" path="svg/lock-line.svg"/>
+    <Image type="svg" name="icon_music" path="svg/music-fill.svg"/>
+    <Image type="svg" name="btn_sequential" path="svg/order-play-line.svg"/>
+    <Image type="svg" name="btn_pause" path="svg/pause-fill.svg"/>
+    <Image type="svg" name="btn_play" path="svg/play-fill.svg"/>
+    <Image type="svg" name="btn_repeatall" path="svg/repeat-line.svg"/>
+    <Image type="svg" name="btn_repeatone" path="svg/repeat-one-line.svg"/>
+    <Image type="svg" name="btn_prevsubsong" path="svg/rewind-fill.svg"/>
+    <Image type="svg" name="btn_skipback" path="svg/skip-back-fill.svg"/>
+    <Image type="svg" name="btn_skipforward" path="svg/skip-forward-fill.svg"/>
+    <Image type="svg" name="btn_nextsubsong" path="svg/speed-fill.svg"/>
+    <Image type="svg" name="btn_stop" path="svg/stop-fill.svg"/>
+    <Image type="svg" name="icon_author" path="svg/user-3-fill.svg"/>
+    <Image type="svg" name="icon_defaultsubsong" path="svg/vip-crown-2-line.svg"/>
+    <Image type="svg" name="icon_skipshort" path="svg/timer-fill.svg"/>
+    <Image type="svg" name="icon_removesong" path="svg/dislike-fill.svg"/>
+    <Image type="svg" name="icon_removesongmenu" path="svg/dislike-line.svg"/>
+    <Image type="svg" name="icon_removemainsong" path="svg/close-line.svg"/>
+    <Image type="svg" name="icon_removeallabove" path="svg/arrow-up-s-line.svg"/>
+    <Image type="svg" name="icon_removeallbelow" path="svg/arrow-down-s-line.svg"/>
+    <Image type="svg" name="icon_expandall" path="svg/add-line.svg"/>
+    <Image type="svg" name="icon_collapseall" path="svg/subtract-line.svg"/>
+    <Image type="svg" name="icon_scrolltocurrent" path="svg/home-line.svg"/>
+    <Image type="svg" name="icon_browselocation" path="svg/folder-open-fill.svg"/>
+    <Image type="svg" name="icon_stilnametitle" path="svg/album-fill.svg"/>
+    <Image type="svg" name="icon_stilartistauthor" path="svg/mic-fill.svg"/>
+    <Image type="svg" name="icon_stilcomment" path="svg/chat-quote-fill.svg"/>
   </Images>
   <GuiElements>
     <GuiElement name="Seekbar">

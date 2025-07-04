@@ -25,32 +25,28 @@ namespace UIElements
 {
 	namespace Util // Static functions.
 	{
-		std::shared_ptr<wxBitmap> LoadRasterizedSvg(const char* image, const wxSize& size, const wxPoint& artOffset, double scale, const wxColor* color)
+		std::shared_ptr<wxBitmapBundle> LoadColorizedSvg(const char* filename, const wxSize& size, const wxColor* const color)
 		{
-			const std::unique_ptr<BufferHolder>& data = Helpers::Wx::Files::GetFileContentFromDisk(image);
+			const std::unique_ptr<BufferHolder>& data = Helpers::Wx::Files::GetFileContentFromDisk(filename);
 			assert(data.get() != nullptr); // File not found.
 
-			const wxSize scaledImageSize = size * scale;
-			wxBitmapBundle bb = wxBitmapBundle::FromSVG(data->buffer, data->size, scaledImageSize);
-			wxImage destImage = bb.GetBitmap(scaledImageSize).ConvertToImage().Resize(wxSize(scaledImageSize.GetWidth() / scale, scaledImageSize.GetHeight() / scale), wxPoint(artOffset.x * scale, artOffset.y * scale));
+			wxString svg(reinterpret_cast<const char*>(data->buffer), wxConvUTF8, data->size);
 
-			if (color == nullptr)
+			// Colorize
 			{
-				const wxColor& color = wxSystemSettings::GetColour(wxSystemColour::wxSYS_COLOUR_CAPTIONTEXT);
-				destImage.SetRGB(destImage.GetSize(), color.GetRed(), color.GetGreen(), color.GetBlue());
-			}
-			else
-			{
-				destImage.SetRGB(destImage.GetSize(), color->GetRed(), color->GetGreen(), color->GetBlue());
+				wxColor col((color == nullptr) ? wxSystemSettings::GetColour(wxSystemColour::wxSYS_COLOUR_CAPTIONTEXT) : *color);
+				wxString hexCol(wxString::Format("#%02X%02X%02X", col.Red(), col.Green(),col.Blue()));
+				svg.Replace("currentColor", hexCol);
+				svg.Replace("#000", hexCol);
 			}
 
-			return std::make_shared<wxBitmap>(destImage);
+			return std::make_shared<wxBitmapBundle>(wxBitmapBundle::FromSVG(svg.c_str(), size));
 		}
 
 		wxButton* NewSvgButton(const ThemeData::ThemeImage& themeImage, const wxSize& size, wxPanel& panel)
 		{
 			wxButton* button = new wxButton(&panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-			button->SetBitmap(*LoadRasterizedSvg(themeImage.path.c_str(), size, themeImage.offset, themeImage.scale));
+			button->SetBitmap(*LoadColorizedSvg(themeImage.path.c_str(), size));
 			return button;
 		}
 	}

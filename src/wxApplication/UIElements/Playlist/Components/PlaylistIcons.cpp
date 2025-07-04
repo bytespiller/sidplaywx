@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2024 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 
 #include "PlaylistIcons.h"
 #include "../../ElementsUtil.h"
-#include "../../../Helpers/DpiSize.h"
 #include "../../../Theme/ThemeData/ThemeImage.h"
 
 namespace UIElements
@@ -26,14 +25,14 @@ namespace UIElements
 	namespace Playlist
 	{
 		PlaylistIcons::PlaylistIcons(int commonIconSize) :
-			_iconSize(DpiSize(commonIconSize, commonIconSize))
+			_iconSize(commonIconSize, commonIconSize)
 		{
 		}
 
 		void PlaylistIcons::RegisterSvgIcon(UIElements::Playlist::PlaylistIconId iconId, const ThemeData::ThemeImage& themeImage)
 		{
 			assert(iconId > UIElements::Playlist::PlaylistIconId::NoIcon);
-			_assignedIcons[iconId] = UIElements::Util::LoadRasterizedSvg(themeImage.path.c_str(), _iconSize, themeImage.offset, themeImage.scale);
+			_assignedIcons[iconId] = UIElements::Util::LoadColorizedSvg(themeImage.path.c_str(), _iconSize);
 		}
 
 		const PlaylistIcons::AssignedIconList& PlaylistIcons::GetIconList() const
