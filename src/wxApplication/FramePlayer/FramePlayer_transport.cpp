@@ -47,6 +47,10 @@ bool FramePlayer::TryPlayPlaylistItem(const PlaylistTreeModelNode& activatedNode
         }
     }
 
+#ifdef WIN32
+    wxSafeYield(); // Allow buttons to refresh to unclicked state before the blocking SID loading. Note: Linux (Wayland?) doesn't like this (may immediately mark the app as not responding).
+#endif
+
     // Trigger playback
     const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(*nodeToPlay) : 0;
     const bool sameTune = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == nodeToPlay->filepath.ToStdWstring();
