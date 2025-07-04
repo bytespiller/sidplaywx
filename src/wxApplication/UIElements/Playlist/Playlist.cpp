@@ -585,7 +585,11 @@ namespace UIElements
 			const wxDataViewItem item = PlaylistTreeModel::ModelNodeToTreeItem(node);
 			if (item.IsOk())
 			{
-				wxDataViewCtrl::EnsureVisible(item);
+				CallAfter([this, item]() // Skip frame, otherwise it jumps around on wxGTK. Also, the item must not be captured by reference here.
+				{
+					wxDataViewCtrl::EnsureVisible(item);
+				});
+
 				return true;
 			}
 
