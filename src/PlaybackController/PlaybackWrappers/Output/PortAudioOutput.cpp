@@ -210,13 +210,16 @@ void PortAudioOutput::StopStream(bool immediate)
 
 PaError PortAudioOutput::ResetStream(double samplerate)
 {
-    Pa_AbortStream(_stream);
     Pa_CloseStream(_stream);
 
     // Open an audio I/O stream.
     const unsigned long safeFramesPerBuffer = samplerate * LIBSIDPLAYFP_MIN_BUFFER_LATENCY;
     PaError err = Pa_OpenStream(&_stream, NULL, &currentAudioConfig, samplerate,
+#ifdef WIN32
+                                paFramesPerBufferUnspecified,
+#else
                                 safeFramesPerBuffer, // Don't use the paFramesPerBufferUnspecified due to libsidplayfp issue (see comment on the constant).
+#endif
                                 paNoFlag,
                                 PlaybackCallback,
                                 _bufferWriter);
