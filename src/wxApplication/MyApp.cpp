@@ -343,8 +343,12 @@ void MyApp::StopPlayback()
 
 void MyApp::PlaySubsong(int subsong, int preRenderDurationMs)
 {
-    PopSilencer();
-    _playback->TryPlaySubsong(subsong, preRenderDurationMs);
+    StopPlayback();
+    const bool success = _playback->TryPlaySubsong(subsong, preRenderDurationMs);
+    if (success)
+    {
+        FinalizePlaybackStarted();
+    }
 }
 
 void MyApp::SetVolume(float volume)
