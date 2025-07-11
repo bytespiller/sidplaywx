@@ -399,6 +399,7 @@ namespace FrameElements // Player class
 			title->SetFont(title->GetFont().MakeBold());
 #endif
 			menu.Append(title);
+			title->Enable(false); // Must come after append, otherwise it wouldn't be disabled on wxGTK.
 			menu.AppendSeparator();
 		}
 
