@@ -163,8 +163,7 @@ public:
 		Title,
 		Duration,
 		Author,
-		Copyright,
-		PlaceholderLast // Must exist for proper column layouting, especially for a dynamically shown "Author" and "Copyright" columns.
+		Copyright
 	};
 
 	/// @brief Convenience method to downcast a wxDataViewItem to PlaylistTreeModelNode.
