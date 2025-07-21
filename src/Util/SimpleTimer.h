@@ -46,9 +46,6 @@ public:
 public:
 	bool IsRunning() const;
 
-	/// @brief Returns currently elapsed milliseconds.
-	unsigned long GetElapsed() const;
-
 	/// @brief Returns configured delay milliseconds (i.e., a fixed value).
 	unsigned long GetDelay() const;
 
@@ -60,6 +57,5 @@ private:
 	std::atomic_ulong _delayMs = 0;
 	Callback _callback;
 	std::thread _thread;
-	std::atomic_ulong _elapsedMs = 0;
 	std::atomic_bool _aborting = false;
 };

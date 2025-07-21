@@ -21,12 +21,6 @@
 #include <chrono>
 #include <system_error>
 
-#ifdef _WIN32
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
-
 SimpleTimer::SimpleTimer(Type type, unsigned long delayMs, Callback callback) :
 	_type(type),
 	_delayMs(delayMs),
@@ -45,11 +39,6 @@ bool SimpleTimer::IsRunning() const
 	return _thread.joinable();
 }
 
-unsigned long SimpleTimer::GetElapsed() const
-{
-	return _elapsedMs;
-}
-
 unsigned long SimpleTimer::GetDelay() const
 {
 	return _delayMs;
@@ -57,34 +46,21 @@ unsigned long SimpleTimer::GetDelay() const
 
 void SimpleTimer::Restart()
 {
-	constexpr int RESOLUTION_MS = 10; // milliseconds
-
 	Abort();
-	_elapsedMs = 0;
 
-	_thread = std::thread([this]()
+	const auto chronoDelay = std::chrono::milliseconds(_delayMs);
+	_thread = std::thread([this, chronoDelay]()
 	{
-		while ((_elapsedMs < _delayMs) && !_aborting)
+		auto next = std::chrono::steady_clock::now() + chronoDelay;
+		while (!_aborting)
 		{
-			const auto start = std::chrono::high_resolution_clock::now();
-#ifdef _WIN32
-			Sleep(RESOLUTION_MS);
-#else
-			usleep(RESOLUTION_MS * 1000); // POSIX function (takes microseconds). There is also a more modern nanosleep() function but is more ugly to use.
-#endif
-			const auto end = std::chrono::high_resolution_clock::now();
-			const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+			std::this_thread::sleep_until(next);
+			if (_aborting) break;
 
-			_elapsedMs += duration;
-		}
-
-		if (!_aborting)
-		{
 			_callback();
-			if (_type == Type::Repeating)
-			{
-				Restart();
-			}
+
+			if (_type != Type::Repeating) break;
+			next += chronoDelay;
 		}
 	});
 }
