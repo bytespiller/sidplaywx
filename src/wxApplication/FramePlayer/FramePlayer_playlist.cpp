@@ -115,6 +115,8 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
     int playableTunesCount = 0; // Not important if it rolls over.
     const PlaybackController& playback = _app.GetPlaybackInfo();
 
+    uint8_t throttledYieldCounter = 0;
+
     for (const wxString& filepath : files)
     {
         ++processedFilesCount;
@@ -266,9 +268,20 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
         if (playableTunesCount == 2)
         {
             UpdateUiState(); // Simply to enable the "next song" button immediately while still adding lots of files.
+            wxYield();
         }
 
-        wxYield(); // Also must be before the HasFocus() call because not even that updates otherwise!
+        // Update the UI in the interim (sparingly as the wxYield causes a tremendous slowdown)
+        {
+            if (throttledYieldCounter == 0 || throttledYieldCounter >= 100) // 255 max
+            {
+                throttledYieldCounter = 0;
+                wxYield(); // Also must be before the HasFocus() call because not even that updates otherwise!
+            }
+
+            ++throttledYieldCounter;
+        }
+
         if (_exitingApplication || !_addingFilesToPlaylist) // In case the user clicked Close (or cleared the playlist) while adding lots of files. This should be checked immediately after any wxYield.
         {
             return;
