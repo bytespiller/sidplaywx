@@ -19,7 +19,7 @@
 #pragma once
 
 // This is temporary until localization support is implemented one day perhaps.
-// Reminder: "inline" must be to (try to) avoid unnecessary duplication of string literals in the executable (it seems to help for some reason!).
+// Reminder: "inline" is to avoid unnecessary duplication of string literals in the executable (C++17, retains internal linkage of constexpr that are in the *header* file).
 
 namespace Strings
 {
