@@ -18,8 +18,9 @@
 
 #pragma once
 
-#include "../IBufferWriter.h"
-#include "../../Util/RomUtil.h"
+#include "SidMixer.h"
+#include "../../IBufferWriter.h"
+#include "../../../Util/RomUtil.h"
 
 #include <sidplayfp/SidInfo.h>
 #include <sidplayfp/sidplayfp.h>
@@ -66,6 +67,7 @@ public:
 public:
     SidDecoder();
     SidDecoder(SidDecoder&) = delete;
+    ~SidDecoder();
 
 public:
     bool TryFillBuffer(void* buffer, unsigned long framesPerBuffer) override;
@@ -81,7 +83,6 @@ public:
     bool TryLoadSong(const uint_least8_t* oneFileFormatSidtune, uint_least32_t sidtuneLength, unsigned int subsong = 0);
 
     bool TrySetSubsong(unsigned int subsong);
-    void Stop();
 
     uint_least32_t GetTime() const;
     int GetCurrentSubsong() const;
@@ -118,6 +119,7 @@ private:
 
 private:
     bool _seeking = false;
+    std::unique_ptr<SidMixer> _mixer;
     SidConfig _sidConfigCache;
     std::unique_ptr<FilterConfig> _filterConfigCache;
     SidVoicesEnabledStatus _sidVoicesEnabledStatus;

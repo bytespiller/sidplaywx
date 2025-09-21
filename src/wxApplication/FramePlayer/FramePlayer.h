@@ -27,7 +27,7 @@
 #include "../Theme/ThemeManager.h"
 #include "../../HvscSupport/Songlengths.h"
 #include "../../HvscSupport/Stil/Stil.h"
-#include "../../PlaybackController/PlaybackWrappers/Input/SidDecoder.h"
+#include "../../PlaybackController/PlaybackWrappers/Input/SidDecoder/SidDecoder.h"
 #include "../../Util/SimpleSignal/SimpleSignalListener.h"
 
 class FramePlaybackMods;

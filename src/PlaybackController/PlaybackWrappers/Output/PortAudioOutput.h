@@ -24,13 +24,19 @@
 class PortAudioOutput
 {
 public:
-    typedef struct TPortAudioConfig: public PaStreamParameters
+    struct AudioConfig: public PaStreamParameters
     {
         float volume = 1.0f;
         double sampleRate = 0.0;
         bool lowLatency = false;
         PaDeviceIndex preferredOutputDevice = paNoDevice;
-    } AudioConfig;
+    };
+
+    struct FxConfig
+    {
+        unsigned int virtualStereoExpansionOffsetMs = 0;
+        float virtualStereoSideVolumeFactor = 0;
+    };
 
 public:
     ~PortAudioOutput();
@@ -55,6 +61,9 @@ public:
     void StopStream(bool immediate);
     PaError ResetStream(double samplerate);
 
+    /// @brief Pass zero offsetMs to disable.
+    void SetVirtualStereo(unsigned int offsetMs, float sideVolumeFactor);
+
     const AudioConfig& GetAudioConfig() const;
     bool IsOutputSampleRateSupported(double samplerate) const;
 
@@ -72,4 +81,5 @@ private:
     PaStream* _stream = nullptr;
     IBufferWriter* _bufferWriter = nullptr;
     bool _paInitialized = false;
+    FxConfig _fxConfig;
 };

@@ -286,8 +286,6 @@ void PlaybackController::Stop()
             {
                 _preRender->Stop();
             }
-
-            _sidDecoder->Stop();
         }
 
         _state = State::Stopped;
@@ -414,6 +412,11 @@ bool PlaybackController::TrySetPlaybackSpeed(double factor)
 double PlaybackController::GetPlaybackSpeedFactor() const
 {
     return _playbackSpeedFactor;
+}
+
+void PlaybackController::SetVirtualStereo(unsigned int offsetMs, float sideVolumeFactor)
+{
+    _portAudioOutput->SetVirtualStereo(offsetMs, sideVolumeFactor);
 }
 
 int PlaybackController::GetCurrentSubsong() const
@@ -763,8 +766,6 @@ void PlaybackController::PrepareTryPlay()
         {
             _preRender->Stop();
         }
-
-        _sidDecoder->Stop();
     }
 }
 
@@ -809,7 +810,6 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
                 _preRender->Stop();
             }
 
-            _sidDecoder->Stop();
             _activeTuneHolder = nullptr;
         }
     }

@@ -38,10 +38,9 @@ target_link_libraries(${PROJECT_NAME}
     wxWidgets_net # for "Check for updates" support
 )
 
-set(CXX_FLAGS -I/usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.2 -I/usr/include/wx-3.2 -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__ -pthread) # get this via /dist/wx-config --cxxflags
+set(CXX_FLAGS -I/usr/local/lib/wx/include/gtk3-unicode-3.3 -I/usr/local/include/wx-3.3 -DWXUSINGDLL -D__WXGTK3__ -D__WXGTK__ -D_FILE_OFFSET_BITS=64) # get this via /dist/wx-config --cxxflags
 
 target_compile_options(${PROJECT_NAME} PRIVATE -fms-extensions -Werror -DHAVE_CONFIG_H -DHAVE_CXX11 ${CXX_FLAGS})
-#target_compile_options(${PROJECT_NAME} PUBLIC -g -O0 -Werror -Wall -Wextra -pedantic) # TEMP!!!
 
 # CPack
 #set(CPACK_PROJECT_NAME ${PROJECT_NAME})

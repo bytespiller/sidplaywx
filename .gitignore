@@ -48,3 +48,4 @@
 # Misc. generated stuff
 *.log
 *.pdb
+*.code-workspace

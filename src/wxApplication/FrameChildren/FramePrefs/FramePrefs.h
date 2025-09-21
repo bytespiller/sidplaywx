@@ -70,6 +70,7 @@ private:
     void AddWrappedProp(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString, wxVariant minValue, wxVariant maxValue);
     void FillPropertyGrid();
     FramePrefs::WrappedProp& GetWrappedProp(const wxPGProperty& property);
+    void RefreshVirtualStereoSettings();
 
 private:
     void OnPropertyGridChanging(wxPropertyGridEvent& evt);

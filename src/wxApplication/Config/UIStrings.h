@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.16.2"); // Reminder: don't forget to increase.
+	inline constexpr const char* const APP_VERSION_TAG("0.17.0"); // Reminder: don't forget to increase.
 
 	namespace FramePlayer
 	{
@@ -211,6 +211,18 @@ namespace Strings
 
 		inline constexpr const char* const OPT_FORCE_MONO("Force mono");
 		inline constexpr const char* const DESC_FORCE_MONO("Disables stereo/panning effects of multi-SID tunes (2SID, 3SID).\nNote: ongoing playback will stop when changing this setting.");
+
+		inline constexpr const char* const OPT_OUT_CHANNELS("Channels");
+		inline constexpr const char* const DESC_OUT_CHANNELS("- Mono: use if output device doesn't support stereo, playback will stop.\n- Normal: mono across both channels, powerful original sound.\n- Virtual stereo: wide sound stage for headphones, unlocks additional options.");
+		inline constexpr const char* const ITEM_OUT_CHANNELS_MONO("Mono");
+		inline constexpr const char* const ITEM_OUT_CHANNELS_DEFAULT("Normal");
+		inline constexpr const char* const ITEM_OUT_CHANNELS_EXPANDED("Virtual stereo");
+
+		inline constexpr const char* const OPT_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE("Virtual sound stage size");
+		inline constexpr const char* const DESC_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE("Size of the virtual sound stage.\n- Low: small room effect.\n- High: large room effect.\n- Default: 8");
+
+		inline constexpr const char* const OPT_OUT_FXVIRTUALSTEREO_SIDE_VOLUME("Virtual sound stage focus");
+		inline constexpr const char* const DESC_OUT_FXVIRTUALSTEREO_SIDE_VOLUME("Volume allocation of sides vs. center.\n- Min: 0.1 = center-focused sound stage (ball).\n- Max: 0.4 = wide-dispersed sound stage (donut).\n- Default: 0.24");
 
 		// Playback
 		inline constexpr const char* const CATEGORY_PLAYBACK_BEHAVIOR("Playback");

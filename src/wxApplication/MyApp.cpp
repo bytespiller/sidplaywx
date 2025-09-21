@@ -103,8 +103,9 @@ namespace
             assert(absoluteDeviceIndex != paNoDevice);
         }
 
+        Settings::AppSettings::OutChannels outChannelsMode = static_cast<Settings::AppSettings::OutChannels>(settings.GetOption(Settings::AppSettings::ID::OutChannels)->GetValueAsInt());
         audioConfig.preferredOutputDevice = absoluteDeviceIndex;
-        audioConfig.channelCount = (settings.GetOption(Settings::AppSettings::ID::ForceMono)->GetValueAsBool()) ? 1 : 2;
+        audioConfig.channelCount = (outChannelsMode == Settings::AppSettings::OutChannels::ForceMono) ? 1 : 2;
         audioConfig.sampleRate = Pa_GetDeviceInfo(audioConfig.preferredOutputDevice)->defaultSampleRate;
         audioConfig.lowLatency = settings.GetOption(Settings::AppSettings::ID::LowLatency)->GetValueAsBool();
 
@@ -161,6 +162,8 @@ bool MyApp::OnInit()
                                                                                              LoadFilterConfig(*currentSettings)));
         if (initSuccess)
         {
+            RefreshVirtualStereoState();
+
             // Load ROMs
             const wxString& romPathKernal = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomKernalPath)->GetValueAsString().ToStdWstring());
             const wxString& romPathBasic = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomBasicPath)->GetValueAsString().ToStdWstring());
@@ -376,6 +379,21 @@ void MyApp::ToggleFilter(unsigned int sidNum, bool enable)
     _playback->ToggleFilter(sidNum, enable);
 }
 
+void MyApp::RefreshVirtualStereoState()
+{
+    unsigned int offsetMs = 0;
+    float sideVolumeFactor = 0;
+
+    Settings::AppSettings::OutChannels outChannelsMode = static_cast<Settings::AppSettings::OutChannels>(currentSettings->GetOption(Settings::AppSettings::ID::OutChannels)->GetValueAsInt());
+    if (outChannelsMode == Settings::AppSettings::OutChannels::VirtualStereo)
+    {
+        offsetMs = currentSettings->GetOption(Settings::AppSettings::ID::VirtualStereoSpeakerDistance)->GetValueAsInt();
+        sideVolumeFactor = currentSettings->GetOption(Settings::AppSettings::ID::VirtualStereoSideVolumeFactor)->GetValueAsFloat();
+    }
+
+    _playback->SetVirtualStereo(offsetMs, sideVolumeFactor);
+}
+
 const PlaybackController& MyApp::GetPlaybackInfo() const
 {
     return *_playback;
@@ -386,7 +404,14 @@ bool MyApp::ReapplyPlaybackSettings()
     const PlaybackController::SwitchAudioDeviceResult result =_playback->TrySwitchPlaybackConfiguration(PlaybackController::SyncedPlaybackConfig(LoadAudioConfig(*currentSettings),
                                                                                                                                                  LoadSidConfig(_playback->GetSidConfig(), *currentSettings),
                                                                                                                                                  LoadFilterConfig(*currentSettings)));
-    return result != PlaybackController::SwitchAudioDeviceResult::Failure;
+
+    const bool success = result != PlaybackController::SwitchAudioDeviceResult::Failure;
+    if (success)
+    {
+        RefreshVirtualStereoState();
+    }
+
+    return success;
 }
 
 void MyApp::UnloadActiveTune()

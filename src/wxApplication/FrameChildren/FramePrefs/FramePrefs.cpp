@@ -42,6 +42,12 @@ namespace
         static constexpr bool AfterRestart = true;
         static constexpr bool Immediately = false;
     };
+
+    constexpr int FXVIRTUALSTEREO_SPEAKER_DISTANCE_MILLISECONDS_MIN = 4;
+    constexpr int FXVIRTUALSTEREO_SPEAKER_DISTANCE_MILLISECONDS_MAX = 16;
+
+    constexpr double FXVIRTUALSTEREO_SIDE_VOLUME_FACTOR_MIN = 0.1;
+    constexpr double FXVIRTUALSTEREO_SIDE_VOLUME_FACTOR_MAX = 0.4;
 }
 
 static bool __destroyed = false;
@@ -144,7 +150,45 @@ void FramePrefs::FillPropertyGrid()
         }
 
         AddWrappedProp(Settings::AppSettings::ID::LowLatency, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_LOW_LATENCY), *page, Effective::Immediately, Strings::Preferences::DESC_LOW_LATENCY);
-        AddWrappedProp(Settings::AppSettings::ID::ForceMono, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_FORCE_MONO), *page, Effective::Immediately, Strings::Preferences::DESC_FORCE_MONO);
+
+        // Out channels
+        {
+            const wxArrayString outChannelsOptions =
+            {
+                Strings::Preferences::ITEM_OUT_CHANNELS_MONO,
+                Strings::Preferences::ITEM_OUT_CHANNELS_DEFAULT,
+                Strings::Preferences::ITEM_OUT_CHANNELS_EXPANDED
+            };
+
+            const char* SettingId = Settings::AppSettings::ID::OutChannels;
+            wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_OUT_CHANNELS, SettingId, outChannelsOptions);
+            AddWrappedProp(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_OUT_CHANNELS);
+
+            const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
+            prop->SetChoiceSelection(selection);
+        }
+
+        // FX VirtualStereo speakers distance
+        {
+            wxArrayString options;
+            options.reserve(FXVIRTUALSTEREO_SPEAKER_DISTANCE_MILLISECONDS_MAX - FXVIRTUALSTEREO_SPEAKER_DISTANCE_MILLISECONDS_MIN);
+            for (int ms = FXVIRTUALSTEREO_SPEAKER_DISTANCE_MILLISECONDS_MIN; ms <= FXVIRTUALSTEREO_SPEAKER_DISTANCE_MILLISECONDS_MAX; ++ms)
+            {
+                options.emplace_back(wxString::Format("Size %i", ms));
+            }
+
+            const char* SettingId = Settings::AppSettings::ID::VirtualStereoSpeakerDistance;
+            wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE, SettingId, options);
+            AddWrappedProp(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE);
+            const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt() - FXVIRTUALSTEREO_SPEAKER_DISTANCE_MILLISECONDS_MIN;
+            prop->SetChoiceSelection(selection);
+        }
+
+        // FX VirtualStereo side volume factor
+        AddWrappedProp(Settings::AppSettings::ID::VirtualStereoSideVolumeFactor, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_OUT_FXVIRTUALSTEREO_SIDE_VOLUME), *page, Effective::Immediately, Strings::Preferences::DESC_OUT_FXVIRTUALSTEREO_SIDE_VOLUME, FXVIRTUALSTEREO_SIDE_VOLUME_FACTOR_MIN, FXVIRTUALSTEREO_SIDE_VOLUME_FACTOR_MAX);
+
+        // Enable/disable
+        RefreshVirtualStereoSettings();
     }
 
     // Playback
@@ -398,6 +442,12 @@ void FramePrefs::OnPropertyGridChanged(wxPropertyGridEvent& evt)
     _ui->propertyGrid->RefreshProperty(evt.GetProperty()); // Necessary to refresh in case of error-highlight previously (wxWidgets' edge-case issue).
 
     FindWindowById(wxID_APPLY, this)->Enable(true);
+
+    // Enable/disable VirtualStereo settings
+    if (evt.GetProperty()->GetLabel() == Strings::Preferences::OPT_OUT_CHANNELS)
+    {
+        RefreshVirtualStereoSettings();
+    }
 }
 
 void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
@@ -427,7 +477,12 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                 case TypeSerialized::Int:
                     option.UpdateValue(propertyValueInt);
 
-                    if (prop.first == Settings::AppSettings::ID::PreRenderEnabled)
+                    if (prop.first == Settings::AppSettings::ID::VirtualStereoSpeakerDistance)
+                    {
+                        const int millis = propertyValueInt + FXVIRTUALSTEREO_SPEAKER_DISTANCE_MILLISECONDS_MIN;
+                        option.UpdateValue(millis);
+                    }
+                    else if (prop.first == Settings::AppSettings::ID::PreRenderEnabled)
                     {
                         _framePlayer.ForceStopPlayback({});
                     }
@@ -566,4 +621,16 @@ FramePrefs::WrappedProp& FramePrefs::GetWrappedProp(const wxPGProperty& property
 
     assert(it != _wrappedProps.end());
     return (*it).second;
+}
+
+void FramePrefs::RefreshVirtualStereoSettings()
+{
+    wxPGProperty& propParent = *_ui->propertyGrid->GetPropertyByLabel(Strings::Preferences::OPT_OUT_CHANNELS);
+    wxPGProperty& propChild1 = *_ui->propertyGrid->GetPropertyByLabel(Strings::Preferences::OPT_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE);
+    wxPGProperty& propChild2 = *_ui->propertyGrid->GetPropertyByLabel(Strings::Preferences::OPT_OUT_FXVIRTUALSTEREO_SIDE_VOLUME);
+
+    Settings::AppSettings::OutChannels mode = static_cast<Settings::AppSettings::OutChannels>(propParent.GetValue().GetInteger());
+    const bool enabled = mode == Settings::AppSettings::OutChannels::VirtualStereo;
+    propChild1.Enable(enabled);
+    propChild2.Enable(enabled);
 }

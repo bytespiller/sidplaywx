@@ -66,6 +66,8 @@ public:
     void ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable);
     void ToggleFilter(unsigned int sidNum, bool enable);
 
+    void RefreshVirtualStereoState();
+
     const PlaybackController& GetPlaybackInfo() const;
     bool ReapplyPlaybackSettings();
     void UnloadActiveTune();

@@ -34,7 +34,9 @@ namespace Settings
 			// Prefs
 			static constexpr const char* const AudioOutputDevice = "AudioOutputDevice";
 			static constexpr const char* const LowLatency = "LowLatency";
-			static constexpr const char* const ForceMono = "ForceMono";
+			static constexpr const char* const OutChannels = "OutChannels";
+			static constexpr const char* const VirtualStereoSpeakerDistance = "VirtualStereoSpeakerDistance";
+			static constexpr const char* const VirtualStereoSideVolumeFactor = "VirtualStereoSideVolumeFactor";
 
 			static constexpr const char* const PreRenderEnabled = "PreRenderEnabled";
 			static constexpr const char* const AutoPlay = "AutoPlay";
@@ -88,6 +90,13 @@ namespace Settings
 			static constexpr const char* const MainWindowPosition = "MainWindowPosition";
 			static constexpr const char* const MainWindowSize = "MainWindowSize";
 			static constexpr const char* const MainWindowMaximized = "MainWindowMaximized";
+		};
+
+		enum class OutChannels
+		{
+			ForceMono,
+			Default,
+			VirtualStereo
 		};
 
 		enum class SystemTheme
@@ -147,7 +156,9 @@ namespace Settings
 				// Prefs
 				DefaultOption(ID::AudioOutputDevice, PREFERRED_DEFAULT_AUDIO_DEVICE_NAME),
 				DefaultOption(ID::LowLatency, true),
-				DefaultOption(ID::ForceMono, false),
+				DefaultOption(ID::OutChannels, static_cast<int>(OutChannels::Default)),
+				DefaultOption(ID::VirtualStereoSpeakerDistance, 8),
+				DefaultOption(ID::VirtualStereoSideVolumeFactor, 0.24),
 
 				DefaultOption(ID::PreRenderEnabled, false),
 				DefaultOption(ID::AutoPlay, true),

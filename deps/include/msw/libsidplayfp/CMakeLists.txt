@@ -1,1 +1,1 @@
-include_directories(C:/msys64/ucrt64/include)
+include_directories(C:/msys64/ucrt64/include/sidplayfp)

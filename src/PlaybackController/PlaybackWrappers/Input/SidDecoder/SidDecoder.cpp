@@ -38,6 +38,8 @@ namespace
         is.close();
         return buffer;
     }
+
+    constexpr unsigned int LIBSIDPLAYFP_SEEK_CYCLES = 20000; // Roughly 20ms. For seeking, greater value is marginally better for speed. This particular max value is hardcoded in the lib itself.
 }
 
 SidDecoder::SidDecoder() :
@@ -47,18 +49,19 @@ SidDecoder::SidDecoder() :
     _rs.create(_sidEngine.info().maxsids());
 }
 
+SidDecoder::~SidDecoder()
+{
+    _sidEngine.load(0);
+}
+
 bool SidDecoder::TryFillBuffer(void* buffer, unsigned long framesPerBuffer)
 {
-    const uint_least32_t length = (framesPerBuffer * _sidConfigCache.playback);
-    short* const out = static_cast<short*>(buffer);
-    const uint_least32_t ret = _sidEngine.play(out, length);
-
-    if (ret < length)
+    if (!_mixer)
     {
-        std::cerr << "SID engine error!" << std::endl;
-        return false;
+        _mixer = std::make_unique<SidMixer>(_sidEngine);
     }
 
+    _mixer->FillBuffer(buffer, framesPerBuffer);
     return true;
 }
 
@@ -172,12 +175,9 @@ bool SidDecoder::TrySetSubsong(unsigned int subsong)
         return false;
     }
 
-    return true;
-}
+    _mixer = nullptr;
 
-void SidDecoder::Stop()
-{
-    _sidEngine.stop();
+    return true;
 }
 
 uint_least32_t SidDecoder::GetTime() const
@@ -315,12 +315,13 @@ const SidDecoder::FilterConfig& SidDecoder::GetFilterConfig() const
 void SidDecoder::SeekTo(uint_least32_t timeMs, const SeekStatusCallback& callback)
 {
     _seeking = true;
+    _mixer = nullptr;
 
     uint_least32_t cTimeMs = _sidEngine.timeMs();
     if (cTimeMs >= timeMs)
     {
-        _sidEngine.stop();
         cTimeMs = 0;
+        _sidEngine.reset();
     }
 
     // Disable voices and filters of all SIDs -- yields additional ~4x speedup when seeking
@@ -338,7 +339,7 @@ void SidDecoder::SeekTo(uint_least32_t timeMs, const SeekStatusCallback& callbac
     bool aborted = false;
     while (cTimeMs < timeMs)
     {
-        _sidEngine.play(nullptr, 0);
+        _sidEngine.play(LIBSIDPLAYFP_SEEK_CYCLES);
 
         if (callback(cTimeMs, false))
         {
@@ -388,7 +389,6 @@ void SidDecoder::UnloadActiveTune()
 {
     if (_tune != nullptr)
     {
-        _sidEngine.stop();
         _sidEngine.load(0);
         _tune = nullptr;
     }

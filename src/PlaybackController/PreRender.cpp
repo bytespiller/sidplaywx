@@ -19,10 +19,8 @@
 #include "PreRender.h"
 
 #include <algorithm>
-#include <chrono>
-#include <math.h>
-#include <stdexcept>
-#include <string.h>
+#include <cmath>
+#include <cstring> // memcpy & memset
 
 static size_t GRANULARITY = 4096; // Buffer granularity in thread fill-loop.
 constexpr std::chrono::milliseconds SEEK_CHECK_SLEEP_MS(15); // Note: increasing this value decreases the indicator smoothness. 15ms should be ideal (especially due to MSW system timer resolution).
@@ -95,11 +93,11 @@ bool PreRender::TryFillBuffer(void* buffer, unsigned long framesPerBuffer)
 
 	if ((_playbackPosition * _numChannels) + framesTo > _preRenderedSize)
 	{
-		memset(buffer, 0, framesTo);
+		std::memset(buffer, 0, framesTo);
 		return true;
 	}
 
-	memcpy(buffer, _waveBufferContent + _playbackPosition, framesTo);
+	std::memcpy(buffer, _waveBufferContent + _playbackPosition, framesTo);
 	return true;
 }
 

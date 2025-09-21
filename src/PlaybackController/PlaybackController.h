@@ -20,7 +20,7 @@
 
 #include "PreRender.h"
 #include "PlaybackWrappers/Output/PortAudioOutput.h"
-#include "PlaybackWrappers/Input/SidDecoder.h"
+#include "PlaybackWrappers/Input/SidDecoder/SidDecoder.h"
 #include "Util/RomUtil.h"
 #include "../Util/BufferHolder.h"
 #include "../Util/SimpleSignal/SimpleSignalProvider.h"
@@ -164,6 +164,8 @@ public:
 
     bool TrySetPlaybackSpeed(double factor);
     double GetPlaybackSpeedFactor() const;
+
+    void SetVirtualStereo(unsigned int offsetMs, float sideVolumeFactor);
 
     int GetCurrentSubsong() const;
     int GetDefaultSubsong();
