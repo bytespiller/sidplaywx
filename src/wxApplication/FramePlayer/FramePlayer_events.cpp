@@ -493,10 +493,11 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             break;
 
         // --- View ---
+#ifdef WIN32
         case MenuItemId_Player::StayTopmost:
             ToggleTopmost();
             break;
-
+#endif
         case MenuItemId_Player::VisualizationEnabled:
             ToggleVisualizationEnabled();
             break;

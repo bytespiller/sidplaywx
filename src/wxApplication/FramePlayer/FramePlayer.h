@@ -104,8 +104,10 @@ private:
     void OpenPrefsFrame();
 
     // View
-    void ToggleTopmost();
+#ifdef WIN32
     bool IsTopmost() const; // Helper
+    void ToggleTopmost();
+#endif
 
     void ToggleVisualizationEnabled();
     void EnableVisualization(bool enable); // Helper

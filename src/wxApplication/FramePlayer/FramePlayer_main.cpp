@@ -390,13 +390,13 @@ void FramePlayer::DeferredInit()
     // Show/hide STIL info
     EnableStilInfoDisplay(_app.currentSettings->GetOption(Settings::AppSettings::ID::StilInfoEnabled)->GetValueAsBool());
 
+#ifdef WIN32
     // Apply window topmost preference
     if (_app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->GetValueAsBool() != IsTopmost())
     {
         ToggleTopmost();
     }
 
-#ifdef WIN32
     // Media keys support
     _ui->infoBarMediaKeysTaken->Bind(wxEVT_BUTTON, [&](wxCommandEvent& evt)
     {
@@ -592,20 +592,6 @@ void FramePlayer::OpenPrefsFrame()
     _framePrefs->ShowModal(); // Reminder: this one gets Destroy()-ed, not Close()-d.
 }
 
-void FramePlayer::ToggleTopmost()
-{
-    const bool topmost = IsTopmost();
-    if (topmost) {
-        SetWindowStyle(GetWindowStyle() & ~wxSTAY_ON_TOP);
-    }
-    else {
-        SetWindowStyle(GetWindowStyle() | wxSTAY_ON_TOP);
-    }
-
-    _ui->menuBar->Check(static_cast<int>(FrameElements::ElementsPlayer::MenuItemId_Player::StayTopmost), !topmost);
-    _app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->UpdateValue(!topmost);
-}
-
 void FramePlayer::ToggleVisualizationEnabled()
 {
     const bool enable = !_app.currentSettings->GetOption(Settings::AppSettings::ID::VisualizationEnabled)->GetValueAsBool();
@@ -665,10 +651,26 @@ void FramePlayer::ShowTuneInfo()
     _frameTuneInfo->ShowAndUpdate(_ui->treePlaylist->GetActiveSong());
 }
 
+#ifdef WIN32
+void FramePlayer::ToggleTopmost()
+{
+    const bool topmost = IsTopmost();
+    if (topmost) {
+        SetWindowStyle(GetWindowStyle() & ~wxSTAY_ON_TOP);
+    }
+    else {
+        SetWindowStyle(GetWindowStyle() | wxSTAY_ON_TOP);
+    }
+
+    _ui->menuBar->Check(static_cast<int>(FrameElements::ElementsPlayer::MenuItemId_Player::StayTopmost), !topmost);
+    _app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->UpdateValue(!topmost);
+}
+
 bool FramePlayer::IsTopmost() const
 {
     return (GetWindowStyle() & wxSTAY_ON_TOP) != 0;
 }
+#endif
 
 void FramePlayer::ForceAppExitOnPrefsClose(PassKey<FramePrefs>)
 {

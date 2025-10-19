@@ -160,7 +160,9 @@ namespace FrameElements // Player class
 			// View menu
 			{
 				wxMenu* viewMenu = new wxMenu();
+#ifdef WIN32
 				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::StayTopmost), wxString::Format("%s\tAlt+A", Strings::FramePlayer::MENU_ITEM_STAY_TOPMOST));
+#endif
 				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::VisualizationEnabled), wxString::Format(Strings::FramePlayer::MENU_ITEM_VISUALIZATION_ENABLED));
 				viewMenu->AppendCheckItem(static_cast<int>(MenuItemId_Player::StilInfoEnabled), wxString::Format(Strings::FramePlayer::MENU_ITEM_STIL_INFO));
 				viewMenu->AppendSeparator();
