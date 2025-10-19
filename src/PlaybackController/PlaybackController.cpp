@@ -745,7 +745,7 @@ bool PlaybackController::TryResetAudioOutput(const PortAudioOutput::AudioConfig&
     _preRender = (enablePreRender) ? std::make_unique<PreRender>() : nullptr; // Enable the pre-render output if desired, otherwise destroy the old instance.
 
     IBufferWriter* decoder = (_preRender == nullptr) ? _sidDecoder.get() : static_cast<IBufferWriter*>(_preRender.get()); // Use either the pre-render or the realtime audio output.
-    return _portAudioOutput != nullptr && _portAudioOutput->TryInit(audioConfig, decoder);
+    return _portAudioOutput != nullptr && _portAudioOutput->TryInit(audioConfig, decoder, _playbackSpeedFactor);
 }
 
 void PlaybackController::PrepareTryPlay()

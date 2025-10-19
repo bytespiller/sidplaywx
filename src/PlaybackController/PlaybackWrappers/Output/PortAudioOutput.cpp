@@ -84,7 +84,7 @@ bool PortAudioOutput::PreInitPortAudioLibrary()
     return _paInitialized;
 }
 
-bool PortAudioOutput::TryInit(const AudioConfig& audioConfig, IBufferWriter* bufferWriter)
+bool PortAudioOutput::TryInit(const AudioConfig& audioConfig, IBufferWriter* bufferWriter, double playbackSpeedFactor)
 {
     if (_stream != nullptr && Pa_IsStreamActive(_stream))
     {
@@ -112,7 +112,7 @@ bool PortAudioOutput::TryInit(const AudioConfig& audioConfig, IBufferWriter* buf
 
         // Open an audio I/O stream.
         assert(currentAudioConfig.sampleRate >= 8000 && currentAudioConfig.sampleRate <= 192000); // libsidplayfp supports sample rates in this range only.
-        success = ResetStream(currentAudioConfig.sampleRate) == paNoError;
+        success = ResetStream(currentAudioConfig.sampleRate * playbackSpeedFactor) == paNoError;
     }
 
     return success;
