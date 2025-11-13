@@ -44,7 +44,12 @@ namespace FrameElements // Static functions
 		const std::shared_ptr<wxBitmapBundle>& img = UIElements::Util::LoadColorizedSvg(themeImage.path.c_str(), wxSize(TEMP_LABEL_ICON_SIZE, TEMP_LABEL_ICON_SIZE));
 		wxStaticBitmap* const bitmapIcon = new wxStaticBitmap(&parent, wxID_ANY, *img.get());
 		sizerIconLabel->Add(bitmapIcon, 0, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
+
 		bitmapIcon->SetToolTip(tooltip);
+		if (!tooltip.empty())
+		{
+			bitmapIcon->SetCursor(wxCURSOR_QUESTION_ARROW);
+		}
 
 		wxStaticText* labelPtr = new wxStaticText(&parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END);
 		sizerIconLabel->Add(labelPtr, 1, wxALIGN_CENTER_VERTICAL, TEMP_LABEL_BORDER_SIZE);
@@ -61,7 +66,12 @@ namespace FrameElements // Static functions
 		const wxColor iconColor = themedData.GetPropertyColor("iconColor");
 		const std::shared_ptr<wxBitmapBundle>& img = UIElements::Util::LoadColorizedSvg(themeImage.path.c_str(), wxSize(TEMP_LABEL_ICON_SIZE, TEMP_LABEL_ICON_SIZE), &iconColor);
 		wxStaticBitmap* const bitmapIcon = new wxStaticBitmap(&parent, wxID_ANY, *img.get());
+
 		bitmapIcon->SetToolTip(tooltip);
+		if (!tooltip.empty())
+		{
+			bitmapIcon->SetCursor(wxCURSOR_QUESTION_ARROW);
+		}
 
 		// Create label
 		UIElements::ScrollingLabel* labelPtr = new UIElements::ScrollingLabel(&parent, themedData, justify);
