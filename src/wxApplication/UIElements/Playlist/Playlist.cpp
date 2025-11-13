@@ -18,6 +18,7 @@
 
 #include "Playlist.h"
 #include "../../Config/UIStrings.h"
+#include <wx/renderer.h>
 
 namespace UIElements
 {
@@ -34,7 +35,7 @@ namespace UIElements
 		{
 			AssociateModel(&_model);
 
-			_AddBitmapColumn(ColumnId::Icon);
+			const wxDataViewColumn* const iconColumn = _AddBitmapColumn(ColumnId::Icon);
 			_AddTextColumn(ColumnId::Title, Strings::PlaylistTree::COLUMN_TITLE);
 			_AddTextColumn(ColumnId::Duration, Strings::PlaylistTree::COLUMN_DURATION);
 			_AddTextColumn(ColumnId::Author, Strings::PlaylistTree::COLUMN_AUTHOR);
@@ -49,6 +50,41 @@ namespace UIElements
 			{
 				AutoFitTextColumn(ColumnId::Title);
 			});
+
+			// Handle the status icon tooltips
+			const int headerHeight = wxRendererNative::Get().GetHeaderButtonHeight(this);
+			GetMainWindow()->Bind(wxEVT_MOTION, [this, iconColumn, headerHeight](const wxMouseEvent& evt)
+			{
+				wxPoint pos(evt.GetPosition()); // Alternatively, doesn't need applying the headerHeight offset, but is sufficient on MSW only: ScreenToClient(GetMainWindow()->ClientToScreen(evt.GetPosition()));
+				pos.y += headerHeight;
+
+				wxDataViewItem item;
+				wxDataViewColumn* col = nullptr;
+				HitTest(pos, item, col);
+
+				if (item.IsOk() && col == iconColumn)
+				{
+					if (_lastTooltipItem != item) // Update the tooltip only if hovering over another item.
+					{
+						const PlaylistIconId iconId = PlaylistTreeModel::TreeItemToModelNode(item)->GetIconId();
+						if (iconId > PlaylistIconId::NoIcon)
+						{
+							const wxString& tooltip = _model.GetPlaylistIcons().GetIconList().at(iconId).tooltip;
+							_lastTooltipItem = item;
+							SetToolTip(tooltip);
+							SetCursor(wxCURSOR_QUESTION_ARROW);
+						}
+						else if (_lastTooltipItem.IsOk()) // Hovering over item without icon. The condition avoids clearing when already cleared.
+						{
+							_ClearTooltip();
+						}
+					}
+				}
+				else if (_lastTooltipItem.IsOk()) // Hovering over irrelevant portion (e.g., not an icon column). The condition avoids clearing when already cleared.
+				{
+					_ClearTooltip();
+				}
+			});
 		}
 
 		wxWindow* Playlist::GetWxWindow()
@@ -56,14 +92,14 @@ namespace UIElements
 			return this;
 		}
 
-		void Playlist::AutoFitTextColumn(PlaylistTreeModel::ColumnId column)
+		void Playlist::AutoFitTextColumn(ColumnId column)
 		{
 			const unsigned int newWidth = _GetBestTextColumnWidth(column);
 			wxDataViewColumn* const col = GetColumn(static_cast<unsigned int>(column));
 			col->SetWidth(newWidth);
 		}
 
-		int Playlist::_GetBestTextColumnWidth(PlaylistTreeModel::ColumnId column)
+		int Playlist::_GetBestTextColumnWidth(ColumnId column)
 		{
 			wxClientDC dc(this);
 			dc.SetFont(GetFont().MakeBold());
@@ -595,7 +631,7 @@ namespace UIElements
 			return false;
 		}
 
-		wxDataViewColumn* Playlist::_AddBitmapColumn(PlaylistTreeModel::ColumnId columnIndex, wxAlignment align, int flags)
+		wxDataViewColumn* Playlist::_AddBitmapColumn(ColumnId column, wxAlignment align, int flags)
 		{
 #ifdef WIN32
 			static constexpr int PAD = 0;
@@ -603,12 +639,12 @@ namespace UIElements
 			static constexpr int PAD = COL_PADDING;
 #endif
 			static const int COL_WIDTH = (48 + PAD) * GetDPIScaleFactor(); // Col width 48 comes from: 16 * 3 where 16 is playlist icon size and 3 is magic number.
-			return AppendBitmapColumn(wxEmptyString, static_cast<unsigned int>(columnIndex), wxDATAVIEW_CELL_INERT, COL_WIDTH, align, flags);
+			return AppendBitmapColumn(wxEmptyString, static_cast<unsigned int>(column), wxDATAVIEW_CELL_INERT, COL_WIDTH, align, flags);
 		}
 
-		wxDataViewColumn* Playlist::_AddTextColumn(ColumnId columnIndex, const wxString& title, wxAlignment align, int flags)
+		wxDataViewColumn* Playlist::_AddTextColumn(ColumnId column, const wxString& title, wxAlignment align, int flags)
 		{
-			return AppendTextColumn(title, static_cast<unsigned int>(columnIndex), wxDATAVIEW_CELL_INERT, wxCOL_WIDTH_AUTOSIZE, align, flags);
+			return AppendTextColumn(title, static_cast<unsigned int>(column), wxDATAVIEW_CELL_INERT, wxCOL_WIDTH_AUTOSIZE, align, flags);
 		}
 
 #ifdef WIN32

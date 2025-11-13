@@ -135,6 +135,11 @@ PlaylistTreeModel::PlaylistTreeModel(const UIElements::Playlist::PlaylistIcons& 
 {
 }
 
+const UIElements::Playlist::PlaylistIcons& PlaylistTreeModel::GetPlaylistIcons() const
+{
+	return _playlistIcons;
+}
+
 std::unique_ptr<void, std::function<void(void*)>> PlaylistTreeModel::PrepareDirty(std::function<void()> notifier)
 {
 #ifndef WIN32
@@ -176,7 +181,7 @@ void PlaylistTreeModel::GetValue(wxVariant& variant, const wxDataViewItem& item,
 			const UIElements::Playlist::PlaylistIconId nodeIconId = node->GetIconId();
 			if (nodeIconId != UIElements::Playlist::PlaylistIconId::NoIcon)
 			{
-				variant = wxVariant(*_playlistIcons.GetIconList().at(nodeIconId)); // This severely impacts the scrolling performance on MSW (issue with wxWidgets' wxDataViewCtrl indirection design).
+				variant = wxVariant(*_playlistIcons.GetIconList().at(nodeIconId).bitmap); // This severely impacts the scrolling performance on MSW (issue with wxWidgets' wxDataViewCtrl indirection design).
 			}
 			else
 			{

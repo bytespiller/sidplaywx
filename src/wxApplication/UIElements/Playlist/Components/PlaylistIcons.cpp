@@ -29,10 +29,10 @@ namespace UIElements
 		{
 		}
 
-		void PlaylistIcons::RegisterSvgIcon(UIElements::Playlist::PlaylistIconId iconId, const ThemeData::ThemeImage& themeImage)
+		void PlaylistIcons::RegisterSvgIcon(UIElements::Playlist::PlaylistIconId iconId, const ThemeData::ThemeImage& themeImage, const wxString& tooltip)
 		{
 			assert(iconId > UIElements::Playlist::PlaylistIconId::NoIcon);
-			_assignedIcons[iconId] = UIElements::Util::LoadColorizedSvg(themeImage.path.c_str(), _iconSize);
+			_assignedIcons.emplace(iconId, Icon(UIElements::Util::LoadColorizedSvg(themeImage.path.c_str(), _iconSize), tooltip));
 		}
 
 		const PlaylistIcons::AssignedIconList& PlaylistIcons::GetIconList() const

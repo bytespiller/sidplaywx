@@ -44,17 +44,30 @@ namespace UIElements
 			RemoveSong
 		};
 
+		struct Icon
+		{
+			Icon() = delete;
+			Icon(std::shared_ptr<wxBitmapBundle> aBitmap, const wxString& aTooltip) :
+				bitmap(std::move(aBitmap)),
+				tooltip(aTooltip)
+			{
+			}
+
+			std::shared_ptr<wxBitmapBundle> bitmap;
+			wxString tooltip;
+		};
+
 		class PlaylistIcons
 		{
 		public:
-			using AssignedIconList = std::map< PlaylistIconId, std::shared_ptr<wxBitmapBundle> >; // Reminder: don't use unsorted_map here (must be ordered for wx compatibility).
+			using AssignedIconList = std::map<PlaylistIconId, Icon>; // Reminder: don't use unsorted_map here!
 
 		public:
 			PlaylistIcons() = delete;
 			explicit PlaylistIcons(int commonIconSize);
 
 		public:
-			void RegisterSvgIcon(PlaylistIconId iconId, const ThemeData::ThemeImage& themeImage);
+			void RegisterSvgIcon(PlaylistIconId iconId, const ThemeData::ThemeImage& themeImage, const wxString& tooltip = wxEmptyString);
 			const AssignedIconList& GetIconList() const;
 			const wxSize& GetIconSize() const;
 

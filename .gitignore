@@ -49,3 +49,4 @@
 *.log
 *.pdb
 *.code-workspace
+.vscode/settings.json

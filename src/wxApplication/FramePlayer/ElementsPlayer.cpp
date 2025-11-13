@@ -340,10 +340,10 @@ namespace FrameElements // Player class
  		// Playlist
 		{
 			UIElements::Playlist::PlaylistIcons playlistIcons(TEMP_PLAYLIST_ICON_SIZE);
-			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::DefaultSubsongIndicator, themeData.GetImage("icon_defaultsubsong"));
-			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::ChipIcon, themeData.GetImage("icon_chip"));
-			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::SkipShort, themeData.GetImage("icon_skipshort"));
-			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::RemoveSong, themeData.GetImage("icon_removesong"));
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::DefaultSubsongIndicator, themeData.GetImage("icon_defaultsubsong"), Strings::PlaylistTree::SONG_ICON_TOOLTIP_DEFAULT_SUBSONG);
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::ChipIcon, themeData.GetImage("icon_chip"), Strings::PlaylistTree::SONG_ICON_TOOLTIP_USES_ROM);
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::SkipShort, themeData.GetImage("icon_skipshort"), Strings::PlaylistTree::SONG_ICON_TOOLTIP_SKIP_SHORT);
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::RemoveSong, themeData.GetImage("icon_removesong"), Strings::PlaylistTree::SONG_ICON_TOOLTIP_REMOVE_SONG);
 
 			treePlaylist = new UIElements::Playlist::Playlist(&_parentPanel, playlistIcons, appSettings, wxDV_SINGLE);
 			sizerMain->Add(treePlaylist->GetWxWindow(), 1, wxEXPAND | wxALL, 0);

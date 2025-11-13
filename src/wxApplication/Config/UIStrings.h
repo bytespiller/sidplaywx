@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.17.0"); // Reminder: don't forget to increase.
+	inline constexpr const char* const APP_VERSION_TAG("0.17.1"); // Reminder: don't forget to increase.
 
 	namespace FramePlayer
 	{
@@ -134,6 +134,11 @@ namespace Strings
 		inline constexpr const char* const MENU_ITEM_SCROLL_TO_CURRENT("Scroll to current");
 
 		inline constexpr const char* const SUBSONG("Subsong");
+
+		inline constexpr const char* const SONG_ICON_TOOLTIP_DEFAULT_SUBSONG("Default subsong");
+		inline constexpr const char* const SONG_ICON_TOOLTIP_USES_ROM("Uses ROM");
+		inline constexpr const char* const SONG_ICON_TOOLTIP_SKIP_SHORT("Skip short tune");
+		inline constexpr const char* const SONG_ICON_TOOLTIP_REMOVE_SONG("Skip subsong");
 	}
 
 	namespace PlaybackMods
