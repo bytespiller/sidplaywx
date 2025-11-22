@@ -315,14 +315,9 @@ void FramePlayer::SetupUiElements()
     _ui->btnPrevSubsong->Bind(wxEVT_BUTTON, &OnButtonSubsongPrev, this);
     _ui->btnNextTrack->Bind(wxEVT_BUTTON, &OnButtonTuneNext, this);
     _ui->btnPrevTrack->Bind(wxEVT_BUTTON, &OnButtonTunePrev, this);
+
     _ui->btnPlaybackMod->Bind(wxEVT_BUTTON, &OnButtonPlaybackMod, this);
-    _ui->btnTuneInfo->Bind(wxEVT_BUTTON, [this](const wxCommandEvent& /*evt*/)
-    {
-        if (_app.GetPlaybackInfo().IsValidSongLoaded())
-        {
-            ShowTuneInfo();
-        }
-    });
+    _ui->btnTuneInfo->Bind(wxEVT_BUTTON, &OnButtonTuneInfo, this);
 
     _ui->sliderVolume->Bind(wxEVT_SLIDER, &OnVolumeSlider, this); // Reminder: context menu is bound in the FrameElementsPlayer to keep stuff tidy.
     _ui->btnRepeatMode->Bind(wxEVT_BUTTON, &OnButtonRepeatMode, this);
@@ -333,6 +328,7 @@ void FramePlayer::SetupUiElements()
     _ui->treePlaylist->Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED, &OnTreePlaylistItemActivated, this);
     _ui->treePlaylist->Bind(wxEVT_DATAVIEW_ITEM_CONTEXT_MENU, &OnTreePlaylistContextMenuOpen, this);
     _ui->treePlaylist->Bind(wxEVT_KEY_DOWN, &OnTreePlaylistKeyPressed, this);
+    _ui->treePlaylist->Bind(wxEVT_DATAVIEW_COLUMN_SORTED, &OnTreePlaylistColumnSorted, this);
 
     SubscribeMe(*_ui->btnRepeatMode, UIElements::SignalsRepeatModeButton::SIGNAL_EXTRA_OPTION_SELECTED, [this](int param)
     {

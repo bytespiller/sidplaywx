@@ -355,6 +355,9 @@ namespace FrameElements // Player class
 			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::SkipShort, themeData.GetImage("icon_skipshort"), Strings::PlaylistTree::SONG_ICON_TOOLTIP_SKIP_SHORT);
 			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::RemoveSong, themeData.GetImage("icon_removesong"), Strings::PlaylistTree::SONG_ICON_TOOLTIP_REMOVE_SONG);
 
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::SortAscending, themeData.GetImage("icon_removeallabove")); // Reusing from RemoveAll/Above/Below context menu icon.
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::SortDescending, themeData.GetImage("icon_removeallbelow")); // Reusing from RemoveAll/Above/Below context menu icon.
+
 			treePlaylist = new UIElements::Playlist::Playlist(&_parentPanel, playlistIcons, appSettings, wxDV_SINGLE);
 			sizerMain->Add(treePlaylist->GetWxWindow(), 1, wxEXPAND | wxALL, 0);
 

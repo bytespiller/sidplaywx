@@ -180,6 +180,7 @@ private:
     bool DoChangePlaylistTrack(const PlaylistTreeModelNode* const targetNode);
 
     void OnButtonPlaybackMod(wxCommandEvent& evt);
+    void OnButtonTuneInfo(wxCommandEvent& evt);
 
     void OnVolumeSlider(wxCommandEvent& evt);
     void OnButtonRepeatMode(wxCommandEvent& evt);
@@ -190,6 +191,7 @@ private:
     void OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt);
     void OnTreePlaylistContextItem(PlaylistTreeModelNode& node, wxCommandEvent& evt);
     void OnTreePlaylistKeyPressed(wxKeyEvent& evt);
+    void OnTreePlaylistColumnSorted(wxDataViewEvent& evt);
     void OnDropFilesFramePlayer(wxDropFilesEvent& evt);
     void OnDropFilesPlaylist(wxDropFilesEvent& evt);
 

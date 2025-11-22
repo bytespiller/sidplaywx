@@ -127,9 +127,11 @@ namespace UIElements
 
 			wxDataViewColumn* _AddBitmapColumn(PlaylistTreeModel::ColumnId column, wxAlignment align = wxALIGN_CENTER, int flags = 0);
 
-			// Reminder 1: wxCOL_SORTABLE would mess up the navigation since the wxDataViewCtrl is feature-incomplete (it sorts visually only and its tree path is inaccessible). Using the wxEVT_DATAVIEW_COLUMN_SORTED to manually sort the model entries proved to be problematic so I gave up for now.
-			// Reminder 2: wxCOL_REORDERABLE is crashy due to use of OnColumnsCountChanged().
+			// Reminder: wxCOL_REORDERABLE is crashy due to use of OnColumnsCountChanged().
 			wxDataViewColumn* _AddTextColumn(PlaylistTreeModel::ColumnId column, const wxString& title, wxAlignment align = wxALIGN_LEFT, int flags = wxCOL_RESIZABLE);
+
+			void _SortByColumn(wxDataViewColumn& viewColumn);
+			void _ResetColumnSortingIndicator();
 
 #ifdef WIN32
 			void _OverrideScrollWheel(wxMouseEvent& evt);
@@ -146,6 +148,11 @@ namespace UIElements
 			Settings::AppSettings& _appSettings;
 			wxDataViewItem _activeItem;
 			wxDataViewItem _lastTooltipItem;
+
+			struct ColumnSortState {
+				PlaylistTreeModel::ColumnId columnId = PlaylistTreeModel::ColumnId::Undefined;
+				bool ascending = true;
+			} _columnSortState;
 		};
 	}
 }

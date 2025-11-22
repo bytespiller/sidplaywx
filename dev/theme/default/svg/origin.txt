@@ -1,1 +1,6 @@
-https://remixicon.com/
+Icon from: https://uxwing.com
+- chip-memory.svg
+
+All other icons are from: https://remixicon.com/
+
+Some icons are modified with added color specification like: fill="#000" in order for auto-coloring (dark vs. light system themes) to work.

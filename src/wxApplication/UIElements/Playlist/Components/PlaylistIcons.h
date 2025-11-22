@@ -37,11 +37,16 @@ namespace UIElements
 	{
 		enum class PlaylistIconId : int
 		{
+			// Playlist items status indicators
 			NoIcon = -1,
 			DefaultSubsongIndicator,
 			ChipIcon,
 			SkipShort,
-			RemoveSong
+			RemoveSong,
+
+			// Column sorting indicators
+			SortAscending,
+			SortDescending
 		};
 
 		struct Icon

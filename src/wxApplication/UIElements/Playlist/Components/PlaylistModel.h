@@ -159,8 +159,9 @@ private:
 class PlaylistTreeModel: public wxDataViewModel
 {
 public:
-	enum class ColumnId : unsigned int
+	enum class ColumnId : int
 	{
+		Undefined = -1,
 		Icon = 0,
 		Title,
 		Duration,

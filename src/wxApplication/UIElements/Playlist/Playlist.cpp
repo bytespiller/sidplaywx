@@ -51,6 +51,15 @@ namespace UIElements
 				AutoFitTextColumn(ColumnId::Title);
 			});
 
+			// Handle sorting
+			Bind(wxEVT_DATAVIEW_COLUMN_HEADER_CLICK, [this](const wxDataViewEvent& evt)
+			{
+				if (wxDataViewColumn* const col = evt.GetDataViewColumn())
+				{
+					_SortByColumn(*col);
+				}
+			});
+
 			// Handle the status icon tooltips
 			const int headerHeight = wxRendererNative::Get().GetHeaderButtonHeight(this);
 			GetMainWindow()->Bind(wxEVT_MOTION, [this, iconColumn, headerHeight](const wxMouseEvent& evt)
@@ -145,6 +154,8 @@ namespace UIElements
 
 		PlaylistTreeModelNode& Playlist::AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable)
 		{
+			_ResetColumnSortingIndicator();
+
 			// Create item
 			_model.entries.emplace_back(new PlaylistTreeModelNode(nullptr, title, filepath, defaultSubsong, duration, hvscPath, md5, author, copyright, romRequirement, playable));
 
@@ -212,6 +223,8 @@ namespace UIElements
 
 		void Playlist::Clear()
 		{
+			_ResetColumnSortingIndicator();
+
 			_activeItem.Unset();
 
 			// Clear all entries (entries are unique ptrs so they'll be destroyed since the vector is their owner)
@@ -645,6 +658,97 @@ namespace UIElements
 		wxDataViewColumn* Playlist::_AddTextColumn(ColumnId column, const wxString& title, wxAlignment align, int flags)
 		{
 			return AppendTextColumn(title, static_cast<unsigned int>(column), wxDATAVIEW_CELL_INERT, wxCOL_WIDTH_AUTOSIZE, align, flags);
+		}
+
+		void Playlist::_SortByColumn(wxDataViewColumn& viewColumn)
+		{
+			const ColumnId columnId = static_cast<ColumnId>(viewColumn.GetModelColumn());
+			const bool ascending = !(_columnSortState.columnId == columnId  && _columnSortState.ascending);
+			bool sorted = true;
+
+			// Sort the model (main songs only)
+			switch (columnId)
+			{
+				case PlaylistTreeModel::ColumnId::Title:
+				{
+					std::sort(_model.entries.begin(), _model.entries.end(), [&](const PlaylistTreeModelNodePtr& a, const PlaylistTreeModelNodePtr& b)
+					{
+						const int result = a->title.Cmp(b->title);
+						return (ascending) ? result < 0 : result > 0;
+					});
+
+					break;
+				}
+				case PlaylistTreeModel::ColumnId::Duration:
+				{
+					std::sort(_model.entries.begin(), _model.entries.end(), [&](const PlaylistTreeModelNodePtr& a, const PlaylistTreeModelNodePtr& b)
+					{
+						return (ascending) ? a->duration < b->duration : a->duration > b->duration;
+					});
+
+					break;
+				}
+				case PlaylistTreeModel::ColumnId::Author:
+				{
+					std::sort(_model.entries.begin(), _model.entries.end(), [&](const PlaylistTreeModelNodePtr& a, const PlaylistTreeModelNodePtr& b)
+					{
+						const int result = a->author.Cmp(b->author);
+						return (ascending) ? result < 0 : result > 0;
+					});
+
+					break;
+				}
+				case PlaylistTreeModel::ColumnId::Copyright:
+				{
+					std::sort(_model.entries.begin(), _model.entries.end(), [&](const PlaylistTreeModelNodePtr& a, const PlaylistTreeModelNodePtr& b)
+					{
+						// Ensure years like "200?" are sorted as "2000"
+						wxString aCopyright(a->copyright);
+						aCopyright.Replace('?', '0');
+						wxString bCopyright(b->copyright);
+						bCopyright.Replace('?', '0');
+
+						const int result = aCopyright.Cmp(bCopyright);
+						return (ascending) ? result < 0 : result > 0;
+					});
+
+					break;
+				}
+				default:
+					sorted = false; // Unhandled column
+			}
+
+			if (!sorted)
+			{
+				return;
+			}
+
+			// Set canonical new sorting state
+			_columnSortState.ascending = ascending;
+			_columnSortState.columnId = columnId;
+
+			// TODO: ensure the sorting indicator also gets cleared when the items are reordered (next feature)
+			// Update column sorting indicator
+			for (unsigned int i = 0; i < GetColumnCount(); ++i)
+			{
+				GetColumn(i)->SetBitmap(wxNullBitmap);
+			}
+			viewColumn.SetBitmap(*_model.GetPlaylistIcons().GetIconList().at((_columnSortState.ascending) ? PlaylistIconId::SortAscending : PlaylistIconId::SortDescending).bitmap);
+
+			// Notify the parent (we need to refresh the transport buttons state after sorting in case the first/last positions are swapped)
+			GetEventHandler()->AddPendingEvent(wxDataViewEvent(wxEVT_DATAVIEW_COLUMN_SORTED, this, &viewColumn));
+
+			// Notify the wx base control of change
+			_model.Cleared();
+		}
+
+		void Playlist::_ResetColumnSortingIndicator()
+		{
+			_columnSortState = ColumnSortState();
+			for (unsigned int i = 0; i < GetColumnCount(); ++i)
+			{
+				GetColumn(i)->SetBitmap(wxNullBitmap);
+			}
 		}
 
 #ifdef WIN32

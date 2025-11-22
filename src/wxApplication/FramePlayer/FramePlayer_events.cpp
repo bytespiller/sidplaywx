@@ -86,6 +86,14 @@ void FramePlayer::OnButtonPlaybackMod(wxCommandEvent& /*evt*/)
     OpenPlaybackModFrame();
 }
 
+void FramePlayer::OnButtonTuneInfo(wxCommandEvent& /*evt*/)
+{
+    if (_app.GetPlaybackInfo().IsValidSongLoaded())
+    {
+        ShowTuneInfo();
+    }
+}
+
 void FramePlayer::OnVolumeSlider(wxCommandEvent& evt)
 {
     const float newVolume = static_cast<float>(evt.GetInt()) / _ui->sliderVolume->GetMax();
@@ -342,6 +350,11 @@ void FramePlayer::OnTreePlaylistKeyPressed(wxKeyEvent& evt)
 #else
     evt.Skip();
 #endif
+}
+
+void FramePlayer::OnTreePlaylistColumnSorted(wxDataViewEvent& /*evt*/)
+{
+    UpdateUiState();
 }
 
 void FramePlayer::OnDropFilesFramePlayer(wxDropFilesEvent& evt)

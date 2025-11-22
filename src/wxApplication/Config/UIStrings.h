@@ -265,7 +265,7 @@ namespace Strings
 
 		inline constexpr const char* const OPT_SYSTEM_THEME("System theme");
 		inline constexpr const char* const DESC_SYSTEM_THEME("You can enable the experimental dark theme on Windows here.\nDark theme will be improved in the future.");
-		inline constexpr const char* const ITEM_SYSTEM_THEME_AUTO("Auto");
+		inline constexpr const char* const ITEM_SYSTEM_THEME_AUTO("Auto (experimental)");
 		inline constexpr const char* const ITEM_SYSTEM_THEME_LIGHT("Light");
 		inline constexpr const char* const ITEM_SYSTEM_THEME_DARK("Dark (experimental)");
 
