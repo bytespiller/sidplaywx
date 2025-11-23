@@ -157,8 +157,8 @@ namespace Settings
 				DefaultOption(ID::AudioOutputDevice, PREFERRED_DEFAULT_AUDIO_DEVICE_NAME),
 				DefaultOption(ID::LowLatency, true),
 				DefaultOption(ID::OutChannels, static_cast<int>(OutChannels::Default)),
-				DefaultOption(ID::VirtualStereoSpeakerDistance, 8),
-				DefaultOption(ID::VirtualStereoSideVolumeFactor, 0.24),
+				DefaultOption(ID::VirtualStereoSpeakerDistance, 7),
+				DefaultOption(ID::VirtualStereoSideVolumeFactor, 0.18),
 
 				DefaultOption(ID::PreRenderEnabled, false),
 				DefaultOption(ID::AutoPlay, true),

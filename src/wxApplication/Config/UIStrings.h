@@ -224,10 +224,10 @@ namespace Strings
 		inline constexpr const char* const ITEM_OUT_CHANNELS_EXPANDED("Virtual stereo");
 
 		inline constexpr const char* const OPT_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE("Virtual sound stage size");
-		inline constexpr const char* const DESC_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE("Size of the virtual sound stage.\n- Low: small room effect.\n- High: large room effect.\n- Default: 8");
+		inline constexpr const char* const DESC_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE("Size of the virtual sound stage.\n- Low: small room effect.\n- High: large room effect.\n- Default: 7");
 
 		inline constexpr const char* const OPT_OUT_FXVIRTUALSTEREO_SIDE_VOLUME("Virtual sound stage focus");
-		inline constexpr const char* const DESC_OUT_FXVIRTUALSTEREO_SIDE_VOLUME("Volume allocation of sides vs. center.\n- Min: 0.1 = center-focused sound stage (ball).\n- Max: 0.4 = wide-dispersed sound stage (donut).\n- Default: 0.24");
+		inline constexpr const char* const DESC_OUT_FXVIRTUALSTEREO_SIDE_VOLUME("Volume allocation of sides vs. center.\n- Min: 0.1 = center-focused sound stage (ball).\n- Max: 0.4 = wide-dispersed sound stage (donut).\n- Default: 0.18");
 
 		// Playback
 		inline constexpr const char* const CATEGORY_PLAYBACK_BEHAVIOR("Playback");
