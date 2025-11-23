@@ -298,8 +298,8 @@ void FramePlayer::SetupUiElements()
 
     // RepeatMode
     {
-        const int modeImageIndex = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode)->GetValueAsInt() - 1;
-        _ui->btnRepeatMode->SetRepeatModeImage(static_cast<RepeatMode>(modeImageIndex));
+        const int modeValue = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode)->GetValueAsInt();
+        _ui->btnRepeatMode->SetRepeatMode(static_cast<RepeatMode>(modeValue));
     }
 
     // Taskbar progress indication
@@ -320,7 +320,13 @@ void FramePlayer::SetupUiElements()
     _ui->btnTuneInfo->Bind(wxEVT_BUTTON, &OnButtonTuneInfo, this);
 
     _ui->sliderVolume->Bind(wxEVT_SLIDER, &OnVolumeSlider, this); // Reminder: context menu is bound in the FrameElementsPlayer to keep stuff tidy.
+
     _ui->btnRepeatMode->Bind(wxEVT_BUTTON, &OnButtonRepeatMode, this);
+    _ui->btnRepeatMode->Bind(wxEVT_CONTEXT_MENU, [&](wxContextMenuEvent& evt)
+    {
+        _ui->btnRepeatMode->SetRepeatModeOptionEnabled(RepeatMode::InfiniteDuration, !_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool());
+        evt.Skip();
+    });
 
     _ui->compositeSeekbar->Bind(UIElements::EVT_CSB_SeekBackward, &OnSeekBackward, this);
     _ui->compositeSeekbar->Bind(UIElements::EVT_CSB_SeekForward, &OnSeekForward, this);

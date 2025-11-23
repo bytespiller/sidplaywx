@@ -105,9 +105,12 @@ void FramePlayer::OnVolumeSlider(wxCommandEvent& evt)
 void FramePlayer::OnButtonRepeatMode(wxCommandEvent& evt)
 {
     const RepeatMode newRepeatMode = (evt.GetInt() == 0) ? _ui->btnRepeatMode->Cycle() : static_cast<RepeatMode>(evt.GetInt());
-    Settings::Option* option = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode);
     assert(newRepeatMode != RepeatMode::Undefined); // Neither the (correct) default nor loaded value was applied during the UI init!
+
+    Settings::Option* option = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode);
     option->UpdateValue(static_cast<int>(newRepeatMode));
+
+    _ui->btnRepeatMode->SetRepeatModeOptionEnabled(RepeatMode::InfiniteDuration, !_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool());
 }
 
 void FramePlayer::OnSeekBackward(wxCommandEvent& evt)
@@ -818,6 +821,14 @@ void FramePlayer::OnRepeatModeExtraOptionToggled(ExtraOptionId extraOptionId)
             option->UpdateValue(!option->GetValueAsBool());
             _ui->btnRepeatMode->SetExtraOptionEnabled(ExtraOptionId::PreRenderEnabled, option->GetValueAsBool());
             OnButtonStop();
+
+            if (option->GetValueAsBool() && _ui->btnRepeatMode->GetRepeatMode() == RepeatMode::InfiniteDuration)
+            {
+                // When the Instant seeking is enabled, Infinite duration would just maintain silence past the end of the pre-render buffer, so we flip it to PlayOnce instead.
+                _ui->btnRepeatMode->SetRepeatMode(RepeatMode::PlayOnce);
+                _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode)->UpdateValue(static_cast<int>(_ui->btnRepeatMode->GetRepeatMode()));
+            }
+
             break;
         }
         default:

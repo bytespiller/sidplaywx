@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,14 +47,16 @@ namespace UIElements
 		struct ButtonState
 		{
 			ButtonState() = delete;
-			ButtonState(const ThemeData::ThemeImage& aImage, const wxString& aText) :
+			ButtonState(const ThemeData::ThemeImage& aImage, const wxString& aText, bool aEnabled = true) :
 				themeImage(aImage),
-				text(aText)
+				text(aText),
+				enabled(aEnabled)
 			{
 			}
 
 			const ThemeData::ThemeImage& themeImage;
 			wxString text;
+			bool enabled;
 		};
 
 		using ButtonStates = std::map<RepeatMode, ButtonState>;
@@ -107,12 +109,12 @@ namespace UIElements
 		RepeatModeButton(const ButtonStates& buttonStates, const wxSize& size, wxPanel& panel, const std::optional<ExtraOptionsHandler>& extraOptionsHandler);
 
 	public:
-		void SetRepeatModeImage(RepeatMode forceMode);
+		void SetRepeatMode(RepeatMode forceMode);
 		RepeatMode GetRepeatMode() const;
 		RepeatMode Cycle();
 
-		void SetModeTexts(const std::vector<wxString>& tooltips); // TODO: improve after API change
-		void SetExtraOptionEnabled(ExtraOptionsHandler::ExtraOptionId optionId, bool enabled);
+		void SetRepeatModeOptionEnabled(RepeatMode mode, bool enabled);
+		void SetExtraOptionEnabled(ExtraOptionsHandler::ExtraOptionId optionId, bool enabled = true);
 
 	private:
 		void UpdateTooltip();
@@ -125,8 +127,7 @@ namespace UIElements
 		static ImageList AsImageList(const ButtonStates& buttonStates);
 
 	private:
-		int _modeImagesCount = 0;
-		std::vector<wxString> _modeTexts;
+		ButtonStates _buttonStates;
 
 	private:
 		std::optional<ExtraOptionsHandler> _extraOptionsHandler;

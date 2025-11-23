@@ -35,6 +35,7 @@ namespace UIElements
 
 	void MultiImageButton::SetActiveImage(int index)
 	{
+		assert(index < _indexedBitmaps.size());
 		_activeBitmapIndex = index;
 		SetBitmap(*_indexedBitmaps.at(_activeBitmapIndex).get());
 	}

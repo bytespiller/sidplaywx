@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,22 +22,17 @@ namespace UIElements
 {
 	RepeatModeButton::RepeatModeButton(const ButtonStates& buttonStates, const wxSize& size, wxPanel& panel, const std::optional<ExtraOptionsHandler>& extraOptionsHandler) :
 		MultiImageButton(AsImageList(buttonStates), size, panel),
-		_modeImagesCount(static_cast<int>(buttonStates.size())),
+		_buttonStates(buttonStates),
 		_extraOptionsHandler(extraOptionsHandler)
 	{
-		_modeTexts.reserve(buttonStates.size());
-		for (const auto& state : buttonStates)
-		{
-			_modeTexts.emplace_back(state.second.text);
-		}
 		UpdateTooltip();
 
 		Bind(wxEVT_CONTEXT_MENU, &OnContextMenuOpen, this);
 	}
 
-	void RepeatModeButton::SetRepeatModeImage(RepeatMode forceMode)
+	void RepeatModeButton::SetRepeatMode(RepeatMode forceMode)
 	{
-		SetActiveImage(static_cast<int>(forceMode));
+		SetActiveImage(static_cast<int>(forceMode) - 1);
 		UpdateTooltip();
 	}
 
@@ -49,17 +44,26 @@ namespace UIElements
 	RepeatModeButton::RepeatMode RepeatModeButton::Cycle()
 	{
 		int newIndex = GetActiveImage() + 1;
-		newIndex = (newIndex > _modeImagesCount - 1) ? 0 : newIndex;
+		newIndex = (newIndex > _buttonStates.size() - 1) ? 0 : newIndex;
+
 		SetActiveImage(newIndex);
 		UpdateTooltip();
+
+		const RepeatMode newMode = GetRepeatMode();
+		if (newMode != RepeatMode::Undefined && !_buttonStates.at(newMode).enabled)
+		{
+			if (std::any_of(_buttonStates.begin(), _buttonStates.end(), [](const auto& kvp) { return kvp.second.enabled; }))
+			{
+				return Cycle();
+			}
+		}
+
 		return GetRepeatMode();
 	}
 
-	void RepeatModeButton::SetModeTexts(const std::vector<wxString>& tooltips)
+	void RepeatModeButton::SetRepeatModeOptionEnabled(RepeatMode mode, bool enabled)
 	{
-		assert(tooltips.size() == _modeImagesCount);
-		_modeTexts = tooltips;
-		UpdateTooltip();
+		_buttonStates.at(mode).enabled = enabled;
 	}
 
 	void RepeatModeButton::SetExtraOptionEnabled(ExtraOptionsHandler::ExtraOptionId optionId, bool enabled)
@@ -69,13 +73,13 @@ namespace UIElements
 
 	void RepeatModeButton::UpdateTooltip()
 	{
-		if (_modeTexts.empty())
+		const wxString& tooltipText = _buttonStates.at(GetRepeatMode()).text;
+		if (tooltipText.IsEmpty())
 		{
 			UnsetToolTip();
 		}
 		else
 		{
-			const wxString& tooltipText = _modeTexts.at(GetActiveImage());
 			SetToolTip(tooltipText);
 		}
 	}
@@ -89,10 +93,12 @@ namespace UIElements
 
 		wxMenu* menu = new wxMenu();
 
-		const int activeImageIndex = GetActiveImage();
-		for (int i = 0; i < _modeTexts.size(); ++i)
+		const RepeatMode activeRepeatMode = GetRepeatMode();
+		for (const auto& [mode, state] : _buttonStates)
 		{
- 			menu->AppendRadioItem(i, _modeTexts.at(i))->Check(activeImageIndex == i);
+			wxMenuItem* const item = menu->AppendRadioItem(static_cast<int>(mode), state.text);
+			item->Check(activeRepeatMode == mode);
+			item->Enable(state.enabled);
 		}
 
 		if (_extraOptionsHandler.has_value())
@@ -117,18 +123,18 @@ namespace UIElements
 
 	void RepeatModeButton::OnContextMenuItemSelected(wxCommandEvent& evt)
 	{
-		const bool isModeRadioButton = evt.GetId() < _modeImagesCount;
+		const bool isModeRadioButton = evt.GetId() <= _buttonStates.size();
 		if (isModeRadioButton)
 		{
-			SetRepeatModeImage(static_cast<RepeatMode>(evt.GetId()));
+			SetRepeatMode(static_cast<RepeatMode>(evt.GetId()));
 
 			wxCommandEvent* newEvt = new wxCommandEvent(wxEVT_BUTTON);
-			newEvt->SetInt(evt.GetId() + 1);
+			newEvt->SetInt(evt.GetId());
 			wxQueueEvent(this, newEvt);
 		}
 		else // ExtraOption
 		{
-			const int extraId = evt.GetId() - _modeImagesCount - 1;
+			const int extraId = evt.GetId() - _buttonStates.size() - 1;
 			EmitSignal(SignalsRepeatModeButton::SIGNAL_EXTRA_OPTION_SELECTED, extraId);
 		}
 	}
