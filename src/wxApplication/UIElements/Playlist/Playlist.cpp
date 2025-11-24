@@ -744,6 +744,11 @@ namespace UIElements
 
 		void Playlist::_ResetColumnSortingIndicator()
 		{
+			if (_columnSortState.columnId == ColumnId::Undefined) [[likely]]
+			{
+				return; // We must skip this to avoid performance penalty for repeated calls when adding lots of items in bulk.
+			}
+
 			_columnSortState = ColumnSortState();
 			for (unsigned int i = 0; i < GetColumnCount(); ++i)
 			{
