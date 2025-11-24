@@ -75,10 +75,25 @@ namespace UIElements
 				{
 					if (_lastTooltipItem != item) // Update the tooltip only if hovering over another item.
 					{
-						const PlaylistIconId iconId = PlaylistTreeModel::TreeItemToModelNode(item)->GetIconId();
+						const PlaylistTreeModelNode* const modelNode = PlaylistTreeModel::TreeItemToModelNode(item);
+						const PlaylistIconId iconId = modelNode->GetIconId();
 						if (iconId > PlaylistIconId::NoIcon)
 						{
-							const wxString& tooltip = _model.GetPlaylistIcons().GetIconList().at(iconId).tooltip;
+							wxString tooltip(_model.GetPlaylistIcons().GetIconList().at(iconId).tooltip);
+
+							if (iconId == PlaylistIconId::ChipIcon)
+							{
+								switch (modelNode->romRequirement)
+								{
+									case PlaylistTreeModelNode::RomRequirement::BasicRom:
+										tooltip.Append(" (BASIC)");
+										break;
+									case PlaylistTreeModelNode::RomRequirement::R64:
+										tooltip.Append(" (KERNAL)");
+										break;
+								}
+							}
+
 							_lastTooltipItem = item;
 							SetToolTip(tooltip);
 							SetCursor(wxCURSOR_QUESTION_ARROW);
