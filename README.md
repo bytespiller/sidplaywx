@@ -1,4 +1,5 @@
-# <img align="left" src="../assets/screenshots/sidplaywx_icon_64.png?raw=true"/> sidplaywx
+# <img src="../assets/screenshots/composite_spwx_title.png?raw=true"/>
+
 The **sidplaywx** is a GUI player for Commodore 64 SID chip tunes aiming to provide a modern & comfortable SID tune playback experience on the PC.
 
 The current alpha version is fully usable, supporting QoL features like seeking, drag & drop, unicode paths, DPI awareness and much more.
@@ -6,24 +7,11 @@ The current alpha version is fully usable, supporting QoL features like seeking,
 The **sidplaywx** uses [libsidplayfp](https://github.com/libsidplayfp/libsidplayfp) for ultimate quality in SID emulation, [wxWidgets](https://github.com/wxWidgets/wxWidgets) for native GUI on supported platforms, and [PortAudio](https://github.com/PortAudio/portaudio) for audio output.
 
 ## Screenshots
-|Main window|
-|-|
-|<p align="center">![Screenshot of the player application main window](../assets/screenshots/sidplaywx-player.png?raw=true)</p>|
-|Pictured: for tunes with subsongs, a _crown_ icon in the playlist indicates a default subsong. You may also encounter other indicators such as a _timer_ icon indicating an (optional) auto-skipping of (sub)songs shorter than (n) seconds, or a _chip_ (indicates a ROM file requirement).<br>Tunes can be seeked ([HVSC](https://www.hvsc.c64.org) *Songlengths.md5* database is supported, and default/fallback duration can be specified in the Preferences).<br>HVSC STIL info is also supported (blue text in the top right).|
+![Screenshot of the player application main window](../assets/screenshots/sidplaywx-player.png?raw=true)
 
-<br>
+![Screenshot of the Modify Playback window](../assets/screenshots/sidplaywx-playbackmod.png?raw=true)
 
-|Modify Playback window|
-|-|
-|<p align="center">![Screenshot of the Modify Playback window](../assets/screenshots/sidplaywx-playbackmod.png?raw=true)</p>|
-|Modification of ongoing playback: toggling individual SID voices (the active SIDs are indicated -- most normal tunes use a single SID chip, but there exist special stereo/multi-SID tunes which will use up to three). Realtime toggles to inhibit the filter and digi samples are also available. <br>Playback speed (not tempo) can also be modified (pitch is affected).<br>If any of these settings are changed, and they affect the currently playing tune, there will be a "MODIFIED" indication in the status bar.|
-
-<br>
-
-|Preferences window|
-|-|
-|<p align="center">![Screenshot of the Preferences window](../assets/screenshots/sidplaywx-preferences-long.png?raw=true)</p>|
-|Each setting in the Preferences is accompanied with a help-text displayed in the bottom area. This way the Preferences also serves as a documentation/help source for sidplaywx's many features.|
+![Screenshot of the Preferences window](../assets/screenshots/sidplaywx-preferences-long.png?raw=true)
 
 ## Platforms
 This project uses the GCC and the CMake, and at the moment Windows and Linux are supported.
@@ -66,10 +54,6 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 * How come the seeking is so slow?
   * There is an "Instant seeking" option available which pre-renders the entire SID tune in the background. It is disabled by default, but if you enable it you will be able to seek instantly. See [release notes](https://github.com/bytespiller/sidplaywx/releases/tag/v0.7.0-beta) of the old release (note: "Instant seeking" was formerly named "Fast seeking") for details on how it works and what are the caveats.
   * SID tunes are actually small programs and not audio files like for example the MP3, so they have to be emulated linearly as fast as possible until the "seek" target is reached.
-    * <details>
-        <summary>More details</summary>
-        The libsidplayfp library (which sidplaywx uses) focuses on accuracy so it's much slower than e.g., libsidplay2 (which is virtually instantaneous, try it in the DeaDBeeF player on the Linux!). FWIW the seeking in the sidplaywx is already separately threaded and bypasses some SID mixing steps, audio rendering etc. so I think it's as fast as possible at the moment, unless you enable the "Instant seeking" option of course).
-      </details>
 * Command-line options in sidplaywx?
   * Focus so far is on the GUI experience. There exists a [sidplayfp](https://github.com/libsidplayfp/sidplayfp/releases) console-based player in the libsidplayfp repo (not to be confused with a sidplaywx which is unrelated and unaffiliated project).
   * For now, you can pass the space-separated filenames. For example `sidplaywx Aces_High.sid Gunstar.sid` to open those two tunes. This "feature" is actually a side-effect of single-instance support, so there will be a slight delay if the app is already running and the single-instance option is enabled.
