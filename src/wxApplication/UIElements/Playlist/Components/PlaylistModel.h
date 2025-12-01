@@ -82,7 +82,7 @@ public:
 public:
 	PlaylistTreeModelNode() = delete;
 	PlaylistTreeModelNode(PlaylistTreeModelNode&) = delete;
-	PlaylistTreeModelNode(PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable);
+	PlaylistTreeModelNode(unsigned int uid, PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable);
 
 public:
 	/// @brief Returns a nullptr for a mainsong or a mainsong for a subsong.
@@ -129,6 +129,7 @@ public:
 	void SetIconId(UIElements::Playlist::PlaylistIconId newIconId, PassKey<UIElements::Playlist::Playlist>);
 
 public:
+	const unsigned int uid;
 	const ItemType type;
 	const wxString title;
 	const wxString author;
@@ -141,7 +142,6 @@ public:
 	const int defaultSubsong;
 	const uint_least32_t duration;
 	const RomRequirement romRequirement;
-
 
 private:
 	PlaylistTreeModelNode* _parent = nullptr;

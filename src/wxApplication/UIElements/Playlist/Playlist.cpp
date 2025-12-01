@@ -172,7 +172,7 @@ namespace UIElements
 			_ResetColumnSortingIndicator();
 
 			// Create item
-			_model.entries.emplace_back(new PlaylistTreeModelNode(nullptr, title, filepath, defaultSubsong, duration, hvscPath, md5, author, copyright, romRequirement, playable));
+			_model.entries.emplace_back(new PlaylistTreeModelNode(_NextFreeItemUid(), nullptr, title, filepath, defaultSubsong, duration, hvscPath, md5, author, copyright, romRequirement, playable));
 
 			// Notify the wx base control of change
 			wxDataViewItem childNotify = wxDataViewItem(_model.entries.back().get());
@@ -203,7 +203,7 @@ namespace UIElements
 				for (const uint_least32_t duration : durations)
 				{
 					++cnt;
-					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(&parent, titles.at(cnt - 1), parent.filepath, cnt, duration, parent.hvscPath, parent.md5, "", "", parent.romRequirement, parent.IsPlayable()), {});
+					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(_NextFreeItemUid(), &parent, titles.at(cnt - 1), parent.filepath, cnt, duration, parent.hvscPath, parent.md5, "", "", parent.romRequirement, parent.IsPlayable()), {});
 					notifyItems.Add(wxDataViewItem(&newChildNode));
 
 					// Indicate if default subsong
@@ -220,7 +220,7 @@ namespace UIElements
 			void* parent = item.GetParent(); // Can be nullptr if item is a mainsong.
 
 			const PlaylistTreeModelNode* const activeSong = GetActiveSong();
-			if (activeSong != nullptr && activeSong->filepath == item.filepath)
+			if (activeSong != nullptr && activeSong->uid == item.uid)
 			{
 				_activeItem.Unset();
 			}
@@ -317,35 +317,26 @@ namespace UIElements
 			return _model.entries;
 		}
 
-		PlaylistTreeModelNode* Playlist::GetSong(const wxString& filepath) const
+		PlaylistTreeModelNode* Playlist::GetSongAtPlaylistPosition(unsigned int position) const
 		{
-			const auto itTargetSong = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&filepath](const PlaylistTreeModelNodePtr& songItem)
-			{
-				return songItem->filepath.IsSameAs(filepath);
-			});
-
-			if (itTargetSong == _model.entries.cend())
+			if (position == 0 || position > _model.entries.size())
 			{
 				return nullptr;
 			}
 
-			return itTargetSong->get();
+			return _model.entries.at(position - 1).get();
 		}
 
-		PlaylistTreeModelNode* Playlist::GetSubsong(const wxString& filepath, int subsong) const
+		PlaylistTreeModelNode& Playlist::GetSubsong(PlaylistTreeModelNode& song, int subsong) const
 		{
-			PlaylistTreeModelNode* mainSongNode = GetSong(filepath);
-			if (mainSongNode == nullptr)
-			{
-				return nullptr;
-			}
+			PlaylistTreeModelNode& mainSongNode = (song.GetParent() == nullptr) ? song : *song.GetParent();
 
 			if (subsong == 0)
 			{
-				return GetEffectiveInitialSubsong(*mainSongNode);
+				return *GetEffectiveInitialSubsong(mainSongNode);
 			}
 
-			return &mainSongNode->GetSubsong(subsong);
+			return mainSongNode.GetSubsong(subsong);
 		}
 
 		PlaylistTreeModelNode* Playlist::GetActiveSong() const
@@ -358,9 +349,15 @@ namespace UIElements
 			return nullptr;
 		}
 
-		PlaylistTreeModelNode* Playlist::GetNextSong(const PlaylistTreeModelNode& fromSong) const
+		PlaylistTreeModelNode* Playlist::GetNextSong(PlaylistTreeModelNode& fromSong) const
 		{
-			const auto itCurrent = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&fromSong](const PlaylistTreeModelNodePtr& cSongNode) { return cSongNode->filepath.IsSameAs(fromSong.filepath); });
+			PlaylistTreeModelNode& mainSongNode = (fromSong.GetParent() == nullptr) ? fromSong : *fromSong.GetParent();
+
+			const auto itCurrent = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&mainSongNode](const PlaylistTreeModelNodePtr& cSongNode)
+			{
+				return cSongNode->uid == mainSongNode.uid;
+			});
+
 			if (itCurrent == _model.entries.cend())
 			{
 				return nullptr; // Not found (should never happen).
@@ -372,7 +369,7 @@ namespace UIElements
 				return nullptr; // No further items.
 			}
 
-			const PlaylistTreeModelNode* const nextSong = itNext->get(); // Here we know for sure there is at least one more item.
+			PlaylistTreeModelNode* const nextSong = itNext->get(); // Here we know for sure there is at least one more item.
 			if (nextSong->IsAutoPlayable())
 			{
 				return GetEffectiveInitialSubsong(*nextSong);
@@ -383,24 +380,31 @@ namespace UIElements
 
 		PlaylistTreeModelNode* Playlist::GetNextSong() const
 		{
-			const PlaylistTreeModelNode* const activeSong = GetActiveSong();
+			PlaylistTreeModelNode* const activeSong = GetActiveSong();
 			if (activeSong == nullptr)
 			{
 				return nullptr;
 			}
 
-			return GetNextSong(*activeSong);
+			PlaylistTreeModelNode* const mainSongNode = (activeSong->GetParent() == nullptr) ? activeSong : activeSong->GetParent();
+			return GetNextSong(*mainSongNode);
 		}
 
-		PlaylistTreeModelNode* Playlist::GetPrevSong(const PlaylistTreeModelNode& fromSong) const
+		PlaylistTreeModelNode* Playlist::GetPrevSong(PlaylistTreeModelNode& fromSong) const
 		{
-			const auto itCurrent = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&fromSong](const PlaylistTreeModelNodePtr& cSongNode) { return cSongNode->filepath.IsSameAs(fromSong.filepath); });
+			PlaylistTreeModelNode& mainSongNode = (fromSong.GetParent() == nullptr) ? fromSong : *fromSong.GetParent();
+
+			const auto itCurrent = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&mainSongNode](const PlaylistTreeModelNodePtr& cSongNode)
+			{
+				return cSongNode->uid == mainSongNode.uid;
+			});
+
 			if (itCurrent == _model.entries.cend() || itCurrent == _model.entries.cbegin()) // Not found (should never happen) or there aren't any previous items.
 			{
 				return nullptr;
 			}
 
-			const PlaylistTreeModelNode* const prevSong = std::prev(itCurrent)->get(); // Here we know for sure there is at least one previous item.
+			PlaylistTreeModelNode* const prevSong = std::prev(itCurrent)->get(); // Here we know for sure there is at least one previous item.
 			if (prevSong->IsAutoPlayable())
 			{
 				return GetEffectiveInitialSubsong(*prevSong);
@@ -411,41 +415,37 @@ namespace UIElements
 
 		PlaylistTreeModelNode* Playlist::GetPrevSong() const
 		{
-			const PlaylistTreeModelNode* const activeSong = GetActiveSong();
+			PlaylistTreeModelNode* const activeSong = GetActiveSong();
 			if (activeSong == nullptr)
 			{
 				return nullptr;
 			}
 
-			return GetPrevSong(*activeSong);
+			PlaylistTreeModelNode* const mainSongNode = (activeSong->GetParent() == nullptr) ? activeSong : activeSong->GetParent();
+			return GetPrevSong(*mainSongNode);
 		}
 
-		PlaylistTreeModelNode* Playlist::GetNextSubsong(const PlaylistTreeModelNode& fromSubsong) const
+		PlaylistTreeModelNode* Playlist::GetNextSubsong(PlaylistTreeModelNode& fromSubsong) const
 		{
-			const PlaylistTreeModelNode* const mainSong = GetSong(fromSubsong.filepath);
-			if (mainSong == nullptr)
-			{
-				return nullptr; // Parent item no longer valid (e.g., removed by user via context menu).
-			}
+			PlaylistTreeModelNode& mainSongNode = (fromSubsong.GetParent() == nullptr) ? fromSubsong : *fromSubsong.GetParent();
 
-			const int max = GetSong(fromSubsong.filepath)->GetSubsongCount();
-			if (fromSubsong.defaultSubsong >= max)
+			if (fromSubsong.defaultSubsong >= mainSongNode.GetSubsongCount())
 			{
 				return nullptr; // No more subsongs.
 			}
 
-			PlaylistTreeModelNode* const nextSubsong = GetSubsong(fromSubsong.filepath, fromSubsong.defaultSubsong + 1); // Here we know for sure there is at least one more item.
-			if (nextSubsong->IsAutoPlayable())
+			PlaylistTreeModelNode& nextSubsong = GetSubsong(fromSubsong, fromSubsong.defaultSubsong + 1); // Here we know for sure there is at least one more item.
+			if (nextSubsong.IsAutoPlayable())
 			{
-				return nextSubsong;
+				return &nextSubsong;
 			}
 
-			return GetNextSubsong(*nextSubsong); // Not playable so try the one after it.
+			return GetNextSubsong(nextSubsong); // Not playable so try the one after it.
 		}
 
 		PlaylistTreeModelNode* Playlist::GetNextSubsong() const
 		{
-			const PlaylistTreeModelNode* const activeSong = GetActiveSong();
+			PlaylistTreeModelNode* const activeSong = GetActiveSong();
 			if (activeSong == nullptr)
 			{
 				return nullptr;
@@ -454,25 +454,25 @@ namespace UIElements
 			return GetNextSubsong(*activeSong);
 		}
 
-		PlaylistTreeModelNode* Playlist::GetPrevSubsong(const PlaylistTreeModelNode& fromSubsong) const
+		PlaylistTreeModelNode* Playlist::GetPrevSubsong(PlaylistTreeModelNode& fromSubsong) const
 		{
 			if (fromSubsong.defaultSubsong <= 1)
 			{
 				return nullptr; // No more subsongs.
 			}
 
-			PlaylistTreeModelNode* const prevSubsong = GetSubsong(fromSubsong.filepath, fromSubsong.defaultSubsong - 1); // Here we know for sure there is at least one previous item.
-			if (prevSubsong->IsAutoPlayable())
+			PlaylistTreeModelNode& prevSubsong = GetSubsong(fromSubsong, fromSubsong.defaultSubsong - 1); // Here we know for sure there is at least one previous item.
+			if (prevSubsong.IsAutoPlayable())
 			{
-				return prevSubsong;
+				return &prevSubsong;
 			}
 
-			return GetPrevSubsong(*prevSubsong); // Not playable so try the one before it.
+			return GetPrevSubsong(prevSubsong); // Not playable so try the one before it.
 		}
 
 		PlaylistTreeModelNode* Playlist::GetPrevSubsong() const
 		{
-			const PlaylistTreeModelNode* const activeSong = GetActiveSong();
+			PlaylistTreeModelNode* const activeSong = GetActiveSong();
 			if (activeSong == nullptr)
 			{
 				return nullptr;
@@ -481,11 +481,13 @@ namespace UIElements
 			return GetPrevSubsong(*activeSong);
 		}
 
-		int Playlist::GetSongIndex(const wxString& filepath) const
+		int Playlist::GetMainSongPlaylistPosition(PlaylistTreeModelNode& song) const
 		{
-			const auto itTargetSong = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&filepath](const PlaylistTreeModelNodePtr& songItem)
+			const unsigned int targetUid = ((song.GetParent() == nullptr) ? song : *song.GetParent()).uid;
+
+			const auto itTargetSong = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [targetUid](const PlaylistTreeModelNodePtr& songItem)
 			{
-				return songItem->filepath.IsSameAs(filepath);
+				return songItem->uid == targetUid;
 			});
 
 			if (itTargetSong == _model.entries.cend())
@@ -493,7 +495,7 @@ namespace UIElements
 				return -1;
 			}
 
-			return std::distance(_model.entries.cbegin(), itTargetSong);
+			return std::distance(_model.entries.cbegin(), itTargetSong) + 1;
 		}
 
 		bool Playlist::TrySetActiveSong(const PlaylistTreeModelNode& node, bool autoexpand)

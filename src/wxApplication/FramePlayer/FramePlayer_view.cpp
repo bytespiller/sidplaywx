@@ -41,7 +41,7 @@ void FramePlayer::UpdateUiState()
         _ui->labelSubsong->Enable(playback.GetTotalSubsongs() > 1);
 
         // Transport buttons
-        const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
+        PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
         _ui->btnNextTrack->Enable(node != nullptr && _ui->treePlaylist->GetNextSong(*node) != nullptr);
         _ui->btnPrevTrack->Enable(node != nullptr && _ui->treePlaylist->GetPrevSong(*node) != nullptr);
 

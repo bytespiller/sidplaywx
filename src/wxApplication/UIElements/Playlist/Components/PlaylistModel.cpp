@@ -24,7 +24,8 @@
 // PlaylistTreeModelNode
 // ----------------------------------------------------------------------------
 
-PlaylistTreeModelNode::PlaylistTreeModelNode(PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable) :
+PlaylistTreeModelNode::PlaylistTreeModelNode(unsigned int uid, PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable) :
+	uid(uid),
 	_parent(parent),
 	title(title),
 	filepath(filepath),

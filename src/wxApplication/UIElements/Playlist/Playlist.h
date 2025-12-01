@@ -64,11 +64,11 @@ namespace UIElements
 			/// @brief Returns all top-level song nodes.
 			const PlaylistTreeModelNodePtrArray& GetSongs() const;
 
-			/// @brief Returns a song (or nullptr) by filepath.
-			PlaylistTreeModelNode* GetSong(const wxString& filepath) const;
+			/// @brief Returns a song (or nullptr) by its position (order) in the playlist.
+			PlaylistTreeModelNode* GetSongAtPlaylistPosition(unsigned int position) const;
 
-			/// @brief Returns a subsong (or nullptr) by filepath. Returns an effective default subsong by default.
-			PlaylistTreeModelNode* GetSubsong(const wxString& filepath, int subsong = 0) const;
+			/// @brief Returns a subsong (the parameter can also be a subsong). Returns an effective default subsong by default.
+			PlaylistTreeModelNode& GetSubsong(PlaylistTreeModelNode& song, int subsong = 0) const;
 
 			/// @brief Returns the currently active song or subsong item or nullptr.
 			PlaylistTreeModelNode* GetActiveSong() const;
@@ -77,28 +77,28 @@ namespace UIElements
 			PlaylistTreeModelNode* GetNextSong() const;
 
 			/// @brief Returns the next playable song (a default or first subsong depending on the user setting) or nullptr after the specified one.
-			PlaylistTreeModelNode* GetNextSong(const PlaylistTreeModelNode& fromSong) const;
+			PlaylistTreeModelNode* GetNextSong(PlaylistTreeModelNode& fromSong) const;
 
 			/// @brief Returns the previous playable song (a default or first subsong depending on the user setting) or nullptr.
 			PlaylistTreeModelNode* GetPrevSong() const;
 
 			/// @brief Returns the previous playable song (a default or first subsong depending on the user setting) or nullptr before the specified one.
-			PlaylistTreeModelNode* GetPrevSong(const PlaylistTreeModelNode& fromSong) const;
+			PlaylistTreeModelNode* GetPrevSong(PlaylistTreeModelNode& fromSong) const;
 
 			/// @brief Returns the next playable subsong item (or nullptr) for the currently active song.
 			PlaylistTreeModelNode* GetNextSubsong() const;
 
 			/// @brief Returns the next playable subsong item (or nullptr) for the specified active song.
-			PlaylistTreeModelNode* GetNextSubsong(const PlaylistTreeModelNode& fromSubsong) const;
+			PlaylistTreeModelNode* GetNextSubsong(PlaylistTreeModelNode& fromSubsong) const;
 
 			/// @brief Returns the previous playable subsong item (or nullptr) for the currently active song.
 			PlaylistTreeModelNode* GetPrevSubsong() const;
 
 			/// @brief Returns the previous playable subsong item (or nullptr) for the specified active song.
-			PlaylistTreeModelNode* GetPrevSubsong(const PlaylistTreeModelNode& fromSubsong) const;
+			PlaylistTreeModelNode* GetPrevSubsong(PlaylistTreeModelNode& fromSubsong) const;
 
-			/// @brief Gets the main song node index (zero based). Returns -1 if not found.
-			int GetSongIndex(const wxString& filepath) const;
+			/// @brief Gets the main song node playlist position (parameter can also be a subsong). Returns -1 if not found.
+			int GetMainSongPlaylistPosition(PlaylistTreeModelNode& song) const;
 
 			/// @brief Sets the node as currently playing (sub)song if playable. Returns true if successful.
 			bool TrySetActiveSong(const PlaylistTreeModelNode& node, bool autoexpand);
@@ -133,6 +133,12 @@ namespace UIElements
 			void _SortByColumn(wxDataViewColumn& viewColumn);
 			void _ResetColumnSortingIndicator();
 
+			/// @brief Increases the global item UID counter and returns the new value.
+			inline unsigned int _NextFreeItemUid()
+			{
+				return ++_lastFreeItemUid;
+			}
+
 #ifdef WIN32
 			void _OverrideScrollWheel(wxMouseEvent& evt);
 #endif
@@ -144,6 +150,7 @@ namespace UIElements
 			}
 
 		private:
+			unsigned int _lastFreeItemUid = 0;
 			PlaylistTreeModel& _model;
 			Settings::AppSettings& _appSettings;
 			wxDataViewItem _activeItem;

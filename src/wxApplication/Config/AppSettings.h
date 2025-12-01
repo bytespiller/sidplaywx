@@ -84,7 +84,7 @@ namespace Settings
 			static constexpr const char* const Volume = "Volume";
 			static constexpr const char* const VolumeControlEnabled = "VolumeControlEnabled";
 
-			static constexpr const char* const LastSongName = "LastSongName";
+			static constexpr const char* const LastSongPosition = "LastSongPosition";
 			static constexpr const char* const LastSubsongIndex = "LastSubsongIndex";
 
 			static constexpr const char* const MainWindowPosition = "MainWindowPosition";
@@ -204,7 +204,7 @@ namespace Settings
 				// Internal
 				DefaultOption(ID::Volume, 100),
 				DefaultOption(ID::VolumeControlEnabled, true),
-				DefaultOption(ID::LastSongName, ""),
+				DefaultOption(ID::LastSongPosition, 0),
 				DefaultOption(ID::LastSubsongIndex, 0),
 
 				DefaultOption(ID::MainWindowPosition, ""),

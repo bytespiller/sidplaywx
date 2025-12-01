@@ -213,7 +213,7 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
             wxMenuItem* const item = new wxMenuItem(menu, static_cast<int>(PopupMenuItemId_Playlist::RemoveAllAbove), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_ABOVE);
             item->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::RemoveAllAbove));
             menu->Append(item);
-            item->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) > 0);
+            item->Enable(_ui->treePlaylist->GetMainSongPlaylistPosition(*node) > 1);
         }
 
         // Remove all below
@@ -221,7 +221,7 @@ void FramePlayer::OnTreePlaylistContextMenuOpen(wxDataViewEvent& evt)
             wxMenuItem* const item = new wxMenuItem(menu, static_cast<int>(PopupMenuItemId_Playlist::RemoveAllBelow), Strings::PlaylistTree::MENU_ITEM_REMOVE_ALL_BELOW);
             item->SetBitmap(*_ui->playlistContextMenuIcons.at(FrameElements::PlaylistContextMenuIconId::RemoveAllBelow));
             menu->Append(item);
-            item->Enable(_ui->treePlaylist->GetSongIndex(node->filepath) + 1 < _ui->treePlaylist->GetSongs().size());
+            item->Enable(_ui->treePlaylist->GetMainSongPlaylistPosition(*node) < _ui->treePlaylist->GetSongs().size());
         }
     }
 

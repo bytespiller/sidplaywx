@@ -446,8 +446,8 @@ void FramePlayer::DeferredInit()
             const bool userSelectionAlreadyMade = _ui->treePlaylist->GetActiveSong() != nullptr;
             if (!userSelectionAlreadyMade)
             {
-                const wxString& targetFilePath = _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongName)->GetValueAsString();
-                PlaylistTreeModelNode* targetItemNode = _ui->treePlaylist->GetSong(targetFilePath); // Can be nullptr in case the target file path no longer exists or is an empty string.
+                const int mainSongPos = _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongPosition)->GetValueAsInt();
+                PlaylistTreeModelNode* targetItemNode = _ui->treePlaylist->GetSongAtPlaylistPosition(mainSongPos); // Can be nullptr in case the target file path no longer exists or is an empty string.
 
                 // Determine subsong if needed
                 if (targetItemNode != nullptr && targetItemNode->GetSubsongCount() > 0)
@@ -545,11 +545,11 @@ void FramePlayer::CloseApplication()
         Helpers::Wx::Files::TrySavePlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME, fileList);
 
         // Store the last played song & subsong as an internal option...
-        const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
-        const wxString& cSongName = (node == nullptr) ? "" : node->filepath;
-        const int cSongIndex = (node == nullptr) ? 0 : node->defaultSubsong;
-        _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongName)->UpdateValue(cSongName);
-        _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSubsongIndex)->UpdateValue(cSongIndex);
+        PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
+        const int cSongPosition = (node == nullptr) ? 0 : _ui->treePlaylist->GetMainSongPlaylistPosition(*node);
+        const int cSubsongIndex = (node == nullptr) ? 0 : node->defaultSubsong;
+        _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongPosition)->UpdateValue(cSongPosition);
+        _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSubsongIndex)->UpdateValue(cSubsongIndex);
     }
 
     _app.currentSettings->TrySave();

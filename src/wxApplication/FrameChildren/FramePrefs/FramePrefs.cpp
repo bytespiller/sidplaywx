@@ -508,7 +508,7 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                         if (propertyValueInt == 0)
                         {
                             Helpers::Wx::Files::TrySavePlaylist(Helpers::Wx::Files::DEFAULT_PLAYLIST_NAME, {}); // Immediately delete the default playlist file if it exists.
-                            _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongName)->UpdateValue("");
+                            _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSongPosition)->UpdateValue(0);
                             _app.currentSettings->GetOption(Settings::AppSettings::ID::LastSubsongIndex)->UpdateValue(0);
                         }
                     }
