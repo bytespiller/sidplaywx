@@ -171,6 +171,7 @@ namespace Strings
 		inline constexpr const char* const TUNE_PATH_FILE("File");
 
 		inline constexpr const char* const CATEGORY_TECHNICAL("Technical");
+		inline constexpr const char* const TUNE_ADDR_DRIVER("Driver address");
 		inline constexpr const char* const TUNE_ADDR_LOAD("Load address");
 		inline constexpr const char* const TUNE_ADDR_INIT("Init address");
 		inline constexpr const char* const TUNE_ADDR_PLAY("Play address");

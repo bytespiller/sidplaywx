@@ -180,6 +180,7 @@ public:
     std::filesystem::path GetCurrentTuneFilePath() const;
     const SidTuneInfo& GetCurrentTuneSidInfo() const;
     int GetCurrentTuneSidChipsRequired() const;
+    const SidInfo& GetEngineInfo() const;
     bool IsValidSongLoaded() const;
 
     SidConfig::sid_model_t GetCurrentlyEffectiveSidModel() const;

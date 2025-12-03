@@ -459,6 +459,11 @@ int PlaybackController::GetCurrentTuneSidChipsRequired() const
     return _sidDecoder->GetCurrentTuneSidChipsRequired();
 }
 
+const SidInfo& PlaybackController::GetEngineInfo() const
+{
+    return _sidDecoder->GetEngineInfo();
+}
+
 std::string PlaybackController::GetCurrentTuneSpeedDescription() const
 {
     return _sidDecoder->GetEngineInfo().speedString();

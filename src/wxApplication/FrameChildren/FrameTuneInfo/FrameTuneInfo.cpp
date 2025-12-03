@@ -112,6 +112,7 @@ void FrameTuneInfo::UpdateInfo(const PlaylistTreeModelNode* const node)
 	}
 
 	const SidTuneInfo& sidInfo = _playbackInfo.GetCurrentTuneSidInfo();
+	const SidInfo& engineInfo = _playbackInfo.GetEngineInfo();
 
 	// General
 	SetPropertyValue(Strings::TuneInfo::TUNE_TITLE, _playbackInfo.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Title));
@@ -123,7 +124,8 @@ void FrameTuneInfo::UpdateInfo(const PlaylistTreeModelNode* const node)
 	_ui->propertyGrid->GetProperty(Strings::TuneInfo::TUNE_PATH_FILE)->SetHelpString(_ui->propertyGrid->GetPropertyValue(Strings::TuneInfo::TUNE_PATH_FILE));
 
 	// Technical
-	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_LOAD, wxString::Format("$%04x", sidInfo.loadAddr()).MakeUpper().ToStdString());
+	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_DRIVER, wxString::Format("$%04x - $%04x", engineInfo.driverAddr(), engineInfo.driverAddr() + engineInfo.driverLength() - 1).MakeUpper().ToStdString());
+	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_LOAD, wxString::Format("$%04x - $%04x", sidInfo.loadAddr(), sidInfo.loadAddr() + sidInfo.c64dataLen() - 1).MakeUpper().ToStdString());
 	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_INIT, wxString::Format("$%04x", sidInfo.initAddr()).MakeUpper().ToStdString());
 	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_PLAY, wxString::Format("$%04x", sidInfo.playAddr()).MakeUpper().ToStdString());
 

@@ -75,6 +75,7 @@ namespace FrameElements
 			// Technical
 			page->Append(new wxPropertyCategory(Strings::TuneInfo::CATEGORY_TECHNICAL));
 			{
+				AddProperty(page, Strings::TuneInfo::TUNE_ADDR_DRIVER);
 				AddProperty(page, Strings::TuneInfo::TUNE_ADDR_LOAD);
 				AddProperty(page, Strings::TuneInfo::TUNE_ADDR_INIT);
 				AddProperty(page, Strings::TuneInfo::TUNE_ADDR_PLAY);
