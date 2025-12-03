@@ -182,7 +182,7 @@ namespace UIElements
 	void ScrollingLabel::OnTimer(wxTimerEvent& /*evt*/)
 	{
 		// Determine time-based scroll amount
-		const double now = wxGetUTCTimeMillis().ToDouble();
+        const long now = _stopWatch.Time();
 		if (_lastTimestamp == 0)
 		{
 			_lastTimestamp = now;
@@ -206,7 +206,7 @@ namespace UIElements
 		{
 			if (_scrollStartDelay >= SCROLL_RESUME_DELAY)
 			{
-				_posX += elapsed / 30;
+				_posX += elapsed / 30.0;
 			}
 			else
 			{

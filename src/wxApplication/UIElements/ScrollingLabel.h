@@ -67,11 +67,12 @@ namespace UIElements
 	private:
 		const ThemeData::ThemedElementData& _themedData;
 		wxTimer _timer;
+		wxStopWatch _stopWatch;
 		TextJustify _justify;
 		wxString _text;
 		int _textWidth = 0;
 		double _posX = 0.0;
-		double _lastTimestamp = 0;
+		long _lastTimestamp = 0;
 		int _scrollStartDelay = 0;
 
 		bool _autoScrollingPaused = false;
