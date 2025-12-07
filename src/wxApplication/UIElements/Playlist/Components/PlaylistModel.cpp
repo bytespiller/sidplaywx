@@ -24,7 +24,7 @@
 // PlaylistTreeModelNode
 // ----------------------------------------------------------------------------
 
-PlaylistTreeModelNode::PlaylistTreeModelNode(unsigned int uid, PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable) :
+PlaylistTreeModelNode::PlaylistTreeModelNode(unsigned int uid, PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable, const wxString& musCompanionStrFilePath) :
 	uid(uid),
 	_parent(parent),
 	title(title),
@@ -37,7 +37,8 @@ PlaylistTreeModelNode::PlaylistTreeModelNode(unsigned int uid, PlaylistTreeModel
 	copyright(copyright),
 	type((parent == nullptr) ? ItemType::Song : ItemType::Subsong),
 	romRequirement(romRequirement),
-	_playable(playable)
+	_playable(playable),
+	musCompanionStrFilePath(musCompanionStrFilePath)
 {
 };
 

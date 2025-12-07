@@ -30,7 +30,7 @@ namespace UIElements
 			const std::unique_ptr<BufferHolder>& data = Helpers::Wx::Files::GetFileContentFromDisk(filename);
 			assert(data.get() != nullptr); // File not found.
 
-			wxString svg(reinterpret_cast<const char*>(data->buffer), wxConvUTF8, data->size);
+			wxString svg(reinterpret_cast<const char*>(data->buffer[0]), wxConvUTF8, data->size[0]);
 
 			// Colorize
 			{

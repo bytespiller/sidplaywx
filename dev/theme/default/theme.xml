@@ -33,6 +33,8 @@
     <Image type="svg" name="icon_stilnametitle" path="svg/album-fill.svg"/>
     <Image type="svg" name="icon_stilartistauthor" path="svg/mic-fill.svg"/>
     <Image type="svg" name="icon_stilcomment" path="svg/chat-quote-fill.svg"/>
+    <Image type="svg" name="icon_musorstr" path="svg/volume-up-icon.svg"/>
+    <Image type="svg" name="icon_musandstr" path="svg/volume-medium-icon.svg"/>
   </Images>
   <GuiElements>
     <GuiElement name="Seekbar">

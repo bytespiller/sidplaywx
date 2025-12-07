@@ -51,7 +51,7 @@ private:
     void HandoffToCanonicalInstance();
 
 public:
-    void Play(const wxString& filename, unsigned int subsong, int preRenderDurationMs); // TODO: PassKey or something to allow calling this by the TryPlayPlaylistItem method only?
+    void Play(const wxString& filename, unsigned int subsong, int preRenderDurationMs, const wxString& musCompanionStrFilePath); // TODO: PassKey or something to allow calling this by the TryPlayPlaylistItem method only?
     void ReplayLoadedTune(int preRenderDurationMs, bool reusePreRender = false);
     void PausePlayback();
     void ResumePlayback();

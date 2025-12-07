@@ -225,7 +225,7 @@ namespace Helpers
 					if (zipStreamSize != 0)
 					{
 						bufferHolder = std::make_unique<BufferHolder>(zipStreamSize);
-						if (!in->ReadAll(bufferHolder->buffer, bufferHolder->size))
+						if (!in->ReadAll(bufferHolder->buffer[0], bufferHolder->size[0]))
 						{
 							bufferHolder = nullptr;
 						}
@@ -235,6 +235,27 @@ namespace Helpers
 				}
 
 				return bufferHolder;
+			}
+
+			bool FileExistsInZipArchive(const wxString& filename)
+			{
+				assert(IsWithinZipFile(filename));
+
+				const auto& archiveAndFile = SplitZipArchiveAndFileNames(filename);
+
+				wxFileSystem fs;
+				fs.ChangePathTo(archiveAndFile.first); // Prevent OpenFile from trying relative scope first (always in vain). This yields some speed boost.
+				wxString filenameOnly = archiveAndFile.first;
+				filenameOnly.Replace("\\", "/");
+				if (!fs.GetPath().IsEmpty())
+				{
+					filenameOnly.Replace(fs.GetPath(), "");
+				}
+
+				wxFSFile* zip = fs.OpenFile(wxString::Format("%s#zip:%s", filenameOnly, archiveAndFile.second), wxFS_READ);
+				const bool exists = zip != nullptr;
+				delete zip;
+				return exists;
 			}
 
 			std::unique_ptr<BufferHolder> GetFileContentFromDisk(const wxString& filename)
@@ -253,7 +274,7 @@ namespace Helpers
 					if (fileStreamSize != 0)
 					{
 						bufferHolder = std::make_unique<BufferHolder>(fileStreamSize);
-						if (!in->ReadAll(bufferHolder->buffer, bufferHolder->size))
+						if (!in->ReadAll(bufferHolder->buffer[0], bufferHolder->size[0]))
 						{
 							bufferHolder = nullptr;
 						}

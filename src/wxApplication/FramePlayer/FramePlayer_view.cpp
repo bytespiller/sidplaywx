@@ -338,14 +338,21 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
     {
         const PlaybackController& playback = _app.GetPlaybackInfo();
         const int subsong = playback.GetCurrentSubsong();
-        const PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
+        PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
 
         // Set song info labels
         if (node)
         {
-            _ui->labelTitle->SetLabelText((playback.GetTotalSubsongs() <= 1)
-                ? Helpers::Wx::StringFromWin1252(node->title.ToStdString()).Trim(false) // Tune without subsongs.
-                : wxString::Format("%s: %s %i", playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Title), Strings::PlaylistTree::SUBSONG, subsong)); // Subsong
+            if (node->musCompanionStrFilePath.IsEmpty()) // Normal one-file tune (e.g., PSID, MUS etc.)
+            {
+                _ui->labelTitle->SetLabelText((playback.GetTotalSubsongs() <= 1)
+                    ? Helpers::Wx::StringFromWin1252(node->title.ToStdString()).Trim(false) // Tune without subsongs.
+                    : wxString::Format("%s: %s %i", playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Title), Strings::PlaylistTree::SUBSONG, subsong)); // Subsong
+            }
+            else // MUS+STR tune
+            {
+                _ui->labelTitle->SetLabel(node->title.Mid(2)); // Simply strip the boxchar prefix.
+            }
 
             _ui->labelAuthor->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author)));
             _ui->labelCopyright->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released)));

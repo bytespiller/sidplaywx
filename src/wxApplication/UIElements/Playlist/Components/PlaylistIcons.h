@@ -43,6 +43,8 @@ namespace UIElements
 			ChipIcon,
 			SkipShort,
 			RemoveSong,
+			MusOrStr, // indicates a companion STR file for MUS
+			MusAndStr, // indicates a MUS+STR (instead of DefaultSubsongIndicator)
 
 			// Column sorting indicators
 			SortAscending,

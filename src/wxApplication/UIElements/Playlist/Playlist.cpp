@@ -81,17 +81,30 @@ namespace UIElements
 						{
 							wxString tooltip(_model.GetPlaylistIcons().GetIconList().at(iconId).tooltip);
 
-							if (iconId == PlaylistIconId::ChipIcon)
+							switch (iconId)
 							{
-								switch (modelNode->romRequirement)
-								{
-									case PlaylistTreeModelNode::RomRequirement::BasicRom:
-										tooltip.Append(" (BASIC)");
-										break;
-									case PlaylistTreeModelNode::RomRequirement::R64:
-										tooltip.Append(" (KERNAL)");
-										break;
-								}
+								case PlaylistIconId::ChipIcon:
+									switch (modelNode->romRequirement)
+									{
+										case PlaylistTreeModelNode::RomRequirement::BasicRom:
+											tooltip.Append(" (BASIC)");
+											break;
+										case PlaylistTreeModelNode::RomRequirement::R64:
+											tooltip.Append(" (KERNAL)");
+											break;
+									}
+									break;
+
+								case PlaylistIconId::MusOrStr:
+									switch (modelNode->GetTag())
+									{
+										case PlaylistTreeModelNode::ItemTag::MUS_StandaloneMus:
+											tooltip.Append(" (MUS)");
+											break;
+										case PlaylistTreeModelNode::ItemTag::MUS_StandaloneStr:
+											tooltip.Append(" (STR)");
+											break;
+									}
 							}
 
 							_lastTooltipItem = item;
@@ -167,12 +180,12 @@ namespace UIElements
 			return width + COL_PADDING;
 		}
 
-		PlaylistTreeModelNode& Playlist::AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable)
+		PlaylistTreeModelNode& Playlist::AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable, const wxString& musCompanionStrFilePath)
 		{
 			_ResetColumnSortingIndicator();
 
 			// Create item
-			_model.entries.emplace_back(new PlaylistTreeModelNode(_NextFreeItemUid(), nullptr, title, filepath, defaultSubsong, duration, hvscPath, md5, author, copyright, romRequirement, playable));
+			_model.entries.emplace_back(new PlaylistTreeModelNode(_NextFreeItemUid(), nullptr, title, filepath, defaultSubsong, duration, hvscPath, md5, author, copyright, romRequirement, playable, musCompanionStrFilePath));
 
 			// Notify the wx base control of change
 			wxDataViewItem childNotify = wxDataViewItem(_model.entries.back().get());
@@ -203,13 +216,13 @@ namespace UIElements
 				for (const uint_least32_t duration : durations)
 				{
 					++cnt;
-					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(_NextFreeItemUid(), &parent, titles.at(cnt - 1), parent.filepath, cnt, duration, parent.hvscPath, parent.md5, "", "", parent.romRequirement, parent.IsPlayable()), {});
+					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(_NextFreeItemUid(), &parent, titles.at(cnt - 1), parent.filepath, cnt, duration, parent.hvscPath, parent.md5, "", "", parent.romRequirement, parent.IsPlayable(), parent.musCompanionStrFilePath), {});
 					notifyItems.Add(wxDataViewItem(&newChildNode));
 
 					// Indicate if default subsong
 					if (parent.defaultSubsong == cnt)
 					{
-						newChildNode.SetIconId(PlaylistIconId::DefaultSubsongIndicator, {});
+						newChildNode.SetIconId((newChildNode.musCompanionStrFilePath.IsEmpty()) ? PlaylistIconId::DefaultSubsongIndicator : PlaylistIconId::MusAndStr, {});
 					}
 				}
 			}
@@ -429,9 +442,9 @@ namespace UIElements
 		{
 			PlaylistTreeModelNode& mainSongNode = (fromSubsong.GetParent() == nullptr) ? fromSubsong : *fromSubsong.GetParent();
 
-			if (fromSubsong.defaultSubsong >= mainSongNode.GetSubsongCount())
+			if (fromSubsong.defaultSubsong >= mainSongNode.GetSubsongCount() || !fromSubsong.musCompanionStrFilePath.IsEmpty())
 			{
-				return nullptr; // No more subsongs.
+				return nullptr; // No more subsongs, or the file is MUS/STR so there are no real subsongs.
 			}
 
 			PlaylistTreeModelNode& nextSubsong = GetSubsong(fromSubsong, fromSubsong.defaultSubsong + 1); // Here we know for sure there is at least one more item.
@@ -456,9 +469,9 @@ namespace UIElements
 
 		PlaylistTreeModelNode* Playlist::GetPrevSubsong(PlaylistTreeModelNode& fromSubsong) const
 		{
-			if (fromSubsong.defaultSubsong <= 1)
+			if (fromSubsong.defaultSubsong <= 1 || !fromSubsong.musCompanionStrFilePath.IsEmpty())
 			{
-				return nullptr; // No more subsongs.
+				return nullptr; // No more subsongs, or the file is MUS/STR so there are no real subsongs.
 			}
 
 			PlaylistTreeModelNode& prevSubsong = GetSubsong(fromSubsong, fromSubsong.defaultSubsong - 1); // Here we know for sure there is at least one previous item.
@@ -588,7 +601,10 @@ namespace UIElements
 					// Reset the icon
 					{
 						const bool itemIsDefaultSubsong = node.type == PlaylistTreeModelNode::ItemType::Subsong && node.defaultSubsong == node.GetParent()->defaultSubsong;
-						const PlaylistIconId nodeIconId = (itemIsDefaultSubsong) ? PlaylistIconId::DefaultSubsongIndicator : PlaylistIconId::NoIcon;
+						const PlaylistIconId nodeIconId = (itemIsDefaultSubsong)
+							? ((node.musCompanionStrFilePath.IsEmpty()) ? PlaylistIconId::DefaultSubsongIndicator : PlaylistIconId::MusAndStr)
+							: PlaylistIconId::NoIcon;
+
 						node.SetIconId(nodeIconId, {});
 					}
 
@@ -626,6 +642,12 @@ namespace UIElements
 				case PlaylistTreeModelNode::ItemTag::Blacklisted:
 				{
 					node.SetIconId(PlaylistIconId::RemoveSong, {});
+					break;
+				}
+				case PlaylistTreeModelNode::ItemTag::MUS_StandaloneMus: [[fallthrough]];
+				case PlaylistTreeModelNode::ItemTag::MUS_StandaloneStr:
+				{
+					node.SetIconId(PlaylistIconId::MusOrStr, {});
 					break;
 				}
 			}

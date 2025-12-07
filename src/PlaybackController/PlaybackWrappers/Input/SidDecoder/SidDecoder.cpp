@@ -19,9 +19,80 @@
 #include "SidDecoder.h"
 
 #include <sidplayfp/SidTuneInfo.h>
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iostream>
+
+namespace MusLoadHelper
+{
+    static constexpr std::string_view EXTENSION_MUS = ".mus";
+    static constexpr std::string_view EXTENSION_STR = ".str";
+    static const char* fileNameExt[] = { MusLoadHelper::EXTENSION_MUS.data(), MusLoadHelper::EXTENSION_STR.data() };
+
+    struct Data
+    {
+        std::filesystem::path fileName;
+        const uint_least8_t* musData = nullptr;
+        uint_least32_t musDataLength = 0;
+        const uint_least8_t* strData = nullptr;
+        uint_least32_t strDataLength = 0;
+    } _data;
+
+    static bool IsMusFormat(std::filesystem::path fileName)
+    {
+        std::string lowerCaseExtension(fileName.extension().string());
+        std::transform(lowerCaseExtension.begin(), lowerCaseExtension.end(), lowerCaseExtension.begin(), [](unsigned char c){ return std::tolower(c); });
+        return lowerCaseExtension == EXTENSION_MUS || lowerCaseExtension == EXTENSION_STR;
+    }
+
+    static void Begin(std::filesystem::path fileName, const uint_least8_t* musData, uint_least32_t musDataLength, const uint_least8_t* strData, uint_least32_t strDataLength)
+    {
+		MusLoadHelper::_data = Data
+		{
+			fileName = fileName,
+			musData = musData,
+			musDataLength = musDataLength,
+			strData = strData,
+			strDataLength = strDataLength
+		};
+    }
+
+    /// @brief Called by the libsidplayfp's SidTune::Load(LoaderFunc...)
+    static void ProvideFileData(const char* aFileName, std::vector<uint8_t>& bufferRef)
+    {
+        std::filesystem::path fileName(aFileName);
+
+        // Sanity checks
+        if (MusLoadHelper::_data.fileName.empty())
+        {
+            throw std::runtime_error("No data to provide.");
+        }
+
+        if (fileName.stem() != MusLoadHelper::_data.fileName.stem())
+        {
+            throw std::runtime_error("File mismatch.");
+        }
+
+        // Provide file data
+        std::string lowerCaseExtension = fileName.extension().string();
+        std::transform(lowerCaseExtension.begin(), lowerCaseExtension.end(), lowerCaseExtension.begin(), [](unsigned char c){ return std::tolower(c); });
+
+        if (lowerCaseExtension == MusLoadHelper::EXTENSION_MUS)
+        {
+            bufferRef.assign(MusLoadHelper::_data.musData, MusLoadHelper::_data.musData + MusLoadHelper::_data.musDataLength);
+        }
+        else if (lowerCaseExtension == MusLoadHelper::EXTENSION_STR)
+        {
+            bufferRef.assign(MusLoadHelper::_data.strData, MusLoadHelper::_data.strData + MusLoadHelper::_data.strDataLength);
+        }
+    }
+
+    static void End()
+    {
+        _data = Data();
+    }
+};
 
 namespace
 {
@@ -65,7 +136,7 @@ bool SidDecoder::TryFillBuffer(void* buffer, unsigned long framesPerBuffer)
     return true;
 }
 
-bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig& filterConfig)
+bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig& filterConfig, bool useNtscForMus)
 {
     // Check if builder is ok
     if (!_rs.getStatus())
@@ -85,9 +156,10 @@ bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig
     }
 
     _filterConfigCache = std::make_unique<FilterConfig>(filterConfig);
-
     _rs.filter6581Curve(_filterConfigCache->filter6581Curve);
     _rs.filter8580Curve(_filterConfigCache->filter8580Curve);
+
+    _useNtscForMus = useNtscForMus;
 
     // Reset the voices enabled status (fourth "voice" is digi samples, added in libsidplayfp v2.10.0)
     _sidVoicesEnabledStatus =
@@ -156,6 +228,19 @@ bool SidDecoder::TryLoadSong(const uint_least8_t* oneFileFormatSidtune, uint_lea
     return TrySetSubsong(subsong);
 }
 
+bool SidDecoder::TryLoadMusStrSong(const char* fileName, const uint_least8_t* musData, uint_least32_t musDataLength, const uint_least8_t* strData, uint_least32_t strDataLength)
+{
+    PrepareLoadSong();
+
+    // Load new tune from buffer
+    MusLoadHelper::Begin(fileName, musData, musDataLength, strData, strDataLength);
+    _tune = std::make_unique<SidTune>(MusLoadHelper::ProvideFileData, fileName, MusLoadHelper::fileNameExt);
+    MusLoadHelper::End();
+
+    // Do rest
+    return TrySetSubsong(0);
+}
+
 bool SidDecoder::TrySetSubsong(unsigned int subsong)
 {
     // Check if the tune is valid
@@ -163,6 +248,18 @@ bool SidDecoder::TrySetSubsong(unsigned int subsong)
     {
         std::cerr << _tune->statusString() << std::endl;
         return false;
+    }
+
+    // Handle the MUS NTSC option
+    if (_useNtscForMus && MusLoadHelper::IsMusFormat(_tune->getInfo()->dataFileName()))
+    {
+        SidConfig config = _sidEngine.config();
+        config.defaultC64Model = SidConfig::c64_model_t::NTSC;
+        _sidEngine.config(config); // Apply the NTSC override option.
+    }
+    else if (_sidConfigCache.defaultC64Model == SidConfig::c64_model_t::NTSC)
+    {
+        _sidEngine.config(_sidConfigCache); // Undo any previously applied MUS NTSC override option.
     }
 
     // Select song
@@ -178,6 +275,11 @@ bool SidDecoder::TrySetSubsong(unsigned int subsong)
     _mixer = nullptr;
 
     return true;
+}
+
+bool SidDecoder::WillUseNtscForMus() const
+{
+    return _useNtscForMus;
 }
 
 uint_least32_t SidDecoder::GetTime() const

@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.17.2"); // Reminder: don't forget to increase.
+	inline constexpr const char* const APP_VERSION_TAG("0.18"); // Reminder: don't forget to increase.
 
 	namespace FramePlayer
 	{
@@ -139,6 +139,8 @@ namespace Strings
 		inline constexpr const char* const SONG_ICON_TOOLTIP_USES_ROM("Uses ROM");
 		inline constexpr const char* const SONG_ICON_TOOLTIP_SKIP_SHORT("Skip short tune");
 		inline constexpr const char* const SONG_ICON_TOOLTIP_REMOVE_SONG("Skip subsong");
+		inline constexpr const char* const SONG_ICON_TOOLTIP_MUS_OR_STR("C64 Stereo Sidplayer tune component");
+		inline constexpr const char* const SONG_ICON_TOOLTIP_MUS_AND_STR("C64 Stereo Sidplayer tune");
 	}
 
 	namespace PlaybackMods
@@ -320,6 +322,9 @@ namespace Strings
 		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_PREFER_8580("Prefer MOS 8580");
 		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_FORCE_6581("Force MOS 6581");
 		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_FORCE_8580("Force MOS 8580");
+
+		inline constexpr const char* const OPT_NTSC_C64_MODEL_MUS("Use NTSC for MUS");
+		inline constexpr const char* const DESC_NTSC_C64_MODEL_MUS("Old MUS-format tunes were predominately created on NTSC C64 models and thus sound too slow on PAL models.\n- Ongoing playback will stop when changing this setting.");
 
 		inline constexpr const char* const OPT_FILTER_CURVE_6581("Filter curve (SID 6581)");
 		inline constexpr const char* const OPT_FILTER_CURVE_8580("Filter curve (SID 8580)");

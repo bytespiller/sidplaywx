@@ -157,9 +157,13 @@ bool MyApp::OnInit()
         wxFileSystem::AddHandler(new wxZipFSHandler);
         _playback = std::make_unique<PlaybackController>(); // Must be pre-init here in order for Pa_* methods to be usable immediately.
 
+        const bool useNtscForMus = currentSettings->GetOption(Settings::AppSettings::ID::UseNtscForMus)->GetValueAsBool();
         const bool initSuccess = _playback->TryInit(PlaybackController::SyncedPlaybackConfig(LoadAudioConfig(*currentSettings),
                                                                                              LoadSidConfig(SidConfig(), *currentSettings),
-                                                                                             LoadFilterConfig(*currentSettings)));
+                                                                                             LoadFilterConfig(*currentSettings),
+                                                                                             useNtscForMus)
+        );
+
         if (initSuccess)
         {
             RefreshVirtualStereoState();
@@ -275,7 +279,7 @@ void MyApp::HandoffToCanonicalInstance()
     }
 }
 
-void MyApp::Play(const wxString& filename, unsigned int subsong, int preRenderDurationMs)
+void MyApp::Play(const wxString& filename, unsigned int subsong, int preRenderDurationMs, const wxString& musCompanionStrFilePath)
 {
     assert(_playback != nullptr);
 
@@ -285,14 +289,30 @@ void MyApp::Play(const wxString& filename, unsigned int subsong, int preRenderDu
 
     {
         std::unique_ptr<BufferHolder> bufferHolder;
+        std::unique_ptr<BufferHolder> temp;
 
         if (Helpers::Wx::Files::IsWithinZipFile(filename))
         {
             bufferHolder = Helpers::Wx::Files::GetFileContentFromZip(filename);
+            if (!musCompanionStrFilePath.IsEmpty())
+            {
+                temp = Helpers::Wx::Files::GetFileContentFromZip(musCompanionStrFilePath);
+            }
         }
         else
         {
             bufferHolder = Helpers::Wx::Files::GetFileContentFromDisk(filename);
+            if (!musCompanionStrFilePath.IsEmpty())
+            {
+                temp = Helpers::Wx::Files::GetFileContentFromDisk(musCompanionStrFilePath);
+            }
+        }
+
+        if (temp != nullptr)
+        {
+            bufferHolder->buffer[1] = new uint_least8_t[temp->size[0]];
+            std::memcpy(bufferHolder->buffer[1], temp->buffer[0], temp->size[0] * sizeof(uint_least8_t));
+            bufferHolder->size[1] = temp->size[0];
         }
 
         status = (bufferHolder == nullptr) ? PlaybackController::PlaybackAttemptStatus::InputError : _playback->TryPlayFromBuffer(filename.ToStdWstring(), bufferHolder, subsong, preRenderDurationMs);
@@ -401,9 +421,12 @@ const PlaybackController& MyApp::GetPlaybackInfo() const
 
 bool MyApp::ReapplyPlaybackSettings()
 {
+    const bool useNtscForMus = currentSettings->GetOption(Settings::AppSettings::ID::UseNtscForMus)->GetValueAsBool();
     const PlaybackController::SwitchAudioDeviceResult result =_playback->TrySwitchPlaybackConfiguration(PlaybackController::SyncedPlaybackConfig(LoadAudioConfig(*currentSettings),
                                                                                                                                                  LoadSidConfig(_playback->GetSidConfig(), *currentSettings),
-                                                                                                                                                 LoadFilterConfig(*currentSettings)));
+                                                                                                                                                 LoadFilterConfig(*currentSettings),
+                                                                                                                                                 useNtscForMus)
+    );
 
     const bool success = result != PlaybackController::SwitchAudioDeviceResult::Failure;
     if (success)

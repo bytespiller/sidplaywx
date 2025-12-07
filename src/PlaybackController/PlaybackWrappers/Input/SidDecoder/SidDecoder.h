@@ -74,16 +74,22 @@ public:
 
 public:
     // Needed for playback. Can be skipped if intending to just read tunes' info.
-    bool TryInitEmulation(const SidConfig& sidConfig, const FilterConfig& filterConfig);
+    bool TryInitEmulation(const SidConfig& sidConfig, const FilterConfig& filterConfig, bool useNtscForMus);
 
     RomUtil::RomStatus TrySetRoms(const std::filesystem::path& pathKernal, const std::filesystem::path& pathBasic, const std::filesystem::path& pathChargen);
 
-    // Unicode paths not supported for filepath variant, rather use the oneFileFormatSidtune variant and do custom file loading.
+    [[deprecated("Unicode paths not supported for filepath variant, rather use the oneFileFormatSidtune variant and do custom file loading.")]]
     bool TryLoadSong(const std::filesystem::path& filepath, unsigned int subsong = 0);
+
+    /// @brief A simple fast loader for single-file tunes (e.g., PSID, MUS without STR etc.).
     bool TryLoadSong(const uint_least8_t* oneFileFormatSidtune, uint_least32_t sidtuneLength, unsigned int subsong = 0);
+
+    /// @brief A special loader for proper support of the MUS+STR. Doesn't perform disk access.
+    bool TryLoadMusStrSong(const char* fileName, const uint_least8_t* musData, uint_least32_t musDataLength, const uint_least8_t* strData = nullptr, uint_least32_t strDataLength = 0);
 
     bool TrySetSubsong(unsigned int subsong);
 
+    bool WillUseNtscForMus() const;
     uint_least32_t GetTime() const;
     int GetCurrentSubsong() const;
     int GetDefaultSubsong() const;
@@ -118,6 +124,7 @@ private:
     void ApplyCanonicalVoiceAndFilterStates();
 
 private:
+    bool _useNtscForMus = false;
     bool _seeking = false;
     std::unique_ptr<SidMixer> _mixer;
     SidConfig _sidConfigCache;

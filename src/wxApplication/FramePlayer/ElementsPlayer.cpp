@@ -354,6 +354,8 @@ namespace FrameElements // Player class
 			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::ChipIcon, themeData.GetImage("icon_chip"), Strings::PlaylistTree::SONG_ICON_TOOLTIP_USES_ROM);
 			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::SkipShort, themeData.GetImage("icon_skipshort"), Strings::PlaylistTree::SONG_ICON_TOOLTIP_SKIP_SHORT);
 			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::RemoveSong, themeData.GetImage("icon_removesong"), Strings::PlaylistTree::SONG_ICON_TOOLTIP_REMOVE_SONG);
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::MusOrStr, themeData.GetImage("icon_musorstr"), Strings::PlaylistTree::SONG_ICON_TOOLTIP_MUS_OR_STR);
+			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::MusAndStr, themeData.GetImage("icon_musandstr"), Strings::PlaylistTree::SONG_ICON_TOOLTIP_MUS_AND_STR);
 
 			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::SortAscending, themeData.GetImage("icon_removeallabove")); // Reusing from RemoveAll/Above/Below context menu icon.
 			playlistIcons.RegisterSvgIcon(UIElements::Playlist::PlaylistIconId::SortDescending, themeData.GetImage("icon_removeallbelow")); // Reusing from RemoveAll/Above/Below context menu icon.

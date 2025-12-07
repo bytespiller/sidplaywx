@@ -1,5 +1,7 @@
 Icon from: https://uxwing.com
 - chip-memory.svg
+- volume-medium-icon.svg
+- volume-up-icon.svg
 
 All other icons are from: https://remixicon.com/
 

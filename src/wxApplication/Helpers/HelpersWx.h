@@ -107,12 +107,14 @@ namespace Helpers
 
 			inline bool IsZipFile(const wxString& filename)
 			{
-				return filename.ends_with(FILE_EXTENSION_ZIP);
+				return filename.Lower().ends_with(FILE_EXTENSION_ZIP);
 			}
 			inline bool IsWithinZipFile(const wxString& filename)
 			{
-				return filename.Contains(FILE_EXTENSION_ZIP + "\\") || filename.Contains(FILE_EXTENSION_ZIP + "/");
+				return filename.Lower().Contains(FILE_EXTENSION_ZIP + "\\") || filename.Lower().Contains(FILE_EXTENSION_ZIP + "/");
 			}
+
+			bool FileExistsInZipArchive(const wxString& filename);
 
 			std::pair<wxString, wxString> SplitZipArchiveAndFileNames(const wxString& filename);
 			std::unique_ptr<BufferHolder> GetFileContentFromZip(const wxString& filename);

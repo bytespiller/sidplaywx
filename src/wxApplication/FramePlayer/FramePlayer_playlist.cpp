@@ -121,6 +121,15 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
     {
         ++processedFilesCount;
 
+        if (!_ui->treePlaylist->IsEmpty())
+        {
+            const wxString& lastMainSongmusCompanionStrFilePath = _ui->treePlaylist->GetSongs().at(_ui->treePlaylist->GetSongs().size() - 1)->musCompanionStrFilePath;
+            if (!lastMainSongmusCompanionStrFilePath.IsEmpty() && wxFileName(filepath).GetFullPath().IsSameAs(lastMainSongmusCompanionStrFilePath, false))
+            {
+                continue; // Skip the duplicate STR file (MUS+STR already loaded in pair).
+            }
+        }
+
         const int totalFiles = files.GetCount() + _enqueuedFiles.GetCount();
         const float totalFilesFloat = static_cast<float>(totalFiles);
 
@@ -137,13 +146,13 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
         if (Helpers::Wx::Files::IsWithinZipFile(filepath))
         {
             const std::unique_ptr<BufferHolder>& infoTuneBufferHolder = Helpers::Wx::Files::GetFileContentFromZip(filepath);
-            tuneIsValid = infoTuneBufferHolder != nullptr && _silentSidInfoDecoder.TryLoadSong(infoTuneBufferHolder->buffer, infoTuneBufferHolder->size);
+            tuneIsValid = infoTuneBufferHolder != nullptr && _silentSidInfoDecoder.TryLoadSong(infoTuneBufferHolder->buffer[0], infoTuneBufferHolder->size[0]);
         }
         else
         {
             //tuneIsValid =_silentSidInfoDecoder.TryLoadSong(filepath); // Would be much faster but no unicode paths support then.
             const std::unique_ptr<BufferHolder>& infoTuneBufferHolder = Helpers::Wx::Files::GetFileContentFromDisk(filepath);
-            tuneIsValid = infoTuneBufferHolder != nullptr && _silentSidInfoDecoder.TryLoadSong(infoTuneBufferHolder->buffer, infoTuneBufferHolder->size, 0);
+            tuneIsValid = infoTuneBufferHolder != nullptr && _silentSidInfoDecoder.TryLoadSong(infoTuneBufferHolder->buffer[0], infoTuneBufferHolder->size[0], 0);
         }
 
         if (tuneIsValid)
@@ -163,7 +172,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
 
             // Subsongs count
             const int defaultSubsong = _silentSidInfoDecoder.GetDefaultSubsong();
-            const int totalSubsongs = _silentSidInfoDecoder.GetTotalSubsongs();
+            int totalSubsongs = _silentSidInfoDecoder.GetTotalSubsongs();
 
             // Tune ROM requirement
             const SidDecoder::RomRequirement romRequirement = _silentSidInfoDecoder.GetCurrentSongRomRequirement();
@@ -196,7 +205,31 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                         throw(Strings::Internal::UNHANDLED_SWITCH_CASE);
                 }
 
-                mainSongNodeNew = &_ui->treePlaylist->AddMainSong(Helpers::Wx::StringFromWin1252(songTitle.ToStdString()), filepath, defaultSubsong, hvscInfoMain.duration, hvscInfoMain.hvscPath, hvscInfoMain.md5, author, copyright, nodeRom, playable);
+                #pragma region Detect MUS+STR pair
+
+                wxString musCompanionStrFilePath;
+
+                const bool musFileType = filepath.Lower().EndsWith(".mus");
+                if (musFileType)
+                {
+                    // Check if the companion STR file exists as well, and load it in pair (MUS+STR)
+                    wxFileName extraStrFilePath(filepath);
+                    extraStrFilePath.SetExt("str");
+
+                    const bool exists =
+                        (Helpers::Wx::Files::IsWithinZipFile(extraStrFilePath.GetFullPath()) && Helpers::Wx::Files::FileExistsInZipArchive(extraStrFilePath.GetFullPath())) ||
+                        (extraStrFilePath.FileExists());
+
+                    if (exists)
+                    {
+                        musCompanionStrFilePath = extraStrFilePath.GetFullPath();
+                        totalSubsongs = 3; // Add as fake subsongs so that individual MUS+STR components can be selected by the user if so desired.
+                    }
+                }
+
+                #pragma endregion
+
+                mainSongNodeNew = &_ui->treePlaylist->AddMainSong(Helpers::Wx::StringFromWin1252(songTitle.ToStdString()), filepath, defaultSubsong, hvscInfoMain.duration, hvscInfoMain.hvscPath, hvscInfoMain.md5, author, copyright, nodeRom, playable, musCompanionStrFilePath);
             }
 
             if (playable)
@@ -220,9 +253,10 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                 std::vector<wxString> subsongTitles;
                 subsongTitles.reserve(totalSubsongs);
 
+                const bool singleFileTune = mainSongNodeNew->musCompanionStrFilePath.IsEmpty();
+                if (singleFileTune) // Normal (or standalone MUS) tune
                 {
-                    Stil::Info info = _stilInfo.Get(mainSongNodeNew->hvscPath.ToStdString()); // Blank if unavailable.
-
+                    const Stil::Info info(_stilInfo.Get(mainSongNodeNew->hvscPath.ToStdString())); // Blank if unavailable.
                     for (int i = 1; i <= totalSubsongs; ++i)
                     {
                         const int boxChar = (i < totalSubsongs) ? BOX_CHAR_VERT_RIGHT : BOX_CHAR_L;
@@ -238,9 +272,21 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                         }
                     }
                 }
+                else // MUS+STR tune
+                {
+                    subsongTitles.emplace_back(wxString::Format("%c %s", BOX_CHAR_VERT_RIGHT, mainSongNodeNew->title.Mid(0, mainSongNodeNew->title.Length() - 4) + " [MUS+STR]"));
+                    subsongTitles.emplace_back(wxString::Format("%c %s", BOX_CHAR_VERT_RIGHT, mainSongNodeNew->title));
+                    subsongTitles.emplace_back(wxString::Format("%c %s", BOX_CHAR_L, mainSongNodeNew->title.Mid(0, mainSongNodeNew->title.Length() - 4) + ".str"));
+                }
 
                 // Add subsongs
                 _ui->treePlaylist->AddSubsongs(subsongDurations, subsongTitles, *mainSongNodeNew);
+
+                if (!singleFileTune) // MUS+STR tune
+                {
+                    _ui->treePlaylist->SetItemTag(mainSongNodeNew->GetSubsong(2), PlaylistTreeModelNode::ItemTag::MUS_StandaloneMus, {});
+                    _ui->treePlaylist->SetItemTag(mainSongNodeNew->GetSubsong(3), PlaylistTreeModelNode::ItemTag::MUS_StandaloneStr, {});
+                }
             }
 
             // One tune (with any subsongs) added -----------------
@@ -336,6 +382,11 @@ void FramePlayer::UpdateIgnoredSong(PlaylistTreeModelNode& mainSongNode)
     // Subsongs
     for (const PlaylistTreeModelNodePtr& subsongNode : subNodes)
     {
+        if (subsongNode->GetTag() == PlaylistTreeModelNode::ItemTag::MUS_StandaloneMus || subsongNode->GetTag() == PlaylistTreeModelNode::ItemTag::MUS_StandaloneStr)
+        {
+            continue;
+        }
+
         const uint_least32_t relevantSubsongDuration = (subsongNode->duration == 0) ? fallbackDuration : subsongNode->duration;
         const bool durationIsShort = skipDurationThreshold > 0 && (relevantSubsongDuration < skipDurationThreshold);
 

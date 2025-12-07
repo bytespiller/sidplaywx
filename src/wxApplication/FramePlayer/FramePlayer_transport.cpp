@@ -52,19 +52,34 @@ bool FramePlayer::TryPlayPlaylistItem(const PlaylistTreeModelNode& activatedNode
 #endif
 
     // Trigger playback
+    wxString targetFilepath = nodeToPlay->filepath;
     const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(*nodeToPlay) : 0;
-    const bool sameTune = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == nodeToPlay->filepath.ToStdWstring();
-    if (sameTune)
+    const bool sameTune = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == targetFilepath.ToStdWstring();
+    if (sameTune && nodeToPlay->musCompanionStrFilePath.IsEmpty())
     {
         _app.PlaySubsong(subsong, preRenderDurationMs); // Switch an already-loaded tune to subsong.
     }
     else
     {
-        _app.Play(nodeToPlay->filepath, subsong, preRenderDurationMs);
+        wxFileName musCompanionStrFilePath(nodeToPlay->musCompanionStrFilePath); // MUS+STR (if STR is available)
+
+        switch (nodeToPlay->GetTag())
+        {
+            case PlaylistTreeModelNode::ItemTag::MUS_StandaloneMus: // Load MUS without STR
+                musCompanionStrFilePath.Clear();
+                break;
+            case PlaylistTreeModelNode::ItemTag::MUS_StandaloneStr: // Load STR without MUS
+                musCompanionStrFilePath.SetExt("str");
+                targetFilepath = musCompanionStrFilePath.GetFullPath();
+                musCompanionStrFilePath.Clear();
+                break;
+        }
+
+        _app.Play(targetFilepath, subsong, preRenderDurationMs, musCompanionStrFilePath.GetFullPath());
     }
 
     // Highlight the item in the playlist if the playback started successfully (file exists etc.)
-    const bool fileLoadedSuccessfully = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == nodeToPlay->filepath.ToStdWstring();
+    const bool fileLoadedSuccessfully = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == targetFilepath.ToStdWstring();
     const bool highlightable = fileLoadedSuccessfully && _ui->treePlaylist->TrySetActiveSong(*nodeToPlay, _app.currentSettings->GetOption(Settings::AppSettings::ID::AutoExpandSubsongs)->GetValueAsBool());
     UpdateUiState();
 

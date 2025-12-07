@@ -71,10 +71,11 @@ public:
     {
         SyncedPlaybackConfig() = delete;
 
-        SyncedPlaybackConfig(const PortAudioOutput::AudioConfig& aAudioConfig, const SidConfig& aSidConfig, const FilterConfig& aFilterConfig) :
+        SyncedPlaybackConfig(const PortAudioOutput::AudioConfig& aAudioConfig, const SidConfig& aSidConfig, const FilterConfig& aFilterConfig, bool useNtscForMus) :
             audioConfig(aAudioConfig),
             sidConfig(aSidConfig),
-            filterConfig(aFilterConfig)
+            filterConfig(aFilterConfig),
+            useNtscForMus(useNtscForMus)
         {
             sidConfig.frequency = static_cast<uint_least32_t>(audioConfig.sampleRate);
             sidConfig.playback = (audioConfig.channelCount == 1) ? SidConfig::playback_t::MONO : SidConfig::playback_t::STEREO;
@@ -83,6 +84,7 @@ public:
         PortAudioOutput::AudioConfig audioConfig;
         SidConfig sidConfig;
         FilterConfig filterConfig;
+        bool useNtscForMus;
     };
 
 private:

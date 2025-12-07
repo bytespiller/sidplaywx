@@ -131,6 +131,7 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
                                      (newConfig.sidConfig.forceC64Model != _sidDecoder->GetSidConfig().forceC64Model) ||
                                      (newConfig.sidConfig.forceSidModel != _sidDecoder->GetSidConfig().forceSidModel) ||
                                      (newConfig.sidConfig.digiBoost != _sidDecoder->GetSidConfig().digiBoost) ||
+                                     (newConfig.useNtscForMus != _sidDecoder->WillUseNtscForMus()) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Curve, _sidDecoder->GetFilterConfig().filter6581Curve)) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve));
 
@@ -188,7 +189,12 @@ PlaybackController::PlaybackAttemptStatus PlaybackController::TryPlayFromBuffer(
     PrepareTryPlay();
 
     _activeTuneHolder = std::make_unique<TuneHolder>(filepathForUid, loadedBufferToAdopt);
-    const bool successInput = _sidDecoder->TryLoadSong(_activeTuneHolder->bufferHolder->buffer, _activeTuneHolder->bufferHolder->size, subsong);
+    // Reminder: loadedBufferToAdopt var is now invalid
+
+    const bool successInput = (_activeTuneHolder->bufferHolder->size[1] == 0)
+        ? _sidDecoder->TryLoadSong(_activeTuneHolder->bufferHolder->buffer[0], _activeTuneHolder->bufferHolder->size[0], subsong)
+        : _sidDecoder->TryLoadMusStrSong(filepathForUid.filename().u8string().c_str(), _activeTuneHolder->bufferHolder->buffer[0], _activeTuneHolder->bufferHolder->size[0], _activeTuneHolder->bufferHolder->buffer[1], _activeTuneHolder->bufferHolder->size[1]);
+
     const bool successOutput = FinalizeTryPlay(successInput, preRenderDurationMs);
 
     PlaybackAttemptStatus status = PlaybackAttemptStatus::Success;
@@ -718,7 +724,7 @@ bool PlaybackController::TryResetSidDecoder(const SyncedPlaybackConfig& newConfi
 
     _preRender = nullptr; // Some SID params changed, any pre-rendered content is no longer valid.
 
-    const bool success = _sidDecoder->TryInitEmulation(newConfig.sidConfig, newConfig.filterConfig);
+    const bool success = _sidDecoder->TryInitEmulation(newConfig.sidConfig, newConfig.filterConfig, newConfig.useNtscForMus);
     if (success)
     {
         if (_state != State::Undefined && _activeTuneHolder != nullptr)

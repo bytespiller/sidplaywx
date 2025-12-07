@@ -69,7 +69,9 @@ public:
 	{
 		Normal,
 		ShortDuration,
-		Blacklisted
+		Blacklisted,
+		MUS_StandaloneMus,
+		MUS_StandaloneStr
 	};
 
     enum class RomRequirement
@@ -82,7 +84,7 @@ public:
 public:
 	PlaylistTreeModelNode() = delete;
 	PlaylistTreeModelNode(PlaylistTreeModelNode&) = delete;
-	PlaylistTreeModelNode(unsigned int uid, PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable);
+	PlaylistTreeModelNode(unsigned int uid, PlaylistTreeModelNode* parent, const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, RomRequirement romRequirement, bool playable, const wxString& musCompanionStrFilePath);
 
 public:
 	/// @brief Returns a nullptr for a mainsong or a mainsong for a subsong.
@@ -142,6 +144,8 @@ public:
 	const int defaultSubsong;
 	const uint_least32_t duration;
 	const RomRequirement romRequirement;
+
+	const wxString musCompanionStrFilePath; // For MUS
 
 private:
 	PlaylistTreeModelNode* _parent = nullptr;

@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,15 +21,15 @@
 #include <cstddef>
 #include <cstdint>
 
-struct BufferHolder // Designed for holding a buffered SID Tune (when loaded from a Zip file) for use with libsidplayfp.
+struct BufferHolder // Designed for holding a buffered PSID (1 buffer) or MUS+STR (2 buffers) tune (when loaded from a Zip file) for use with libsidplayfp.
 {
 	BufferHolder() = delete;
 	BufferHolder(const BufferHolder& other) = delete;
 	BufferHolder& operator=(const BufferHolder&) = delete;
 
-	explicit BufferHolder(size_t bufferSize);
+	explicit BufferHolder(size_t buffer1Size, size_t buffer2Size = 0);
 	~BufferHolder();
 
-	uint_least8_t* buffer = nullptr;
-	size_t size = 0;
+	uint_least8_t* buffer[2] {nullptr, nullptr};
+	size_t size[2] = {0, 0};
 };

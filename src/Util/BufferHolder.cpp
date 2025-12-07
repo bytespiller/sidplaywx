@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,17 @@
 
 #include "BufferHolder.h"
 
-BufferHolder::BufferHolder(size_t bufferSize)
+BufferHolder::BufferHolder(size_t buffer1Size, size_t buffer2Size)
 {
-	size = bufferSize;
-	buffer = new uint_least8_t[size];
+	size[0] = buffer1Size;
+	buffer[0] = new uint_least8_t[buffer1Size];
+
+	size[1] = buffer2Size;
+	buffer[1] = (buffer2Size == 0) ? nullptr : new uint_least8_t[buffer2Size];
 }
 
 BufferHolder::~BufferHolder()
 {
-	delete[] buffer;
-	buffer = nullptr;
-	size = 0;
+	delete[] buffer[0];
+	delete[] buffer[1];
 }
