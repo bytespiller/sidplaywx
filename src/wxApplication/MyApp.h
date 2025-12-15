@@ -66,7 +66,11 @@ public:
     void ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable);
     void ToggleFilter(unsigned int sidNum, bool enable);
 
+    /// @brief The Virtual stereo state can be changed in the realtime during the playback, without limitations.
     void RefreshVirtualStereoState();
+
+    /// @brief The Channel matrix state should not be changed during the playback *if* the Prerender (Instant seeking) mode is active. Otherwise it can be changed in the realtime during the playback, without limitations.
+    void RefreshChannelMatrix();
 
     const PlaybackController& GetPlaybackInfo() const;
     bool ReapplyPlaybackSettings();

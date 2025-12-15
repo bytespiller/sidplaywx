@@ -21,6 +21,7 @@
 #include "PreRender.h"
 #include "PlaybackWrappers/Output/PortAudioOutput.h"
 #include "PlaybackWrappers/Input/SidDecoder/SidDecoder.h"
+#include "PlaybackWrappers/Input/SidDecoder/MultiSidChannelMatrix.h"
 #include "Util/RomUtil.h"
 #include "../Util/BufferHolder.h"
 #include "../Util/SimpleSignal/SimpleSignalProvider.h"
@@ -198,6 +199,8 @@ public:
 
     float GetVolume() const;
     void SetVolume(float volume);
+
+    void SetChannelMatrix(const MultiSidChannelMatrix& matrix);
 
     bool ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable);
     bool ToggleFilter(unsigned int sidNum, bool enable);

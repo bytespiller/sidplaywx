@@ -37,6 +37,19 @@ namespace Settings
 			static constexpr const char* const OutChannels = "OutChannels";
 			static constexpr const char* const VirtualStereoSpeakerDistance = "VirtualStereoSpeakerDistance";
 			static constexpr const char* const VirtualStereoSideVolumeFactor = "VirtualStereoSideVolumeFactor";
+			static constexpr const char* const VirtualStereoMultiSid = "VirtualStereoMultiSid";
+
+			static constexpr const char* const PanMatrix_2Sid_FirstLeft = "PanMatrix_2Sid_FirstLeft";
+			static constexpr const char* const PanMatrix_2Sid_FirstRight = "PanMatrix_2Sid_FirstRight";
+			static constexpr const char* const PanMatrix_2Sid_SecondLeft = "PanMatrix_2Sid_SecondLeft";
+			static constexpr const char* const PanMatrix_2Sid_SecondRight = "PanMatrix_2Sid_SecondRight";
+
+			static constexpr const char* const PanMatrix_3Sid_FirstLeft = "PanMatrix_3Sid_FirstLeft";
+			static constexpr const char* const PanMatrix_3Sid_FirstRight = "PanMatrix_3Sid_FirstRight";
+			static constexpr const char* const PanMatrix_3Sid_SecondLeft = "PanMatrix_3Sid_SecondLeft";
+			static constexpr const char* const PanMatrix_3Sid_SecondRight = "PanMatrix_3Sid_SecondRight";
+			static constexpr const char* const PanMatrix_3Sid_ThirdLeft = "PanMatrix_3Sid_ThirdLeft";
+			static constexpr const char* const PanMatrix_3Sid_ThirdRight = "PanMatrix_3Sid_ThirdRight";
 
 			static constexpr const char* const PreRenderEnabled = "PreRenderEnabled";
 			static constexpr const char* const AutoPlay = "AutoPlay";
@@ -160,6 +173,19 @@ namespace Settings
 				DefaultOption(ID::OutChannels, static_cast<int>(OutChannels::Default)),
 				DefaultOption(ID::VirtualStereoSpeakerDistance, 7),
 				DefaultOption(ID::VirtualStereoSideVolumeFactor, 0.18),
+				DefaultOption(ID::VirtualStereoMultiSid, true),
+
+				DefaultOption(ID::PanMatrix_2Sid_FirstLeft, 1.0),
+				DefaultOption(ID::PanMatrix_2Sid_FirstRight, 0.5),
+				DefaultOption(ID::PanMatrix_2Sid_SecondLeft, 0.5),
+				DefaultOption(ID::PanMatrix_2Sid_SecondRight, 1.0),
+
+				DefaultOption(ID::PanMatrix_3Sid_FirstLeft, 1.0),
+				DefaultOption(ID::PanMatrix_3Sid_FirstRight, 0.5),
+				DefaultOption(ID::PanMatrix_3Sid_SecondLeft, 1.0),
+				DefaultOption(ID::PanMatrix_3Sid_SecondRight, 1.0),
+				DefaultOption(ID::PanMatrix_3Sid_ThirdLeft, 0.5),
+				DefaultOption(ID::PanMatrix_3Sid_ThirdRight, 1.0),
 
 				DefaultOption(ID::PreRenderEnabled, false),
 				DefaultOption(ID::AutoPlay, true),

@@ -638,6 +638,11 @@ void PlaybackController::SetVolume(float volume)
     _portAudioOutput->SetVolume(volume);
 }
 
+void PlaybackController::SetChannelMatrix(const MultiSidChannelMatrix& matrix)
+{
+    _sidDecoder->SetChannelMatrix(matrix);
+}
+
 bool PlaybackController::ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable)
 {
     if (IsValidSongLoaded())

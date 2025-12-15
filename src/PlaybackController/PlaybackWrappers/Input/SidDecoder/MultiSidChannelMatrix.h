@@ -18,37 +18,18 @@
 
 #pragma once
 
-#include <array>
-
-struct MultiSidChannelMatrix;
-class sidplayfp;
-
-class SidMixer
+struct MultiSidChannelMatrix
 {
-public:
-	static constexpr unsigned int LIBSIDPLAYFP_PLAY_CYCLES = 3000; // Roughly 3ms buffer granularity.
+	struct ChannelVolume
+	{
+		float left = 1.0f;
+		float right = 1.0f;
+	};
 
-public:
-	SidMixer() = delete;
-	SidMixer(SidMixer&) = delete;
-	SidMixer& operator=(const SidMixer&) = delete;
+	ChannelVolume tune2Sid_First;
+	ChannelVolume tune2Sid_Second;
 
-	explicit SidMixer(sidplayfp& sidEngine);
-
-public:
-	void FillBuffer(void* buffer, unsigned long framesPerBuffer);
-	void ApplyChannelMatrix(const MultiSidChannelMatrix& matrix);
-
-private:
-	sidplayfp& _sidEngine;
-
-	const unsigned int _numSidChips = 0;
-	const float _sidVolumeFactor = 0;
-	const unsigned int _numChannels = 0;
-	short* _sidChipsBuffers[3];
-
-	int _samplesPos = 0;
-	int _samplesLen = 0;
-
-	std::array<std::array<std::array<float, 2>, 3>, 4> _channelMatrix;
+	ChannelVolume tune3Sid_First;
+	ChannelVolume tune3Sid_Second;
+	ChannelVolume tune3Sid_Third;
 };

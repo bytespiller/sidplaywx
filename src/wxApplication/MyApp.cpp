@@ -22,6 +22,7 @@
 #include "Helpers/HelpersWx.h"
 #include "SingleInstanceManager/IpcSetup.h"
 #include "../Util/BufferHolder.h"
+#include "../PlaybackController/PlaybackWrappers/Input/SidDecoder/MultiSidChannelMatrix.h"
 #include "../PlaybackController/Util/RomUtil.h"
 #include <wx/stdpaths.h>
 
@@ -414,6 +415,35 @@ void MyApp::RefreshVirtualStereoState()
     _playback->SetVirtualStereo(offsetMs, sideVolumeFactor);
 }
 
+void MyApp::RefreshChannelMatrix()
+{
+    MultiSidChannelMatrix newMatrix;
+
+    Settings::AppSettings::OutChannels outChannelsMode = static_cast<Settings::AppSettings::OutChannels>(currentSettings->GetOption(Settings::AppSettings::ID::OutChannels)->GetValueAsInt());
+    if (outChannelsMode != Settings::AppSettings::OutChannels::ForceMono)
+    {
+        const bool shouldFlattenCurrentMultiSidTune = outChannelsMode == Settings::AppSettings::OutChannels::VirtualStereo && _playback->GetCurrentTuneSidChipsRequired() > 1 && currentSettings->GetOption(Settings::AppSettings::ID::VirtualStereoMultiSid)->GetValueAsBool();
+        if (!shouldFlattenCurrentMultiSidTune)
+        {
+            // 2SID
+            newMatrix.tune2Sid_First.left = currentSettings->GetOption(Settings::AppSettings::ID::PanMatrix_2Sid_FirstLeft)->GetValueAsFloat();
+            newMatrix.tune2Sid_First.right = currentSettings->GetOption(Settings::AppSettings::ID::PanMatrix_2Sid_FirstRight)->GetValueAsFloat();
+            newMatrix.tune2Sid_Second.left = currentSettings->GetOption(Settings::AppSettings::ID::PanMatrix_2Sid_SecondLeft)->GetValueAsFloat();
+            newMatrix.tune2Sid_Second.right = currentSettings->GetOption(Settings::AppSettings::ID::PanMatrix_2Sid_SecondRight)->GetValueAsFloat();
+
+            // 3SID
+            newMatrix.tune3Sid_First.left = currentSettings->GetOption(Settings::AppSettings::ID::PanMatrix_3Sid_FirstLeft)->GetValueAsFloat();
+            newMatrix.tune3Sid_First.right = currentSettings->GetOption(Settings::AppSettings::ID::PanMatrix_3Sid_FirstRight)->GetValueAsFloat();
+            newMatrix.tune3Sid_Second.left = currentSettings->GetOption(Settings::AppSettings::ID::PanMatrix_3Sid_SecondLeft)->GetValueAsFloat();
+            newMatrix.tune3Sid_Second.right = currentSettings->GetOption(Settings::AppSettings::ID::PanMatrix_3Sid_SecondRight)->GetValueAsFloat();
+            newMatrix.tune3Sid_Third.left = currentSettings->GetOption(Settings::AppSettings::ID::PanMatrix_3Sid_ThirdLeft)->GetValueAsFloat();
+            newMatrix.tune3Sid_Third.right = currentSettings->GetOption(Settings::AppSettings::ID::PanMatrix_3Sid_ThirdRight)->GetValueAsFloat();
+        }
+    }
+
+    _playback->SetChannelMatrix(newMatrix);
+}
+
 const PlaybackController& MyApp::GetPlaybackInfo() const
 {
     return *_playback;
@@ -504,6 +534,7 @@ void MyApp::RunOnMainThread(std::function<void()> fn)
 
 void MyApp::FinalizePlaybackStarted()
 {
+    RefreshChannelMatrix(); // To apply the Multi-SID Virtual stereo exclusion option state.
     PopSilencer();
 }
 

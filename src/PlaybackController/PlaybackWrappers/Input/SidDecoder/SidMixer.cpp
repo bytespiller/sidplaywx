@@ -17,9 +17,11 @@
  */
 
 #include "SidMixer.h"
+#include "MultiSidChannelMatrix.h"
 
 #include <sidplayfp/sidplayfp.h>
 #include <sidplayfp/SidInfo.h>
+
 #include <cmath>
 #include <cstdint>
 
@@ -50,10 +52,13 @@ void SidMixer::FillBuffer(void* buffer, unsigned long framesPerBuffer)
 		{
 			for (unsigned int channel = 0; channel < _numChannels; ++channel)
 			{
-				int_least32_t tmp = _sidChipsBuffers[0][_samplesPos] * _sidVolumeFactor; // SID 1
+				const float panning = _channelMatrix[_numSidChips][0][channel];
+				int_least32_t tmp = std::lrintf(_sidChipsBuffers[0][_samplesPos] * _sidVolumeFactor) * panning; // SID 1
+
 				for (unsigned int chip = 1; chip < _numSidChips; ++chip) // SID 2 & 3 (if used)
 				{
-					tmp += std::lrintf(_sidChipsBuffers[chip][_samplesPos] * _sidVolumeFactor);
+					const float panning = _channelMatrix[_numSidChips][chip][channel];
+					tmp += std::lrintf(_sidChipsBuffers[chip][_samplesPos] * _sidVolumeFactor) * panning;
 				}
 
 				out[written++] = static_cast<short>(tmp);
@@ -69,4 +74,31 @@ void SidMixer::FillBuffer(void* buffer, unsigned long framesPerBuffer)
 		_samplesPos = 0;
 		_samplesLen = 0;
 	}
+}
+
+void SidMixer::ApplyChannelMatrix(const MultiSidChannelMatrix& matrix)
+{
+	_channelMatrix =
+	{{
+		{{ // Dummy offset (zero-based array)
+			{{1.0f, 1.0f}},
+			{{1.0f, 1.0f}},
+			{{1.0f, 1.0f}}
+		}},
+		{{ // 1SID
+			{{1.0f, 1.0f}}, // SID 1
+			{{1.0f, 1.0f}}, // dummy SID 2
+			{{1.0f, 1.0f}}  // dummy SID 3
+		}},
+		{{ // 2SID
+			{{matrix.tune2Sid_First.left, matrix.tune2Sid_First.right}},   // SID 1
+			{{matrix.tune2Sid_Second.left, matrix.tune2Sid_Second.right}}, // SID 2
+			{{1.0f, 1.0f}} // dummy SID 3
+		}},
+		{{ // 3SID
+			{{matrix.tune3Sid_First.left, matrix.tune3Sid_First.right}},   // SID 1
+			{{matrix.tune3Sid_Second.left, matrix.tune3Sid_Second.right}}, // SID 2
+			{{matrix.tune3Sid_Third.left, matrix.tune3Sid_Third.right}}    // SID 3
+		}}
+	}};
 }

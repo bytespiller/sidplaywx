@@ -217,11 +217,8 @@ namespace Strings
 		inline constexpr const char* const OPT_LOW_LATENCY("Low latency");
 		inline constexpr const char* const DESC_LOW_LATENCY("Enable for more responsive controls.\nDisable if experiencing stuttering.\nNote: ongoing playback will stop when changing this setting.");
 
-		inline constexpr const char* const OPT_FORCE_MONO("Force mono");
-		inline constexpr const char* const DESC_FORCE_MONO("Disables stereo/panning effects of multi-SID tunes (2SID, 3SID).\nNote: ongoing playback will stop when changing this setting.");
-
 		inline constexpr const char* const OPT_OUT_CHANNELS("Channels");
-		inline constexpr const char* const DESC_OUT_CHANNELS("- Mono: use if output device doesn't support stereo, playback will stop.\n- Normal: mono across both channels, powerful original sound.\n- Virtual stereo: wide sound stage for headphones, unlocks additional options.");
+		inline constexpr const char* const DESC_OUT_CHANNELS("- Mono: mono output for all tunes.\n- Normal: stereo for multi-SID tunes.\n- Virtual stereo: wide sound stage (ideal for headphones).");
 		inline constexpr const char* const ITEM_OUT_CHANNELS_MONO("Mono");
 		inline constexpr const char* const ITEM_OUT_CHANNELS_DEFAULT("Normal");
 		inline constexpr const char* const ITEM_OUT_CHANNELS_EXPANDED("Virtual stereo");
@@ -231,6 +228,49 @@ namespace Strings
 
 		inline constexpr const char* const OPT_OUT_FXVIRTUALSTEREO_SIDE_VOLUME("Virtual sound stage focus");
 		inline constexpr const char* const DESC_OUT_FXVIRTUALSTEREO_SIDE_VOLUME("Volume allocation of sides vs. center.\n- Min: 0.1 = center-focused sound stage (ball).\n- Max: 0.4 = wide-dispersed sound stage (donut).\n- Default: 0.18");
+
+		inline constexpr const char* const OPT_OUT_FXVIRTUALSTEREO_MULTISID("Multi-SID tunes Virtual stereo");
+		inline constexpr const char* const DESC_OUT_FXVIRTUALSTEREO_MULTISID("Governs whether the Virtual stereo applies to multi-SID tunes as well.\n- Enable to use the Virtual stereo with multi-SID tunes too (no hard-panning).\n- Disable to use the Multi-SID channel matrix for them instead (Normal).\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+
+		#pragma region Multi-SID panning matrix (TODO: add support for 4SID once it becomes possible)
+
+		inline constexpr const char* const CATEGORY_MULTISID_PANNING_MATRIX("Multi-SID channel matrix");
+		inline constexpr const char* const DESC_CATEGORY_MULTISID_PANNING_MATRIX("Per-chip per-channel volume matrix allows advanced users to tweak multi-SID panning in detail.\nThis applies only to multi-SID tune types (2SID, 3SID, MUS+STR).\n\nThis large category is collapsed by default.");
+
+		// 2SID panning matrix
+		inline constexpr const char* const CATEGORY_2SID_PANNING_MATRIX("2SID tunes");
+		inline constexpr const char* const DESC_CATEGORY_2SID_PANNING_MATRIX("Per-chip channel volume matrix for tunes utilizing 2 SID chips.");
+
+		inline constexpr const char* const OPT_2SID_FIRST_LEFT("SID 1: Left");
+		inline constexpr const char* const DESC_2SID_FIRST_LEFT("SID 1 left volume when playing 2SID tunes.\nDefault: 1.0\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+		inline constexpr const char* const OPT_2SID_FIRST_RIGHT("SID 1: Right");
+		inline constexpr const char* const DESC_2SID_FIRST_RIGHT("SID 1 right volume when playing 2SID tunes.\nDefault: 0.5\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+
+		inline constexpr const char* const OPT_2SID_SECOND_LEFT("SID 2: Left");
+		inline constexpr const char* const DESC_2SID_SECOND_LEFT("SID 2 left volume when playing 2SID tunes.\nDefault: 0.5\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+		inline constexpr const char* const OPT_2SID_SECOND_RIGHT("SID 2: Right");
+		inline constexpr const char* const DESC_2SID_SECOND_RIGHT("SID 2 right volume when playing 2SID tunes.\nDefault: 1.0\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+
+		// 3SID panning matrix
+		inline constexpr const char* const CATEGORY_3SID_PANNING_MATRIX("3SID tunes");
+		inline constexpr const char* const DESC_CATEGORY_3SID_PANNING_MATRIX("Per-chip channel volume matrix for tunes utilizing 3 SID chips.");
+
+		inline constexpr const char* const OPT_3SID_FIRST_LEFT("SID 1: Left");
+		inline constexpr const char* const DESC_3SID_FIRST_LEFT("SID 1 left volume when playing 3SID tunes.\nDefault: 1.0\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+		inline constexpr const char* const OPT_3SID_FIRST_RIGHT("SID 1: Right");
+		inline constexpr const char* const DESC_3SID_FIRST_RIGHT("SID 1 right volume when playing 3SID tunes.\nDefault: 0.5\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+
+		inline constexpr const char* const OPT_3SID_SECOND_LEFT("SID 2: Left");
+		inline constexpr const char* const DESC_3SID_SECOND_LEFT("SID 2 left volume when playing 3SID tunes.\nDefault: 1.0\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+		inline constexpr const char* const OPT_3SID_SECOND_RIGHT("SID 2: Right");
+		inline constexpr const char* const DESC_3SID_SECOND_RIGHT("SID 2 right volume when playing 3SID tunes.\nDefault: 1.0\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+
+		inline constexpr const char* const OPT_3SID_THIRD_LEFT("SID 3: Left");
+		inline constexpr const char* const DESC_3SID_THIRD_LEFT("SID 3 left volume when playing 3SID tunes.\nDefault: 0.5\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+		inline constexpr const char* const OPT_3SID_THIRD_RIGHT("SID 3: Right");
+		inline constexpr const char* const DESC_3SID_THIRD_RIGHT("SID 3 right volume when playing 3SID tunes.\nDefault: 1.0\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+
+		#pragma endregion
 
 		// Playback
 		inline constexpr const char* const CATEGORY_PLAYBACK_BEHAVIOR("Playback");

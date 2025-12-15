@@ -66,11 +66,18 @@ private:
     using WrappedProps = std::map<SettingId, WrappedProp>;
 
 private:
-    void AddWrappedProp(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString = "");
-    void AddWrappedProp(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString, wxVariant minValue, wxVariant maxValue);
+    /// @brief Adds a property but doesn't add it to page.
+    void AddWrappedPropManual(SettingId settingId, TypeSerialized type, wxPGProperty* property, bool requiresRestart, wxString helpString = "");
+
+    void AddWrappedPropToPage(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString = "");
+    void AddWrappedPropToPage(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString, wxVariant minValue, wxVariant maxValue);
+    void AddWrappedPropChild(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPGProperty& parentProperty, bool requiresRestart, wxString helpString, wxVariant minValue, wxVariant maxValue);
+
+
     void FillPropertyGrid();
     FramePrefs::WrappedProp& GetWrappedProp(const wxPGProperty& property);
-    void RefreshVirtualStereoSettings();
+    void EnableOrDisableVirtualStereoProps();
+    void EnableOrDisableMultiSidVolumeMatrixProps();
 
 private:
     void OnPropertyGridChanging(wxPropertyGridEvent& evt);
@@ -79,6 +86,8 @@ private:
     void OnButtonApply(wxCommandEvent& evt);
     void OnButtonOk(wxCommandEvent& evt);
     void OnButtonCancel(wxCommandEvent& evt);
+
+    void ImmediatelyRefreshChannelMatrix();
 
 private:
     MyApp& _app;

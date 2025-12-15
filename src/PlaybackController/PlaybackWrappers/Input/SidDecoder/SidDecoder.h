@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "MultiSidChannelMatrix.h"
 #include "SidMixer.h"
 #include "../../IBufferWriter.h"
 #include "../../../Util/RomUtil.h"
@@ -115,6 +116,8 @@ public:
     void ToggleVoice(unsigned int sidNum, unsigned int voice, bool enable);
     void ToggleFilter(unsigned int sidNum, bool enable);
 
+    void SetChannelMatrix(const MultiSidChannelMatrix& matrix);
+
     void UnloadActiveTune();
 
 private:
@@ -127,6 +130,7 @@ private:
     bool _useNtscForMus = false;
     bool _seeking = false;
     std::unique_ptr<SidMixer> _mixer;
+    MultiSidChannelMatrix _channelMatrixCache;
     SidConfig _sidConfigCache;
     std::unique_ptr<FilterConfig> _filterConfigCache;
     SidVoicesEnabledStatus _sidVoicesEnabledStatus;

@@ -25,6 +25,9 @@
 
 namespace
 {
+    constexpr double MIN_MULTISID_MATRIX = 0.0;
+    constexpr double MAX_MULTISID_MATRIX = 1.0;
+
     constexpr int MIN_DURATION = 0;
     constexpr int MAX_DURATION = 3600;
 
@@ -87,15 +90,15 @@ bool FramePrefs::Destroy()
     return wxDialog::Destroy();
 }
 
-void FramePrefs::AddWrappedProp(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString)
+void FramePrefs::AddWrappedPropManual(SettingId settingId, TypeSerialized type, wxPGProperty* property, bool requiresRestart, wxString helpString)
 {
+    property->SetName(settingId);
+
     if (requiresRestart)
     {
         helpString = wxString::Format("%s\n%s", helpString, Strings::Preferences::SUFFIX_NOTE_APP_RESTART);
     }
     property->SetHelpString(helpString);
-
-    page.Append(property);
 
     const Settings::Option* const cOption = _app.currentSettings->GetOption(settingId);
 
@@ -121,11 +124,25 @@ void FramePrefs::AddWrappedProp(SettingId settingId, TypeSerialized type, wxPGPr
     _wrappedProps.emplace(settingId, WrappedProp(settingId, type, *property, requiresRestart));
 }
 
-void FramePrefs::AddWrappedProp(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString, wxVariant minValue, wxVariant maxValue)
+void FramePrefs::AddWrappedPropToPage(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString)
+{
+    page.Append(property);
+    AddWrappedPropManual(settingId, type, property, requiresRestart, helpString);
+}
+
+void FramePrefs::AddWrappedPropToPage(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPropertyGridPage& page, bool requiresRestart, wxString helpString, wxVariant minValue, wxVariant maxValue)
 {
     property->SetAttribute(wxPG_ATTR_MIN, minValue);
     property->SetAttribute(wxPG_ATTR_MAX, maxValue);
-    AddWrappedProp(settingId, type, property, page, requiresRestart, helpString);
+    AddWrappedPropToPage(settingId, type, property, page, requiresRestart, helpString);
+}
+
+void FramePrefs::AddWrappedPropChild(SettingId settingId, TypeSerialized type, wxPGProperty* property, wxPGProperty& parentProperty, bool requiresRestart, wxString helpString, wxVariant minValue, wxVariant maxValue)
+{
+    property->SetAttribute(wxPG_ATTR_MIN, minValue);
+    property->SetAttribute(wxPG_ATTR_MAX, maxValue);
+    parentProperty.AppendChild(property);
+    AddWrappedPropManual(settingId, type, property, requiresRestart, helpString);
 }
 
 void FramePrefs::FillPropertyGrid()
@@ -140,7 +157,7 @@ void FramePrefs::FillPropertyGrid()
             const char* settingId = Settings::AppSettings::ID::AudioOutputDevice;
             const wxArrayString& supportedOutDevices = Helpers::Wx::Audio::GetAudioDevicesNames(Helpers::Wx::Audio::DeviceType::Output, Helpers::Wx::Audio::Backend::Filtered);
             wxPGProperty* propOut = new wxEnumProperty(Strings::Preferences::OPT_DEVICE, settingId, supportedOutDevices);
-            AddWrappedProp(settingId, TypeSerialized::String, propOut, *page, Effective::Immediately, Strings::Preferences::DESC_DEVICE);
+            AddWrappedPropToPage(settingId, TypeSerialized::String, propOut, *page, Effective::Immediately, Strings::Preferences::DESC_DEVICE);
 
             const int filteredDeviceIndex = Helpers::Wx::Audio::TryGetFilteredFromAbsoluteAudioDeviceIndex(_app.GetPlaybackInfo().GetAudioConfig().device);
             if (filteredDeviceIndex != wxNOT_FOUND)
@@ -149,7 +166,7 @@ void FramePrefs::FillPropertyGrid()
             }
         }
 
-        AddWrappedProp(Settings::AppSettings::ID::LowLatency, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_LOW_LATENCY), *page, Effective::Immediately, Strings::Preferences::DESC_LOW_LATENCY);
+        AddWrappedPropToPage(Settings::AppSettings::ID::LowLatency, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_LOW_LATENCY), *page, Effective::Immediately, Strings::Preferences::DESC_LOW_LATENCY);
 
         // Out channels
         {
@@ -162,7 +179,7 @@ void FramePrefs::FillPropertyGrid()
 
             const char* SettingId = Settings::AppSettings::ID::OutChannels;
             wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_OUT_CHANNELS, SettingId, outChannelsOptions);
-            AddWrappedProp(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_OUT_CHANNELS);
+            AddWrappedPropToPage(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_OUT_CHANNELS);
 
             const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
             prop->SetChoiceSelection(selection);
@@ -179,30 +196,73 @@ void FramePrefs::FillPropertyGrid()
 
             const char* SettingId = Settings::AppSettings::ID::VirtualStereoSpeakerDistance;
             wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE, SettingId, options);
-            AddWrappedProp(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE);
+            AddWrappedPropToPage(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE);
             const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt() - FXVIRTUALSTEREO_SPEAKER_DISTANCE_MILLISECONDS_MIN;
             prop->SetChoiceSelection(selection);
         }
 
         // FX VirtualStereo side volume factor
-        AddWrappedProp(Settings::AppSettings::ID::VirtualStereoSideVolumeFactor, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_OUT_FXVIRTUALSTEREO_SIDE_VOLUME), *page, Effective::Immediately, Strings::Preferences::DESC_OUT_FXVIRTUALSTEREO_SIDE_VOLUME, FXVIRTUALSTEREO_SIDE_VOLUME_FACTOR_MIN, FXVIRTUALSTEREO_SIDE_VOLUME_FACTOR_MAX);
+        AddWrappedPropToPage(Settings::AppSettings::ID::VirtualStereoSideVolumeFactor, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_OUT_FXVIRTUALSTEREO_SIDE_VOLUME), *page, Effective::Immediately, Strings::Preferences::DESC_OUT_FXVIRTUALSTEREO_SIDE_VOLUME, FXVIRTUALSTEREO_SIDE_VOLUME_FACTOR_MIN, FXVIRTUALSTEREO_SIDE_VOLUME_FACTOR_MAX);
+
+        // FX VirtualStereo Multi-SID checkbox
+        AddWrappedPropToPage(Settings::AppSettings::ID::VirtualStereoMultiSid, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_OUT_FXVIRTUALSTEREO_MULTISID), *page, Effective::Immediately, Strings::Preferences::DESC_OUT_FXVIRTUALSTEREO_MULTISID);
 
         // Enable/disable
-        RefreshVirtualStereoSettings();
+        EnableOrDisableVirtualStereoProps();
     }
+
+    #pragma region Multi-SID volume/panning matrix
+
+    wxPropertyCategory* categoryPanMatrixMultiSid = new wxPropertyCategory(Strings::Preferences::CATEGORY_MULTISID_PANNING_MATRIX);
+    page->Append(categoryPanMatrixMultiSid);
+    categoryPanMatrixMultiSid->SetHelpString(Strings::Preferences::DESC_CATEGORY_MULTISID_PANNING_MATRIX);
+
+    // 2SID panning matrix
+    {
+        wxPGProperty* subCategoryPanMatrix2Sid = categoryPanMatrixMultiSid->AppendChild(new wxPropertyCategory(Strings::Preferences::CATEGORY_2SID_PANNING_MATRIX));
+        subCategoryPanMatrix2Sid->SetHelpString(Strings::Preferences::DESC_CATEGORY_2SID_PANNING_MATRIX);
+        {
+            AddWrappedPropChild(Settings::AppSettings::ID::PanMatrix_2Sid_FirstLeft, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_2SID_FIRST_LEFT), *subCategoryPanMatrix2Sid, Effective::Immediately, Strings::Preferences::DESC_2SID_FIRST_LEFT, MIN_MULTISID_MATRIX, MAX_MULTISID_MATRIX);
+            AddWrappedPropChild(Settings::AppSettings::ID::PanMatrix_2Sid_FirstRight, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_2SID_FIRST_RIGHT), *subCategoryPanMatrix2Sid, Effective::Immediately, Strings::Preferences::DESC_2SID_FIRST_RIGHT, MIN_MULTISID_MATRIX, MAX_MULTISID_MATRIX);
+
+            AddWrappedPropChild(Settings::AppSettings::ID::PanMatrix_2Sid_SecondLeft, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_2SID_SECOND_LEFT), *subCategoryPanMatrix2Sid, Effective::Immediately, Strings::Preferences::DESC_2SID_SECOND_LEFT, MIN_MULTISID_MATRIX, MAX_MULTISID_MATRIX);
+            AddWrappedPropChild(Settings::AppSettings::ID::PanMatrix_2Sid_SecondRight, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_2SID_SECOND_RIGHT), *subCategoryPanMatrix2Sid, Effective::Immediately, Strings::Preferences::DESC_2SID_SECOND_RIGHT, MIN_MULTISID_MATRIX, MAX_MULTISID_MATRIX);
+        }
+    }
+
+    // 3SID panning matrix
+    {
+        wxPGProperty* const subCategoryPanMatrix3Sid = categoryPanMatrixMultiSid->AppendChild(new wxPropertyCategory(Strings::Preferences::CATEGORY_3SID_PANNING_MATRIX));
+        subCategoryPanMatrix3Sid->SetHelpString(Strings::Preferences::DESC_CATEGORY_3SID_PANNING_MATRIX);
+        {
+            AddWrappedPropChild(Settings::AppSettings::ID::PanMatrix_3Sid_FirstLeft, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_3SID_FIRST_LEFT), *subCategoryPanMatrix3Sid, Effective::Immediately, Strings::Preferences::DESC_3SID_FIRST_LEFT, MIN_MULTISID_MATRIX, MAX_MULTISID_MATRIX);
+            AddWrappedPropChild(Settings::AppSettings::ID::PanMatrix_3Sid_FirstRight, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_3SID_FIRST_RIGHT), *subCategoryPanMatrix3Sid, Effective::Immediately, Strings::Preferences::DESC_3SID_FIRST_RIGHT, MIN_MULTISID_MATRIX, MAX_MULTISID_MATRIX);
+
+            AddWrappedPropChild(Settings::AppSettings::ID::PanMatrix_3Sid_SecondLeft, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_3SID_SECOND_LEFT), *subCategoryPanMatrix3Sid, Effective::Immediately, Strings::Preferences::DESC_3SID_SECOND_LEFT, MIN_MULTISID_MATRIX, MAX_MULTISID_MATRIX);
+            AddWrappedPropChild(Settings::AppSettings::ID::PanMatrix_3Sid_SecondRight, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_3SID_SECOND_RIGHT), *subCategoryPanMatrix3Sid, Effective::Immediately, Strings::Preferences::DESC_3SID_SECOND_RIGHT, MIN_MULTISID_MATRIX, MAX_MULTISID_MATRIX);
+
+            AddWrappedPropChild(Settings::AppSettings::ID::PanMatrix_3Sid_ThirdLeft, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_3SID_THIRD_LEFT), *subCategoryPanMatrix3Sid, Effective::Immediately, Strings::Preferences::DESC_3SID_THIRD_LEFT, MIN_MULTISID_MATRIX, MAX_MULTISID_MATRIX);
+            AddWrappedPropChild(Settings::AppSettings::ID::PanMatrix_3Sid_ThirdRight, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_3SID_THIRD_RIGHT), *subCategoryPanMatrix3Sid, Effective::Immediately, Strings::Preferences::DESC_3SID_THIRD_RIGHT, MIN_MULTISID_MATRIX, MAX_MULTISID_MATRIX);
+        }
+    }
+
+    page->Collapse(categoryPanMatrixMultiSid); // It's large, and not of interest most of the time to most users, so collapse it.
+    EnableOrDisableMultiSidVolumeMatrixProps(); // Enable/disable
+
+    #pragma endregion
 
     // Playback
     page->Append(new wxPropertyCategory(Strings::Preferences::CATEGORY_PLAYBACK_BEHAVIOR));
     {
-        AddWrappedProp(Settings::AppSettings::ID::PreRenderEnabled, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_PRERENDER), *page, Effective::Immediately, Strings::Preferences::DESC_PRERENDER);
-        AddWrappedProp(Settings::AppSettings::ID::AutoPlay, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_AUTOPLAY), *page, Effective::Immediately, Strings::Preferences::DESC_AUTOPLAY);
+        AddWrappedPropToPage(Settings::AppSettings::ID::PreRenderEnabled, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_PRERENDER), *page, Effective::Immediately, Strings::Preferences::DESC_PRERENDER);
+        AddWrappedPropToPage(Settings::AppSettings::ID::AutoPlay, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_AUTOPLAY), *page, Effective::Immediately, Strings::Preferences::DESC_AUTOPLAY);
 
-        AddWrappedProp(Settings::AppSettings::ID::RepeatModeDefaultSubsong, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_START_DEFAULT_SUBSONG), *page, Effective::Immediately, Strings::Preferences::DESC_START_DEFAULT_SUBSONG);
-        AddWrappedProp(Settings::AppSettings::ID::RepeatModeIncludeSubsongs, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_INCLUDE_SUBSONGS), *page, Effective::Immediately, Strings::Preferences::DESC_INCLUDE_SUBSONGS);
+        AddWrappedPropToPage(Settings::AppSettings::ID::RepeatModeDefaultSubsong, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_START_DEFAULT_SUBSONG), *page, Effective::Immediately, Strings::Preferences::DESC_START_DEFAULT_SUBSONG);
+        AddWrappedPropToPage(Settings::AppSettings::ID::RepeatModeIncludeSubsongs, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_INCLUDE_SUBSONGS), *page, Effective::Immediately, Strings::Preferences::DESC_INCLUDE_SUBSONGS);
 
-        AddWrappedProp(Settings::AppSettings::ID::SongFallbackDuration, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_FALLBACK_DURATION), *page, Effective::Immediately, Strings::Preferences::DESC_FALLBACK_DURATION, 1, MAX_DURATION);
-        AddWrappedProp(Settings::AppSettings::ID::SkipShorter, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_SKIP_SHORTER), *page, Effective::Immediately, Strings::Preferences::DESC_SKIP_SHORTER, MIN_DURATION, MAX_DURATION);
-        AddWrappedProp(Settings::AppSettings::ID::PopSilencer, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_POP_SILENCER), *page, Effective::Immediately, Strings::Preferences::DESC_POP_SILENCER, MIN_POP_SILENCER, MAX_POP_SILENCER);
+        AddWrappedPropToPage(Settings::AppSettings::ID::SongFallbackDuration, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_FALLBACK_DURATION), *page, Effective::Immediately, Strings::Preferences::DESC_FALLBACK_DURATION, 1, MAX_DURATION);
+        AddWrappedPropToPage(Settings::AppSettings::ID::SkipShorter, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_SKIP_SHORTER), *page, Effective::Immediately, Strings::Preferences::DESC_SKIP_SHORTER, MIN_DURATION, MAX_DURATION);
+        AddWrappedPropToPage(Settings::AppSettings::ID::PopSilencer, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_POP_SILENCER), *page, Effective::Immediately, Strings::Preferences::DESC_POP_SILENCER, MIN_POP_SILENCER, MAX_POP_SILENCER);
 
         {
             const wxArrayString dragDropModeOptions =
@@ -215,7 +275,7 @@ void FramePrefs::FillPropertyGrid()
 
             const char* SettingId = Settings::AppSettings::ID::DragDropMode;
             wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_DRAGDROP_MODE, SettingId, dragDropModeOptions);
-            AddWrappedProp(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_DRAGDROP_MODE);
+            AddWrappedPropToPage(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_DRAGDROP_MODE);
             const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
             prop->SetChoiceSelection(selection);
         }
@@ -235,14 +295,14 @@ void FramePrefs::FillPropertyGrid()
 
             const char* SettingId = Settings::AppSettings::ID::SystemTheme;
             wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_SYSTEM_THEME, SettingId, systemThemeOptions);
-            AddWrappedProp(SettingId, TypeSerialized::Int, prop, *page, Effective::AfterRestart, Strings::Preferences::DESC_SYSTEM_THEME);
+            AddWrappedPropToPage(SettingId, TypeSerialized::Int, prop, *page, Effective::AfterRestart, Strings::Preferences::DESC_SYSTEM_THEME);
             const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
             prop->SetChoiceSelection(selection);
         }
 #endif
 
-        AddWrappedProp(Settings::AppSettings::ID::SelectionFollowsPlayback, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SELECTION_FOLLOWS_PLAYBACK), *page, Effective::Immediately, Strings::Preferences::DESC_SELECTION_FOLLOWS_PLAYBACK);
-        AddWrappedProp(Settings::AppSettings::ID::AutoExpandSubsongs, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_AUTOEXPAND_SUBSONGS), *page, Effective::Immediately, Strings::Preferences::DESC_AUTOEXPAND_SUBSONGS);
+        AddWrappedPropToPage(Settings::AppSettings::ID::SelectionFollowsPlayback, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SELECTION_FOLLOWS_PLAYBACK), *page, Effective::Immediately, Strings::Preferences::DESC_SELECTION_FOLLOWS_PLAYBACK);
+        AddWrappedPropToPage(Settings::AppSettings::ID::AutoExpandSubsongs, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_AUTOEXPAND_SUBSONGS), *page, Effective::Immediately, Strings::Preferences::DESC_AUTOEXPAND_SUBSONGS);
 
 #ifdef WIN32
         {
@@ -253,7 +313,7 @@ void FramePrefs::FillPropertyGrid()
 
             const char* SettingId = Settings::AppSettings::ID::TaskbarProgress;
             wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_TASKBAR_PROGRESS, SettingId, taskbarProgressOptions);
-            AddWrappedProp(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_TASKBAR_PROGRESS);
+            AddWrappedPropToPage(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_TASKBAR_PROGRESS);
             const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
             prop->SetChoiceSelection(selection);
         }
@@ -269,15 +329,15 @@ void FramePrefs::FillPropertyGrid()
         {
             wxFileProperty* filePropertyHandler = new wxFileProperty(Strings::Preferences::OPT_SONGLENGTHS_PATH);
             filePropertyHandler->SetAttribute(wxPG_FILE_WILDCARD, wxString::Format("%s (*.md5)|*.md5", Strings::Preferences::WILDCARD_DESC_MD5));
-            AddWrappedProp(Settings::AppSettings::ID::SonglengthsPath, TypeSerialized::String, filePropertyHandler, *page, Effective::AfterRestart, Strings::Preferences::DESC_SONGLENGTHS_PATH);
+            AddWrappedPropToPage(Settings::AppSettings::ID::SonglengthsPath, TypeSerialized::String, filePropertyHandler, *page, Effective::AfterRestart, Strings::Preferences::DESC_SONGLENGTHS_PATH);
         }
 
-        AddWrappedProp(Settings::AppSettings::ID::SonglengthsTrim, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_SONGLENGTHS_TRIM), *page, Effective::Immediately, Strings::Preferences::DESC_SONGLENGTHS_TRIM, MIN_SONGLENGTHS_TRIM, MAX_SONGLENGTHS_TRIM);
+        AddWrappedPropToPage(Settings::AppSettings::ID::SonglengthsTrim, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_SONGLENGTHS_TRIM), *page, Effective::Immediately, Strings::Preferences::DESC_SONGLENGTHS_TRIM, MIN_SONGLENGTHS_TRIM, MAX_SONGLENGTHS_TRIM);
 
         {
             wxFileProperty* filePropertyHandler = new wxFileProperty(Strings::Preferences::OPT_STIL_PATH);
             filePropertyHandler->SetAttribute(wxPG_FILE_WILDCARD, wxString::Format("%s|STIL.txt", Strings::Preferences::WILDCARD_DESC_STIL_TXT));
-            AddWrappedProp(Settings::AppSettings::ID::StilPath, TypeSerialized::String, filePropertyHandler, *page, Effective::Immediately, Strings::Preferences::DESC_STIL_PATH);
+            AddWrappedPropToPage(Settings::AppSettings::ID::StilPath, TypeSerialized::String, filePropertyHandler, *page, Effective::Immediately, Strings::Preferences::DESC_STIL_PATH);
         }
     }
 
@@ -303,7 +363,7 @@ void FramePrefs::FillPropertyGrid()
 
                 const char* SettingId = Settings::AppSettings::ID::DefaultC64Model;
                 wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_DEFAULT_C64_MODEL, SettingId, defaultC64ModelOptions);
-                AddWrappedProp(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_DEFAULT_C64_MODEL);
+                AddWrappedPropToPage(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_DEFAULT_C64_MODEL);
                 const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
                 prop->SetChoiceSelection(selection);
             }
@@ -318,37 +378,37 @@ void FramePrefs::FillPropertyGrid()
 
                 const char* SettingId = Settings::AppSettings::ID::DefaultSidModel;
                 wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_DEFAULT_SID_MODEL, SettingId, defaultSidModelOptions);
-                AddWrappedProp(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_DEFAULT_SID_MODEL);
+                AddWrappedPropToPage(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_DEFAULT_SID_MODEL);
                 const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
                 prop->SetChoiceSelection(selection);
             }
 
             // Use NTSC for MUS & STR
-            AddWrappedProp(Settings::AppSettings::ID::UseNtscForMus, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_NTSC_C64_MODEL_MUS), *page, Effective::Immediately, Strings::Preferences::DESC_NTSC_C64_MODEL_MUS);
+            AddWrappedPropToPage(Settings::AppSettings::ID::UseNtscForMus, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_NTSC_C64_MODEL_MUS), *page, Effective::Immediately, Strings::Preferences::DESC_NTSC_C64_MODEL_MUS);
 
             // Filter
-            AddWrappedProp(Settings::AppSettings::ID::FilterCurve6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE_COMMON, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
-            AddWrappedProp(Settings::AppSettings::ID::FilterCurve8580, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_8580), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE_COMMON, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
+            AddWrappedPropToPage(Settings::AppSettings::ID::FilterCurve6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE_COMMON, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
+            AddWrappedPropToPage(Settings::AppSettings::ID::FilterCurve8580, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_8580), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE_COMMON, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
 
             // DigiBoost
-            AddWrappedProp(Settings::AppSettings::ID::DigiBoost, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_DIGIBOOST), *page, Effective::Immediately, Strings::Preferences::DESC_DIGIBOOST);
+            AddWrappedPropToPage(Settings::AppSettings::ID::DigiBoost, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_DIGIBOOST), *page, Effective::Immediately, Strings::Preferences::DESC_DIGIBOOST);
 
             // KERNAL
             {
                 wxFileProperty* filePropertyHandler = new wxFileProperty(Strings::Preferences::OPT_ROM_KERNAL_PATH);
-                AddWrappedProp(Settings::AppSettings::ID::RomKernalPath, TypeSerialized::String, filePropertyHandler, *page, Effective::AfterRestart, Strings::Preferences::DESC_ROM_KERNAL_PATH);
+                AddWrappedPropToPage(Settings::AppSettings::ID::RomKernalPath, TypeSerialized::String, filePropertyHandler, *page, Effective::AfterRestart, Strings::Preferences::DESC_ROM_KERNAL_PATH);
             }
 
             // BASIC
             {
                 wxFileProperty* filePropertyHandler = new wxFileProperty(Strings::Preferences::OPT_ROM_BASIC_PATH);
-                AddWrappedProp(Settings::AppSettings::ID::RomBasicPath, TypeSerialized::String, filePropertyHandler, *page, Effective::AfterRestart, Strings::Preferences::DESC_ROM_BASIC_PATH);
+                AddWrappedPropToPage(Settings::AppSettings::ID::RomBasicPath, TypeSerialized::String, filePropertyHandler, *page, Effective::AfterRestart, Strings::Preferences::DESC_ROM_BASIC_PATH);
             }
 
             // CHARGEN
             {
                 wxFileProperty* filePropertyHandler = new wxFileProperty(Strings::Preferences::OPT_ROM_CHARGEN_PATH);
-                AddWrappedProp(Settings::AppSettings::ID::RomChargenPath, TypeSerialized::String, filePropertyHandler, *page, Effective::AfterRestart, Strings::Preferences::DESC_ROM_CHARGEN_PATH);
+                AddWrappedPropToPage(Settings::AppSettings::ID::RomChargenPath, TypeSerialized::String, filePropertyHandler, *page, Effective::AfterRestart, Strings::Preferences::DESC_ROM_CHARGEN_PATH);
             }
         }
     }
@@ -356,11 +416,11 @@ void FramePrefs::FillPropertyGrid()
     // System
     page->Append(new wxPropertyCategory(Strings::Preferences::CATEGORY_APPLICATION));
     {
-        AddWrappedProp(Settings::AppSettings::ID::RememberPlaylist, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_REMEMBER_PLAYLIST), *page, Effective::Immediately, Strings::Preferences::DESC_REMEMBER_PLAYLIST);
+        AddWrappedPropToPage(Settings::AppSettings::ID::RememberPlaylist, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_REMEMBER_PLAYLIST), *page, Effective::Immediately, Strings::Preferences::DESC_REMEMBER_PLAYLIST);
 #ifdef WIN32
-        AddWrappedProp(Settings::AppSettings::ID::MediaKeys, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_MEDIA_KEYS), *page, Effective::Immediately, Strings::Preferences::DESC_MEDIA_KEYS);
+        AddWrappedPropToPage(Settings::AppSettings::ID::MediaKeys, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_MEDIA_KEYS), *page, Effective::Immediately, Strings::Preferences::DESC_MEDIA_KEYS);
 #endif
-        AddWrappedProp(Settings::AppSettings::ID::SingleInstance, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SINGLE_INSTANCE), *page, Effective::Immediately, Strings::Preferences::DESC_SINGLE_INSTANCE);
+        AddWrappedPropToPage(Settings::AppSettings::ID::SingleInstance, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SINGLE_INSTANCE), *page, Effective::Immediately, Strings::Preferences::DESC_SINGLE_INSTANCE);
 
         wxString descRestoreDefaultsStr(Strings::Preferences::DESC_RESTORE_DEFAULTS);
 #ifndef WIN32
@@ -369,7 +429,7 @@ void FramePrefs::FillPropertyGrid()
             .Append(Strings::Preferences::DESC_RESTORE_DEFAULTS_LINUX)
             .Append(_app.currentSettings->GetSettingsFilePath());
 #endif
-        AddWrappedProp(Settings::AppSettings::ID::RestoreDefaults, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_RESTORE_DEFAULTS), *page, Effective::Immediately, descRestoreDefaultsStr);
+        AddWrappedPropToPage(Settings::AppSettings::ID::RestoreDefaults, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_RESTORE_DEFAULTS), *page, Effective::Immediately, descRestoreDefaultsStr);
     }
 
     // Final
@@ -443,14 +503,10 @@ void FramePrefs::OnPropertyGridChanged(wxPropertyGridEvent& evt)
     wProp.changed = true;
 
     _ui->propertyGrid->RefreshProperty(evt.GetProperty()); // Necessary to refresh in case of error-highlight previously (wxWidgets' edge-case issue).
-
     FindWindowById(wxID_APPLY, this)->Enable(true);
 
-    // Enable/disable VirtualStereo settings
-    if (evt.GetProperty()->GetLabel() == Strings::Preferences::OPT_OUT_CHANNELS)
-    {
-        RefreshVirtualStereoSettings();
-    }
+    EnableOrDisableVirtualStereoProps();
+    EnableOrDisableMultiSidVolumeMatrixProps();
 }
 
 void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
@@ -488,6 +544,10 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     else if (prop.first == Settings::AppSettings::ID::PreRenderEnabled)
                     {
                         _framePlayer.ForceStopPlayback({});
+                    }
+                    else if (prop.first == Settings::AppSettings::ID::OutChannels || prop.first == Settings::AppSettings::ID::VirtualStereoMultiSid)
+                    {
+                        ImmediatelyRefreshChannelMatrix();
                     }
                     else if (prop.first == Settings::AppSettings::ID::SongFallbackDuration)
                     {
@@ -537,6 +597,28 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                 {
                     const double propertyValueDouble = prop.second.property.GetValue().GetDouble();
                     option.UpdateValue(propertyValueDouble);
+
+                    const bool panningMatrixChanged =
+                    (
+                           // 2SID
+                           prop.first == Settings::AppSettings::ID::PanMatrix_2Sid_FirstLeft
+                        || prop.first == Settings::AppSettings::ID::PanMatrix_2Sid_FirstRight
+                        || prop.first == Settings::AppSettings::ID::PanMatrix_2Sid_SecondLeft
+                        || prop.first == Settings::AppSettings::ID::PanMatrix_2Sid_SecondRight
+                           // 3SID
+                        || prop.first == Settings::AppSettings::ID::PanMatrix_3Sid_FirstLeft
+                        || prop.first == Settings::AppSettings::ID::PanMatrix_3Sid_FirstRight
+                        || prop.first == Settings::AppSettings::ID::PanMatrix_3Sid_SecondLeft
+                        || prop.first == Settings::AppSettings::ID::PanMatrix_3Sid_SecondRight
+                        || prop.first == Settings::AppSettings::ID::PanMatrix_3Sid_ThirdLeft
+                        || prop.first == Settings::AppSettings::ID::PanMatrix_3Sid_ThirdRight
+                    );
+
+                    if (panningMatrixChanged)
+                    {
+                        ImmediatelyRefreshChannelMatrix();
+                    }
+
                     break;
                 }
 
@@ -612,6 +694,15 @@ void FramePrefs::OnButtonCancel(wxCommandEvent& /*evt*/)
     Destroy();
 }
 
+void FramePrefs::ImmediatelyRefreshChannelMatrix()
+{
+    if (_app.GetPlaybackInfo().GetCurrentTuneSidChipsRequired() > 1 && _app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool())
+    {
+        _framePlayer.ForceStopPlayback({}); // Discard the pre-render.
+    }
+    _app.RefreshChannelMatrix();
+}
+
 FramePrefs::WrappedProp& FramePrefs::GetWrappedProp(const wxPGProperty& property)
 {
     const wxString& targetName = property.GetName();
@@ -626,14 +717,30 @@ FramePrefs::WrappedProp& FramePrefs::GetWrappedProp(const wxPGProperty& property
     return (*it).second;
 }
 
-void FramePrefs::RefreshVirtualStereoSettings()
+void FramePrefs::EnableOrDisableVirtualStereoProps()
 {
-    wxPGProperty& propParent = *_ui->propertyGrid->GetPropertyByLabel(Strings::Preferences::OPT_OUT_CHANNELS);
-    wxPGProperty& propChild1 = *_ui->propertyGrid->GetPropertyByLabel(Strings::Preferences::OPT_OUT_FXVIRTUALSTEREO_SPEAKER_DISTANCE);
-    wxPGProperty& propChild2 = *_ui->propertyGrid->GetPropertyByLabel(Strings::Preferences::OPT_OUT_FXVIRTUALSTEREO_SIDE_VOLUME);
+    const wxPGProperty& propParent = *_ui->propertyGrid->GetPropertyByName(Settings::AppSettings::ID::OutChannels);
+    wxPGProperty& propChild1 = *_ui->propertyGrid->GetPropertyByName(Settings::AppSettings::ID::VirtualStereoSpeakerDistance);
+    wxPGProperty& propChild2 = *_ui->propertyGrid->GetPropertyByName(Settings::AppSettings::ID::VirtualStereoSideVolumeFactor);
+    wxPGProperty& propChild3 = *_ui->propertyGrid->GetPropertyByName(Settings::AppSettings::ID::VirtualStereoMultiSid);
 
-    Settings::AppSettings::OutChannels mode = static_cast<Settings::AppSettings::OutChannels>(propParent.GetValue().GetInteger());
+    const Settings::AppSettings::OutChannels mode = static_cast<Settings::AppSettings::OutChannels>(propParent.GetValue().GetInteger());
     const bool enabled = mode == Settings::AppSettings::OutChannels::VirtualStereo;
     propChild1.Enable(enabled);
     propChild2.Enable(enabled);
+    propChild3.Enable(enabled);
+}
+
+void FramePrefs::EnableOrDisableMultiSidVolumeMatrixProps()
+{
+    const wxPGProperty& propOutChannels = *_ui->propertyGrid->GetPropertyByName(Settings::AppSettings::ID::OutChannels);
+    const Settings::AppSettings::OutChannels mode = static_cast<Settings::AppSettings::OutChannels>(propOutChannels.GetValue().GetInteger());
+
+    const bool headphonesMode = _ui->propertyGrid->GetPropertyByName(Settings::AppSettings::ID::VirtualStereoMultiSid)->GetValue().GetBool();
+
+    const bool enabled =
+        mode != Settings::AppSettings::OutChannels::ForceMono &&
+        !(mode == Settings::AppSettings::OutChannels::VirtualStereo && headphonesMode);
+
+    _ui->propertyGrid->GetPropertyByLabel(Strings::Preferences::CATEGORY_MULTISID_PANNING_MATRIX)->Enable(enabled);
 }

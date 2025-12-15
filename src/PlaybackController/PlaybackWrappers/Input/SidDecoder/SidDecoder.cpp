@@ -130,6 +130,7 @@ bool SidDecoder::TryFillBuffer(void* buffer, unsigned long framesPerBuffer)
     if (!_mixer)
     {
         _mixer = std::make_unique<SidMixer>(_sidEngine);
+        _mixer->ApplyChannelMatrix(_channelMatrixCache);
     }
 
     _mixer->FillBuffer(buffer, framesPerBuffer);
@@ -484,6 +485,15 @@ void SidDecoder::ToggleFilter(unsigned int sidNum, bool enable)
     if (!_seeking)
     {
         _sidEngine.filter(sidNum, enable);
+    }
+}
+
+void SidDecoder::SetChannelMatrix(const MultiSidChannelMatrix& matrix)
+{
+    _channelMatrixCache = matrix;
+    if (_mixer != nullptr)
+    {
+        _mixer->ApplyChannelMatrix(_channelMatrixCache);
     }
 }
 
