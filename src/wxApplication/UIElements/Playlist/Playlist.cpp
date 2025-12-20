@@ -712,7 +712,7 @@ namespace UIElements
 				{
 					std::sort(_model.entries.begin(), _model.entries.end(), [&](const PlaylistTreeModelNodePtr& a, const PlaylistTreeModelNodePtr& b)
 					{
-						const int result = a->title.Cmp(b->title);
+						const int result = a->title.CmpNoCase(b->title);
 						return (ascending) ? result < 0 : result > 0;
 					});
 
@@ -731,7 +731,7 @@ namespace UIElements
 				{
 					std::sort(_model.entries.begin(), _model.entries.end(), [&](const PlaylistTreeModelNodePtr& a, const PlaylistTreeModelNodePtr& b)
 					{
-						const int result = a->author.Cmp(b->author);
+						const int result = a->author.CmpNoCase(b->author);
 						return (ascending) ? result < 0 : result > 0;
 					});
 
@@ -747,7 +747,7 @@ namespace UIElements
 						wxString bCopyright(b->copyright);
 						bCopyright.Replace('?', '0');
 
-						const int result = aCopyright.Cmp(bCopyright);
+						const int result = aCopyright.CmpNoCase(bCopyright);
 						return (ascending) ? result < 0 : result > 0;
 					});
 
