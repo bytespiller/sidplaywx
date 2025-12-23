@@ -907,7 +907,7 @@ PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const Play
 void FramePlayer::DoRemoveSongTreeItem(PlaylistTreeModelNode& node)
 {
     const PlaylistTreeModelNode* activeSong = _ui->treePlaylist->GetActiveSong();
-    if (activeSong != nullptr && activeSong->filepath == node.filepath)
+    if (activeSong != nullptr && activeSong->uid == node.uid)
     {
         _app.UnloadActiveTune();
     }
