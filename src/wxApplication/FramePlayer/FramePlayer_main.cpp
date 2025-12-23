@@ -592,6 +592,11 @@ void FramePlayer::OpenPrefsFrame()
 {
     _framePrefs = new FramePrefs(this, Strings::Preferences::WINDOW_TITLE, wxDefaultPosition, DpiSize(480, 600), _app, *this);
     _framePrefs->ShowModal(); // Reminder: this one gets Destroy()-ed, not Close()-d.
+
+    if (_exitingApplication)
+    {
+        CloseApplication(); // The Preferences wants to close the app (i.e., "Reset default settings" was chosen).
+    }
 }
 
 void FramePlayer::ToggleVisualizationEnabled()

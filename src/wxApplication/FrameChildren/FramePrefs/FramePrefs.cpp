@@ -662,7 +662,7 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
         {
             _app.currentSettings->ResetTo(_app.currentSettings->GetDefaultSettings());
             _framePlayer.ForceAppExitOnPrefsClose({}); // Since we're modal, the caller must close the app after we return (wxExit() etc. won't do anything from here).
-            Destroy();
+            Destroy(); // In case Apply button (not OK button) was clicked.
         }
         else
         {
