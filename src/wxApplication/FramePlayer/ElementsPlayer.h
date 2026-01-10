@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,6 +121,8 @@ namespace FrameElements
 		wxStaticText* labelTitle;
 		wxStaticText* labelAuthor;
 		wxStaticText* labelCopyright;
+		wxStaticText* labelPlaylistPosition;
+
 		wxStaticText* labelSubsong;
 		wxStaticText* labelTime;
 

@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2023-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2023-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -774,11 +774,11 @@ namespace UIElements
 			}
 			viewColumn.SetBitmap(*_model.GetPlaylistIcons().GetIconList().at((_columnSortState.ascending) ? PlaylistIconId::SortAscending : PlaylistIconId::SortDescending).bitmap);
 
-			// Notify the parent (we need to refresh the transport buttons state after sorting in case the first/last positions are swapped)
-			GetEventHandler()->AddPendingEvent(wxDataViewEvent(wxEVT_DATAVIEW_COLUMN_SORTED, this, &viewColumn));
-
 			// Notify the wx base control of change
 			_model.Cleared();
+
+			// Notify the parent (we need to refresh the transport buttons state after sorting in case the first/last positions are swapped)
+			GetEventHandler()->AddPendingEvent(wxDataViewEvent(wxEVT_DATAVIEW_COLUMN_SORTED, this, &viewColumn));
 		}
 
 		void Playlist::_ResetColumnSortingIndicator()

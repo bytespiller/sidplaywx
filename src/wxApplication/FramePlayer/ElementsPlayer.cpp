@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,13 @@ namespace FrameElements // Static vars
 
 namespace FrameElements // Static functions
 {
+	static wxStaticText* AttachLabel(wxPanel& parent, wxBoxSizer* parentSizer)
+	{
+		wxStaticText* labelPtr = new wxStaticText(&parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END);
+		parentSizer->Add(labelPtr, 0, wxEXPAND, TEMP_LABEL_BORDER_SIZE);
+		return labelPtr;
+	}
+
 	static wxStaticText* AttachIconLabel(const ThemeData::ThemeImage& themeImage, const std::string& tooltip, wxPanel& parent, wxBoxSizer* parentSizer)
 	{
 		wxBoxSizer* sizerIconLabel = new wxBoxSizer(wxHORIZONTAL);
@@ -51,10 +58,7 @@ namespace FrameElements // Static functions
 			bitmapIcon->SetCursor(wxCURSOR_QUESTION_ARROW);
 		}
 
-		wxStaticText* labelPtr = new wxStaticText(&parent, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END);
-		sizerIconLabel->Add(labelPtr, 1, wxALIGN_CENTER_VERTICAL, TEMP_LABEL_BORDER_SIZE);
-
-		return labelPtr;
+		return AttachLabel(parent, sizerIconLabel);
 	}
 
 	static UIElements::ScrollingLabel* AttachStilIconScrollingLabel(const ThemeData::ThemeImage& themeImage, const ThemeData::ThemedElementData& themedData, const std::string& tooltip, wxPanel& parent, wxBoxSizer* parentSizer, UIElements::ScrollingLabel::TextJustify justify)
@@ -98,15 +102,6 @@ namespace FrameElements // Static functions
 		wxButton* newButton = UIElements::Util::NewSvgButton(themeImage, wxSize(TEMP_BUTTON_SIZE, TEMP_BUTTON_SIZE), parent);
 		parentSizer->Add(newButton, 0, wxALL, TEMP_BUTTON_BORDER_SIZE);
 		return newButton;
-	}
-
-	static void AttachFixedSizeSeparator(const wxSize& size, wxBoxSizer* parentSizer, wxPanel& parent)
-	{
-		wxPanel* separatorDummyPanel = new wxPanel(&parent, wxID_ANY);
-		separatorDummyPanel->SetSize(size);
-		separatorDummyPanel->Enable(false);
-		separatorDummyPanel->Hide();
-		parentSizer->Add(separatorDummyPanel, 0, wxFIXED_MINSIZE | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
 	}
 
 	static std::shared_ptr<wxBitmapBundle> LoadMenuIcon(const ThemeData::ThemeData& themeData, const std::string& themeIconName)
@@ -193,7 +188,7 @@ namespace FrameElements // Player class
 
 		// Sizers
 		wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
-		AttachFixedSizeSeparator(wxSize(-1, TEMP_LABEL_BORDER_SIZE * 2), sizerMain, panel); // Add some top-margin to clear the song area from the menubar.
+		sizerMain->AddSpacer(TEMP_LABEL_BORDER_SIZE * 2); // Add some top-margin to clear the song area from the menubar.
 
 		wxBoxSizer* sizerSongArea = new wxBoxSizer(wxHORIZONTAL);
 		sizerMain->Add(sizerSongArea, 0, wxEXPAND);
@@ -204,19 +199,29 @@ namespace FrameElements // Player class
 
 		// Right
 		sizerStilRight = new wxBoxSizer(wxVERTICAL);
-		sizerSongArea->Add(sizerStilRight, 1, wxEXPAND);
+		sizerSongArea->Add(sizerStilRight, 1);
 
-		// Labels
+		// Song labels
 		labelTitle = AttachIconLabel(themeData.GetImage("icon_music"), Strings::FramePlayer::TOOLTIP_PSID_TITLE, _parentPanel, sizerSongInfoLeft);
 
 		{
-			wxFont boldFont = labelTitle->GetFont();
+			wxFont boldFont(labelTitle->GetFont());
 			boldFont.MakeBold();
 			labelTitle->SetFont(boldFont);
 		}
 
 		labelAuthor = AttachIconLabel(themeData.GetImage("icon_author"), Strings::FramePlayer::TOOLTIP_PSID_AUTHOR, _parentPanel, sizerSongInfoLeft);
 		labelCopyright = AttachIconLabel(themeData.GetImage("icon_copyright"), Strings::FramePlayer::TOOLTIP_PSID_COPYRIGHT, _parentPanel, sizerSongInfoLeft);
+
+		// Playlist position & count label
+		{
+			wxBoxSizer* sizerLabelPlaylistPosition = new wxBoxSizer(wxHORIZONTAL);
+			sizerMain->Add(sizerLabelPlaylistPosition, 0);
+			sizerLabelPlaylistPosition->AddSpacer(TEMP_LABEL_BORDER_SIZE);
+
+			labelPlaylistPosition = AttachLabel(_parentPanel, sizerLabelPlaylistPosition);
+			labelPlaylistPosition->SetLabelText(Strings::FramePlayer::LABEL_PLAYLIST_POS_EMPTY);
+		}
 
 		// STIL scrolling labels
 		{
@@ -229,11 +234,11 @@ namespace FrameElements // Player class
 		// Visualization
 		waveformVisualization = new UIElements::WaveformVisualization(&_parentPanel, themeData.GetThemedElement("WaveformVisualization"));
 		waveformVisualization->Hide();
-		waveformVisualization->SetMinClientSize(wxSize(-1, 10));
-		waveformVisualization->SetMaxClientSize(wxSize(-1, 72));
-		sizerMain->Add(waveformVisualization, 1, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
+		waveformVisualization->SetMinClientSize(wxSize(-1, 72));
+		waveformVisualization->SetMaxClientSize(waveformVisualization->GetMinClientSize());
+		sizerMain->Add(waveformVisualization, 0, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
 
-		AttachFixedSizeSeparator(wxSize(0, 10 + 4), sizerMain, _parentPanel); // TODO: magic numbers
+		//sizerMain->AddSpacer(14); // TODO: magic numbers
 
 		// Sizer below
 		wxBoxSizer* gridSizerPlaybackButtons = new wxBoxSizer(wxHORIZONTAL);
@@ -274,7 +279,7 @@ namespace FrameElements // Player class
 		btnPlaybackMod = AttachSimplePlaybackControlButton(themeData.GetImage("btn_eq"), _parentPanel, gridSizerPlaybackButtons);
 		btnPlaybackMod->SetToolTip(Strings::PlaybackMods::WINDOW_TITLE);
 
-		AttachFixedSizeSeparator(wxSize(0, 1 + 4), sizerMain, _parentPanel); // TODO: magic number
+		sizerMain->AddSpacer(5); // TODO: magic number
 
 		// Info bar: Media keys taken
 		infoBarMediaKeysTaken = new wxInfoBar(&_parentPanel);
@@ -345,7 +350,7 @@ namespace FrameElements // Player class
 		labelTime = new wxStaticText(&_parentPanel, wxID_ANY, wxT("000:00"), wxDefaultPosition, wxDefaultSize, wxSTB_DEFAULT_STYLE | wxTEXT_ALIGNMENT_CENTER); // Extra padding in text on purpose!
 		sizerSeekbar->Add(labelTime, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL, TEMP_LABEL_TIME_BORDER_SIZE);
 
-		AttachFixedSizeSeparator(wxSize(TEMP_LABEL_BORDER_SIZE, 0), sizerSeekbar, _parentPanel);
+		sizerSeekbar->AddSpacer(TEMP_LABEL_BORDER_SIZE); // Add some right-padding after time label.
 
  		// Playlist
 		{

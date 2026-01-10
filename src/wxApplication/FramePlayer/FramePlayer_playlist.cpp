@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -322,6 +322,7 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
             if (throttledYieldCounter == 0 || throttledYieldCounter >= 100) // 255 max
             {
                 throttledYieldCounter = 0;
+                UpdatePlaylistPositionLabel();
                 wxYield(); // Also must be before the HasFocus() call because not even that updates otherwise!
             }
 

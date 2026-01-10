@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.18.0"); // Reminder: don't forget to increase. Also, don't forget the final zero for x.y.0 versions.
+	inline constexpr const char* const APP_VERSION_TAG("0.18.1"); // Reminder: don't forget to increase. Also, don't forget the final zero for x.y.0 versions.
 
 	namespace FramePlayer
 	{
@@ -108,6 +108,9 @@ namespace Strings
 		inline constexpr const char* const TOOLTIP_STIL_NAME_TITLE("STIL Name - Title");
 		inline constexpr const char* const TOOLTIP_STIL_ARTIST_AUTHOR("STIL Artist (Author)");
 		inline constexpr const char* const TOOLTIP_STIL_COMMENT("STIL Comment");
+
+		inline constexpr const char* const LABEL_PLAYLIST_POS_EMPTY("%i files");
+		inline constexpr const char* const LABEL_PLAYLIST_POS_TEMPLATE("File %i / %i");
 
 		inline constexpr const char* const TOOLTIP_SHOW_REFRESH_TUNE_INFO("Show/refresh current Tune Info");
 
@@ -230,7 +233,7 @@ namespace Strings
 		inline constexpr const char* const DESC_OUT_FXVIRTUALSTEREO_SIDE_VOLUME("Volume allocation of sides vs. center.\n- Min: 0.1 = center-focused sound stage (ball).\n- Max: 0.4 = wide-dispersed sound stage (donut).\n- Default: 0.18");
 
 		inline constexpr const char* const OPT_OUT_FXVIRTUALSTEREO_MULTISID("Multi-SID tunes Virtual stereo");
-		inline constexpr const char* const DESC_OUT_FXVIRTUALSTEREO_MULTISID("Governs whether the Virtual stereo applies to multi-SID tunes as well.\n- Enable to use the Virtual stereo with multi-SID tunes too (no hard-panning).\n- Disable to use the Multi-SID channel matrix for them instead (Normal).\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
+		inline constexpr const char* const DESC_OUT_FXVIRTUALSTEREO_MULTISID("Governs whether the Virtual stereo applies to multi-SID tunes as well.\n- Enable to use the Virtual stereo with multi-SID tunes too (no hard-panning).\n- Disable to use the Multi-SID channel matrix for them instead (Normal). This will also eliminate any edge-case clipping/crackling.\n\nOngoing playback will stop if Instant seeking is enabled when changing this setting while multi-SID tune is playing.");
 
 		#pragma region Multi-SID panning matrix (TODO: add support for 4SID once it becomes possible)
 
@@ -404,7 +407,7 @@ namespace Strings
 		inline constexpr const char* const DESCRIPTION("A GUI player for Commodore 64 SID music files based on libsidplayfp and wxWidgets");
 		inline constexpr const char* const DEVELOPER_LIBRARIES("This program uses the following Open Source libraries:");
 		inline constexpr const char* const HVSC("Check out the (unaffiliated) High Voltage SID Collection for SID tunes, Songlengths Database and more: https://www.hvsc.c64.org");
-		inline constexpr const char* const LICENSE("sidplaywx - A GUI player for Commodore 64 SID music files based on libsidplayfp and wxWidgets.\nCopyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html");
+		inline constexpr const char* const LICENSE("sidplaywx - A GUI player for Commodore 64 SID music files based on libsidplayfp and wxWidgets.\nCopyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html");
 	}
 
 	namespace Error

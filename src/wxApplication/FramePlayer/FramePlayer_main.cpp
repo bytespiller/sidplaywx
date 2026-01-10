@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -755,7 +755,7 @@ void FramePlayer::DisplayAboutBox()
     aboutInfo.SetName(Strings::FramePlayer::WINDOW_TITLE);
     aboutInfo.SetVersion(Strings::APP_VERSION_TAG); // Reminder: don't forget to increase.
     aboutInfo.SetDescription(Strings::About::DESCRIPTION);
-    aboutInfo.SetCopyright(L"(C) 2021-2025 Jasmin Rutić"); // Reminder: don't forget to bump.
+    aboutInfo.SetCopyright(L"(C) 2021-2026 Jasmin Rutić"); // Reminder: don't forget to bump.
     aboutInfo.SetWebSite("https://github.com/bytespiller/sidplaywx");
 
     aboutInfo.SetLicense(Strings::About::LICENSE);

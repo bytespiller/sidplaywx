@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -337,8 +337,8 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
     else
     {
         const PlaybackController& playback = _app.GetPlaybackInfo();
-        const int subsong = playback.GetCurrentSubsong();
         PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
+        const int subsong = (node != nullptr) ? playback.GetCurrentSubsong() : 1;
 
         // Set song info labels
         if (node)
@@ -420,7 +420,22 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
         }
     }
 
+    UpdatePlaylistPositionLabel();
     UpdatePlaybackStatusBar();
+}
+
+void FramePlayer::UpdatePlaylistPositionLabel()
+{
+    const int total = static_cast<int>(_ui->treePlaylist->GetSongs().size());
+
+    if (PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong())
+    {
+        _ui->labelPlaylistPosition->SetLabelText(wxString::Format(Strings::FramePlayer::LABEL_PLAYLIST_POS_TEMPLATE, _ui->treePlaylist->GetMainSongPlaylistPosition(*node), total));
+    }
+    else
+    {
+        _ui->labelPlaylistPosition->SetLabelText(wxString::Format(Strings::FramePlayer::LABEL_PLAYLIST_POS_EMPTY, total));
+    }
 }
 
 void FramePlayer::SetRefreshTimerThrottled(bool throttle)
