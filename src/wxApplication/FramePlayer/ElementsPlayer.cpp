@@ -43,7 +43,7 @@ namespace FrameElements // Static functions
 		return labelPtr;
 	}
 
-	static wxStaticText* AttachIconLabel(const ThemeData::ThemeImage& themeImage, const std::string& tooltip, wxPanel& parent, wxBoxSizer* parentSizer)
+	static wxStaticText* AttachIconLabel(const ThemeData::ThemeImage& themeImage, const wxString& tooltip, wxPanel& parent, wxBoxSizer* parentSizer)
 	{
 		wxBoxSizer* sizerIconLabel = new wxBoxSizer(wxHORIZONTAL);
 		parentSizer->Add(sizerIconLabel, 1, wxEXPAND, 0);
@@ -53,7 +53,7 @@ namespace FrameElements // Static functions
 		sizerIconLabel->Add(bitmapIcon, 0, wxEXPAND | wxALL, TEMP_LABEL_BORDER_SIZE);
 
 		bitmapIcon->SetToolTip(tooltip);
-		if (!tooltip.empty())
+		if (!tooltip.IsEmpty())
 		{
 			bitmapIcon->SetCursor(wxCURSOR_QUESTION_ARROW);
 		}
@@ -61,7 +61,7 @@ namespace FrameElements // Static functions
 		return AttachLabel(parent, sizerIconLabel);
 	}
 
-	static UIElements::ScrollingLabel* AttachStilIconScrollingLabel(const ThemeData::ThemeImage& themeImage, const ThemeData::ThemedElementData& themedData, const std::string& tooltip, wxPanel& parent, wxBoxSizer* parentSizer, UIElements::ScrollingLabel::TextJustify justify)
+	static UIElements::ScrollingLabel* AttachStilIconScrollingLabel(const ThemeData::ThemeImage& themeImage, const ThemeData::ThemedElementData& themedData, const wxString& tooltip, wxPanel& parent, wxBoxSizer* parentSizer, UIElements::ScrollingLabel::TextJustify justify)
 	{
 		wxBoxSizer* sizerIconLabel = new wxBoxSizer(wxHORIZONTAL);
 		parentSizer->Add(sizerIconLabel, 1, wxEXPAND, 0);
@@ -72,7 +72,7 @@ namespace FrameElements // Static functions
 		wxStaticBitmap* const bitmapIcon = new wxStaticBitmap(&parent, wxID_ANY, *img.get());
 
 		bitmapIcon->SetToolTip(tooltip);
-		if (!tooltip.empty())
+		if (!tooltip.IsEmpty())
 		{
 			bitmapIcon->SetCursor(wxCURSOR_QUESTION_ARROW);
 		}
@@ -97,10 +97,16 @@ namespace FrameElements // Static functions
 		return labelPtr;
 	}
 
-	static wxButton* AttachSimplePlaybackControlButton(const ThemeData::ThemeImage& themeImage, wxPanel& parent, wxBoxSizer* parentSizer)
+	static wxButton* AttachSimplePlaybackControlButton(const ThemeData::ThemeImage& themeImage, wxPanel& parent, wxBoxSizer* parentSizer, const wxString& tooltip = wxEmptyString)
 	{
 		wxButton* newButton = UIElements::Util::NewSvgButton(themeImage, wxSize(TEMP_BUTTON_SIZE, TEMP_BUTTON_SIZE), parent);
 		parentSizer->Add(newButton, 0, wxALL, TEMP_BUTTON_BORDER_SIZE);
+
+		if (!tooltip.IsEmpty())
+		{
+			newButton->SetToolTip(tooltip);
+		}
+
 		return newButton;
 	}
 
@@ -252,32 +258,33 @@ namespace FrameElements // Player class
 		gridSubSizer1Vert->Add(sliderVolume, 0, wxEXPAND | wxALL, 0);
 
 		// Playback controls & other buttons
-		btnStop = AttachSimplePlaybackControlButton(themeData.GetImage("btn_stop"), _parentPanel, gridSizerPlaybackButtons);
+		btnStop = AttachSimplePlaybackControlButton(themeData.GetImage("btn_stop"), _parentPanel, gridSizerPlaybackButtons, Strings::FramePlayer::TOOLTIP_BTN_STOP);
 
 		btnPlayPause = new UIElements::PlayPauseButton(themeData.GetImage("btn_play"), themeData.GetImage("btn_pause"), wxSize(TEMP_BUTTON_SIZE, TEMP_BUTTON_SIZE), _parentPanel);
+		btnPlayPause->SetToolTip(Strings::FramePlayer::TOOLTIP_BTN_PLAY_PAUSE);
 		gridSizerPlaybackButtons->Add(btnPlayPause, 0, wxALL, TEMP_BUTTON_BORDER_SIZE);
 
 		gridSizerPlaybackButtons->Add(0, 0, wxEXPAND, 0); // This "spacer" makes the playback control buttons horizontally centered (without it, they'd be left-aligned).
 
-		btnPrevTrack = AttachSimplePlaybackControlButton(themeData.GetImage("btn_skipback"), _parentPanel, gridSizerPlaybackButtons);
-		btnPrevSubsong = AttachSimplePlaybackControlButton(themeData.GetImage("btn_prevsubsong"), _parentPanel, gridSizerPlaybackButtons);
+		btnPrevTrack = AttachSimplePlaybackControlButton(themeData.GetImage("btn_skipback"), _parentPanel, gridSizerPlaybackButtons, Strings::FramePlayer::TOOLTIP_BTN_PREV_FILE);
+		btnPrevSubsong = AttachSimplePlaybackControlButton(themeData.GetImage("btn_prevsubsong"), _parentPanel, gridSizerPlaybackButtons, Strings::FramePlayer::TOOLTIP_BTN_PREV_SUBSONG);
 
 		labelSubsong = new wxStaticText(&_parentPanel, wxID_ANY, "000 / 000", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER | wxST_NO_AUTORESIZE);
+		labelSubsong->SetToolTip(Strings::FramePlayer::TOOLTIP_SUBSONG_LABEL);
+		labelSubsong->SetCursor(wxCURSOR_QUESTION_ARROW);
 		labelSubsong->SetMinSize(labelSubsong->GetBestSize()); // Needed on GTK (additional padding with zeros as well).
 		gridSizerPlaybackButtons->Add(labelSubsong, 1, wxALIGN_CENTER_VERTICAL);
 
-		btnNextSubsong = AttachSimplePlaybackControlButton(themeData.GetImage("btn_nextsubsong"), _parentPanel, gridSizerPlaybackButtons);
-		btnNextTrack = AttachSimplePlaybackControlButton(themeData.GetImage("btn_skipforward"), _parentPanel, gridSizerPlaybackButtons);
+		btnNextSubsong = AttachSimplePlaybackControlButton(themeData.GetImage("btn_nextsubsong"), _parentPanel, gridSizerPlaybackButtons, Strings::FramePlayer::TOOLTIP_BTN_NEXT_SUBSONG);
+		btnNextTrack = AttachSimplePlaybackControlButton(themeData.GetImage("btn_skipforward"), _parentPanel, gridSizerPlaybackButtons, Strings::FramePlayer::TOOLTIP_BTN_NEXT_FILE);
 
 		gridSizerPlaybackButtons->Add(0, 0, wxEXPAND, 0); // This "spacer" makes the playback control buttons horizontally centered (without it, they'd be right-aligned).
 
 		// TuneInfo button
-		btnTuneInfo = AttachSimplePlaybackControlButton(themeData.GetImage("btn_tuneinfo"), _parentPanel, gridSizerPlaybackButtons);
-		btnTuneInfo->SetToolTip(Strings::FramePlayer::TOOLTIP_SHOW_REFRESH_TUNE_INFO);
+		btnTuneInfo = AttachSimplePlaybackControlButton(themeData.GetImage("btn_tuneinfo"), _parentPanel, gridSizerPlaybackButtons, Strings::FramePlayer::TOOLTIP_SHOW_REFRESH_TUNE_INFO);
 
 		// Playback modifier button
-		btnPlaybackMod = AttachSimplePlaybackControlButton(themeData.GetImage("btn_eq"), _parentPanel, gridSizerPlaybackButtons);
-		btnPlaybackMod->SetToolTip(Strings::PlaybackMods::WINDOW_TITLE);
+		btnPlaybackMod = AttachSimplePlaybackControlButton(themeData.GetImage("btn_eq"), _parentPanel, gridSizerPlaybackButtons, Strings::PlaybackMods::WINDOW_TITLE);
 
 		sizerMain->AddSpacer(5); // TODO: magic number
 

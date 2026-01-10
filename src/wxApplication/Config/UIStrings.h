@@ -112,6 +112,14 @@ namespace Strings
 		inline constexpr const char* const LABEL_PLAYLIST_POS_EMPTY("%i files");
 		inline constexpr const char* const LABEL_PLAYLIST_POS_TEMPLATE("File %i / %i");
 
+		inline constexpr const char* const TOOLTIP_BTN_PLAY_PAUSE("Play/Pause");
+		inline constexpr const char* const TOOLTIP_BTN_STOP("Stop");
+		inline constexpr const char* const TOOLTIP_BTN_PREV_FILE("Previous file");
+		inline constexpr const char* const TOOLTIP_BTN_NEXT_FILE("Next file");
+		inline constexpr const char* const TOOLTIP_BTN_PREV_SUBSONG("Previous subsong");
+		inline constexpr const char* const TOOLTIP_BTN_NEXT_SUBSONG("Next subsong");
+
+		inline constexpr const char* const TOOLTIP_SUBSONG_LABEL("Subsong");
 		inline constexpr const char* const TOOLTIP_SHOW_REFRESH_TUNE_INFO("Show/refresh current Tune Info");
 
 		inline constexpr const char* const MSG_MEDIA_KEYS_TAKEN("Media keys already in use by another application.");
