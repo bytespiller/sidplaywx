@@ -22,6 +22,8 @@
 #include "../UIElements/ElementsUtil.h"
 #include "../Theme/ThemeData/ThemeImage.h"
 
+#include <wx/tooltip.h>
+
 namespace FrameElements // Static vars
 {
 	// TODO: these TEMP_* things could be defined in the theme XML?
@@ -227,6 +229,9 @@ namespace FrameElements // Player class
 
 			labelPlaylistPosition = AttachLabel(_parentPanel, sizerLabelPlaylistPosition);
 			labelPlaylistPosition->SetLabelText(Strings::FramePlayer::LABEL_PLAYLIST_POS_EMPTY);
+
+			labelPlaylistPosition->SetCursor(wxCURSOR_QUESTION_ARROW);
+			labelPlaylistPosition->SetToolTip(new wxToolTip(wxEmptyString));
 		}
 
 		// STIL scrolling labels

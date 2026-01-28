@@ -262,6 +262,9 @@ void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
     uint_least32_t displayTimeMs = playbackTimeMs;
     const PlaybackController& playback = _app.GetPlaybackInfo();
 
+    // Playlist position & duration label
+    UpdatePlaylistPositionLabel();
+
     // Seekbar
     _ui->compositeSeekbar->UpdatePlaybackPosition(static_cast<long>(playbackTimeMs), playback.GetPreRenderProgressFactor());
 
@@ -428,13 +431,71 @@ void FramePlayer::UpdatePlaylistPositionLabel()
 {
     const int total = static_cast<int>(_ui->treePlaylist->GetSongs().size());
 
-    if (PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong())
+    if (PlaylistTreeModelNode* const activeSongNode = _ui->treePlaylist->GetActiveSong())
     {
-        _ui->labelPlaylistPosition->SetLabelText(wxString::Format(Strings::FramePlayer::LABEL_PLAYLIST_POS_TEMPLATE, _ui->treePlaylist->GetMainSongPlaylistPosition(*node), total));
+        // Update duration text & tooltip
+        {
+            const bool includeSubsongs = _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatModeIncludeSubsongs)->GetValueAsBool();
+            const int fallbackDurationMs = _app.currentSettings->GetOption(Settings::AppSettings::ID::SongFallbackDuration)->GetValueAsInt() * Const::MILLISECONDS_IN_SECOND;
+
+            unsigned long durationTotalMs = 0;
+            unsigned long durationPlayedMs = _app.GetPlaybackInfo().GetTime();
+
+            for (const PlaylistTreeModelNodePtr& songNode : _ui->treePlaylist->GetSongs())
+            {
+                if (!songNode->IsAutoPlayable())
+                {
+                    continue; // Skip songs with missing ROMs, short-duration auto-skips etc.
+                }
+
+                if (includeSubsongs && !songNode->GetChildren().empty())
+                {
+                    for (const PlaylistTreeModelNodePtr& subsongNode : songNode->GetChildren())
+                    {
+                        if (!subsongNode->IsAutoPlayable())
+                        {
+                            continue; // Skip subsongs user-marked as "skip".
+                        }
+
+                        if (activeSongNode->uid == subsongNode->uid)
+                        {
+                            durationPlayedMs += durationTotalMs;
+                        }
+
+                        durationTotalMs += (subsongNode->duration != 0) ? subsongNode->duration : fallbackDurationMs;
+                    }
+                }
+                else
+                {
+                    if (activeSongNode->uid == songNode->uid)
+                    {
+                        durationPlayedMs += durationTotalMs;
+                    }
+
+                    durationTotalMs += (songNode->duration != 0) ? songNode->duration : fallbackDurationMs;
+                }
+            }
+
+            // Update the tooltip
+            const wxString newDurationString(Helpers::Wx::GetDynamicTimeFormattedStringSlow(durationTotalMs));
+            const wxString newToolTipText(wxString::Format("%s / %s", Helpers::Wx::GetDynamicTimeFormattedStringSlow(durationPlayedMs), newDurationString));
+            if (!newToolTipText.IsSameAs(_ui->labelPlaylistPosition->GetToolTipText()))
+            {
+                _ui->labelPlaylistPosition->GetToolTip()->SetTip(newToolTipText);
+            }
+        }
+
+        // Update the label with playlist position & total duration
+        const wxString positionText(wxString::Format(Strings::FramePlayer::LABEL_PLAYLIST_POS_TEMPLATE, _ui->treePlaylist->GetMainSongPlaylistPosition(*activeSongNode), total));
+        if (!positionText.IsSameAs(_ui->labelPlaylistPosition->GetLabelText()))
+        {
+            _ui->labelPlaylistPosition->SetLabelText(positionText);
+        }
     }
     else
     {
         _ui->labelPlaylistPosition->SetLabelText(wxString::Format(Strings::FramePlayer::LABEL_PLAYLIST_POS_EMPTY, total));
+        _ui->labelPlaylistPosition->GetToolTip()->SetTip(_ui->labelPlaylistPosition->GetLabelText());
     }
 }
 

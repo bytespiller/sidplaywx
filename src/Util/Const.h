@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 namespace Const
 {
+	constexpr int MILLISECONDS_IN_HOUR = 3600000;
 	constexpr int MILLISECONDS_IN_MINUTE = 60000;
 	constexpr int MILLISECONDS_IN_SECOND = 1000;
 }

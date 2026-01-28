@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,6 +77,7 @@ namespace Helpers
 			return false;
 		}
 
+		/// @brief Fast version for lots of items with minutes:seconds only.
 		inline const wxString GetTimeFormattedString(uint_least32_t millis, bool zeroDurationSpecial = false)
 		{
 			if (zeroDurationSpecial && millis == 0)
@@ -90,6 +91,18 @@ namespace Helpers
 			const long sec = millis / Const::MILLISECONDS_IN_SECOND;
 
 			return FastJoin(Helpers::General::GetZeroPaddedString(min), ":", Helpers::General::GetZeroPaddedString(sec).c_str());
+		}
+
+		/// @brief Slower version that handles hours (displays hours when above zero).
+		inline const wxString GetDynamicTimeFormattedStringSlow(unsigned long millis)
+		{
+			const unsigned long hours = millis / Const::MILLISECONDS_IN_HOUR;
+        	const unsigned long minutes = (millis % Const::MILLISECONDS_IN_HOUR) / Const::MILLISECONDS_IN_MINUTE;
+        	const unsigned long seconds = (millis % Const::MILLISECONDS_IN_MINUTE) / Const::MILLISECONDS_IN_SECOND;
+
+			return (hours == 0)
+				? wxString::Format("%02lu:%02lu", minutes, seconds) // Without hours
+				: wxString::Format("%lu:%02lu:%02lu", hours, minutes, seconds); // With hours
 		}
 
 		/// @brief Songlengths.md5, STIL.txt and .sid files use the Windows1252 encoding for strings.
