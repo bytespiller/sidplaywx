@@ -259,20 +259,21 @@ private:
 
 void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
 {
-    uint_least32_t displayTimeMs = playbackTimeMs;
-    const PlaybackController& playback = _app.GetPlaybackInfo();
-
     // Playlist position & duration label
     UpdatePlaylistPositionLabel();
 
     // Seekbar
+    const PlaybackController& playback = _app.GetPlaybackInfo();
     _ui->compositeSeekbar->UpdatePlaybackPosition(static_cast<long>(playbackTimeMs), playback.GetPreRenderProgressFactor());
 
     // Time position label
+    const long durationMs = _ui->compositeSeekbar->GetDurationValue();
+    uint_least32_t displayTimeMs = playbackTimeMs;
     wxFont font(_ui->labelTime->GetFont());
+
     if (_ui->compositeSeekbar->IsSeekPreviewing())
     {
-        displayTimeMs = _ui->compositeSeekbar->GetNormalizedFillTarget() * _ui->compositeSeekbar->GetDurationValue();
+        displayTimeMs = _ui->compositeSeekbar->GetNormalizedFillTarget() * durationMs;
         if (font.GetWeight() != wxFONTWEIGHT_BOLD)
         {
             font.MakeBold();
@@ -296,19 +297,21 @@ void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
 
     // Remaining tune time tooltip
     {
-        uint_least32_t remainingTime = 0;
+        uint_least32_t remainingTimeMs = 0;
         char prefix = '+';
-        if (playbackTimeMs <= _ui->compositeSeekbar->GetDurationValue())
+
+        const long maxDurationMs = durationMs + 1000;
+        if (playbackTimeMs <= maxDurationMs)
         {
-            remainingTime = _ui->compositeSeekbar->GetDurationValue() - playbackTimeMs;
+            remainingTimeMs = maxDurationMs - playbackTimeMs;
             prefix = '-';
         }
         else
         {
-            remainingTime = playbackTimeMs - _ui->compositeSeekbar->GetDurationValue();
+            remainingTimeMs = playbackTimeMs - durationMs;
         }
 
-        const wxString newRemainingTimeText(prefix + Helpers::Wx::GetTimeFormattedString(remainingTime));
+        const wxString newRemainingTimeText(prefix + Helpers::Wx::GetTimeFormattedString(remainingTimeMs));
         if (!newRemainingTimeText.IsSameAs(_ui->labelTime->GetToolTipText()))
         {
             _ui->labelTime->GetToolTip()->SetTip(newRemainingTimeText);
