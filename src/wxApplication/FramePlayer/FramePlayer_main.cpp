@@ -325,6 +325,7 @@ void FramePlayer::SetupUiElements()
     _ui->btnRepeatMode->Bind(wxEVT_CONTEXT_MENU, [&](wxContextMenuEvent& evt)
     {
         _ui->btnRepeatMode->SetRepeatModeOptionEnabled(RepeatMode::InfiniteDuration, !_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool());
+        _ui->btnRepeatMode->SetExtraOptionEnabled(ExtraOptionId::ActionShufflePlaylist, _ui->treePlaylist->GetSongs().size() > 1);
         evt.Skip();
     });
 

@@ -142,6 +142,7 @@ namespace FrameElements // Player class
 				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistOpen), Strings::FramePlayer::MENU_ITEM_PLAYLIST_OPEN);
 				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistSave), Strings::FramePlayer::MENU_ITEM_PLAYLIST_SAVE);
 				playlistSubMenu->AppendSeparator();
+				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistShuffle), wxString::Format("%s\tCtrl+R", Strings::FramePlayer::MENU_ITEM_PLAYLIST_SHUFFLE));
 				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistClear), Strings::FramePlayer::MENU_ITEM_PLAYLIST_CLEAR);
 #ifndef WIN32
 				playlistSubMenu->AppendSeparator();
@@ -329,6 +330,8 @@ namespace FrameElements // Player class
 				{ExtraOptionId::IncludeSubsongs, ExtraOption(Strings::Preferences::OPT_INCLUDE_SUBSONGS, false)},
 				// ----
 				{ExtraOptionId::PreRenderEnabled, ExtraOption(Strings::Preferences::OPT_PRERENDER, false, PREPEND_SEPARATOR)},
+				// ----
+				{ExtraOptionId::ActionShufflePlaylist, ExtraOption(Strings::FramePlayer::REPEAT_MODE_MENU_ACTION_PLAYLIST_SHUFFLE, false, PREPEND_SEPARATOR, ExtraOptionsHandler::Type::Action)},
 			};
 
 			ExtraOptionsHandler extraOptionsHandler(extraOptions, [&appSettings](UIElements::RepeatModeButton& btnRepeatMode)

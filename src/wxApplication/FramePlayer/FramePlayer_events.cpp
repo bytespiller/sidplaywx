@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -418,6 +418,7 @@ void FramePlayer::OnMenuOpening(wxMenuEvent& evt)
     if (menu->GetTitle().IsSameAs(Strings::FramePlayer::MENU_FILE)) // TODO: try to find a better way to detect which menu is opened (e.g., "File" in this case).
     {
         menu->Enable(static_cast<int>(MenuItemId_Player::PlaylistSave), !playlistEmpty);
+        menu->Enable(static_cast<int>(MenuItemId_Player::PlaylistShuffle), _ui->treePlaylist->GetSongs().size() > 1);
         menu->Enable(static_cast<int>(MenuItemId_Player::PlaylistClear), !playlistEmpty);
     }
     else if (menu->GetTitle().IsSameAs(Strings::FramePlayer::MENU_EDIT))
@@ -468,6 +469,10 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
 
         case MenuItemId_Player::PlaylistSave:
             TrySaveCurrentPlaylist();
+            break;
+
+        case MenuItemId_Player::PlaylistShuffle:
+            _ui->treePlaylist->Shuffle();
             break;
 
         case MenuItemId_Player::PlaylistResetDemo:
@@ -829,6 +834,11 @@ void FramePlayer::OnRepeatModeExtraOptionToggled(ExtraOptionId extraOptionId)
                 _app.currentSettings->GetOption(Settings::AppSettings::ID::RepeatMode)->UpdateValue(static_cast<int>(_ui->btnRepeatMode->GetRepeatMode()));
             }
 
+            break;
+        }
+        case ExtraOptionId::ActionShufflePlaylist:
+        {
+            _ui->treePlaylist->Shuffle();
             break;
         }
         default:

@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2023-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2023-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,6 +120,9 @@ namespace UIElements
 
 			/// @brief Use this for auto-fitting the **text** columns, since the GetBestColumnWidth is unavailable on Linux (wxGTK).
 			void AutoFitTextColumn(PlaylistTreeModel::ColumnId column);
+
+			/// @brief Shuffles the main songs.
+			void Shuffle();
 
 		private:
 			/// @brief There is no GetBestColumnWidth on Linux for some reason, so we've rolled our own here that should work everywhere for text columns at least.

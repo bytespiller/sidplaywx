@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,7 +113,14 @@ namespace UIElements
 				}
 
 				const int extraId = static_cast<int>(extra.first);
-				menu->AppendCheckItem(idOffset + extraId, extra.second.text)->Check(extra.second.enabled);
+				if (extra.second.type == ExtraOptionsHandler::Type::Toggle)
+				{
+					menu->AppendCheckItem(idOffset + extraId, extra.second.text)->Check(extra.second.enabled);
+				}
+				else if (extra.second.type == ExtraOptionsHandler::Type::Action)
+				{
+					menu->Append(idOffset + extraId, extra.second.text)->Enable(extra.second.enabled);
+				}
 			}
 		}
 

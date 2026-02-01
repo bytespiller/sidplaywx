@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,25 +66,37 @@ namespace UIElements
 		{
 			enum class ExtraOptionId : int
 			{
+				// Toggles
 				Undefined = 0,
 				DefaultSubsong = 1,
 				IncludeSubsongs = 2,
-				PreRenderEnabled = 3
+				PreRenderEnabled = 3,
+
+				// Actions
+				ActionShufflePlaylist = 100
+			};
+
+			enum class Type
+			{
+				Toggle,
+				Action
 			};
 
 			struct ExtraOption
 			{
 				ExtraOption() = delete;
-				ExtraOption(const wxString& aText, bool aEnabled, bool aSeparator = false) :
+				ExtraOption(const wxString& aText, bool aEnabled, bool aSeparator = false, ExtraOptionsHandler::Type aType = ExtraOptionsHandler::Type::Toggle) :
 					text(aText),
 					enabled(aEnabled),
-					separator(aSeparator)
+					separator(aSeparator),
+					type(aType)
 				{
 				}
 
 				wxString text;
 				bool enabled;
 				bool separator;
+				ExtraOptionsHandler::Type type;
 			};
 
 			using ExtraOptions = std::map<ExtraOptionId, ExtraOption>;

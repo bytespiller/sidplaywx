@@ -44,6 +44,7 @@ namespace Strings
 		inline constexpr const char* const MENU_ITEM_SUBMENU_PLAYLIST("Playlist");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_OPEN("Open...");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_SAVE("Save As...");
+		inline constexpr const char* const MENU_ITEM_PLAYLIST_SHUFFLE("Shuffle");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_CLEAR("Clear");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_RESET_DEMO("Demo songs");
 
@@ -71,6 +72,8 @@ namespace Strings
 		inline constexpr const char* const REPEAT_MODE_REPEAT_ALL("Repeat All");
 		inline constexpr const char* const REPEAT_MODE_LEAVE_RUNNING("Leave Running");
 		inline constexpr const char* const REPEAT_MODE_PLAY_ONCE("Play Once");
+
+		inline constexpr const char* const REPEAT_MODE_MENU_ACTION_PLAYLIST_SHUFFLE("Shuffle now");
 
 		inline constexpr const char* const VOL_MENU_PREFIX("Volume:");
 		inline constexpr const char* const VOL_SET_MAX("Set Max Volume");
