@@ -44,7 +44,7 @@ namespace UIElements
 			void AddSubsongs(const std::vector<uint_least32_t>& durations, const std::vector<wxString>& titles, PlaylistTreeModelNode& parent);
 
 			/// @brief Removes a main song or a subsong item.
-			void Remove(PlaylistTreeModelNode& item);
+			void Remove(PlaylistTreeModelNode* item);
 
 			/// @brief Removes all items from the playlist.
 			void Clear();

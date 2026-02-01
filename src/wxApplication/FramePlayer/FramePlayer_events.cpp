@@ -276,7 +276,7 @@ void FramePlayer::OnTreePlaylistContextItem(PlaylistTreeModelNode& node, wxComma
     switch (id)
     {
         case PopupMenuItemId_Playlist::Remove:
-            DoRemoveSongTreeItem(node);
+            DoRemoveSongTreeItem(&node); // "node" is now invalid (but not nullptr)!
             break;
 
         case PopupMenuItemId_Playlist::RemoveAllAbove:
@@ -315,6 +315,8 @@ void FramePlayer::OnTreePlaylistContextItem(PlaylistTreeModelNode& node, wxComma
 			}
             break;
     }
+
+    // Reminder: "node" may be invalid (but not nullptr) by now!
 }
 
 void FramePlayer::OnTreePlaylistKeyPressed(wxKeyEvent& evt)
@@ -329,7 +331,7 @@ void FramePlayer::OnTreePlaylistKeyPressed(wxKeyEvent& evt)
             PlaylistTreeModelNode* node = PlaylistTreeModel::TreeItemToModelNode(item);
             if (node->type == PlaylistTreeModelNode::ItemType::Song)
             {
-                DoRemoveSongTreeItem(*node);
+                DoRemoveSongTreeItem(node); // "node" is now invalid (but not nullptr)!
             }
             else
             {
@@ -914,15 +916,15 @@ PlaylistTreeModelNode* FramePlayer::DoFindSong(const wxString& query, const Play
     }
 }
 
-void FramePlayer::DoRemoveSongTreeItem(PlaylistTreeModelNode& node)
+void FramePlayer::DoRemoveSongTreeItem(PlaylistTreeModelNode* node)
 {
-    const PlaylistTreeModelNode* activeSong = _ui->treePlaylist->GetActiveSong();
-    if (activeSong != nullptr && activeSong->uid == node.uid)
+    PlaylistTreeModelNode* activeSong = _ui->treePlaylist->GetActiveSong();
+    if (activeSong != nullptr && (activeSong->uid == node->uid || (activeSong->type == PlaylistTreeModelNode::ItemType::Subsong && activeSong->GetParent()->uid == node->uid)))
     {
         _app.UnloadActiveTune();
     }
 
-    _ui->treePlaylist->Remove(node);
+    _ui->treePlaylist->Remove(node); // "node" is now invalid (but not nullptr)!
     PadColumnsWidth();
     UpdateUiState(); // To refresh the Next/Prev buttons.
 }
@@ -954,7 +956,7 @@ void FramePlayer::DoRemoveAllSongTreeItemsAbove(PlaylistTreeModelNode& node)
                 activeSong = nullptr;
             }
 
-            _ui->treePlaylist->Remove(*cSong);
+            _ui->treePlaylist->Remove(cSong);
         }
     }
 
@@ -994,7 +996,7 @@ void FramePlayer::DoRemoveAllSongTreeItemsBelow(PlaylistTreeModelNode& node)
                 activeSong = nullptr;
             }
 
-            _ui->treePlaylist->Remove(*cSong);
+            _ui->treePlaylist->Remove(cSong);
         }
     }
 

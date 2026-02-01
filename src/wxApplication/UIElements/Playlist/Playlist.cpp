@@ -262,25 +262,25 @@ namespace UIElements
 			}
 		}
 
-		void Playlist::Remove(PlaylistTreeModelNode& item)
+		void Playlist::Remove(PlaylistTreeModelNode* item)
 		{
-			void* parent = item.GetParent(); // Can be nullptr if item is a mainsong.
+			void* parent = item->GetParent(); // Remember the parent (or nullptr if no parent) before the item is removed.
 
-			const PlaylistTreeModelNode* const activeSong = GetActiveSong();
-			if (activeSong != nullptr && activeSong->uid == item.uid)
+			PlaylistTreeModelNode* const activeSong = GetActiveSong();
+			if (item->uid == activeSong->uid || (activeSong->type == PlaylistTreeModelNode::ItemType::Subsong && item->uid == activeSong->GetParent()->uid))
 			{
 				_activeItem.Unset();
 			}
 
 			// Find and remove the item from the model (in case of a main song it is removed from the root, in case of a subsong it is removed from its parent main song)
-			const auto it = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&item](const PlaylistTreeModelNodePtr& qItemNode) { return qItemNode.get() == &item; });
+			const auto it = std::find_if(_model.entries.cbegin(), _model.entries.cend(), [&item](const PlaylistTreeModelNodePtr& qItemNode) { return qItemNode.get() == item; });
 			if (it != _model.entries.cend())
 			{
-				_model.entries.erase(it); // "item" is now nullptr/invalid, do not access it beyond this point.
+				_model.entries.erase(it); // "item" is now invalid (but not nullptr), do not access it beyond this point.
 			}
 
 			// Notify the wx base control of change
-			_model.ItemDeleted(static_cast<wxDataViewItem>(parent), static_cast<wxDataViewItem>(&item));
+			_model.ItemDeleted(static_cast<wxDataViewItem>(parent), static_cast<wxDataViewItem>(item));
 		}
 
 		void Playlist::Clear()
