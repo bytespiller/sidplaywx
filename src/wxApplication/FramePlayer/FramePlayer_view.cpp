@@ -288,7 +288,32 @@ void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
         }
     }
 
-    _ui->labelTime->SetLabelText(Helpers::Wx::GetTimeFormattedString(displayTimeMs));
+    const wxString newDisplayTimeText(Helpers::Wx::GetTimeFormattedString(displayTimeMs));
+    if (!newDisplayTimeText.IsSameAs(_ui->labelTime->GetLabelText()))
+    {
+        _ui->labelTime->SetLabelText(newDisplayTimeText);
+    }
+
+    // Remaining tune time tooltip
+    {
+        uint_least32_t remainingTime = 0;
+        char prefix = '+';
+        if (playbackTimeMs <= _ui->compositeSeekbar->GetDurationValue())
+        {
+            remainingTime = _ui->compositeSeekbar->GetDurationValue() - playbackTimeMs;
+            prefix = '-';
+        }
+        else
+        {
+            remainingTime = playbackTimeMs - _ui->compositeSeekbar->GetDurationValue();
+        }
+
+        const wxString newRemainingTimeText(prefix + Helpers::Wx::GetTimeFormattedString(remainingTime));
+        if (!newRemainingTimeText.IsSameAs(_ui->labelTime->GetToolTipText()))
+        {
+            _ui->labelTime->GetToolTip()->SetTip(newRemainingTimeText);
+        }
+    }
 
     // Visualization
     _app.GetVisualizationWaveform(_ui->waveformVisualization->GetBuffer());

@@ -360,6 +360,8 @@ namespace FrameElements // Player class
 		sizerSeekbar->Add(compositeSeekbar, 1, wxEXPAND | wxALL, TEMP_LABEL_TIME_BORDER_SIZE);
 
 		labelTime = new wxStaticText(&_parentPanel, wxID_ANY, wxT("000:00"), wxDefaultPosition, wxDefaultSize, wxSTB_DEFAULT_STYLE | wxTEXT_ALIGNMENT_CENTER); // Extra padding in text on purpose!
+		labelTime->SetToolTip(new wxToolTip(wxEmptyString));
+		labelTime->SetCursor(wxCURSOR_QUESTION_ARROW);
 		sizerSeekbar->Add(labelTime, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL, TEMP_LABEL_TIME_BORDER_SIZE);
 
 		sizerSeekbar->AddSpacer(TEMP_LABEL_BORDER_SIZE); // Add some right-padding after time label.
