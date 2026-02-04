@@ -64,16 +64,16 @@ namespace UIElements
 	public:
 		struct ExtraOptionsHandler
 		{
-			enum class ExtraOptionId : int
+			enum class ExtraOptionId : int // Must be greater (different) than the RepeatMode enum.
 			{
 				// Toggles
-				Undefined = 0,
-				DefaultSubsong = 1,
-				IncludeSubsongs = 2,
-				PreRenderEnabled = 3,
+				Undefined = -1,
+				DefaultSubsong = 100,
+				IncludeSubsongs = 101,
+				PreRenderEnabled = 102,
 
 				// Actions
-				ActionShufflePlaylist = 100
+				ActionShufflePlaylist = 200
 			};
 
 			enum class Type
@@ -85,11 +85,12 @@ namespace UIElements
 			struct ExtraOption
 			{
 				ExtraOption() = delete;
-				ExtraOption(const wxString& aText, bool aEnabled, bool aSeparator = false, ExtraOptionsHandler::Type aType = ExtraOptionsHandler::Type::Toggle) :
+				ExtraOption(const wxString& aText, bool aEnabled, bool aSeparator = false, ExtraOptionsHandler::Type aType = ExtraOptionsHandler::Type::Toggle, bool aBottom = true) :
 					text(aText),
 					enabled(aEnabled),
 					separator(aSeparator),
-					type(aType)
+					type(aType),
+					bottom(aBottom)
 				{
 				}
 
@@ -97,6 +98,7 @@ namespace UIElements
 				bool enabled;
 				bool separator;
 				ExtraOptionsHandler::Type type;
+				bool bottom;
 			};
 
 			using ExtraOptions = std::map<ExtraOptionId, ExtraOption>;
@@ -130,8 +132,8 @@ namespace UIElements
 
 	private:
 		void UpdateTooltip();
+		bool AddExtraOptions(wxMenu* menu, bool bottom);
 
-	private:
 		void OnContextMenuOpen(wxContextMenuEvent& evt);
 		void OnContextMenuItemSelected(wxCommandEvent& evt);
 

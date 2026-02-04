@@ -322,16 +322,21 @@ namespace FrameElements // Player class
 			using ExtraOption = UIElements::RepeatModeButton::ExtraOptionsHandler::ExtraOption;
 			using ExtraOptionId = UIElements::RepeatModeButton::ExtraOptionsHandler::ExtraOptionId;
 			using ExtraOptionsHandler = UIElements::RepeatModeButton::ExtraOptionsHandler;
+
+			const bool NO_SEPARATOR = false;
 			const bool PREPEND_SEPARATOR = true;
+			const bool TOP_EXTRA_OPTION = false;
 
 			const ExtraOptionsHandler::ExtraOptions extraOptions
 			{
+				// TOP
+				{ExtraOptionId::ActionShufflePlaylist, ExtraOption(Strings::FramePlayer::REPEAT_MODE_MENU_ACTION_PLAYLIST_SHUFFLE, false, NO_SEPARATOR, ExtraOptionsHandler::Type::Action, TOP_EXTRA_OPTION)},
+
+				// BOTTOM
 				{ExtraOptionId::DefaultSubsong, ExtraOption(Strings::Preferences::OPT_START_DEFAULT_SUBSONG, false)},
 				{ExtraOptionId::IncludeSubsongs, ExtraOption(Strings::Preferences::OPT_INCLUDE_SUBSONGS, false)},
 				// ----
 				{ExtraOptionId::PreRenderEnabled, ExtraOption(Strings::Preferences::OPT_PRERENDER, false, PREPEND_SEPARATOR)},
-				// ----
-				{ExtraOptionId::ActionShufflePlaylist, ExtraOption(Strings::FramePlayer::REPEAT_MODE_MENU_ACTION_PLAYLIST_SHUFFLE, false, PREPEND_SEPARATOR, ExtraOptionsHandler::Type::Action)},
 			};
 
 			ExtraOptionsHandler extraOptionsHandler(extraOptions, [&appSettings](UIElements::RepeatModeButton& btnRepeatMode)

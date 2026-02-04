@@ -93,6 +93,13 @@ namespace UIElements
 
 		wxMenu* menu = new wxMenu();
 
+		// Prepend top extra options
+		if (AddExtraOptions(menu, false))
+		{
+			menu->AppendSeparator();
+		}
+
+		// Repeat mode radio/check items
 		const RepeatMode activeRepeatMode = GetRepeatMode();
 		for (const auto& [mode, state] : _buttonStates)
 		{
@@ -101,48 +108,87 @@ namespace UIElements
 			item->Enable(state.enabled);
 		}
 
-		if (_extraOptionsHandler.has_value())
-		{
-			menu->AppendSeparator();
-			const int idOffset = menu->GetMenuItemCount();
-			for (const auto& extra : _extraOptionsHandler->extraOptions)
-			{
-				if (extra.second.separator)
-				{
-					menu->AppendSeparator();
-				}
+		// Append bottom extra options
+		menu->AppendSeparator();
+		AddExtraOptions(menu, true);
 
-				const int extraId = static_cast<int>(extra.first);
-				if (extra.second.type == ExtraOptionsHandler::Type::Toggle)
-				{
-					menu->AppendCheckItem(idOffset + extraId, extra.second.text)->Check(extra.second.enabled);
-				}
-				else if (extra.second.type == ExtraOptionsHandler::Type::Action)
-				{
-					menu->Append(idOffset + extraId, extra.second.text)->Enable(extra.second.enabled);
-				}
-			}
-		}
-
+		// Bind & open
 		menu->Bind(wxEVT_COMMAND_MENU_SELECTED, &OnContextMenuItemSelected, this);
 		PopupMenu(menu);
 	}
 
+	bool RepeatModeButton::AddExtraOptions(wxMenu* menu, bool bottom)
+	{
+		bool addedSomething = false;
+
+		if (_extraOptionsHandler.has_value())
+		{
+			for (const auto& pair : _extraOptionsHandler->extraOptions)
+			{
+				if (pair.second.bottom != bottom)
+				{
+					continue;
+				}
+
+				if (pair.second.separator)
+				{
+					menu->AppendSeparator();
+				}
+
+				const int extraId = static_cast<int>(pair.first);
+				if (pair.second.type == ExtraOptionsHandler::Type::Toggle)
+				{
+					menu->AppendCheckItem(extraId, pair.second.text)->Check(pair.second.enabled);
+					addedSomething = true;
+				}
+				else if (pair.second.type == ExtraOptionsHandler::Type::Action)
+				{
+					menu->Append(extraId, pair.second.text)->Enable(pair.second.enabled);
+					addedSomething = true;
+				}
+			}
+		}
+
+		return addedSomething;
+	}
+
 	void RepeatModeButton::OnContextMenuItemSelected(wxCommandEvent& evt)
 	{
-		const bool isModeRadioButton = evt.GetId() <= _buttonStates.size();
-		if (isModeRadioButton)
+		const int id = evt.GetId();
+		switch (static_cast<RepeatMode>(id))
 		{
-			SetRepeatMode(static_cast<RepeatMode>(evt.GetId()));
+			case RepeatMode::InfiniteDuration:
+			case RepeatMode::Normal:
+			case RepeatMode::PlayOnce:
+			case RepeatMode::RepeatAll:
+			case RepeatMode::RepeatOne:
+			{
+				SetRepeatMode(static_cast<RepeatMode>(id));
 
-			wxCommandEvent* newEvt = new wxCommandEvent(wxEVT_BUTTON);
-			newEvt->SetInt(evt.GetId());
-			wxQueueEvent(this, newEvt);
-		}
-		else // ExtraOption
-		{
-			const int extraId = evt.GetId() - _buttonStates.size() - 1;
-			EmitSignal(SignalsRepeatModeButton::SIGNAL_EXTRA_OPTION_SELECTED, extraId);
+				wxCommandEvent* newEvt = new wxCommandEvent(wxEVT_BUTTON);
+				newEvt->SetInt(evt.GetId());
+				wxQueueEvent(this, newEvt);
+				break;
+			}
+			default: // ExtraOption
+			{
+				if (_extraOptionsHandler.has_value())
+				{
+					const bool valid = std::any_of(_extraOptionsHandler->extraOptions.cbegin(), _extraOptionsHandler->extraOptions.cend(), [id](const std::pair<ExtraOptionsHandler::ExtraOptionId, ExtraOptionsHandler::ExtraOption>& pair)
+					{
+						return static_cast<int>(pair.first) == id;
+					});
+
+					if (valid)
+					{
+						EmitSignal(SignalsRepeatModeButton::SIGNAL_EXTRA_OPTION_SELECTED, id);
+					}
+					else
+					{
+						__builtin_trap(); // Invalid ExtraOption, perhaps a new RepeatMode was added and isn't handled above?
+					}
+				}
+			}
 		}
 	}
 
