@@ -467,7 +467,7 @@ void FramePlayer::UpdatePlaylistPositionLabel()
             const int fallbackDurationMs = _app.currentSettings->GetOption(Settings::AppSettings::ID::SongFallbackDuration)->GetValueAsInt() * Const::MILLISECONDS_IN_SECOND;
 
             unsigned long durationTotalMs = 0;
-            unsigned long durationPlayedMs = _app.GetPlaybackInfo().GetTime();
+            unsigned long durationPlayedMs = std::min(_app.GetPlaybackInfo().GetTime(), activeSongNode->duration); // Count current tune's playback time up to its duration only (in case of "Leave Running").
 
             for (const PlaylistTreeModelNodePtr& songNode : _ui->treePlaylist->GetSongs())
             {
