@@ -273,21 +273,22 @@ void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
 
     if (_ui->compositeSeekbar->IsSeekPreviewing())
     {
-        displayTimeMs = _ui->compositeSeekbar->GetNormalizedFillTarget() * durationMs;
         if (font.GetWeight() != wxFONTWEIGHT_BOLD)
         {
             font.MakeBold();
-            _ui->labelTime->SetFont(font);
         }
+
+        displayTimeMs = _ui->compositeSeekbar->GetNormalizedFillTarget() * durationMs;
     }
     else
     {
         if (font.GetWeight() != wxFONTWEIGHT_NORMAL)
         {
             font.SetWeight(wxFONTWEIGHT_NORMAL);
-            _ui->labelTime->SetFont(font);
         }
     }
+
+    _ui->labelTime->SetFont(font);
 
     const wxString newDisplayTimeText(Helpers::Wx::GetTimeFormattedString(displayTimeMs));
     if (!newDisplayTimeText.IsSameAs(_ui->labelTime->GetLabelText()))
@@ -476,7 +477,7 @@ void FramePlayer::UpdatePlaylistPositionLabel()
                     continue; // Skip songs with missing ROMs, short-duration auto-skips etc.
                 }
 
-                if (includeSubsongs && !songNode->GetChildren().empty())
+                if (includeSubsongs && !songNode->GetChildren().empty()) // Sum subsongs' durations
                 {
                     for (const PlaylistTreeModelNodePtr& subsongNode : songNode->GetChildren())
                     {
@@ -493,7 +494,7 @@ void FramePlayer::UpdatePlaylistPositionLabel()
                         durationTotalMs += (subsongNode->duration != 0) ? subsongNode->duration : fallbackDurationMs;
                     }
                 }
-                else
+                else // Sum the main song's duration only
                 {
                     if (activeSongNode->uid == songNode->uid)
                     {
