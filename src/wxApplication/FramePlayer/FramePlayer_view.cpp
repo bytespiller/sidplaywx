@@ -23,6 +23,9 @@
 #include "../Helpers/HelpersWx.h"
 #include "../FrameChildren/FramePlaybackMods/FramePlaybackMods.h"
 #include "../../Util/Const.h"
+
+#include <wx/tooltip.h>
+
 #include <chrono>
 #include <numeric>
 
