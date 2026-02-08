@@ -71,7 +71,7 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 ##### (libsidplayfp)
 * **NOTE:** Building the libsidplayfp from its git master branch is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
 1. To enable C++20 set in the terminal `CXXFLAGS="$CXXFLAGS -std=c++20"`
-2. Commands to build statically: `./configure LDFLAGS="-static" && make`
+2. Commands to build statically: `./configure --disable-dependency-tracking --disable-shared --enable-static --without-gcrypt --with-simd=runtime && make`
 3. Copy the following *includes* (with their folder structures) to the appropriate `include` folder in the sidplaywx's `/deps/`:
 	- `/builders/residfp.h`
 	- `sidbuilder.h`, `SidConfig.h`, `siddefs.h`, `SidInfo.h`, `sidplayfp.h`, `SidTune.h`, `SidTuneInfo.h`, `sidversion.h`
@@ -123,10 +123,8 @@ Once installed you need to **first-time configure** it like so:
 ##### (libsidplayfp)
 * **NOTE:** Building the libsidplayfp from its git master branch is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
 1. `cd` (with MSYS2 i.e., UCRT64.exe terminal) into the libsidplayfp's root.
-2. To specify either:
-	1. C++20 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++20"` (new)
-	2. C++14 – set this in the terminal: `CXXFLAGS="$CXXFLAGS -std=c++0x"` (older versions of libsidplayfp)
-3. Finally, run: `./configure LDFLAGS="-static" && make && make install`
+2. To enable C++20 set in the terminal `CXXFLAGS="$CXXFLAGS -std=c++20"`
+3. Finally, run: `./configure --disable-dependency-tracking --disable-shared --enable-static --without-gcrypt --with-simd=runtime && make && make install`
 	1. TIP: if doing this for the first time, break down these 3 commands (i.e., they are separated by `&&`) and run them one by one so you can catch any problems more easily.
 4. Note: the lib will be automatically found by our cmake later (if you've installed the msys into the `C:\msys64\`) and it will get linked statically.
 	
