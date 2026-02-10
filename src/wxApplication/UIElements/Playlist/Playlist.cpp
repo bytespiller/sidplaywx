@@ -264,12 +264,14 @@ namespace UIElements
 
 		void Playlist::Remove(PlaylistTreeModelNode* item)
 		{
-			void* parent = item->GetParent(); // Remember the parent (or nullptr if no parent) before the item is removed.
+			void* parent = item->GetParent(); // Remember the parent (or nullptr if no parent) here *before* the item is removed.
 
-			PlaylistTreeModelNode* const activeSong = GetActiveSong();
-			if (item->uid == activeSong->uid || (activeSong->type == PlaylistTreeModelNode::ItemType::Subsong && item->uid == activeSong->GetParent()->uid))
+			if (PlaylistTreeModelNode* const activeSong = GetActiveSong())
 			{
-				_activeItem.Unset();
+				if (item->uid == activeSong->uid || (activeSong->type == PlaylistTreeModelNode::ItemType::Subsong && item->uid == activeSong->GetParent()->uid))
+				{
+					_activeItem.Unset();
+				}
 			}
 
 			// Find and remove the item from the model (in case of a main song it is removed from the root, in case of a subsong it is removed from its parent main song)
