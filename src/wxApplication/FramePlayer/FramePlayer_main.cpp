@@ -762,7 +762,7 @@ void FramePlayer::DisplayAboutBox()
     aboutInfo.SetLicense(Strings::About::LICENSE);
 
     aboutInfo.AddDeveloper(wxString(Strings::About::DEVELOPER_LIBRARIES) + "\n" +
-                           wxString::Format("%s %s", _silentSidInfoDecoder.GetEngineInfo().name(), _silentSidInfoDecoder.GetEngineInfo().version()) + "\n" + // libsidplayfp
+                           wxString::Format("%s %s", _app.GetPlaybackInfo().GetEngineInfo().name(), _app.GetPlaybackInfo().GetEngineInfo().version()) + "\n" + // libsidplayfp
                            wxString(Pa_GetVersionInfo()->versionText) + "\n" + // PortAudio
                            wxVERSION_STRING // wxWidgets
                           );

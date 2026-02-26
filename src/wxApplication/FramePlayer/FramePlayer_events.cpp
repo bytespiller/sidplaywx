@@ -144,10 +144,10 @@ void FramePlayer::OnTreePlaylistItemActivated(wxDataViewEvent& evt)
             case PlaylistTreeModelNode::RomRequirement::None:
                 break;
             case PlaylistTreeModelNode::RomRequirement::BasicRom:
-                romName = (_app.GetPlaybackInfo().IsRomLoaded(SidDecoder::RomRequirement::BasicRom)) ? "" : "BASIC";
+                romName = (_app.GetPlaybackInfo().IsRomLoaded(TuneUtil::RomRequirement::BasicRom)) ? "" : "BASIC";
                 break;
             case PlaylistTreeModelNode::RomRequirement::R64:
-                romName = (_app.GetPlaybackInfo().IsRomLoaded(SidDecoder::RomRequirement::R64)) ? "" : "KERNAL";
+                romName = (_app.GetPlaybackInfo().IsRomLoaded(TuneUtil::RomRequirement::R64)) ? "" : "KERNAL";
                 break;
             default:
                 romName = "UNKNOWN (CHARGEN?)";

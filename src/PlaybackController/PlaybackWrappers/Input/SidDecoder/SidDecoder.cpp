@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 
 #include "SidDecoder.h"
 
-#include <sidplayfp/SidTuneInfo.h>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
@@ -303,28 +302,9 @@ int SidDecoder::GetTotalSubsongs() const
     return _tune->getInfo()->songs();
 }
 
-static void trimString(std::string& str)
+std::string SidDecoder::GetCurrentTuneInfoString(TuneUtil::SongInfoCategory category) const
 {
-    str.erase(str.find_last_not_of(' ') + 1); // ltrim
-    str.erase(0, str.find_first_not_of(' ')); // rtrim
-}
-
-std::string SidDecoder::GetCurrentTuneInfoString(SongInfoCategory category) const
-{
-    const SidTuneInfo& info = *_tune->getInfo();
-    const unsigned int index = static_cast<unsigned int>(category);
-
-    std::string retStr(info.infoString(index));
-    trimString(retStr);
-
-    // Try get similar MUS fields in case this is a MUS file
-    if (category != SongInfoCategory::Title && retStr.empty()) [[unlikely]]
-    {
-        retStr = info.commentString(index); // Any index overflow is handled by the lib already (returns an empty string).
-        trimString(retStr);
-    }
-
-    return retStr;
+    return TuneUtil::GetTuneInfoString(*_tune, category);
 }
 
 std::string SidDecoder::GetCurrentTuneMusComments() const
@@ -339,7 +319,7 @@ std::string SidDecoder::GetCurrentTuneMusComments() const
     for (unsigned int i = 0; i < count; ++i)
     {
         std::string curr(info.commentString(i));
-        trimString(curr);
+        TuneUtil::trimString(curr);
 
         if (!curr.empty())
         {
@@ -355,19 +335,9 @@ const SidTuneInfo& SidDecoder::GetCurrentSongInfo() const
     return *_tune->getInfo();
 }
 
-SidDecoder::RomRequirement SidDecoder::GetCurrentSongRomRequirement() const
+TuneUtil::RomRequirement SidDecoder::GetCurrentSongRomRequirement() const
 {
-    switch (_tune->getInfo()->compatibility())
-    {
-        case SidTuneInfo::COMPATIBILITY_BASIC:
-            return RomRequirement::BasicRom;
-
-        case SidTuneInfo::COMPATIBILITY_R64:
-            return RomRequirement::R64;
-
-        default:
-            return RomRequirement::None;
-    }
+    return TuneUtil::GetTuneRomRequirement(*_tune);
 }
 
 int SidDecoder::GetCurrentTuneSidChipsRequired() const

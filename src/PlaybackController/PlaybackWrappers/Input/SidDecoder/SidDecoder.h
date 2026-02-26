@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include "MultiSidChannelMatrix.h"
 #include "SidMixer.h"
+#include "TuneUtil.h"
 #include "../../IBufferWriter.h"
 #include "../../../Util/RomUtil.h"
 
@@ -35,20 +36,6 @@
 class SidDecoder : public IBufferWriter
 {
 public:
-    enum class RomRequirement
-    {
-        None,
-        BasicRom,
-        R64
-    };
-
-    enum class SongInfoCategory
-    {
-        Title = 0,
-        Author,
-        Released // a.k.a. Copyright
-    };
-
     struct FilterConfig
     {
         FilterConfig() = delete;
@@ -96,11 +83,11 @@ public:
     int GetDefaultSubsong() const;
     int GetTotalSubsongs() const;
 
-    std::string GetCurrentTuneInfoString(SongInfoCategory category) const;
+    std::string GetCurrentTuneInfoString(TuneUtil::SongInfoCategory category) const;
     std::string GetCurrentTuneMusComments() const;
 
     const SidTuneInfo& GetCurrentSongInfo() const;
-    RomRequirement GetCurrentSongRomRequirement() const;
+    TuneUtil::RomRequirement GetCurrentSongRomRequirement() const;
     int GetCurrentTuneSidChipsRequired() const;
 
     // Calculates the MD5 hash of the current tune. Returns 0 if no tune is loaded.

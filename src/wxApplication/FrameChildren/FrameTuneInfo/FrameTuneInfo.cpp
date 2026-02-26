@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -138,10 +138,10 @@ void FrameTuneInfo::UpdateInfo(const PlaylistTreeModelNode* const node)
 		wxString romStr("-");
 		switch (_playbackInfo.GetCurrentSongRomRequirement())
 		{
-			case SidDecoder::RomRequirement::BasicRom:
+			case TuneUtil::RomRequirement::BasicRom:
 				romStr = "BASIC";
 				break;
-			case SidDecoder::RomRequirement::R64:
+			case TuneUtil::RomRequirement::R64:
 				romStr = "KERNAL";
 				break;
 		}

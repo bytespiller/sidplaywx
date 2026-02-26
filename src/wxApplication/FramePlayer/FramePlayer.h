@@ -27,7 +27,6 @@
 #include "../Theme/ThemeManager.h"
 #include "../../HvscSupport/Songlengths.h"
 #include "../../HvscSupport/Stil/Stil.h"
-#include "../../PlaybackController/PlaybackWrappers/Input/SidDecoder/SidDecoder.h"
 #include "../../Util/SimpleSignal/SimpleSignalListener.h"
 
 class FramePlaybackMods;
@@ -241,7 +240,6 @@ private:
     ThemeManager _themeManager;
     Songlengths _sidDatabase;
     Stil _stilInfo;
-    SidDecoder _silentSidInfoDecoder;
 
     std::unique_ptr<FrameElements::ElementsPlayer> _ui;
     std::unique_ptr<wxTimer> _timerRefresh;

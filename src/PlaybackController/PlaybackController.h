@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "PlaybackWrappers/Output/PortAudioOutput.h"
 #include "PlaybackWrappers/Input/SidDecoder/SidDecoder.h"
 #include "PlaybackWrappers/Input/SidDecoder/MultiSidChannelMatrix.h"
+#include "PlaybackWrappers/Input/SidDecoder/TuneUtil.h"
 #include "Util/RomUtil.h"
 #include "../Util/BufferHolder.h"
 #include "../Util/SimpleSignal/SimpleSignalProvider.h"
@@ -66,7 +67,7 @@ public:
     };
 
     using FilterConfig = SidDecoder::FilterConfig;
-    using SongInfoCategory = SidDecoder::SongInfoCategory;
+    using SongInfoCategory = TuneUtil::SongInfoCategory;
 
     struct SyncedPlaybackConfig
     {
@@ -188,8 +189,8 @@ public:
 
     SidConfig::sid_model_t GetCurrentlyEffectiveSidModel() const;
 
-    SidDecoder::RomRequirement GetCurrentSongRomRequirement() const;
-    bool IsRomLoaded(SidDecoder::RomRequirement requirement) const;
+    TuneUtil::RomRequirement GetCurrentSongRomRequirement() const;
+    bool IsRomLoaded(TuneUtil::RomRequirement requirement) const;
 
     SidConfig GetSidConfig() const;
     PortAudioOutput::AudioConfig GetAudioConfig() const;

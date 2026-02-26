@@ -24,6 +24,7 @@
 #include "../Helpers/HelpersWx.h"
 #include "../UIElements/Playlist/Components/PlaylistModel.h"
 #include "../../Util/Const.h"
+#include "../../PlaybackController/PlaybackWrappers/Input/SidDecoder/TuneUtil.h"
 
 namespace
 {
@@ -142,62 +143,61 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
         }
         lastPercentage = currentPercentage;
 
-        // Inspect tune in a separate info-only decoder -------
-        if (Helpers::Wx::Files::IsWithinZipFile(filepath))
+        // Inspect the tune  -------
+        std::unique_ptr<SidTune> inspectTune = nullptr;
+
         {
-            const std::unique_ptr<BufferHolder>& infoTuneBufferHolder = Helpers::Wx::Files::GetFileContentFromZip(filepath);
-            tuneIsValid = infoTuneBufferHolder != nullptr && _silentSidInfoDecoder.TryLoadSong(infoTuneBufferHolder->buffer[0], infoTuneBufferHolder->size[0]);
-        }
-        else
-        {
-            //tuneIsValid =_silentSidInfoDecoder.TryLoadSong(filepath); // Would be much faster but no unicode paths support then.
-            const std::unique_ptr<BufferHolder>& infoTuneBufferHolder = Helpers::Wx::Files::GetFileContentFromDisk(filepath);
-            tuneIsValid = infoTuneBufferHolder != nullptr && _silentSidInfoDecoder.TryLoadSong(infoTuneBufferHolder->buffer[0], infoTuneBufferHolder->size[0], 0);
+            const std::unique_ptr<BufferHolder>& infoTuneBufferHolder = (Helpers::Wx::Files::IsWithinZipFile(filepath))
+                    ? Helpers::Wx::Files::GetFileContentFromZip(filepath)
+                    : Helpers::Wx::Files::GetFileContentFromDisk(filepath);
+
+            inspectTune = (infoTuneBufferHolder != nullptr) ? std::make_unique<SidTune>(infoTuneBufferHolder->buffer[0], infoTuneBufferHolder->size[0]) : nullptr;
+            tuneIsValid = inspectTune != nullptr && inspectTune->getStatus();
         }
 
         if (tuneIsValid)
         {
             // Tune title
-            wxString songTitle(_silentSidInfoDecoder.GetCurrentTuneInfoString(SidDecoder::SongInfoCategory::Title));
+            wxString songTitle(TuneUtil::GetTuneInfoString(*inspectTune, TuneUtil::SongInfoCategory::Title));
             {
                 if (songTitle.IsEmpty()) [[unlikely]] // Fallback/MUS file (rare situation)
                 {
                     songTitle = wxFileNameFromPath(filepath);
                 }
 
-                const int sidsNeeded = _silentSidInfoDecoder.GetCurrentTuneSidChipsRequired();
+                const int sidsNeeded = inspectTune->getInfo()->sidChips();
                 const wxString& songTitleAddendum = (sidsNeeded > 1) ? wxString::Format(" [%iSID]", sidsNeeded) : wxGetEmptyString();
                 songTitle.Append(songTitleAddendum);
             }
 
             // Subsongs count
-            const int defaultSubsong = _silentSidInfoDecoder.GetDefaultSubsong();
-            int totalSubsongs = _silentSidInfoDecoder.GetTotalSubsongs();
+            const int defaultSubsong = inspectTune->getInfo()->startSong();
+            int totalSubsongs = inspectTune->getInfo()->songs();
 
             // Tune ROM requirement
-            const SidDecoder::RomRequirement romRequirement = _silentSidInfoDecoder.GetCurrentSongRomRequirement();
+            const TuneUtil::RomRequirement romRequirement = TuneUtil::GetTuneRomRequirement(*inspectTune);
             const bool playable = playback.IsRomLoaded(romRequirement);
 
             // Add main song node to playlist tree
             PlaylistTreeModelNode* mainSongNodeNew = nullptr;
 
-            const Songlengths::HvscInfo& hvscInfoMain = TryGetHvscInfo(_silentSidInfoDecoder.CalcCurrentTuneMd5());
+            const Songlengths::HvscInfo& hvscInfoMain = TryGetHvscInfo(inspectTune->createMD5New());
 
             {
-                const wxString author = Helpers::Wx::StringFromWin1252(_silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author)); // Don't use reference.
-                const wxString copyright = Helpers::Wx::StringFromWin1252(_silentSidInfoDecoder.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released)); // Don't use reference.
+                const wxString author = Helpers::Wx::StringFromWin1252(TuneUtil::GetTuneInfoString(*inspectTune, TuneUtil::SongInfoCategory::Author));
+                const wxString copyright = Helpers::Wx::StringFromWin1252(TuneUtil::GetTuneInfoString(*inspectTune, TuneUtil::SongInfoCategory::Released));
 
                 // Determine ROM requirement
                 PlaylistTreeModelNode::RomRequirement nodeRom = PlaylistTreeModelNode::RomRequirement::None;
                 switch (romRequirement)
                 {
-                    case SidDecoder::RomRequirement::None:
+                    case TuneUtil::RomRequirement::None:
                         nodeRom = PlaylistTreeModelNode::RomRequirement::None;
                         break;
-                    case SidDecoder::RomRequirement::BasicRom:
+                    case TuneUtil::RomRequirement::BasicRom:
                         nodeRom = PlaylistTreeModelNode::RomRequirement::BasicRom;
                         break;
-                    case SidDecoder::RomRequirement::R64:
+                    case TuneUtil::RomRequirement::R64:
                         nodeRom = PlaylistTreeModelNode::RomRequirement::R64;
                         break;
                     default:
