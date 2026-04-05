@@ -302,17 +302,17 @@ void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
     // Remaining tune time tooltip
     {
         uint_least32_t remainingTimeMs = 0;
-        char prefix = '+';
+        char prefix = '-';
 
-        const long maxDurationMs = durationMs + 1000;
-        if (playbackTimeMs <= maxDurationMs)
+        const long floorPlaybackTimeMs = (playbackTimeMs / 1000) * 1000;
+        if (floorPlaybackTimeMs <= durationMs)
         {
-            remainingTimeMs = maxDurationMs - playbackTimeMs;
-            prefix = '-';
+            remainingTimeMs = durationMs - floorPlaybackTimeMs;
         }
         else
         {
-            remainingTimeMs = playbackTimeMs - durationMs;
+            remainingTimeMs = (floorPlaybackTimeMs + 999) - durationMs;
+            prefix = '+';
         }
 
         const wxString newRemainingTimeText(prefix + Helpers::Wx::GetTimeFormattedString(remainingTimeMs));
