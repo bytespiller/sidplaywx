@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2022 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include "../Helpers/HelpersWx.h"
 #include <wx/filedlg.h>
 
-static const wxString WILDCARD_SID = "*.sid;*.c64;*.prg;*.p00;*.str;*.mus";
+static const wxString WILDCARD_SID = "*.sid;*.str;*.mus";
 static const wxString WILDCARD_ZIP = wxString::Format("*%s", Helpers::Wx::Files::FILE_EXTENSION_ZIP);
 static const wxString WILDCARD_M3U8 = wxString::Format("*%s", Helpers::Wx::Files::FILE_EXTENSION_PLAYLIST);
 static const wxString WILDCARD_ALL = "*.*";
