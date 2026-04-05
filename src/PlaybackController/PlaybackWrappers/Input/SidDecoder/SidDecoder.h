@@ -39,13 +39,15 @@ public:
     struct FilterConfig
     {
         FilterConfig() = delete;
-        FilterConfig(double aFilter6581Curve, double aFilter8580Curve) :
+        FilterConfig(double aFilter6581Curve, double aFilter6581Range, double aFilter8580Curve) :
             filter6581Curve(aFilter6581Curve),
+            filter6581Range(aFilter6581Range),
             filter8580Curve(aFilter8580Curve)
         {
         }
 
         const double filter6581Curve;
+        const double filter6581Range;
         const double filter8580Curve;
     };
 

@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,6 +76,7 @@ namespace Settings
 			static constexpr const char* const UseNtscForMus = "UseNtscForMus";
 
 			static constexpr const char* const FilterCurve6581 = "FilterCurve6581";
+			static constexpr const char* const FilterRange6581 = "FilterRange6581";
 			static constexpr const char* const FilterCurve8580 = "FilterCurve8580";
 
 			static constexpr const char* const DigiBoost = "DigiBoost";
@@ -211,6 +212,7 @@ namespace Settings
 				DefaultOption(ID::UseNtscForMus, true),
 
 				DefaultOption(ID::FilterCurve6581, 0.5),
+				DefaultOption(ID::FilterRange6581, 0.5),
 				DefaultOption(ID::FilterCurve8580, 0.5),
 
 				DefaultOption(ID::DigiBoost, false),

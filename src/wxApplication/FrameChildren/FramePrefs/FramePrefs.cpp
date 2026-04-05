@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -387,8 +387,9 @@ void FramePrefs::FillPropertyGrid()
             AddWrappedPropToPage(Settings::AppSettings::ID::UseNtscForMus, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_NTSC_C64_MODEL_MUS), *page, Effective::Immediately, Strings::Preferences::DESC_NTSC_C64_MODEL_MUS);
 
             // Filter
-            AddWrappedPropToPage(Settings::AppSettings::ID::FilterCurve6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE_COMMON, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
-            AddWrappedPropToPage(Settings::AppSettings::ID::FilterCurve8580, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_8580), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE_COMMON, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
+            AddWrappedPropToPage(Settings::AppSettings::ID::FilterCurve6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
+            AddWrappedPropToPage(Settings::AppSettings::ID::FilterRange6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_RANGE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_RANGE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
+            AddWrappedPropToPage(Settings::AppSettings::ID::FilterCurve8580, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_8580), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
 
             // DigiBoost
             AddWrappedPropToPage(Settings::AppSettings::ID::DigiBoost, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_DIGIBOOST), *page, Effective::Immediately, Strings::Preferences::DESC_DIGIBOOST);

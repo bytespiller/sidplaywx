@@ -157,6 +157,7 @@ bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig
 
     _filterConfigCache = std::make_unique<FilterConfig>(filterConfig);
     _rs.filter6581Curve(_filterConfigCache->filter6581Curve);
+    _rs.filter6581Range(_filterConfigCache->filter6581Range);
     _rs.filter8580Curve(_filterConfigCache->filter8580Curve);
 
     _useNtscForMus = useNtscForMus;
