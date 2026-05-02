@@ -64,7 +64,7 @@ public:
 
 public:
     // Needed for playback. Can be skipped if intending to just read tunes' info.
-    bool TryInitEmulation(const SidConfig& sidConfig, const FilterConfig& filterConfig, bool useNtscForMus);
+    bool TryInitEmulation(const SidConfig& sidConfig, const FilterConfig& filterConfig, bool useNtscForMus, int outChannels);
 
     RomUtil::RomStatus TrySetRoms(const std::filesystem::path& pathKernal, const std::filesystem::path& pathBasic, const std::filesystem::path& pathChargen);
 
@@ -118,6 +118,7 @@ private:
 private:
     bool _useNtscForMus = false;
     bool _seeking = false;
+    int _outChannels = 0;
     std::unique_ptr<SidMixer> _mixer;
     MultiSidChannelMatrix _channelMatrixCache;
     SidConfig _sidConfigCache;

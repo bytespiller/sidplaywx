@@ -125,7 +125,7 @@ bool PlaybackController::TryInit(const SyncedPlaybackConfig& config)
 PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybackConfiguration(const SyncedPlaybackConfig& newConfig)
 {
     const bool needResetSidDecoder = (newConfig.sidConfig.frequency != _sidDecoder->GetSidConfig().frequency) ||
-                                     (newConfig.sidConfig.playback != _sidDecoder->GetSidConfig().playback) ||
+                                     (newConfig.audioConfig.channelCount != _portAudioOutput->GetAudioConfig().channelCount) || // due to SidMixer
                                      (newConfig.sidConfig.defaultC64Model != _sidDecoder->GetSidConfig().defaultC64Model) ||
                                      (newConfig.sidConfig.defaultSidModel != _sidDecoder->GetSidConfig().defaultSidModel) ||
                                      (newConfig.sidConfig.forceC64Model != _sidDecoder->GetSidConfig().forceC64Model) ||
@@ -730,7 +730,7 @@ bool PlaybackController::TryResetSidDecoder(const SyncedPlaybackConfig& newConfi
 
     _preRender = nullptr; // Some SID params changed, any pre-rendered content is no longer valid.
 
-    const bool success = _sidDecoder->TryInitEmulation(newConfig.sidConfig, newConfig.filterConfig, newConfig.useNtscForMus);
+    const bool success = _sidDecoder->TryInitEmulation(newConfig.sidConfig, newConfig.filterConfig, newConfig.useNtscForMus, newConfig.audioConfig.channelCount);
     if (success)
     {
         if (_state != State::Undefined && _activeTuneHolder != nullptr)
@@ -804,7 +804,7 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
             if (!reusePreRender || _preRender->GetPreRenderProgressFactor() != 1.0)
             {
                 const SidConfig& sidConfig = _sidDecoder->GetSidConfig();
-                _preRender->DoPreRender(*_sidDecoder.get(), sidConfig.frequency, sidConfig.playback, preRenderDurationMs);
+                _preRender->DoPreRender(*_sidDecoder.get(), sidConfig.frequency, GetAudioConfig().channelCount, preRenderDurationMs);
             }
         }
         else

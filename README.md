@@ -4,7 +4,7 @@ The **sidplaywx** is a GUI player for Commodore 64 SID chip tunes aiming to prov
 
 The current alpha version is fully usable, supporting QoL features like seeking, drag & drop, unicode paths, DPI awareness and much more.
 
-The **sidplaywx** uses [libsidplayfp](https://github.com/libsidplayfp/libsidplayfp) for ultimate quality in SID emulation, [wxWidgets](https://github.com/wxWidgets/wxWidgets) for native GUI on supported platforms, and [PortAudio](https://github.com/PortAudio/portaudio) for audio output.
+The **sidplaywx** uses [libsidplayfp](https://github.com/libsidplayfp/libsidplayfp) (with [ReSIDfp](https://github.com/libsidplayfp/libresidfp)) for ultimate quality in SID emulation, [wxWidgets](https://github.com/wxWidgets/wxWidgets) for native GUI on supported platforms, and [PortAudio](https://github.com/PortAudio/portaudio) for audio output.
 
 ## Screenshots
 ![Screenshot of the player application main window](../assets/screenshots/sidplaywx-player.png?raw=true)
@@ -70,11 +70,13 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 
 ##### (libsidplayfp)
 * **NOTE:** Building the libsidplayfp from its git master branch is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
-1. Commands to build statically: `./configure --disable-dependency-tracking --disable-shared --enable-static --without-gcrypt --with-simd=runtime && make`
-2. Copy the following *includes* (with their folder structures) to the appropriate `include` folder in the sidplaywx's `/deps/`:
+1. Download libresidfp: https://github.com/libsidplayfp/libresidfp/releases
+2. Build libresidfp: `./configure --disable-dependency-tracking --disable-shared --enable-static --with-simd=runtime && make`
+3. Build libsidplayfp: `./configure --disable-dependency-tracking --disable-shared --enable-static --without-gcrypt && make`
+4. Copy the following *includes* (with their folder structures) to the appropriate `include` folder in the sidplaywx's `/deps/`:
 	- `/builders/residfp.h`
 	- `sidbuilder.h`, `SidConfig.h`, `siddefs.h`, `SidInfo.h`, `sidplayfp.h`, `SidTune.h`, `SidTuneInfo.h`, `sidversion.h`
-3. Copy the `/src/.libs/libsidplayfp.a` (`.libs` is a *hidden* folder) to the appropriate `lib` folder in the sidplaywx's `/deps/`
+5. Copy the `/src/.libs/libsidplayfp.a` (`.libs` is a *hidden* folder) to the appropriate `lib` folder in the sidplaywx's `/deps/`
 
 ##### (PortAudio)
 0. Prerequisites: you must have installed the `libpulse-dev`, ALSA (`libasound2-dev`), `libsndio-dev`, `libjack-dev` BEFORE building the PortAudio, otherwise the resultant PortAudio may not find any devices.
@@ -121,10 +123,12 @@ Once installed you need to **first-time configure** it like so:
 
 ##### (libsidplayfp)
 * **NOTE:** Building the libsidplayfp from its git master branch is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
-1. `cd` (with MSYS2 i.e., UCRT64.exe terminal) into the libsidplayfp's root.
-2. Finally, run: `./configure --disable-dependency-tracking --disable-shared --enable-static --without-gcrypt --with-simd=runtime && make && make install`
+1. `cd` (with MSYS2 i.e., UCRT64.exe terminal) into the libsidplayfp/libresidfp's root.
+2. Download libresidfp: https://github.com/libsidplayfp/libresidfp/releases
+3. Build libresidfp: `./configure --disable-dependency-tracking --disable-shared --enable-static --with-simd=runtime && make && make install`
+4. Build libsidplayfp: `./configure --disable-dependency-tracking --disable-shared --enable-static --without-gcrypt && make && make install`
 	1. TIP: if doing this for the first time, break down these 3 commands (i.e., they are separated by `&&`) and run them one by one so you can catch any problems more easily.
-3. Note: the lib will be automatically found by our cmake later (if you've installed the msys into the `C:\msys64\`) and it will get linked statically.
+5. Note: the lib will be automatically found by our cmake later (if you've installed the msys into the `C:\msys64\`) and it will get linked statically.
 	
 ##### (PortAudio)
 1. [Download](http://files.portaudio.com/download.html) the PortAudio stable source release or the master [from the github](https://github.com/PortAudio/portaudio).

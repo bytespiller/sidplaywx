@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2025-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,11 +29,11 @@ static constexpr float VOLUME_FACTOR_1SID = 1.0f;
 static const float VOLUME_FACTOR_2SID = 1.0f / std::sqrt(2.0f);
 static const float VOLUME_FACTOR_3SID = 1.0f / std::sqrt(3.0f);
 
-SidMixer::SidMixer(sidplayfp& sidEngine) :
+SidMixer::SidMixer(sidplayfp& sidEngine, unsigned int outChannels) :
 	_sidEngine(sidEngine),
 	_numSidChips(_sidEngine.installedSIDs()),
 	_sidVolumeFactor((_numSidChips == 1) ? VOLUME_FACTOR_1SID : (_numSidChips == 2) ? VOLUME_FACTOR_2SID : VOLUME_FACTOR_3SID),
-	_numChannels(_sidEngine.info().channels())
+	_outChannels(outChannels)
 {
 	_sidEngine.buffers(_sidChipsBuffers);
 }
@@ -41,7 +41,7 @@ SidMixer::SidMixer(sidplayfp& sidEngine) :
 void SidMixer::FillBuffer(void* buffer, unsigned long framesPerBuffer)
 {
 	short* const out = static_cast<short*>(buffer);
-	const unsigned long capacity = (_numChannels == 2) ? framesPerBuffer << 1 : framesPerBuffer; // *2 for stereo
+	const unsigned long capacity = (_outChannels == 2) ? framesPerBuffer << 1 : framesPerBuffer; // *2 for stereo
 
 	unsigned int written = 0;
 	while (written < capacity)
@@ -50,7 +50,7 @@ void SidMixer::FillBuffer(void* buffer, unsigned long framesPerBuffer)
 
 		for (; _samplesPos < _samplesLen; ++_samplesPos)
 		{
-			for (unsigned int channel = 0; channel < _numChannels; ++channel)
+			for (unsigned int channel = 0; channel < _outChannels; ++channel)
 			{
 				const float panning = _channelMatrix[_numSidChips][0][channel];
 				int_least32_t tmp = std::lrintf(_sidChipsBuffers[0][_samplesPos] * _sidVolumeFactor) * panning; // SID 1

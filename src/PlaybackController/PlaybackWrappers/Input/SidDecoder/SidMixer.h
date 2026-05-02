@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2025-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ public:
 	SidMixer(SidMixer&) = delete;
 	SidMixer& operator=(const SidMixer&) = delete;
 
-	explicit SidMixer(sidplayfp& sidEngine);
+	explicit SidMixer(sidplayfp& sidEngine, unsigned int outChannels);
 
 public:
 	void FillBuffer(void* buffer, unsigned long framesPerBuffer);
@@ -44,7 +44,7 @@ private:
 
 	const unsigned int _numSidChips = 0;
 	const float _sidVolumeFactor = 0;
-	const unsigned int _numChannels = 0;
+	const unsigned int _outChannels = 0;
 	short* _sidChipsBuffers[3];
 
 	int _samplesPos = 0;

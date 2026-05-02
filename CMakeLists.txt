@@ -15,6 +15,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/deps/include/msw/wxWidgets)
 
 # external libs
 include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/CMakeLists_libsidplayfp.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/CMakeLists_libresidfp.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/CMakeLists_portaudio.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/deps/lib/msw/CMakeLists_wxWidgets.txt)
 
@@ -30,6 +31,7 @@ add_executable(${PROJECT_NAME} ${SRC_FILES})
 find_package(Threads)
 target_link_libraries(${PROJECT_NAME}
     libsidplayfp
+    libresidfp
     libportaudio
     setupapi dsound dxguid winmm # Windows-specific (for audio)
     Threads::Threads

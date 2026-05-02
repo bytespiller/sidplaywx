@@ -115,8 +115,6 @@ namespace
 SidDecoder::SidDecoder() :
     _rs(ReSIDfpBuilder(""))
 {
-    // Create SID emulators
-    _rs.create(_sidEngine.info().maxsids());
 }
 
 SidDecoder::~SidDecoder()
@@ -128,7 +126,7 @@ bool SidDecoder::TryFillBuffer(void* buffer, unsigned long framesPerBuffer)
 {
     if (!_mixer)
     {
-        _mixer = std::make_unique<SidMixer>(_sidEngine);
+        _mixer = std::make_unique<SidMixer>(_sidEngine, _outChannels);
         _mixer->ApplyChannelMatrix(_channelMatrixCache);
     }
 
@@ -136,15 +134,8 @@ bool SidDecoder::TryFillBuffer(void* buffer, unsigned long framesPerBuffer)
     return true;
 }
 
-bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig& filterConfig, bool useNtscForMus)
+bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig& filterConfig, bool useNtscForMus, int outChannels)
 {
-    // Check if builder is ok
-    if (!_rs.getStatus())
-    {
-        std::cerr << _rs.error() << std::endl;
-        return false;
-    }
-
     // Configure the engine
     _sidConfigCache = sidConfig;
     _sidConfigCache.sidEmulation = &_rs;
@@ -161,6 +152,7 @@ bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig
     _rs.filter8580Curve(_filterConfigCache->filter8580Curve);
 
     _useNtscForMus = useNtscForMus;
+    _outChannels = outChannels;
 
     // Reset the voices enabled status (fourth "voice" is digi samples, added in libsidplayfp v2.10.0)
     _sidVoicesEnabledStatus =
@@ -399,7 +391,7 @@ void SidDecoder::SeekTo(uint_least32_t timeMs, const SeekStatusCallback& callbac
     }
 
     // Disable voices and filters of all SIDs -- yields additional ~4x speedup when seeking
-    const unsigned int maxSids = _sidEngine.info().maxsids();
+    const unsigned int maxSids = _sidEngine.info().numberOfSIDs();
     for (unsigned int sid = 0; sid < maxSids; ++sid)
     {
         _sidEngine.mute(sid, 0, true); // Voice 1
@@ -479,7 +471,7 @@ void SidDecoder::UnloadActiveTune()
 
 void SidDecoder::ApplyCanonicalVoiceAndFilterStates()
 {
-    const unsigned int maxSids = _sidEngine.info().maxsids();
+    const unsigned int maxSids = _sidEngine.info().numberOfSIDs();
     for (unsigned int sid = 0; sid < maxSids; ++sid)
     {
         _sidEngine.mute(sid, 0, !_sidVoicesEnabledStatus.at(sid).at(0)); // Voice 1
