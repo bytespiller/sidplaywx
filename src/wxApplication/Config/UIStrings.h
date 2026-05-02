@@ -383,8 +383,8 @@ namespace Strings
 		inline constexpr const char* const OPT_FILTER_CURVE_6581("Filter curve (SID 6581)");
 		inline constexpr const char* const OPT_FILTER_RANGE_6581("Filter range (SID 6581)");
 		inline constexpr const char* const OPT_FILTER_CURVE_8580("Filter curve (SID 8580)");
-		inline constexpr const char* const DESC_FILTER_CURVE("Adjust the center frequency value from 0.0 (weak/bright) to 1.0 (strong/dark), default is 0.5.\nNote: ongoing playback will stop when changing this setting.");
-		inline constexpr const char* const DESC_FILTER_RANGE("Adjust the center frequency value from 0.0 (strong/dark) to 1.0 (weak/bright), default is 0.5.\nNote: ongoing playback will stop when changing this setting.");
+		inline constexpr const char* const DESC_FILTER_CURVE("Adjust the center frequency value from 0.0 to 1.0, default is 0.5.\nNote: ongoing playback will stop when changing this setting.");
+		inline constexpr const char* const DESC_FILTER_RANGE(DESC_FILTER_CURVE);
 
 		inline constexpr const char* const OPT_DIGIBOOST("DigiBoost (SID 8580)");
 		inline constexpr const char* const DESC_DIGIBOOST("The SID 8580 performs volume changes silently. Some tunes are using the volume register to play digitized sounds on the older SID 6581. These sounds are very silent (effectively missing!) on a 8580. DigiBoost hack enables a loud volume changing on 8580 (but may have side effects with \"normal\" tunes made for 8580).\nNote: ongoing playback will stop when changing this setting.");
