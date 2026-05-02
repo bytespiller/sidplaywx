@@ -168,8 +168,6 @@ bool MyApp::OnInit()
 
         if (initSuccess)
         {
-            RefreshVirtualStereoState();
-
             // Load ROMs
             const wxString& romPathKernal = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomKernalPath)->GetValueAsString().ToStdWstring());
             const wxString& romPathBasic = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomBasicPath)->GetValueAsString().ToStdWstring());
@@ -406,11 +404,15 @@ void MyApp::RefreshVirtualStereoState()
     unsigned int offsetMs = 0;
     float sideVolumeFactor = 0;
 
-    Settings::AppSettings::OutChannels outChannelsMode = static_cast<Settings::AppSettings::OutChannels>(currentSettings->GetOption(Settings::AppSettings::ID::OutChannels)->GetValueAsInt());
-    if (outChannelsMode == Settings::AppSettings::OutChannels::VirtualStereo)
+    const bool suspendVirtualStereo = _playback->GetCurrentTuneSidChipsRequired() > 1 && !currentSettings->GetOption(Settings::AppSettings::ID::VirtualStereoMultiSid)->GetValueAsBool();
+    if (!suspendVirtualStereo)
     {
-        offsetMs = currentSettings->GetOption(Settings::AppSettings::ID::VirtualStereoSpeakerDistance)->GetValueAsInt();
-        sideVolumeFactor = currentSettings->GetOption(Settings::AppSettings::ID::VirtualStereoSideVolumeFactor)->GetValueAsFloat();
+        Settings::AppSettings::OutChannels outChannelsMode = static_cast<Settings::AppSettings::OutChannels>(currentSettings->GetOption(Settings::AppSettings::ID::OutChannels)->GetValueAsInt());
+        if (outChannelsMode == Settings::AppSettings::OutChannels::VirtualStereo)
+        {
+            offsetMs = currentSettings->GetOption(Settings::AppSettings::ID::VirtualStereoSpeakerDistance)->GetValueAsInt();
+            sideVolumeFactor = currentSettings->GetOption(Settings::AppSettings::ID::VirtualStereoSideVolumeFactor)->GetValueAsFloat();
+        }
     }
 
     _playback->SetVirtualStereo(offsetMs, sideVolumeFactor);
@@ -535,8 +537,11 @@ void MyApp::RunOnMainThread(std::function<void()> fn)
 
 void MyApp::FinalizePlaybackStarted()
 {
-    RefreshChannelMatrix(); // To apply the Multi-SID Virtual stereo exclusion option state.
     PopSilencer();
+
+    // Apply the Multi-SID Virtual stereo exclusion option state.
+    RefreshVirtualStereoState();
+    RefreshChannelMatrix();
 }
 
 void MyApp::PopSilencer()
