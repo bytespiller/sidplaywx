@@ -386,6 +386,9 @@ namespace Strings
 		inline constexpr const char* const DESC_FILTER_CURVE("Adjust the center frequency value from 0.0 to 1.0, default is 0.5.\nNote: ongoing playback will stop when changing this setting.");
 		inline constexpr const char* const DESC_FILTER_RANGE(DESC_FILTER_CURVE);
 
+		inline constexpr const char* const OPT_OLD_CAPS("Early model caps (SID 6581)");
+		inline constexpr const char* const DESC_OLD_CAPS("- Enabled: old 2200pF caps used on ASSY 326298 (year 1982).\n- Disabled: use the standard 470pF caps.\nNote: ongoing playback will stop when changing this setting.");
+
 		inline constexpr const char* const OPT_DIGIBOOST("DigiBoost (SID 8580)");
 		inline constexpr const char* const DESC_DIGIBOOST("The SID 8580 performs volume changes silently. Some tunes are using the volume register to play digitized sounds on the older SID 6581. These sounds are very silent (effectively missing!) on a 8580. DigiBoost hack enables a loud volume changing on 8580 (but may have side effects with \"normal\" tunes made for 8580).\nNote: ongoing playback will stop when changing this setting.");
 

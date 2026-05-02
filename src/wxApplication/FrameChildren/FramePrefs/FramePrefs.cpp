@@ -42,7 +42,10 @@ namespace
 
     struct Effective
     {
+        /// @brief Effective after app restart.
         static constexpr bool AfterRestart = true;
+
+        /// @brief Effective either in realtime or after playback restart.
         static constexpr bool Immediately = false;
     };
 
@@ -390,6 +393,9 @@ void FramePrefs::FillPropertyGrid()
             AddWrappedPropToPage(Settings::AppSettings::ID::FilterCurve6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
             AddWrappedPropToPage(Settings::AppSettings::ID::FilterRange6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_RANGE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_RANGE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
             AddWrappedPropToPage(Settings::AppSettings::ID::FilterCurve8580, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_8580), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
+
+            // Old 6581 caps (filter related)
+            AddWrappedPropToPage(Settings::AppSettings::ID::Old6581caps, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_OLD_CAPS), *page, Effective::Immediately, Strings::Preferences::DESC_OLD_CAPS);
 
             // DigiBoost
             AddWrappedPropToPage(Settings::AppSettings::ID::DigiBoost, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_DIGIBOOST), *page, Effective::Immediately, Strings::Preferences::DESC_DIGIBOOST);

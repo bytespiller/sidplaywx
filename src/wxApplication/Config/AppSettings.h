@@ -79,6 +79,7 @@ namespace Settings
 			static constexpr const char* const FilterRange6581 = "FilterRange6581";
 			static constexpr const char* const FilterCurve8580 = "FilterCurve8580";
 
+			static constexpr const char* const Old6581caps = "Old6581caps";
 			static constexpr const char* const DigiBoost = "DigiBoost";
 
 			static constexpr const char* const RomKernalPath = "RomKernalPath";
@@ -215,6 +216,7 @@ namespace Settings
 				DefaultOption(ID::FilterRange6581, 0.5),
 				DefaultOption(ID::FilterCurve8580, 0.5),
 
+				DefaultOption(ID::Old6581caps, false),
 				DefaultOption(ID::DigiBoost, false),
 
 				DefaultOption(ID::RomKernalPath, ""),

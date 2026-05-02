@@ -134,7 +134,8 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
                                      (newConfig.useNtscForMus != _sidDecoder->WillUseNtscForMus()) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Curve, _sidDecoder->GetFilterConfig().filter6581Curve)) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Range, _sidDecoder->GetFilterConfig().filter6581Range)) ||
-                                     (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve));
+                                     (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve)) ||
+                                     (newConfig.filterConfig.enableOld6581caps != _sidDecoder->GetFilterConfig().enableOld6581caps);
 
     const bool needResetAudioOutput = (needResetSidDecoder && _preRender != nullptr) || // -> Reset the prerender (in Instant Seeking mode) when the SID decoder gets reset since it'd hold an invalid reference to it then.
                                       (newConfig.audioConfig.lowLatency != _portAudioOutput->GetAudioConfig().lowLatency) ||
