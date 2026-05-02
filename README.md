@@ -72,11 +72,14 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 * **NOTE:** Building the libsidplayfp from its git master branch is more involved and not covered here. This guide assumes you're building one of the [source releases](https://github.com/libsidplayfp/libsidplayfp/releases) of the libsidplayfp which is simpler.
 1. Download libresidfp: https://github.com/libsidplayfp/libresidfp/releases
 2. Build libresidfp: `./configure --disable-dependency-tracking --disable-shared --enable-static --with-simd=runtime && make`
+	1. sudo make install
+	2. sudo ldconfig
 3. Build libsidplayfp: `./configure --disable-dependency-tracking --disable-shared --enable-static --without-gcrypt && make`
 4. Copy the following *includes* (with their folder structures) to the appropriate `include` folder in the sidplaywx's `/deps/`:
 	- `/builders/residfp.h`
 	- `sidbuilder.h`, `SidConfig.h`, `siddefs.h`, `SidInfo.h`, `sidplayfp.h`, `SidTune.h`, `SidTuneInfo.h`, `sidversion.h`
 5. Copy the `/src/.libs/libsidplayfp.a` (`.libs` is a *hidden* folder) to the appropriate `lib` folder in the sidplaywx's `/deps/`
+6. Copy the `/src/.libs/libresidfp.a` (`.libs` is a *hidden* folder) to the appropriate `lib` folder in the sidplaywx's `/deps/` -- FIXME: this step might be unnecessary due to pkgconfig, I plan to cleanup these instructions later.
 
 ##### (PortAudio)
 0. Prerequisites: you must have installed the `libpulse-dev`, ALSA (`libasound2-dev`), `libsndio-dev`, `libjack-dev` BEFORE building the PortAudio, otherwise the resultant PortAudio may not find any devices.
