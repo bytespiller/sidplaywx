@@ -79,7 +79,6 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 	- `/builders/residfp.h`
 	- `sidbuilder.h`, `SidConfig.h`, `siddefs.h`, `SidInfo.h`, `sidplayfp.h`, `SidTune.h`, `SidTuneInfo.h`, `sidversion.h`
 5. Copy the `/src/.libs/libsidplayfp.a` (`.libs` is a *hidden* folder) to the appropriate `lib` folder in the sidplaywx's `/deps/`
-6. Copy the `/src/.libs/libresidfp.a` (`.libs` is a *hidden* folder) to the appropriate `lib` folder in the sidplaywx's `/deps/` -- FIXME: this step might be unnecessary due to pkgconfig, I plan to cleanup these instructions later.
 
 ##### (PortAudio)
 0. Prerequisites: you must have installed the `libpulse-dev`, ALSA (`libasound2-dev`), `libsndio-dev`, `libjack-dev` BEFORE building the PortAudio, otherwise the resultant PortAudio may not find any devices.

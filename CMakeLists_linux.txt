@@ -28,7 +28,7 @@ add_executable(${PROJECT_NAME} ${SRC_FILES})
 find_package(Threads)
 target_link_libraries(${PROJECT_NAME}
     libsidplayfp
-    libresidfp
+	${RESIDFP_LIBRARY}
     libportaudio
     asound sndio pulse jack # needed for PortAudio on Linux, must be defined *after* libportaudio
     Threads::Threads
