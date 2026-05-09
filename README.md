@@ -89,7 +89,7 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 
 ##### (wxWidgets)
 0. Prerequisites: if needed, install the `libgtk-3-dev` and `libcurl-dev` (the last one is needed for our "Check for updates" function).
-1. `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -S . -B dist && cmake --build dist`
+1. `cmake -G "Unix Makefiles" -DwxUSE_WEBVIEW=OFF -DCMAKE_BUILD_TYPE=Release -S . -B dist && cmake --build dist`
 	- Exceptional cases (if you get an `#include` error when building the sidplaywx):
 		- You may need to call the `wx-config --cxxflags` to get necessary flags and update the equivalent variable in our sidplaywx CMakeLists.txt
 		- May also be of interest:
