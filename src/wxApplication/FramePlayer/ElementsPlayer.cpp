@@ -27,7 +27,11 @@
 namespace FrameElements // Static vars
 {
 	// TODO: these TEMP_* things could be defined in the theme XML?
-	static constexpr int TEMP_BUTTON_SIZE = 25; // Bitmap size. Careful, sizes below 30 cause blurry SVG bitmap for some reason...
+	#ifdef __WXGTK__
+		static constexpr int TEMP_BUTTON_SIZE = 30; // Bitmap size. Careful, sizes below 30 cause blurry SVG bitmap for some reason...
+	#else
+		static constexpr int TEMP_BUTTON_SIZE = 25; // Bitmap size. Careful, sizes below 30 cause blurry SVG bitmap for some reason...
+	#endif
 	static constexpr int TEMP_BUTTON_BORDER_SIZE = 1;
 	static constexpr int TEMP_LABEL_BORDER_SIZE = 2;
 	static constexpr int TEMP_LABEL_TIME_BORDER_SIZE = 2;
