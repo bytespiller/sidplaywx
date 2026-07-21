@@ -194,8 +194,8 @@ PlaybackController::PlaybackAttemptStatus PlaybackController::TryPlayFromBuffer(
     // Reminder: loadedBufferToAdopt var is now invalid
 
     const bool successInput = (_activeTuneHolder->bufferHolder->size[1] == 0)
-        ? _sidDecoder->TryLoadSong(_activeTuneHolder->bufferHolder->buffer[0], _activeTuneHolder->bufferHolder->size[0], subsong)
-        : _sidDecoder->TryLoadMusStrSong(filepathForUid.filename().u8string().c_str(), _activeTuneHolder->bufferHolder->buffer[0], _activeTuneHolder->bufferHolder->size[0], _activeTuneHolder->bufferHolder->buffer[1], _activeTuneHolder->bufferHolder->size[1]);
+        ? _sidDecoder->TryLoadSong(_activeTuneHolder->filepath.filename(), _activeTuneHolder->bufferHolder->buffer[0], _activeTuneHolder->bufferHolder->size[0], subsong)
+        : _sidDecoder->TryLoadMusStrSong(filepathForUid.filename(), _activeTuneHolder->bufferHolder->buffer[0], _activeTuneHolder->bufferHolder->size[0], _activeTuneHolder->bufferHolder->buffer[1], _activeTuneHolder->bufferHolder->size[1]);
 
     const bool successOutput = FinalizeTryPlay(successInput, preRenderDurationMs);
 

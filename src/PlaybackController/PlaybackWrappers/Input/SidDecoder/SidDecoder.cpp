@@ -200,35 +200,35 @@ void SidDecoder::PrepareLoadSong()
     UnloadActiveTune();
 }
 
-bool SidDecoder::TryLoadSong(const std::filesystem::path& filepath, unsigned int subsong)
+bool SidDecoder::TryLoadSong(const std::filesystem::path& filePath, unsigned int subsong)
 {
     PrepareLoadSong();
 
     // Load new tune from file
-    _tune = std::make_unique<SidTune>(filepath.generic_string().c_str());
+    _tune = std::make_unique<SidTuneEx>(filePath);
 
     // Do rest
     return TrySetSubsong(subsong);
 }
 
-bool SidDecoder::TryLoadSong(const uint_least8_t* oneFileFormatSidtune, uint_least32_t sidtuneLength, unsigned int subsong)
+bool SidDecoder::TryLoadSong(const std::filesystem::path& fileName, const uint_least8_t* oneFileFormatSidtune, uint_least32_t sidtuneLength, unsigned int subsong)
 {
     PrepareLoadSong();
 
     // Load new tune from buffer
-    _tune = std::make_unique<SidTune>(oneFileFormatSidtune, sidtuneLength);
+    _tune = std::make_unique<SidTuneEx>(fileName, oneFileFormatSidtune, sidtuneLength);
 
     // Do rest
     return TrySetSubsong(subsong);
 }
 
-bool SidDecoder::TryLoadMusStrSong(const char* fileName, const uint_least8_t* musData, uint_least32_t musDataLength, const uint_least8_t* strData, uint_least32_t strDataLength)
+bool SidDecoder::TryLoadMusStrSong(const std::filesystem::path& fileName, const uint_least8_t* musData, uint_least32_t musDataLength, const uint_least8_t* strData, uint_least32_t strDataLength)
 {
     PrepareLoadSong();
 
     // Load new tune from buffer
     MusLoadHelper::Begin(fileName, musData, musDataLength, strData, strDataLength);
-    _tune = std::make_unique<SidTune>(MusLoadHelper::ProvideFileData, fileName, MusLoadHelper::fileNameExt);
+    _tune = std::make_unique<SidTuneEx>(MusLoadHelper::ProvideFileData, fileName, MusLoadHelper::fileNameExt);
     MusLoadHelper::End();
 
     // Do rest
@@ -238,14 +238,14 @@ bool SidDecoder::TryLoadMusStrSong(const char* fileName, const uint_least8_t* mu
 bool SidDecoder::TrySetSubsong(unsigned int subsong)
 {
     // Check if the tune is valid
-    if (!_tune->getStatus())
+    if (!_tune->get().getStatus())
     {
-        std::cerr << _tune->statusString() << std::endl;
+        std::cerr << _tune->get().statusString() << std::endl;
         return false;
     }
 
     // Handle the MUS NTSC option
-    if (_useNtscForMus && MusLoadHelper::IsMusFormat(_tune->getInfo()->dataFileName()))
+    if (_useNtscForMus && MusLoadHelper::IsMusFormat(_tune->filepath))
     {
         SidConfig config = _sidEngine.config();
         config.defaultC64Model = SidConfig::c64_model_t::NTSC;
@@ -257,10 +257,10 @@ bool SidDecoder::TrySetSubsong(unsigned int subsong)
     }
 
     // Select song
-    _tune->selectSong(subsong);
+    _tune->get().selectSong(subsong);
 
     // Load tune into engine
-    if (!_sidEngine.load(_tune.get()))
+    if (!_sidEngine.load(&_tune->get()))
     {
         std::cerr << _sidEngine.error() << std::endl;
         return false;
@@ -283,22 +283,22 @@ uint_least32_t SidDecoder::GetTime() const
 
 int SidDecoder::GetCurrentSubsong() const
 {
-    return _tune->getInfo()->currentSong();
+    return _tune->get().getInfo()->currentSong();
 }
 
 int SidDecoder::GetDefaultSubsong() const
 {
-    return _tune->getInfo()->startSong();
+    return _tune->get().getInfo()->startSong();
 }
 
 int SidDecoder::GetTotalSubsongs() const
 {
-    return _tune->getInfo()->songs();
+    return _tune->get().getInfo()->songs();
 }
 
 std::string SidDecoder::GetCurrentTuneInfoString(TuneUtil::SongInfoCategory category) const
 {
-    return TuneUtil::GetTuneInfoString(*_tune, category);
+    return TuneUtil::GetTuneInfoString(_tune->get(), category);
 }
 
 std::string SidDecoder::GetCurrentTuneMusComments() const
@@ -307,7 +307,7 @@ std::string SidDecoder::GetCurrentTuneMusComments() const
 
     std::string retStr;
 
-    const SidTuneInfo& info = *_tune->getInfo();
+    const SidTuneInfo& info = *_tune->get().getInfo();
     const unsigned int count = info.numberOfCommentStrings();
 
     for (unsigned int i = 0; i < count; ++i)
@@ -326,19 +326,19 @@ std::string SidDecoder::GetCurrentTuneMusComments() const
 
 const SidTuneInfo& SidDecoder::GetCurrentSongInfo() const
 {
-    return *_tune->getInfo();
+    return *_tune->get().getInfo();
 }
 
 TuneUtil::RomRequirement SidDecoder::GetCurrentSongRomRequirement() const
 {
-    return TuneUtil::GetTuneRomRequirement(*_tune);
+    return TuneUtil::GetTuneRomRequirement(_tune->get());
 }
 
 int SidDecoder::GetCurrentTuneSidChipsRequired() const
 {
     if (_tune != nullptr)
     {
-        return _tune->getInfo()->sidChips();
+        return _tune->get().getInfo()->sidChips();
     }
 
     return 0;
@@ -351,7 +351,7 @@ const char* SidDecoder::CalcCurrentTuneMd5() const
         return 0;
     }
 
-    return _tune->createMD5New();
+    return _tune->get().createMD5New();
 }
 
 const SidInfo& SidDecoder::GetEngineInfo() const

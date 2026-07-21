@@ -33,6 +33,41 @@
 #include <memory>
 #include <vector>
 
+struct SidTuneEx
+{
+    SidTuneEx() = delete;
+
+    /// @brief Deprecated libsidplayfp-native loading constructor (no unicode paths supported).
+    [[deprecated]]
+    SidTuneEx(const std::filesystem::path& filePath) :
+        filepath(filePath), // Full path here rather than just a file name.
+        instance(filePath.generic_string().c_str())
+    {}
+
+    /// @brief Data-from-buffer constructor.
+    SidTuneEx(const std::filesystem::path& filePath, const uint_least8_t* oneFileFormatSidtune, uint_least32_t sidtuneLength) :
+        filepath(filePath),
+        instance(oneFileFormatSidtune, sidtuneLength)
+    {}
+
+    /// @brief MUS/STR constructor.
+    SidTuneEx(SidTune::LoaderFunc loader, const std::filesystem::path& filePath, const char** fileNameExt) :
+        filepath(filePath),
+        instance(loader, filePath.generic_string().c_str(), fileNameExt)
+    {}
+
+    const std::filesystem::path filepath;
+
+    /// @brief SidTune instance getter.
+    SidTune& get()
+    {
+        return instance;
+    }
+
+private:
+    SidTune instance;
+};
+
 class SidDecoder : public IBufferWriter
 {
 public:
@@ -71,13 +106,13 @@ public:
     RomUtil::RomStatus TrySetRoms(const std::filesystem::path& pathKernal, const std::filesystem::path& pathBasic, const std::filesystem::path& pathChargen);
 
     [[deprecated("Unicode paths not supported for filepath variant, rather use the oneFileFormatSidtune variant and do custom file loading.")]]
-    bool TryLoadSong(const std::filesystem::path& filepath, unsigned int subsong = 0);
+    bool TryLoadSong(const std::filesystem::path& filePath, unsigned int subsong = 0);
 
     /// @brief A simple fast loader for single-file tunes (e.g., PSID, MUS without STR etc.).
-    bool TryLoadSong(const uint_least8_t* oneFileFormatSidtune, uint_least32_t sidtuneLength, unsigned int subsong = 0);
+    bool TryLoadSong(const std::filesystem::path& fileName, const uint_least8_t* oneFileFormatSidtune, uint_least32_t sidtuneLength, unsigned int subsong = 0);
 
     /// @brief A special loader for proper support of the MUS+STR. Doesn't perform disk access.
-    bool TryLoadMusStrSong(const char* fileName, const uint_least8_t* musData, uint_least32_t musDataLength, const uint_least8_t* strData = nullptr, uint_least32_t strDataLength = 0);
+    bool TryLoadMusStrSong(const std::filesystem::path& fileName, const uint_least8_t* musData, uint_least32_t musDataLength, const uint_least8_t* strData = nullptr, uint_least32_t strDataLength = 0);
 
     bool TrySetSubsong(unsigned int subsong);
 
@@ -128,6 +163,6 @@ private:
     SidVoicesEnabledStatus _sidVoicesEnabledStatus;
     SidFiltersEnabledStatus _sidFiltersEnabledStatus;
     sidplayfp _sidEngine;
-    std::unique_ptr<SidTune> _tune;
+    std::unique_ptr<SidTuneEx> _tune;
     ReSIDfpBuilder _rs;
 };
