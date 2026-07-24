@@ -124,6 +124,7 @@ namespace
         baseSidConfig.forceC64Model = c64ModelSetting.forceC64Model;
 
         baseSidConfig.digiBoost = settings.GetOption(Settings::AppSettings::ID::DigiBoost)->GetValueAsBool();
+        baseSidConfig.powerOnDelay = 16; // Force predictable powerOnDelay, 16 should be minimal stable value and also so low (microseconds) that we don't have to account for it.
 
         return baseSidConfig;
     }
