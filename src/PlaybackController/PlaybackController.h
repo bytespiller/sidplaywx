@@ -161,7 +161,7 @@ public:
     State GetState() const;
     State GetResumeState() const;
 
-    /// @brief Gets the current playback time position. Playback buffer size affects the returned value and is typically some milliseconds in the future.
+    /// @brief Gets the current playback time position.
     uint_least32_t GetTime() const;
     double GetPreRenderProgressFactor() const;
 

@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@
 class PortAudioOutput
 {
 public:
+    static constexpr float MIN_BUFFER_LATENCY_MS = 0.25f; // This value is a minimum that ensures short tunes (e.g., 7ms SFX) aren't cutoff on both Windows and Linux.
+
     struct AudioConfig: public PaStreamParameters
     {
         float volume = 1.0f;
@@ -60,6 +62,9 @@ public:
     bool TryStartStream();
     void StopStream(bool immediate);
     PaError ResetStream(double samplerate);
+
+    /// @brief Gets the current stream's buffer latency (which may be dynamic) in milliseconds. Returns zero if no stream is currently open.
+    int GetCurrentLatencyMs() const;
 
     /// @brief Pass zero offsetMs to disable.
     void SetVirtualStereo(unsigned int offsetMs, float sideVolumeFactor);

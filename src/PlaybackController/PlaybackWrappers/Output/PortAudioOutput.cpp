@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,16 @@
 #include "extra/VirtualStereo/VirtualStereo.h"
 
 #include <assert.h>
+#include <cmath>
 #include <iostream>
 #include <memory>
 
-static constexpr double LIBSIDPLAYFP_MIN_BUFFER_LATENCY = 5.6 / 1000.0; // Ensure safe minimum buffer size due to libsidplayfp change in commit 1a6d9016e8bc35fa88d429c1ca77f31c5f5f6831 causing crash with ALSA & PulseAudio when using the paFramesPerBufferUnspecified (auto-size).
+static constexpr double LIBSIDPLAYFP_MIN_BUFFER_LATENCY_SECONDS = 5.6 / 1000.0; // Ensure safe minimum buffer size due to libsidplayfp change in commit 1a6d9016e8bc35fa88d429c1ca77f31c5f5f6831 causing crash with ALSA & PulseAudio when using the paFramesPerBufferUnspecified (auto-size).
 
 static PortAudioOutput::AudioConfig currentAudioConfig; // Must be static because the PlaybackCallback is static (PortAudio works that way).
 static std::unique_ptr<VisualizationBuffer> visBuffer = nullptr;
 static std::unique_ptr<VirtualStereo> virtualStereo = nullptr;
+static std::atomic<float> bufferDynamicLatencySec = 0;
 
 PortAudioOutput::~PortAudioOutput()
 {
@@ -108,7 +110,9 @@ bool PortAudioOutput::TryInit(const AudioConfig& audioConfig, IBufferWriter* buf
         currentAudioConfig.hostApiSpecificStreamInfo = NULL; // Without this you get an error in the release mode.
         currentAudioConfig.device = outputDevice;
         currentAudioConfig.sampleFormat = paInt16; // Must be 16 bit (libsidplayfp expects 16 bit buffer).
+
         currentAudioConfig.suggestedLatency = (currentAudioConfig.lowLatency) ? deviceInfo.defaultLowOutputLatency : deviceInfo.defaultHighOutputLatency;
+        currentAudioConfig.suggestedLatency = std::max(LIBSIDPLAYFP_MIN_BUFFER_LATENCY_SECONDS, currentAudioConfig.suggestedLatency); // See comment on the constant for why we do this.
 
         // Open an audio I/O stream.
         assert(currentAudioConfig.sampleRate >= 8000 && currentAudioConfig.sampleRate <= 192000); // libsidplayfp supports sample rates in this range only.
@@ -140,13 +144,8 @@ PaError PortAudioOutput::ResetStream(double samplerate)
     Pa_CloseStream(_stream);
 
     // Open an audio I/O stream.
-    const unsigned long safeFramesPerBuffer = samplerate * LIBSIDPLAYFP_MIN_BUFFER_LATENCY;
     PaError err = Pa_OpenStream(&_stream, NULL, &currentAudioConfig, samplerate,
-#ifdef _WIN32
                                 paFramesPerBufferUnspecified,
-#else
-                                safeFramesPerBuffer, // Don't use the paFramesPerBufferUnspecified due to libsidplayfp issue (see comment on the constant).
-#endif
                                 paNoFlag,
                                 PlaybackCallback,
                                 _bufferWriter);
@@ -162,6 +161,17 @@ PaError PortAudioOutput::ResetStream(double samplerate)
     }
 
     return err;
+}
+
+int PortAudioOutput::GetCurrentLatencyMs() const
+{
+    const PaStreamInfo* const streamInfo = Pa_GetStreamInfo(_stream);
+    if (streamInfo == nullptr)
+    {
+        return 0;
+    }
+
+    return (std::max(MIN_BUFFER_LATENCY_MS, bufferDynamicLatencySec.load(std::memory_order_relaxed)) + streamInfo->outputLatency) * 1000.0;
 }
 
 void PortAudioOutput::SetVirtualStereo(unsigned int offsetMs, float sideVolumeFactor)
@@ -202,7 +212,7 @@ bool PortAudioOutput::LogAnyError(const char* tag, const PaError& err)
 
 int PortAudioOutput::PlaybackCallback(const void* /*inputBuffer*/, void* outputBuffer,
                                       unsigned long framesPerBuffer,
-                                      const PaStreamCallbackTimeInfo* /*timeInfo*/,
+                                      const PaStreamCallbackTimeInfo* timeInfo,
                                       PaStreamCallbackFlags /*statusFlags*/,
                                       void* userData)
 {
@@ -214,6 +224,9 @@ int PortAudioOutput::PlaybackCallback(const void* /*inputBuffer*/, void* outputB
     {
         return paAbort;
     }
+
+    // More precise playback time tracking support
+    bufferDynamicLatencySec.store(timeInfo->outputBufferDacTime - timeInfo->currentTime, std::memory_order_relaxed);
 
     // Common
     short* const out = static_cast<short*>(outputBuffer);
@@ -241,5 +254,5 @@ int PortAudioOutput::PlaybackCallback(const void* /*inputBuffer*/, void* outputB
         }
     }
 
-    return paContinue; // Reminder: there is also paComplete, so see about it when we reach the end maybe
+    return paContinue;
 }

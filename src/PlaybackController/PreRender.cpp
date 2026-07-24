@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2023-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2023-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
 #include <cmath>
 #include <cstring> // memcpy & memset
 
-static size_t GRANULARITY = 4096; // Buffer granularity in thread fill-loop.
-constexpr std::chrono::milliseconds SEEK_CHECK_SLEEP_MS(15); // Note: increasing this value decreases the indicator smoothness. 15ms should be ideal (especially due to MSW system timer resolution).
+static constexpr int GRANULARITY = 4096; // Buffer granularity in thread fill-loop.
+static constexpr std::chrono::milliseconds SEEK_CHECK_SLEEP_MS(15); // Note: increasing this value decreases the indicator smoothness. 15ms should be ideal (especially due to MSW system timer resolution).
 
 PreRender::~PreRender()
 {
@@ -55,9 +55,9 @@ void PreRender::DoPreRender(IBufferWriter& renderer, int sampleRate, int numChan
 	_preRenderedSize = 0;
 	_abortPreRenderFlag = false;
 
-	_thread = std::thread([this, size, &renderer]
+	_thread = std::thread([this, frames, size, &renderer]
     {
-		const size_t maxFramesPerBuffer = std::min(GRANULARITY, size);
+		const size_t maxFramesPerBuffer = std::min(GRANULARITY, frames);
 
 		while (!_abortPreRenderFlag && _preRenderedSize < size)
 		{

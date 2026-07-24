@@ -380,15 +380,14 @@ uint_least32_t PlaybackController::GetTime() const
     {
         return _seekOperation.safeCtimeMs;
     }
-    else
-    {
-        if (_preRender != nullptr)
-        {
-            return _preRender->GetCurrentSongTimeMs();
-        }
 
-        return _sidDecoder->GetTime();
+    const int currentLatencyMs = _portAudioOutput->GetCurrentLatencyMs();
+    if (_preRender != nullptr)
+    {
+        return std::max(0, _preRender->GetCurrentSongTimeMs() - currentLatencyMs);
     }
+
+    return std::max(0, static_cast<int>(_sidDecoder->GetTime()) - currentLatencyMs);
 }
 
 double PlaybackController::GetPreRenderProgressFactor() const
@@ -804,8 +803,8 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
 
             if (!reusePreRender || _preRender->GetPreRenderProgressFactor() != 1.0)
             {
-                const SidConfig& sidConfig = _sidDecoder->GetSidConfig();
-                _preRender->DoPreRender(*_sidDecoder.get(), sidConfig.frequency, GetAudioConfig().channelCount, preRenderDurationMs);
+                static constexpr int MIN_BUFFER_DURATION = PortAudioOutput::MIN_BUFFER_LATENCY_MS * 1000; // Min duration/latency padding to prevent short tunes (e.g., 7ms SFX and such) ending prematurely.
+                _preRender->DoPreRender(*_sidDecoder.get(), _sidDecoder->GetSidConfig().frequency, GetAudioConfig().channelCount, std::max(MIN_BUFFER_DURATION, preRenderDurationMs));
             }
         }
         else
@@ -821,6 +820,7 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
         }
 
         isSuccessful = _portAudioOutput->TryStartStream();
+
         if (!isSuccessful)
         {
             if (_preRender != nullptr)

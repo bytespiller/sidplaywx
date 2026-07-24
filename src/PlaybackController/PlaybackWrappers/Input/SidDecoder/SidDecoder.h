@@ -117,7 +117,10 @@ public:
     bool TrySetSubsong(unsigned int subsong);
 
     bool WillUseNtscForMus() const;
+
+    /// @brief Gets the current playback time position in milliseconds. Playback buffer size affects the returned value and is typically some milliseconds in the future.
     uint_least32_t GetTime() const;
+
     int GetCurrentSubsong() const;
     int GetDefaultSubsong() const;
     int GetTotalSubsongs() const;
