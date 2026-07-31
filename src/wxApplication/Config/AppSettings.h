@@ -175,7 +175,7 @@ namespace Settings
 				DefaultOption(ID::OutChannels, static_cast<int>(OutChannels::Default)),
 				DefaultOption(ID::VirtualStereoSpeakerDistance, 7),
 				DefaultOption(ID::VirtualStereoSideVolumeFactor, 0.18),
-				DefaultOption(ID::VirtualStereoMultiSid, true),
+				DefaultOption(ID::VirtualStereoMultiSid, false),
 
 				DefaultOption(ID::PanMatrix_2Sid_FirstLeft, 1.0),
 				DefaultOption(ID::PanMatrix_2Sid_FirstRight, 0.5),
