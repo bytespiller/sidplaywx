@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,17 @@ namespace FrameElements // Static functions.
 		parent.Add(retLabel, 0, wxEXPAND | wxRESERVE_SPACE_EVEN_IF_HIDDEN, 0);
 		return retLabel;
 	}
+
+	/// @brief Temporary workaround for wxWidgets v3.3.3 regression. Effective on MSW only.
+	static void FixBlackFontOnDarkTheme(wxStaticBoxSizer* staticBoxSizer)
+	{
+#ifdef WIN32
+		if (wxSystemSettings::GetAppearance().IsDark())
+		{
+			staticBoxSizer->GetStaticBox()->SetForegroundColour(wxColour(255,255,255));
+		}
+#endif
+	}
 }
 
 namespace FrameElements
@@ -69,11 +80,13 @@ namespace FrameElements
 	{
 	    wxBoxSizer* sizerParent = new wxBoxSizer(wxVERTICAL);
 	    wxStaticBoxSizer* sizerChannels = new wxStaticBoxSizer(wxHORIZONTAL, &_parentPanel, Strings::PlaybackMods::SID_VOICES_TITLE);
+		FixBlackFontOnDarkTheme(sizerChannels); // TODO: remove this once wxWidgets fixes regression from v3.3.3
 	    sizerParent->Add(sizerChannels, 1, wxEXPAND, 0);
 
 		// SID 1
 		{
 			wxStaticBoxSizer* sizerVoices1 = new wxStaticBoxSizer(wxVERTICAL, sizerChannels->GetStaticBox(), wxString::Format("%s %i", Strings::PlaybackMods::SID_TITLE, 1));
+			FixBlackFontOnDarkTheme(sizerVoices1); // TODO: remove this once wxWidgets fixes regression from v3.3.3
 			sizerChannels->Add(sizerVoices1, 1, wxEXPAND | wxTOP | wxRIGHT, BOX_BORDER_SIZE);
 
 			static constexpr unsigned int SID1 = 0;
@@ -91,6 +104,7 @@ namespace FrameElements
 		// SID 2
 		{
 			wxStaticBoxSizer* sizerVoices2 = new wxStaticBoxSizer(wxVERTICAL, sizerChannels->GetStaticBox(), wxString::Format("%s %i", Strings::PlaybackMods::SID_TITLE, 2));
+			FixBlackFontOnDarkTheme(sizerVoices2); // TODO: remove this once wxWidgets fixes regression from v3.3.3
 			sizerChannels->Add(sizerVoices2, 1, wxEXPAND | wxTOP | wxLEFT, BOX_BORDER_SIZE);
 
 			static constexpr unsigned int SID2 = 1;
@@ -108,6 +122,7 @@ namespace FrameElements
 		// SID 3
 		{
 			wxStaticBoxSizer* sizerVoices3 = new wxStaticBoxSizer(wxVERTICAL, sizerChannels->GetStaticBox(), wxString::Format("%s %i", Strings::PlaybackMods::SID_TITLE, 3));
+			FixBlackFontOnDarkTheme(sizerVoices3); // TODO: remove this once wxWidgets fixes regression from v3.3.3
 			sizerChannels->Add(sizerVoices3, 1, wxEXPAND | wxTOP | wxLEFT, BOX_BORDER_SIZE);
 
 			static constexpr unsigned int SID3 = 2;
@@ -135,6 +150,7 @@ namespace FrameElements
 
 		// Playback speed
 	    wxStaticBoxSizer* sizer_6 = new wxStaticBoxSizer(wxVERTICAL, &_parentPanel, Strings::PlaybackMods::SPEED_SLIDER);
+		FixBlackFontOnDarkTheme(sizer_6); // TODO: remove this once wxWidgets fixes regression from v3.3.3
 	    sizerParent->Add(sizer_6, 0, wxEXPAND | wxTOP, BOX_BORDER_SIZE);
 	    sliderPlaybackSpeed = new wxSlider(sizer_6->GetStaticBox(), wxID_ANY, 100, 50, 200, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_VALUE_LABEL);
 		sliderPlaybackSpeed->SetPageSize(5);
