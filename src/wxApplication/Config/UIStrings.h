@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.19.2"); // Reminder: don't forget to increase. Also, don't forget the final zero for x.y.0 versions.
+	inline constexpr const char* const APP_VERSION_TAG("0.19.3"); // Reminder: don't forget to increase. Also, don't forget the final zero for x.y.0 versions.
 
 	namespace FramePlayer
 	{
@@ -430,7 +430,7 @@ namespace Strings
 	{
 		inline constexpr const char* const ERR_INIT_PLAYBACK("Fatal error: failed to initialize playback subsystems.");
 
-		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_RECOVERY("Critical init failure.\nDo you want to reset all settings to defaults?\n\n(Selecting \"No\" will close the application so you can retry with original settings.)");
+		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_RECOVERY("Critical init failure.\nDo you want to reset all settings to defaults?\n\n(Selecting \"No\" will close the application so you can retry with saved settings.)");
 		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_EXIT("Critical init failure.\nDo you want to reset all settings to defaults?\n(Note: you will have to relaunch the application.)");
 
 		inline constexpr const char* const MSG_ERR_SONGLENGTHS_NOT_FOUND("Songlengths database not found. Note: we use relative paths, so if you've moved the executable that could be the reason.");
