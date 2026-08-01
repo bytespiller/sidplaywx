@@ -1,6 +1,6 @@
 /*
 * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
-* Copyright (C) 2024-2025 Jasmin Rutic (bytespiller@gmail.com)
+* Copyright (C) 2024-2026 Jasmin Rutic (bytespiller@gmail.com)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -41,11 +41,7 @@ namespace UIElements
 		SetForegroundColour(_themedData.GetPropertyColor("textColor"));
 
 		// Set fixed height similar to the regular StaticText control
-		{
-			int _, height;
-			GetTrueTextExtent("A", _, height);
-			SetMaxClientSize(wxSize(-1, std::max(1, height)));
-		}
+		SetMaxClientSize(wxSize(-1, std::max(1, GetTextExtent("A").GetHeight())));
 
 		// Set timer interval
 		_timer.Start(INTERVAL_SCROLLING);
@@ -78,15 +74,35 @@ namespace UIElements
 
 		_text = normalizedText;
 
-		{
-			int _;
-			GetTrueTextExtent(_text, _textWidth, _);
-		}
+		const wxSize extent = GetTextExtent(_text);
+		_textWidth = extent.GetWidth();
+		_textHeight = extent.GetHeight();
 
 		if (IsScrollingNeeded())
 		{
 			_scrollStartDelay = SCROLL_RESUME_DELAY; // Don't delay initially.
 			_posX = -(GetClientSize().GetWidth() * SCROLL_START_OFFSET);
+		}
+
+		// Pre-render text
+		if (!_text.empty())
+		{
+			_textCacheBitmap.Create(_textWidth, _textHeight);
+			std::unique_ptr<wxGraphicsContext> gc(wxGraphicsContext::Create(_textCacheBitmap));
+
+			if (gc)
+			{
+				// Clear GC
+				gc->SetCompositionMode(wxCOMPOSITION_SOURCE);
+				gc->SetBrush(gc->CreateBrush(wxBrush(GetBackgroundColour())));
+				gc->SetPen(*wxTRANSPARENT_PEN);
+				gc->DrawRectangle(0, 0, _textWidth, _textHeight);
+				gc->SetCompositionMode(wxCOMPOSITION_OVER);
+
+				// Render text (TODO: need to do tiling otherwise we'll crash on large text!)
+				gc->SetFont(GetFont(), GetForegroundColour());
+				gc->DrawText(_text, 0, 0);
+			}
 		}
 
 		Refresh(false);
@@ -95,20 +111,6 @@ namespace UIElements
 	const wxString& ScrollingLabel::GetText() const
 	{
 		return _text;
-	}
-
-	void ScrollingLabel::GetTrueTextExtent(const wxString& text, int& width, int& height)
-	{
-		wxGraphicsContext* const gc = wxGraphicsContext::Create(wxClientDC(this));
-		gc->SetFont(GetFont(), GetForegroundColour());
-
-		double w, h;
-		gc->GetTextExtent(text, &w, &h); // Calling regular GetTextExtent comes short (on MSW) so we have to use the one from the wxGraphicsContext.
-
-		width = static_cast<int>(std::ceil(w) + 1);
-		height = static_cast<int>(std::ceil(h));
-
-		delete gc;
 	}
 
 	void ScrollingLabel::Render(wxGraphicsContext& gc)
@@ -142,8 +144,12 @@ namespace UIElements
 		}
 
 		// Draw the text
-		gc.SetFont(GetFont(), GetForegroundColour());
-		gc.DrawText(_text, -_posX, 0);
+		const wxSize& size = GetClientSize();
+
+		if (!_text.empty())
+		{
+			gc.DrawBitmap(_textCacheBitmap, -_posX, 0, _textCacheBitmap.GetWidth(), _textCacheBitmap.GetHeight());
+		}
 
 		if (!shouldScroll)
 		{
@@ -152,7 +158,6 @@ namespace UIElements
 
 		// Create a gradient brush (for feathered overlay)
 		// Draw a rectangle with the gradient brush
-		const wxSize& size = GetClientSize();
 		const float startPos = std::min(0.5f, FEATHERING / std::max(1, size.GetWidth()));
 		const float endPos = 1.0f - startPos;
 
