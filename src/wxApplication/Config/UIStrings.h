@@ -194,6 +194,9 @@ namespace Strings
 		inline constexpr const char* const TUNE_SIZE("Size data / file");
 		inline constexpr const char* const TUNE_SUBSONG("Song (default)");
 		inline constexpr const char* const TUNE_MODEL_SID("SID model");
+		inline constexpr const char* const TUNE_ADDR_SID1("SID 1 address");
+		inline constexpr const char* const TUNE_ADDR_SID2("SID 2 address");
+		inline constexpr const char* const TUNE_ADDR_SID3("SID 3 address");
 		inline constexpr const char* const TUNE_MODEL_C64("Clock speed");
 		inline constexpr const char* const TUNE_TYPE("Type");
 		inline constexpr const char* const TUNE_ROM("ROM required");

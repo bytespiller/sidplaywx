@@ -129,6 +129,10 @@ void FrameTuneInfo::UpdateInfo(const PlaylistTreeModelNode* const node)
 	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_INIT, wxString::Format("$%04x", sidInfo.initAddr()).MakeUpper().ToStdString());
 	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_PLAY, wxString::Format("$%04x", sidInfo.playAddr()).MakeUpper().ToStdString());
 
+	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_SID1, wxString::Format("$%04x", sidInfo.sidChipBase(0)).MakeUpper().ToStdString());
+	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_SID2, (sidInfo.sidChips() > 1) ? wxString::Format("$%04x", sidInfo.sidChipBase(1)).MakeUpper().ToStdString() : "-");
+	SetPropertyValue(Strings::TuneInfo::TUNE_ADDR_SID3, (sidInfo.sidChips() > 2) ? wxString::Format("$%04x", sidInfo.sidChipBase(2)).MakeUpper().ToStdString() : "-");
+
 	SetPropertyValue(Strings::TuneInfo::TUNE_SIZE, wxString::Format("%i ($%04x) / %i ($%04x)", sidInfo.c64dataLen(), sidInfo.c64dataLen(), sidInfo.dataFileLen(), sidInfo.dataFileLen()).MakeUpper().ToStdString());
 	SetPropertyValue(Strings::TuneInfo::TUNE_SUBSONG, wxString::Format("%i / %i (%i)", sidInfo.currentSong(), sidInfo.songs(), sidInfo.startSong()).ToStdString());
 	SetPropertyValue(Strings::TuneInfo::TUNE_MODEL_SID, _playbackInfo.GetCurrentTuneSidDescription(false));

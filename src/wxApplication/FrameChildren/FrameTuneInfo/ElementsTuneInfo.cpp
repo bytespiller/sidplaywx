@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,7 +82,12 @@ namespace FrameElements
 
 				AddProperty(page, Strings::TuneInfo::TUNE_SIZE);
 				AddProperty(page, Strings::TuneInfo::TUNE_SUBSONG);
+
 				AddProperty(page, Strings::TuneInfo::TUNE_MODEL_SID);
+				AddProperty(page, Strings::TuneInfo::TUNE_ADDR_SID1);
+				AddProperty(page, Strings::TuneInfo::TUNE_ADDR_SID2);
+				AddProperty(page, Strings::TuneInfo::TUNE_ADDR_SID3);
+
 				AddProperty(page, Strings::TuneInfo::TUNE_MODEL_C64);
 				AddProperty(page, Strings::TuneInfo::TUNE_TYPE);
 				AddProperty(page, Strings::TuneInfo::TUNE_ROM);
