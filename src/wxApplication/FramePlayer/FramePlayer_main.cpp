@@ -17,6 +17,13 @@
  */
 
 #include "FramePlayer.h"
+
+#pragma region HACK: Grab libresidfp version defines
+    #define RESIDFP_H
+    #include <residfp/sidversion.h>
+    #undef RESIDFP_H
+#pragma endregion
+
 #include "../MyApp.h"
 #include "../Config/AppSettings.h"
 #include "../Config/UIStrings.h"
@@ -762,7 +769,7 @@ void FramePlayer::DisplayAboutBox()
     aboutInfo.SetLicense(Strings::About::LICENSE);
 
     aboutInfo.AddDeveloper(wxString(Strings::About::DEVELOPER_LIBRARIES) + "\n" +
-                           wxString::Format("%s %s", _app.GetPlaybackInfo().GetEngineInfo().name(), _app.GetPlaybackInfo().GetEngineInfo().version()) + "\n" + // libsidplayfp
+                           wxString::Format("%s %s (libresidfp %i.%i.%i)", _app.GetPlaybackInfo().GetEngineInfo().name(), _app.GetPlaybackInfo().GetEngineInfo().version(), LIBRESIDFP_VERSION_MAJ, LIBRESIDFP_VERSION_MIN, LIBRESIDFP_VERSION_LEV) + "\n" + // libsidplayfp
                            wxString(Pa_GetVersionInfo()->versionText) + "\n" + // PortAudio
                            wxVERSION_STRING // wxWidgets
                           );

@@ -1,6 +1,5 @@
-${CMAKE_CURRENT_LIST_DIR}/libresidfp/libresidfp.a)
-
 find_library(RESIDFP_LIBRARY
     NAMES residfp libresidfp
     REQUIRED
 )
+
