@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2024-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2024-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,6 @@ namespace UIElements
 		const wxString& GetText() const;
 
 	private:
-		void GetTrueTextExtent(const wxString& text, int& width, int& height);
 		void Render(wxGraphicsContext& gc);
 		bool IsScrollingNeeded() const;
 
@@ -70,7 +69,9 @@ namespace UIElements
 		wxStopWatch _stopWatch;
 		TextJustify _justify;
 		wxString _text;
+		wxBitmap _textCacheBitmap;
 		int _textWidth = 0;
+		int _textHeight = 0;
 		double _posX = 0.0;
 		long _lastTimestamp = 0;
 		int _scrollStartDelay = 0;
