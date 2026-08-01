@@ -16,14 +16,20 @@
  * along with this program.  If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-#include "FramePlayer.h"
-
 #pragma region HACK: Grab libresidfp version defines
-    #define RESIDFP_H
+    #ifndef RESIDFP_H
+        #define RESIDFP_H // The sidversion.h include checks this, if not defined it will yell.
+        #define SIDPLAYWX_BORROWED_RESIDFP_H
+    #endif
+
     #include <residfp/sidversion.h>
-    #undef RESIDFP_H
+
+    #ifdef SIDPLAYWX_BORROWED_RESIDFP_H
+        #undef RESIDFP_H // Pickpocket level increased...
+    #endif
 #pragma endregion
 
+#include "FramePlayer.h"
 #include "../MyApp.h"
 #include "../Config/AppSettings.h"
 #include "../Config/UIStrings.h"
