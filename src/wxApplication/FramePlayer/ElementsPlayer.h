@@ -121,7 +121,7 @@ namespace FrameElements
 		// Labels
 		wxStaticText* labelTitle;
 		wxStaticText* labelAuthor;
-		wxStaticText* labelCopyright;
+		wxStaticText* labelReleased;
 		wxStaticText* labelPlaylistPosition;
 
 		wxStaticText* labelSubsong;

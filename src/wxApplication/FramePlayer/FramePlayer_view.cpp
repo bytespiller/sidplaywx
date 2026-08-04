@@ -362,7 +362,7 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
     {
         _ui->labelTitle->SetLabelText("");
         _ui->labelAuthor->SetLabelText("");
-        _ui->labelCopyright->SetLabelText("");
+        _ui->labelReleased->SetLabelText("");
         _ui->labelSubsong->SetLabelText("0 / 0");
 
         _ui->labelStilNameTitle->SetText("");
@@ -390,7 +390,7 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
             }
 
             _ui->labelAuthor->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author)));
-            _ui->labelCopyright->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released)));
+            _ui->labelReleased->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released)));
             _ui->labelSubsong->SetLabelText(wxString::Format("%i / %i", subsong, playback.GetTotalSubsongs()));
         }
 

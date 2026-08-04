@@ -42,7 +42,7 @@ namespace UIElements
 			_AddTextColumn(ColumnId::Title, Strings::PlaylistTree::COLUMN_TITLE);
 			_AddTextColumn(ColumnId::Duration, Strings::PlaylistTree::COLUMN_DURATION);
 			_AddTextColumn(ColumnId::Author, Strings::PlaylistTree::COLUMN_AUTHOR);
-			_AddTextColumn(ColumnId::Copyright, Strings::PlaylistTree::COLUMN_COPYRIGHT);
+			_AddTextColumn(ColumnId::Copyright, Strings::PlaylistTree::COLUMN_RELEASED);
 
 #ifdef WIN32
 			Bind(wxEVT_MOUSEWHEEL, &_OverrideScrollWheel, this); // Partial workaround for the smooth scrolling performance issues on MSW (especially with lots of icons in rows).

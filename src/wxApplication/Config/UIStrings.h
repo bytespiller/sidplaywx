@@ -106,7 +106,7 @@ namespace Strings
 
 		inline constexpr const char* const TOOLTIP_PSID_TITLE("Song title");
 		inline constexpr const char* const TOOLTIP_PSID_AUTHOR("Song author");
-		inline constexpr const char* const TOOLTIP_PSID_COPYRIGHT("Song copyright");
+		inline constexpr const char* const TOOLTIP_PSID_RELEASED("Song released");
 
 		inline constexpr const char* const TOOLTIP_STIL_NAME_TITLE("STIL Name - Title");
 		inline constexpr const char* const TOOLTIP_STIL_ARTIST_AUTHOR("STIL Artist (Author)");
@@ -133,7 +133,7 @@ namespace Strings
 		inline constexpr const char* const COLUMN_TITLE("Title");
 		inline constexpr const char* const COLUMN_DURATION("Duration");
 		inline constexpr const char* const COLUMN_AUTHOR("Author");
-		inline constexpr const char* const COLUMN_COPYRIGHT("Copyright");
+		inline constexpr const char* const COLUMN_RELEASED("Released");
 
 		inline constexpr const char* const MENU_ITEM_REMOVE("Remove");
 		inline constexpr const char* const MENU_ITEM_REMOVE_ALL_ABOVE("Remove all above");

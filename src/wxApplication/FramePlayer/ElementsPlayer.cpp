@@ -224,7 +224,7 @@ namespace FrameElements // Player class
 		}
 
 		labelAuthor = AttachIconLabel(themeData.GetImage("icon_author"), Strings::FramePlayer::TOOLTIP_PSID_AUTHOR, _parentPanel, sizerSongInfoLeft);
-		labelCopyright = AttachIconLabel(themeData.GetImage("icon_copyright"), Strings::FramePlayer::TOOLTIP_PSID_COPYRIGHT, _parentPanel, sizerSongInfoLeft);
+		labelReleased = AttachIconLabel(themeData.GetImage("icon_released"), Strings::FramePlayer::TOOLTIP_PSID_RELEASED, _parentPanel, sizerSongInfoLeft);
 
 		// Playlist position & count label
 		{

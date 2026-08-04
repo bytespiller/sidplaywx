@@ -2,7 +2,7 @@
 <Theme displayName="Default">
   <Images>
     <Image type="svg" name="icon_chip" path="svg/chip-memory.svg"/>
-    <Image type="svg" name="icon_copyright" path="svg/copyright-line.svg"/>
+    <Image type="svg" name="icon_released" path="svg/signal-tower-fill.svg"/>
     <Image type="svg" name="btn_eq" path="svg/equalizer-fill.svg"/>
     <Image type="svg" name="btn_tuneinfo" path="svg/information-2-line.svg"/>
     <Image type="svg" name="btn_infinite" path="svg/infinity-line.svg"/>
