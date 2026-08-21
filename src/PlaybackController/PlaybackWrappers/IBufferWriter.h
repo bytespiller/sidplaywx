@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2023 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 class IBufferWriter
 {
 public:
+    static constexpr int LIBSIDPLAYFP_APPARENT_INIT_DELAY_MS = 200;
     using SeekStatusCallback = std::function<bool(int, bool)>;
 
 public:

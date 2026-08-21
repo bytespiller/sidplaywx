@@ -22,16 +22,17 @@
 #include "extra/VirtualStereo/VirtualStereo.h"
 
 #include <assert.h>
-#include <cmath>
 #include <iostream>
 #include <memory>
 
 static constexpr double LIBSIDPLAYFP_MIN_BUFFER_LATENCY_SECONDS = 5.6 / 1000.0; // Ensure safe minimum buffer size due to libsidplayfp change in commit 1a6d9016e8bc35fa88d429c1ca77f31c5f5f6831 causing crash with ALSA & PulseAudio when using the paFramesPerBufferUnspecified (auto-size).
 
-static PortAudioOutput::AudioConfig currentAudioConfig; // Must be static because the PlaybackCallback is static (PortAudio works that way).
-static std::unique_ptr<VisualizationBuffer> visBuffer = nullptr;
-static std::unique_ptr<VirtualStereo> virtualStereo = nullptr;
-static std::atomic<float> bufferDynamicLatencySec = 0;
+namespace PlaybackThreadState // Static because the PlaybackCallback is static (PortAudio works that way)
+{
+    static PortAudioOutput::AudioConfig currentAudioConfig;
+    static std::unique_ptr<VisualizationBuffer> visBuffer = nullptr;
+    static std::unique_ptr<VirtualStereo> virtualStereo = nullptr;
+}
 
 PortAudioOutput::~PortAudioOutput()
 {
@@ -43,35 +44,35 @@ PortAudioOutput::~PortAudioOutput()
 
 float PortAudioOutput::GetVolume()
 {
-    return currentAudioConfig.volume;
+    return PlaybackThreadState::currentAudioConfig.volume;
 }
 
 void PortAudioOutput::SetVolume(float volume)
 {
     assert(volume >= 0.0f && volume <= 1.0f);
-    currentAudioConfig.volume = volume;
+    PlaybackThreadState::currentAudioConfig.volume = volume;
 }
 
 void PortAudioOutput::InitVisualizationBuffer(size_t length)
 {
     if (length == 0)
     {
-        visBuffer = nullptr;
+        PlaybackThreadState::visBuffer = nullptr;
     }
     else
     {
-        visBuffer = std::make_unique<VisualizationBuffer>(length);
+        PlaybackThreadState::visBuffer = std::make_unique<VisualizationBuffer>(length);
     }
 }
 
 size_t PortAudioOutput::GetVisualizationWaveform(short* out) const
 {
-    if (visBuffer == nullptr)
+    if (PlaybackThreadState::visBuffer == nullptr)
     {
         return 0;
     }
 
-    return visBuffer->Read(out);
+    return PlaybackThreadState::visBuffer->Read(out);
 }
 
 bool PortAudioOutput::PreInitPortAudioLibrary()
@@ -106,17 +107,17 @@ bool PortAudioOutput::TryInit(const AudioConfig& audioConfig, IBufferWriter* buf
         }
 
         const PaDeviceInfo& deviceInfo = *Pa_GetDeviceInfo(outputDevice);
-        currentAudioConfig = AudioConfig(audioConfig);
-        currentAudioConfig.hostApiSpecificStreamInfo = NULL; // Without this you get an error in the release mode.
-        currentAudioConfig.device = outputDevice;
-        currentAudioConfig.sampleFormat = paInt16; // Must be 16 bit (libsidplayfp expects 16 bit buffer).
+        PlaybackThreadState::currentAudioConfig = AudioConfig(audioConfig);
+        PlaybackThreadState::currentAudioConfig.hostApiSpecificStreamInfo = NULL; // Without this you get an error in the release mode.
+        PlaybackThreadState::currentAudioConfig.device = outputDevice;
+        PlaybackThreadState::currentAudioConfig.sampleFormat = paInt16; // Must be 16 bit (libsidplayfp expects 16 bit buffer).
 
-        currentAudioConfig.suggestedLatency = (currentAudioConfig.lowLatency) ? deviceInfo.defaultLowOutputLatency : deviceInfo.defaultHighOutputLatency;
-        currentAudioConfig.suggestedLatency = std::max(LIBSIDPLAYFP_MIN_BUFFER_LATENCY_SECONDS, currentAudioConfig.suggestedLatency); // See comment on the constant for why we do this.
+        PlaybackThreadState::currentAudioConfig.suggestedLatency = (PlaybackThreadState::currentAudioConfig.lowLatency) ? deviceInfo.defaultLowOutputLatency : deviceInfo.defaultHighOutputLatency;
+        PlaybackThreadState::currentAudioConfig.suggestedLatency = std::max(LIBSIDPLAYFP_MIN_BUFFER_LATENCY_SECONDS, PlaybackThreadState::currentAudioConfig.suggestedLatency); // See comment on the constant for why we do this.
 
         // Open an audio I/O stream.
-        assert(currentAudioConfig.sampleRate >= 8000 && currentAudioConfig.sampleRate <= 192000); // libsidplayfp supports sample rates in this range only.
-        success = ResetStream(currentAudioConfig.sampleRate * playbackSpeedFactor) == paNoError;
+        assert(PlaybackThreadState::currentAudioConfig.sampleRate >= 8000 && PlaybackThreadState::currentAudioConfig.sampleRate <= 192000); // libsidplayfp supports sample rates in this range only.
+        success = ResetStream(PlaybackThreadState::currentAudioConfig.sampleRate * playbackSpeedFactor) == paNoError;
     }
 
     return success;
@@ -124,9 +125,9 @@ bool PortAudioOutput::TryInit(const AudioConfig& audioConfig, IBufferWriter* buf
 
 bool PortAudioOutput::TryStartStream()
 {
-    if (virtualStereo != nullptr)
+    if (PlaybackThreadState::virtualStereo != nullptr)
     {
-        virtualStereo->Reset();
+        PlaybackThreadState::virtualStereo->Reset();
     }
 
     PaError err = Pa_StartStream(_stream);
@@ -144,7 +145,7 @@ PaError PortAudioOutput::ResetStream(double samplerate)
     Pa_CloseStream(_stream);
 
     // Open an audio I/O stream.
-    PaError err = Pa_OpenStream(&_stream, NULL, &currentAudioConfig, samplerate,
+    PaError err = Pa_OpenStream(&_stream, NULL, &PlaybackThreadState::currentAudioConfig, samplerate,
                                 paFramesPerBufferUnspecified,
                                 paNoFlag,
                                 PlaybackCallback,
@@ -163,17 +164,6 @@ PaError PortAudioOutput::ResetStream(double samplerate)
     return err;
 }
 
-int PortAudioOutput::GetCurrentLatencyMs() const
-{
-    const PaStreamInfo* const streamInfo = Pa_GetStreamInfo(_stream);
-    if (streamInfo == nullptr)
-    {
-        return 0;
-    }
-
-    return (std::max(MIN_BUFFER_LATENCY_MS, bufferDynamicLatencySec.load(std::memory_order_relaxed)) + streamInfo->outputLatency) * 1000.0;
-}
-
 void PortAudioOutput::SetVirtualStereo(unsigned int offsetMs, float sideVolumeFactor)
 {
     _fxConfig.virtualStereoExpansionOffsetMs = offsetMs;
@@ -181,22 +171,22 @@ void PortAudioOutput::SetVirtualStereo(unsigned int offsetMs, float sideVolumeFa
     if (_fxConfig.virtualStereoExpansionOffsetMs > 0)
     {
         // Reminder: HaaS domain splits this offset in half, so offset parameter below 2ms is invalid.
-        virtualStereo = std::make_unique<VirtualStereo>(currentAudioConfig.sampleRate, _fxConfig.virtualStereoExpansionOffsetMs, _fxConfig.virtualStereoSideVolumeFactor);
+        PlaybackThreadState::virtualStereo = std::make_unique<VirtualStereo>(PlaybackThreadState::currentAudioConfig.sampleRate, _fxConfig.virtualStereoExpansionOffsetMs, _fxConfig.virtualStereoSideVolumeFactor);
     }
     else
     {
-        virtualStereo = nullptr;
+        PlaybackThreadState::virtualStereo = nullptr;
     }
 }
 
 const PortAudioOutput::AudioConfig& PortAudioOutput::GetAudioConfig() const
 {
-    return currentAudioConfig;
+    return PlaybackThreadState::currentAudioConfig;
 }
 
 bool PortAudioOutput::IsOutputSampleRateSupported(double samplerate) const
 {
-    return Pa_IsFormatSupported(NULL, &currentAudioConfig, samplerate) == paFormatIsSupported;
+    return Pa_IsFormatSupported(NULL, &PlaybackThreadState::currentAudioConfig, samplerate) == paFormatIsSupported;
 }
 
 bool PortAudioOutput::LogAnyError(const char* tag, const PaError& err)
@@ -212,7 +202,7 @@ bool PortAudioOutput::LogAnyError(const char* tag, const PaError& err)
 
 int PortAudioOutput::PlaybackCallback(const void* /*inputBuffer*/, void* outputBuffer,
                                       unsigned long framesPerBuffer,
-                                      const PaStreamCallbackTimeInfo* timeInfo,
+                                      const PaStreamCallbackTimeInfo* /*timeInfo*/,
                                       PaStreamCallbackFlags /*statusFlags*/,
                                       void* userData)
 {
@@ -225,27 +215,24 @@ int PortAudioOutput::PlaybackCallback(const void* /*inputBuffer*/, void* outputB
         return paAbort;
     }
 
-    // More precise playback time tracking support
-    bufferDynamicLatencySec.store(timeInfo->outputBufferDacTime - timeInfo->currentTime, std::memory_order_relaxed);
-
     // Common
     short* const out = static_cast<short*>(outputBuffer);
-    const size_t length = framesPerBuffer * currentAudioConfig.channelCount;
+    const size_t length = framesPerBuffer * PlaybackThreadState::currentAudioConfig.channelCount;
 
     // Update the visualization buffer
-    if (visBuffer != nullptr)
+    if (PlaybackThreadState::visBuffer != nullptr)
     {
-        visBuffer->Write(out, length);
+        PlaybackThreadState::visBuffer->Write(out, length);
     }
 
     // Apply VirtualStereo
-    if (virtualStereo != nullptr && currentAudioConfig.channelCount == 2)
+    if (PlaybackThreadState::virtualStereo != nullptr && PlaybackThreadState::currentAudioConfig.channelCount == 2)
     {
-        virtualStereo->Apply(out, framesPerBuffer);
+        PlaybackThreadState::virtualStereo->Apply(out, framesPerBuffer);
     }
 
     // Apply volume (down)scale if needed
-    const float volume = currentAudioConfig.volume;
+    const float volume = PlaybackThreadState::currentAudioConfig.volume;
     if (volume != 1.0f)
     {
         for (size_t i = 0; i < length; ++i)
@@ -253,6 +240,31 @@ int PortAudioOutput::PlaybackCallback(const void* /*inputBuffer*/, void* outputB
             out[i] *= volume;
         }
     }
+
+    /* Commented-out because it's not worth it currently (no benefit for additional complexity upstream), but I plan to revisit it.
+    // Precise playback duration
+    const unsigned long framesTotal = PlaybackThreadState::framesTotal.load(std::memory_order_relaxed);
+    if (framesTotal > 0)
+    {
+        const unsigned long framesRendered = PlaybackThreadState::framesRendered.load(std::memory_order_relaxed) + framesPerBuffer;
+
+        if (framesRendered >= framesTotal) [[unlikely]]
+        {
+            const unsigned long framesOverflow = framesRendered - framesTotal;
+            const unsigned long framesToSilence = (framesOverflow > framesPerBuffer) ? framesPerBuffer : framesOverflow;
+            const unsigned long samplesToSilenceStart = length - (framesToSilence * PlaybackThreadState::currentAudioConfig.channelCount);
+
+            std::fill(out + samplesToSilenceStart, out + length, 0.0f);
+
+            PlaybackThreadState::framesRendered.store(framesTotal, std::memory_order_relaxed);
+
+            PlaybackThreadState::notifyPlaybackStatusChanged(PortAudioOutput::PlaybackStatusChanged::Complete);
+            return paComplete;
+        }
+
+        PlaybackThreadState::framesRendered.store(framesRendered, std::memory_order_relaxed);
+    }
+    */
 
     return paContinue;
 }

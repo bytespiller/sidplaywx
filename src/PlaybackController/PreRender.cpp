@@ -38,7 +38,7 @@ void PreRender::DoPreRender(IBufferWriter& renderer, int sampleRate, int numChan
 	_numChannels = numChannels;
 	_stridePerMs = sampleRatePerMs * numChannels;
 
-	const int frames = std::ceil(durationMs * sampleRatePerMs);
+	const int frames = std::ceil((durationMs + IBufferWriter::LIBSIDPLAYFP_APPARENT_INIT_DELAY_MS) * sampleRatePerMs);
 	const size_t size = frames * _numChannels * sizeof(short);
 
 	short* result = static_cast<short*>(realloc(_waveBufferContent, size));

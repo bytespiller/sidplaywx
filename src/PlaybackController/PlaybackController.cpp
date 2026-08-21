@@ -381,13 +381,8 @@ uint_least32_t PlaybackController::GetTime() const
         return _seekOperation.safeCtimeMs;
     }
 
-    const int currentLatencyMs = _portAudioOutput->GetCurrentLatencyMs();
-    if (_preRender != nullptr)
-    {
-        return std::max(0, _preRender->GetCurrentSongTimeMs() - currentLatencyMs);
-    }
-
-    return std::max(0, static_cast<int>(_sidDecoder->GetTime()) - currentLatencyMs);
+    const int time = (_preRender != nullptr) ? _preRender->GetCurrentSongTimeMs() : _sidDecoder->GetTime();
+    return std::max(0, time - IBufferWriter::LIBSIDPLAYFP_APPARENT_INIT_DELAY_MS);
 }
 
 double PlaybackController::GetPreRenderProgressFactor() const
@@ -803,7 +798,7 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
 
             if (!reusePreRender || _preRender->GetPreRenderProgressFactor() != 1.0)
             {
-                static constexpr int MIN_BUFFER_DURATION = PortAudioOutput::MIN_BUFFER_LATENCY_MS * 1000; // Min duration/latency padding to prevent short tunes (e.g., 7ms SFX and such) ending prematurely.
+                static constexpr int MIN_BUFFER_DURATION = IBufferWriter::LIBSIDPLAYFP_APPARENT_INIT_DELAY_MS * 1000; // Min duration/latency padding to prevent short tunes (e.g., 7ms SFX and such) ending prematurely.
                 _preRender->DoPreRender(*_sidDecoder.get(), _sidDecoder->GetSidConfig().frequency, GetAudioConfig().channelCount, std::max(MIN_BUFFER_DURATION, preRenderDurationMs));
             }
         }
