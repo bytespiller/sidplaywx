@@ -20,8 +20,10 @@
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
+
+#include <wx/graphics.h>
 
 namespace ThemeData
 {
@@ -53,6 +55,7 @@ namespace UIElements
 	private:
 		void Render(wxGraphicsContext& gc);
 		bool IsScrollingNeeded() const;
+		wxSize GetTrueTextExtent(const wxString& text);
 
 	private: // Event handlers
 		void OnPaintEvent(wxPaintEvent& evt);
@@ -64,12 +67,22 @@ namespace UIElements
 		void OnMouseCaptureLost(wxMouseCaptureLostEvent& evt);
 
 	private:
+		struct VramResidentTexture
+		{
+			wxGraphicsBitmap bitmap;
+			wxSize size;
+		};
+
+	private:
 		const ThemeData::ThemedElementData& _themedData;
 		wxTimer _timer;
 		wxStopWatch _stopWatch;
 		TextJustify _justify;
 		wxString _text;
-		wxBitmap _textCacheBitmap;
+
+		std::vector<VramResidentTexture> _textCacheBitmapTiles;
+		wxGraphicsRenderer* _renderer;
+
 		int _textWidth = 0;
 		int _textHeight = 0;
 		double _posX = 0.0;

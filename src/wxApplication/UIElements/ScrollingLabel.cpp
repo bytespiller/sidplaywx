@@ -20,12 +20,12 @@
 
 #include "../Theme/ThemeData/ThemedElementData.h"
 #include <wx/dcbuffer.h>
-#include <wx/graphics.h>
 
 constexpr int INTERVAL_SCROLLING = 10; // ms
 constexpr float FEATHERING = 20.0f; // px
 constexpr int SCROLL_RESUME_DELAY = 1000; // ms -- delay of auto-resume after user dragged the scroll text manually.
 constexpr float SCROLL_START_OFFSET = 0.75f; // Offset factor (higher value rewinds towards the window width).
+constexpr int BITMAP_TILE_MAX_WIDTH_PX = 512; // Text is pre-rendered to a tiled bitmap where each tile can be at most this amount of pixels wide.
 
 namespace UIElements
 {
@@ -35,13 +35,14 @@ namespace UIElements
 		_timer(this),
 		_justify(justify),
 		_bgColor(GetBackgroundColour()),
-		_bgTransparentColor(_bgColor.Red(), _bgColor.Green(), _bgColor.Blue(), 0)
+		_bgTransparentColor(_bgColor.Red(), _bgColor.Green(), _bgColor.Blue(), 0),
+		_renderer(wxGraphicsRenderer::GetDefaultRenderer())
 	{
 		SetBackgroundStyle(wxBG_STYLE_PAINT);
 		SetForegroundColour(_themedData.GetPropertyColor("textColor"));
 
 		// Set fixed height similar to the regular StaticText control
-		SetMaxClientSize(wxSize(-1, std::max(1, GetTextExtent("A").GetHeight())));
+		SetMaxClientSize(wxSize(-1, std::max(1, GetTrueTextExtent("A").GetHeight())));
 
 		// Set timer interval
 		_timer.Start(INTERVAL_SCROLLING);
@@ -64,7 +65,7 @@ namespace UIElements
 
 	void ScrollingLabel::SetText(const wxString& text)
 	{
-		wxString normalizedText = text;
+		wxString normalizedText(text);
 		normalizedText.Trim();
 
 		if (_text.IsSameAs(normalizedText))
@@ -74,7 +75,7 @@ namespace UIElements
 
 		_text = normalizedText;
 
-		const wxSize extent = GetTextExtent(_text);
+		const wxSize extent = GetTrueTextExtent(_text);
 		_textWidth = extent.GetWidth();
 		_textHeight = extent.GetHeight();
 
@@ -84,24 +85,53 @@ namespace UIElements
 			_posX = -(GetClientSize().GetWidth() * SCROLL_START_OFFSET);
 		}
 
-		// Pre-render text
+		// Pre-render text to cached bitmap(s)
 		if (!_text.empty())
 		{
-			_textCacheBitmap.Create(_textWidth, _textHeight);
-			std::unique_ptr<wxGraphicsContext> gc(wxGraphicsContext::Create(_textCacheBitmap));
-
-			if (gc)
+			// Create bitmap tiles
 			{
-				// Clear GC
-				gc->SetCompositionMode(wxCOMPOSITION_SOURCE);
-				gc->SetBrush(gc->CreateBrush(wxBrush(GetBackgroundColour())));
-				gc->SetPen(*wxTRANSPARENT_PEN);
-				gc->DrawRectangle(0, 0, _textWidth, _textHeight);
-				gc->SetCompositionMode(wxCOMPOSITION_OVER);
+				_textCacheBitmapTiles.clear();
 
-				// Render text (TODO: need to do tiling otherwise we'll crash on large text!)
-				gc->SetFont(GetFont(), GetForegroundColour());
-				gc->DrawText(_text, 0, 0);
+				wxString sliceText;
+
+				int start = 0;
+
+				bool testflip = false; // REMOVE ME
+
+				for (int end = 1; end < _textWidth; ++end)
+				{
+					sliceText = _text.Mid(start, end - start);
+					const int sliceWidth = GetTrueTextExtent(sliceText).GetWidth();
+
+					if (sliceWidth >= BITMAP_TILE_MAX_WIDTH_PX || (end + 1) == _textWidth)
+					{
+						wxBitmap tile(sliceWidth, _textHeight, 32);
+
+						std::unique_ptr<wxGraphicsContext> gc(wxGraphicsContext::Create(tile));
+						if (gc && _renderer)
+						{
+							// Clear GC
+							gc->SetCompositionMode(wxCOMPOSITION_SOURCE);
+							testflip = !testflip;
+							gc->SetBrush(gc->CreateBrush(wxBrush(testflip ? GetBackgroundColour() : *wxYELLOW)));
+							gc->SetPen(*wxTRANSPARENT_PEN);
+							gc->DrawRectangle(0, 0, sliceWidth, _textHeight);
+							gc->SetCompositionMode(wxCOMPOSITION_OVER);
+
+							// Render text
+							gc->SetFont(GetFont(), GetForegroundColour());
+							gc->DrawText(sliceText, 0, 0);
+
+							_textCacheBitmapTiles.emplace_back(VramResidentTexture
+							{
+								.bitmap = _renderer->CreateBitmap(tile),
+								.size = tile.GetSize()
+							});
+						}
+
+						start = end;
+					}
+				}
 			}
 		}
 
@@ -148,7 +178,26 @@ namespace UIElements
 
 		if (!_text.empty())
 		{
-			gc.DrawBitmap(_textCacheBitmap, -_posX, 0, _textCacheBitmap.GetWidth(), _textCacheBitmap.GetHeight());
+			const wxRect viewport(size);
+
+			int tileX = 0;
+			for (const VramResidentTexture tile : _textCacheBitmapTiles)
+			{
+				const double renderX = -_posX + tileX;
+				if (viewport.Intersects(wxRect(renderX, 0, tile.size.GetWidth(), tile.size.GetHeight())))
+				{
+					// Scroll the text in a VRAM friendly manner
+					wxGraphicsMatrix matrix = gc.CreateMatrix();
+					gc.PushState(); // Allow resetting the matrix
+					matrix.Translate(renderX, 0);
+					gc.SetTransform(matrix);
+
+					gc.DrawBitmap(tile.bitmap, 0, 0, tile.size.GetWidth(), tile.size.GetHeight());
+					gc.PopState(); // Reset matrix so that gradient brush below won't be affected
+				}
+
+				tileX += tile.size.GetWidth();
+			}
 		}
 
 		if (!shouldScroll)
@@ -265,5 +314,21 @@ namespace UIElements
 	bool ScrollingLabel::IsScrollingNeeded() const
 	{
 		return _textWidth > GetClientSize().GetWidth();
+	}
+
+	wxSize ScrollingLabel::GetTrueTextExtent(const wxString& text)
+	{
+		wxGraphicsContext* const gc = wxGraphicsContext::Create(wxClientDC(this));
+		gc->SetFont(GetFont(), GetForegroundColour());
+
+		double w, h;
+		gc->GetTextExtent(text, &w, &h); // Calling regular GetTextExtent comes short (on MSW) so we have to use the one from the wxGraphicsContext.
+
+		w = static_cast<int>(std::ceil(w) + 1);
+		h = static_cast<int>(std::ceil(h));
+
+		delete gc;
+
+		return wxSize(w, h);
 	}
 }
