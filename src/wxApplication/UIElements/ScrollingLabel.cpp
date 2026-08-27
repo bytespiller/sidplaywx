@@ -1,6 +1,6 @@
 /*
 * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
-* Copyright (C) 2024-2025 Jasmin Rutic (bytespiller@gmail.com)
+* Copyright (C) 2024-2026 Jasmin Rutic (bytespiller@gmail.com)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 
 #include "../Theme/ThemeData/ThemedElementData.h"
 #include <wx/dcbuffer.h>
-#include <wx/graphics.h>
 
 constexpr int INTERVAL_SCROLLING = 10; // ms
 constexpr float FEATHERING = 20.0f; // px
@@ -35,10 +34,11 @@ namespace UIElements
 		_timer(this),
 		_justify(justify),
 		_bgColor(GetBackgroundColour()),
-		_bgTransparentColor(_bgColor.Red(), _bgColor.Green(), _bgColor.Blue(), 0)
+		_bgTransparentColor(_bgColor.Red(), _bgColor.Green(), _bgColor.Blue(), 0),
+		_renderFont(wxGraphicsRenderer::GetDefaultRenderer()->CreateFont(GetFont(), _themedData.GetPropertyColor("textColor")))
 	{
 		SetBackgroundStyle(wxBG_STYLE_PAINT);
-		SetForegroundColour(_themedData.GetPropertyColor("textColor"));
+		//SetForegroundColour(_themedData.GetPropertyColor("textColor"));
 
 		// Set fixed height similar to the regular StaticText control
 		{
@@ -52,6 +52,7 @@ namespace UIElements
 		_timer.Stop();
 
 		// Bind event handlers
+		Bind(wxEVT_SIZE, &OnSizeEvent, this);
 		Bind(wxEVT_PAINT, &OnPaintEvent, this);
 		Bind(wxEVT_TIMER, &OnTimer, this, _timer.GetId());
 
@@ -100,7 +101,7 @@ namespace UIElements
 	void ScrollingLabel::GetTrueTextExtent(const wxString& text, int& width, int& height)
 	{
 		wxGraphicsContext* const gc = wxGraphicsContext::Create(wxClientDC(this));
-		gc->SetFont(GetFont(), GetForegroundColour());
+		gc->SetFont(_renderFont);
 
 		double w, h;
 		gc->GetTextExtent(text, &w, &h); // Calling regular GetTextExtent comes short (on MSW) so we have to use the one from the wxGraphicsContext.
@@ -142,7 +143,7 @@ namespace UIElements
 		}
 
 		// Draw the text
-		gc.SetFont(GetFont(), GetForegroundColour());
+		gc.SetFont(_renderFont);
 		gc.DrawText(_text, -_posX, 0);
 
 		if (!shouldScroll)
@@ -150,8 +151,14 @@ namespace UIElements
 			return;
 		}
 
-		// Create a gradient brush (for feathered overlay)
-		// Draw a rectangle with the gradient brush
+		// Draw a feathered overlay (rectangle with the gradient brush)
+		const wxSize& size = GetClientSize();
+		gc.SetBrush(_textFeatheringBrush);
+		gc.DrawRectangle(0, 0, size.GetWidth(), size.GetHeight());
+	}
+
+	void ScrollingLabel::CreateTextFeatheringBrush()
+	{
 		const wxSize& size = GetClientSize();
 		const float startPos = std::min(0.5f, FEATHERING / std::max(1, size.GetWidth()));
 		const float endPos = 1.0f - startPos;
@@ -162,9 +169,12 @@ namespace UIElements
 		stops.Add(_bgTransparentColor, endPos);
 		stops.Add(_bgColor, 1.0f);
 
-		const wxGraphicsBrush& brush = gc.CreateLinearGradientBrush(0, 0, size.GetWidth(), 0, stops);
-		gc.SetBrush(brush);
-		gc.DrawRectangle(0, 0, size.GetWidth(), size.GetHeight());
+		_textFeatheringBrush = wxGraphicsRenderer::GetDefaultRenderer()->CreateLinearGradientBrush(0, 0, size.GetWidth(), 0, stops);
+	}
+
+	void ScrollingLabel::OnSizeEvent(wxSizeEvent& /*evt*/)
+	{
+		CreateTextFeatheringBrush();
 	}
 
 	// Called by the system of wxWidgets when the panel needs to be redrawn. You can also trigger this call by calling Refresh()/Update().

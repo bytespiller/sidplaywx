@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2024-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2024-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
+
+#include <wx/graphics.h>
 
 namespace ThemeData
 {
@@ -53,9 +55,11 @@ namespace UIElements
 	private:
 		void GetTrueTextExtent(const wxString& text, int& width, int& height);
 		void Render(wxGraphicsContext& gc);
+		void CreateTextFeatheringBrush();
 		bool IsScrollingNeeded() const;
 
 	private: // Event handlers
+		void OnSizeEvent(wxSizeEvent& evt);
 		void OnPaintEvent(wxPaintEvent& evt);
 		void OnTimer(wxTimerEvent& evt);
 
@@ -81,5 +85,7 @@ namespace UIElements
 
 		const wxColor _bgColor;
 		const wxColor _bgTransparentColor;
+		const wxGraphicsFont _renderFont;
+		wxGraphicsBrush _textFeatheringBrush;
 	};
 }
