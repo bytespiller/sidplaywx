@@ -612,7 +612,7 @@ void FramePlayer::OnTimerRefresh(wxTimerEvent& /*evt*/)
             const RepeatMode repeatMode = static_cast<RepeatMode>(ivalue);
             if (repeatMode != RepeatMode::InfiniteDuration)
             {
-                const int trimMs = _app.currentSettings->GetOption(Settings::AppSettings::ID::SonglengthsTrim)->GetValueAsInt();
+                const int trimMs = _app.currentSettings->GetOption(Settings::AppSettings::ID::SonglengthsTrim)->GetValueAsInt() + IBufferWriter::LIBSIDPLAYFP_APPARENT_INIT_DELAY_MS;
                 if (playbackTimeMs >= _ui->compositeSeekbar->GetDurationValue() + trimMs)
                 {
                     OnSongDurationReached();

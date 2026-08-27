@@ -23,7 +23,7 @@
 class IBufferWriter
 {
 public:
-    static constexpr int LIBSIDPLAYFP_APPARENT_INIT_DELAY_MS = 200;
+    static constexpr int LIBSIDPLAYFP_APPARENT_INIT_DELAY_MS = 250; // This probably includes host audio buffer latency as well.
     using SeekStatusCallback = std::function<bool(int, bool)>;
 
 public:

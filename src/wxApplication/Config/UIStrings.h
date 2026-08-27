@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.19.3"); // Reminder: don't forget to increase. Also, don't forget the final zero for x.y.0 versions.
+	inline constexpr const char* const APP_VERSION_TAG("0.19.4"); // Reminder: don't forget to increase. Also, don't forget the final zero for x.y.0 versions.
 
 	namespace FramePlayer
 	{

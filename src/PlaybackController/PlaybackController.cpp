@@ -381,8 +381,7 @@ uint_least32_t PlaybackController::GetTime() const
         return _seekOperation.safeCtimeMs;
     }
 
-    const int time = (_preRender != nullptr) ? _preRender->GetCurrentSongTimeMs() : _sidDecoder->GetTime();
-    return std::max(0, time - IBufferWriter::LIBSIDPLAYFP_APPARENT_INIT_DELAY_MS);
+    return (_preRender != nullptr) ? _preRender->GetCurrentSongTimeMs() : _sidDecoder->GetTime();
 }
 
 double PlaybackController::GetPreRenderProgressFactor() const
