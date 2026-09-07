@@ -135,6 +135,9 @@ namespace
             settings.GetOption(Settings::AppSettings::ID::FilterCurve6581)->GetValueAsDouble(),
             settings.GetOption(Settings::AppSettings::ID::FilterRange6581)->GetValueAsDouble(),
             settings.GetOption(Settings::AppSettings::ID::FilterCurve8580)->GetValueAsDouble(),
+            settings.GetOption(Settings::AppSettings::ID::DacLeakage)->GetValueAsDouble(),
+            settings.GetOption(Settings::AppSettings::ID::DcbOffset)->GetValueAsDouble(),
+            settings.GetOption(Settings::AppSettings::ID::WaveOffset6581)->GetValueAsDouble(),
             settings.GetOption(Settings::AppSettings::ID::Old6581caps)->GetValueAsBool()
         };
     }
