@@ -389,6 +389,17 @@ namespace Strings
 		inline constexpr const char* const DESC_FILTER_CURVE("Adjust the center frequency value from 0.0 to 1.0, default is 0.5.\nNote: ongoing playback will stop when changing this setting.");
 		inline constexpr const char* const DESC_FILTER_RANGE(DESC_FILTER_CURVE);
 
+		// TODO: add Combined waveforms strength option as well
+
+		inline constexpr const char* const OPT_DAC_LEAKAGE("DAC leakage level");
+		inline constexpr const char* const DESC_DAC_LEAKAGE("Affects the envelope and waveforms.\n\nLevel range can be adjusted from 0.0 (no leakage) to 1.0 (default leakage).\n\nNote: ongoing playback will stop when changing this setting.");
+
+		inline constexpr const char* const OPT_DCB_OFFSET("DC-Blocker resistance");
+		inline constexpr const char* const DESC_DCB_OFFSET("Affects the highpass cutoff frequency of the external filter.\n\nThe resistance value can be adjusted from 0.0 (~1.6Hz) to 1.0 (~16Hz) which is default.\n\nNote: ongoing playback will stop when changing this setting.");
+
+		inline constexpr const char* const OPT_WAVE_OFFSET_6581("Wave offset (SID 6581)");
+		inline constexpr const char* const DESC_WAVE_OFFSET_6581("Affects the volume of digi samples.\n\nRange can be adjusted from 0.0 (faint digis, default) to 1.0 (loud digis).\n\nNote: ongoing playback will stop when changing this setting.");
+
 		inline constexpr const char* const OPT_OLD_CAPS("Early model caps (SID 6581)");
 		inline constexpr const char* const DESC_OLD_CAPS("- Enabled: old 2200pF caps used on ASSY 326298 (year 1982).\n- Disabled: use the standard 470pF caps.\nNote: ongoing playback will stop when changing this setting.");
 

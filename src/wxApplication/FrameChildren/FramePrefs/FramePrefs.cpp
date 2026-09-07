@@ -389,16 +389,23 @@ void FramePrefs::FillPropertyGrid()
             // Use NTSC for MUS & STR
             AddWrappedPropToPage(Settings::AppSettings::ID::UseNtscForMus, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_NTSC_C64_MODEL_MUS), *page, Effective::Immediately, Strings::Preferences::DESC_NTSC_C64_MODEL_MUS);
 
+            // New tunables
+            AddWrappedPropToPage(Settings::AppSettings::ID::DacLeakage, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_DAC_LEAKAGE), *page, Effective::Immediately, Strings::Preferences::DESC_DAC_LEAKAGE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
+            AddWrappedPropToPage(Settings::AppSettings::ID::DcbOffset, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_DCB_OFFSET), *page, Effective::Immediately, Strings::Preferences::DESC_DCB_OFFSET, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
+
             // Filter
             AddWrappedPropToPage(Settings::AppSettings::ID::FilterCurve6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
             AddWrappedPropToPage(Settings::AppSettings::ID::FilterRange6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_RANGE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_RANGE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
             AddWrappedPropToPage(Settings::AppSettings::ID::FilterCurve8580, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_8580), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
 
+            // 6581 digi volume
+            AddWrappedPropToPage(Settings::AppSettings::ID::WaveOffset6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_WAVE_OFFSET_6581), *page, Effective::Immediately, Strings::Preferences::DESC_WAVE_OFFSET_6581, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
+
+            // 8580 DigiBoost
+            AddWrappedPropToPage(Settings::AppSettings::ID::DigiBoost, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_DIGIBOOST), *page, Effective::Immediately, Strings::Preferences::DESC_DIGIBOOST);
+
             // Old 6581 caps (filter related)
             AddWrappedPropToPage(Settings::AppSettings::ID::Old6581caps, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_OLD_CAPS), *page, Effective::Immediately, Strings::Preferences::DESC_OLD_CAPS);
-
-            // DigiBoost
-            AddWrappedPropToPage(Settings::AppSettings::ID::DigiBoost, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_DIGIBOOST), *page, Effective::Immediately, Strings::Preferences::DESC_DIGIBOOST);
 
             // KERNAL
             {

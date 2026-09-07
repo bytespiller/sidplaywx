@@ -74,7 +74,7 @@ If you have an idea or a comment, feel free to post it in the [Discussions](http
 2. Build libresidfp: `./configure --disable-dependency-tracking --disable-shared --enable-static --with-simd=runtime && make`
 	1. sudo make install
 	2. sudo ldconfig
-3. Build libsidplayfp: `./configure --disable-dependency-tracking --disable-shared --enable-static --without-gcrypt && make`
+3. Build libsidplayfp: `./configure --disable-dependency-tracking --disable-shared --enable-static && make`
 4. Copy the following *includes* (with their folder structures) to the appropriate `include` folder in the sidplaywx's `/deps/`:
 	- `/builders/residfp.h`
 	- `sidbuilder.h`, `SidConfig.h`, `siddefs.h`, `SidInfo.h`, `sidplayfp.h`, `SidTune.h`, `SidTuneInfo.h`, `sidversion.h`
@@ -128,7 +128,7 @@ Once installed you need to **first-time configure** it like so:
 1. `cd` (with MSYS2 i.e., UCRT64.exe terminal) into the libsidplayfp/libresidfp's root.
 2. Download libresidfp: https://github.com/libsidplayfp/libresidfp/releases
 3. Build libresidfp: `./configure --disable-dependency-tracking --disable-shared --enable-static --with-simd=runtime && make && make install`
-4. Build libsidplayfp: `./configure --disable-dependency-tracking --disable-shared --enable-static --without-gcrypt && make && make install`
+4. Build libsidplayfp: `./configure --disable-dependency-tracking --disable-shared --enable-static && make && make install`
 	1. TIP: if doing this for the first time, break down these 3 commands (i.e., they are separated by `&&`) and run them one by one so you can catch any problems more easily.
 5. Note: the lib will be automatically found by our cmake later (if you've installed the msys into the `C:\msys64\`) and it will get linked statically.
 	
