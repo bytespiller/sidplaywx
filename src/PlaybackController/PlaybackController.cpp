@@ -130,6 +130,7 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
                                      (newConfig.sidConfig.defaultSidModel != _sidDecoder->GetSidConfig().defaultSidModel) ||
                                      (newConfig.sidConfig.forceC64Model != _sidDecoder->GetSidConfig().forceC64Model) ||
                                      (newConfig.sidConfig.forceSidModel != _sidDecoder->GetSidConfig().forceSidModel) ||
+                                     (newConfig.filterConfig.combinedWaveformsStrength != _sidDecoder->GetFilterConfig().combinedWaveformsStrength) ||
                                      (newConfig.sidConfig.digiBoost != _sidDecoder->GetSidConfig().digiBoost) ||
                                      (newConfig.useNtscForMus != _sidDecoder->WillUseNtscForMus()) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Curve, _sidDecoder->GetFilterConfig().filter6581Curve)) ||

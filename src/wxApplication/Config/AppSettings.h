@@ -79,6 +79,7 @@ namespace Settings
 			static constexpr const char* const FilterRange6581 = "FilterRange6581";
 			static constexpr const char* const FilterCurve8580 = "FilterCurve8580";
 
+			static constexpr const char* const CwsStrength = "CwsStrength";
 			static constexpr const char* const DacLeakage = "DacLeakage";
 			static constexpr const char* const DcbOffset = "DcbOffset";
 			static constexpr const char* const WaveOffset6581 = "WaveOffset6581";
@@ -156,6 +157,13 @@ namespace Settings
 			Force_MOS8580
 		};
 
+		enum class CwsStrength
+		{
+			AVERAGE,
+			WEAK,
+			STRONG
+		};
+
 	public:
 		AppSettings() :
 			SettingsBase("settings.xml")
@@ -214,6 +222,7 @@ namespace Settings
 
 				DefaultOption(ID::DefaultC64Model, static_cast<int>(DefaultC64Model::Prefer_PAL)),
 				DefaultOption(ID::DefaultSidModel, static_cast<int>(DefaultSidModel::Prefer_MOS6581)),
+				DefaultOption(ID::CwsStrength, static_cast<int>(CwsStrength::AVERAGE)),
 				DefaultOption(ID::UseNtscForMus, true),
 
 				DefaultOption(ID::FilterCurve6581, 0.5),

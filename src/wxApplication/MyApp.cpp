@@ -132,6 +132,7 @@ namespace
     PlaybackController::FilterConfig LoadFilterConfig(Settings::AppSettings& settings)
     {
         return {
+            static_cast<SidConfig::sid_cw_t>(settings.GetOption(Settings::AppSettings::ID::CwsStrength)->GetValueAsInt()),
             settings.GetOption(Settings::AppSettings::ID::FilterCurve6581)->GetValueAsDouble(),
             settings.GetOption(Settings::AppSettings::ID::FilterRange6581)->GetValueAsDouble(),
             settings.GetOption(Settings::AppSettings::ID::FilterCurve8580)->GetValueAsDouble(),

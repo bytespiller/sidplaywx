@@ -376,20 +376,24 @@ namespace Strings
 		inline constexpr const char* const OPT_DEFAULT_SID_MODEL("Default SID model");
 		inline constexpr const char* const DESC_DEFAULT_SID_MODEL("- Prefer: SID model to use if not specified by the tune.\n- Force: ignore tune specification and always use the selected SID model.\nAdditional notes:\n- First option in the list is recommended.\n- Ongoing playback will stop when changing this setting.");
 		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_PREFER_6581("Prefer MOS 6581");
-		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_PREFER_8580("Prefer MOS 8580");
+		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_PREFER_8580("Prefer CSG 8580");
 		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_FORCE_6581("Force MOS 6581");
-		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_FORCE_8580("Force MOS 8580");
+		inline constexpr const char* const ITEM_DEFAULT_SID_MODEL_FORCE_8580("Force CSG 8580");
 
 		inline constexpr const char* const OPT_NTSC_C64_MODEL_MUS("Use NTSC for MUS");
 		inline constexpr const char* const DESC_NTSC_C64_MODEL_MUS("Old MUS-format tunes were predominately created on NTSC C64 models and thus sound too slow on PAL models.\n- Ongoing playback will stop when changing this setting.");
+
+		inline constexpr const char* const OPT_CWS_STRENGTH("Combined waveforms strength");
+		inline constexpr const char* const DESC_CWS_STRENGTH("Affects how harsh the SID chip sounds. Individual SID chips had different characteristics and there is no canonically \"correct\" setting.\n- Average: average waves (default)\n- Weak: thin waves\n- Strong: wide waves\n\nNote: ongoing playback will stop when changing this setting.");
+		inline constexpr const char* const ITEM_CWS_STRENGTH_AVERAGE("Average");
+		inline constexpr const char* const ITEM_CWS_STRENGTH_WEAK("Weak");
+		inline constexpr const char* const ITEM_CWS_STRENGTH_STRONG("Strong");
 
 		inline constexpr const char* const OPT_FILTER_CURVE_6581("Filter curve (SID 6581)");
 		inline constexpr const char* const OPT_FILTER_RANGE_6581("Filter range (SID 6581)");
 		inline constexpr const char* const OPT_FILTER_CURVE_8580("Filter curve (SID 8580)");
 		inline constexpr const char* const DESC_FILTER_CURVE("Adjust the center frequency value from 0.0 to 1.0, default is 0.5.\nNote: ongoing playback will stop when changing this setting.");
 		inline constexpr const char* const DESC_FILTER_RANGE(DESC_FILTER_CURVE);
-
-		// TODO: add Combined waveforms strength option as well
 
 		inline constexpr const char* const OPT_DAC_LEAKAGE("DAC leakage level");
 		inline constexpr const char* const DESC_DAC_LEAKAGE("Affects the envelope and waveforms.\n\nLevel range can be adjusted from 0.0 (no leakage) to 1.0 (default leakage).\n\nNote: ongoing playback will stop when changing this setting.");
