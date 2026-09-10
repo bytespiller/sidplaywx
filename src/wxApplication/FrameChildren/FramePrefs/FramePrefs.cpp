@@ -386,6 +386,20 @@ void FramePrefs::FillPropertyGrid()
                 prop->SetChoiceSelection(selection);
             }
 
+            // Combined waveforms strength
+            {
+                wxArrayString defaultCwsOptions;
+                defaultCwsOptions.push_back(Strings::Preferences::ITEM_COMBINED_WAVEFORMS_STRENGTH_AVERAGE);
+                defaultCwsOptions.push_back(Strings::Preferences::ITEM_COMBINED_WAVEFORMS_STRENGTH_WEAK);
+                defaultCwsOptions.push_back(Strings::Preferences::ITEM_COMBINED_WAVEFORMS_STRENGTH_STRONG);
+
+                const char* SettingId = Settings::AppSettings::ID::CombinedWaveformsStrength;
+                wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_COMBINED_WAVEFORMS_STRENGTH, SettingId, defaultCwsOptions);
+                AddWrappedPropToPage(SettingId, TypeSerialized::Int, prop, *page, Effective::Immediately, Strings::Preferences::DESC_COMBINED_WAVEFORMS_STRENGTH);
+                const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
+                prop->SetChoiceSelection(selection);
+            }
+
             // Use NTSC for MUS & STR
             AddWrappedPropToPage(Settings::AppSettings::ID::UseNtscForMus, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_NTSC_C64_MODEL_MUS), *page, Effective::Immediately, Strings::Preferences::DESC_NTSC_C64_MODEL_MUS);
 

@@ -151,6 +151,7 @@ bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig
     _rs.filter6581Range(_filterConfigCache->filter6581Range);
     _rs.filter8580Curve(_filterConfigCache->filter8580Curve);
 
+    _rs.combinedWaveformsStrength(_filterConfigCache->combinedWaveformsStrength);
     _rs.dacLeakage(_filterConfigCache->dacLeakage);
     _rs.dcbRes(_filterConfigCache->dcbOffset);
     _rs.offset6581(_filterConfigCache->waveOffset6581);
