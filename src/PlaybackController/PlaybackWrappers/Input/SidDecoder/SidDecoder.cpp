@@ -397,14 +397,12 @@ void SidDecoder::SeekTo(uint_least32_t timeMs, const SeekStatusCallback& callbac
         _sidEngine.reset();
     }
 
-    // Disable voices and filters of all SIDs -- yields additional ~4x speedup when seeking
+    // Disable filters of all SIDs -- yields some speedup when seeking
     const unsigned int maxSids = _sidEngine.info().numberOfSIDs();
     for (unsigned int sid = 0; sid < maxSids; ++sid)
     {
-        _sidEngine.mute(sid, 0, true); // Voice 1
-        _sidEngine.mute(sid, 1, true); // Voice 2
-        _sidEngine.mute(sid, 2, true); // Voice 3
-        _sidEngine.mute(sid, 3, true); // Digi
+        // Reminder: mustn't disable voices or we risk tune state corruption (https://github.com/libsidplayfp/libsidplayfp/issues/158#issuecomment-5327227731)
+        _sidEngine.mute(sid, 3, true); // Digi writes (not real voice)
         _sidEngine.filter(sid, false);
     }
 
