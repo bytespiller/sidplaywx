@@ -286,7 +286,6 @@ void FramePrefs::FillPropertyGrid()
     // Visual
     page->Append(new wxPropertyCategory(Strings::Preferences::CATEGORY_VISUAL_BEHAVIOR));
     {
-#ifdef WIN32
         {
             const wxArrayString systemThemeOptions =
             {
@@ -301,7 +300,6 @@ void FramePrefs::FillPropertyGrid()
             const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
             prop->SetChoiceSelection(selection);
         }
-#endif
 
         AddWrappedPropToPage(Settings::AppSettings::ID::SelectionFollowsPlayback, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SELECTION_FOLLOWS_PLAYBACK), *page, Effective::Immediately, Strings::Preferences::DESC_SELECTION_FOLLOWS_PLAYBACK);
         AddWrappedPropToPage(Settings::AppSettings::ID::AutoExpandSubsongs, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_AUTOEXPAND_SUBSONGS), *page, Effective::Immediately, Strings::Preferences::DESC_AUTOEXPAND_SUBSONGS);

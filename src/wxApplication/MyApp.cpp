@@ -199,7 +199,6 @@ bool MyApp::OnInit()
             }
 
             // Finalize
-#ifdef WIN32
             switch (static_cast<Settings::AppSettings::SystemTheme>(currentSettings->GetOption(Settings::AppSettings::ID::SystemTheme)->GetValueAsInt()))
             {
                 case Settings::AppSettings::SystemTheme::Auto:
@@ -212,7 +211,7 @@ bool MyApp::OnInit()
                     SetAppearance(Appearance::Dark);
                     break;
             }
-#endif
+
             SubscribeMe(*_playback, SignalsPlaybackController::SIGNAL_SEEKING_CEASED__WORKER_THREAD_CONTEXT, std::bind(&OnSeekingCeased, this));
 
             lastFileListReceptionTime = wxGetLocalTimeMillis(); // Must be before FramePlayer init.
