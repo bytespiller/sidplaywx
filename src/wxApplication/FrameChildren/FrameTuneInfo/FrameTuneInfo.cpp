@@ -66,7 +66,6 @@ FrameTuneInfo::FrameTuneInfo(wxWindow* parent, const wxString& title, const wxPo
 	});
 
 	// *** Configure window ***
-	//SetDoubleBuffered(true); // No need at the moment.
 	CenterOnParent();
 	Layout();
 }

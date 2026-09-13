@@ -30,7 +30,6 @@ FramePlaybackMods::FramePlaybackMods(wxWindow* parent, const wxString& title, co
     SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
     _panel = new wxPanel(this, wxID_ANY);
-    _panel->SetDoubleBuffered(true);
     _ui = std::make_unique<FrameElements::ElementsPlaybackMods>(*_panel);
 
     // Configure UI
