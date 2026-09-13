@@ -801,8 +801,7 @@ bool PlaybackController::FinalizeTryPlay(bool isSuccessful, int preRenderDuratio
 
             if (!reusePreRender || _preRender->GetPreRenderProgressFactor() != 1.0)
             {
-                static constexpr int MIN_BUFFER_DURATION = IBufferWriter::LIBSIDPLAYFP_APPARENT_INIT_DELAY_MS * 1000; // Min duration/latency padding to prevent short tunes (e.g., 7ms SFX and such) ending prematurely.
-                _preRender->DoPreRender(*_sidDecoder.get(), _sidDecoder->GetSidConfig().frequency, GetAudioConfig().channelCount, std::max(MIN_BUFFER_DURATION, preRenderDurationMs));
+                _preRender->DoPreRender(*_sidDecoder.get(), _sidDecoder->GetSidConfig().frequency, GetAudioConfig().channelCount, preRenderDurationMs);
             }
         }
         else
