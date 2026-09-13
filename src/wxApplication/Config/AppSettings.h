@@ -211,7 +211,7 @@ namespace Settings
 				DefaultOption(ID::PopSilencer, 100),
 				DefaultOption(ID::DragDropMode, static_cast<int>(DragDropMode::Dual)),
 
-				DefaultOption(ID::SystemTheme, static_cast<int>(SystemTheme::ForceLight)), // TODO: make it default to Auto once this wxWidgets' feature is out of beta.
+				DefaultOption(ID::SystemTheme, static_cast<int>(SystemTheme::Auto)),
 				DefaultOption(ID::SelectionFollowsPlayback, true),
 				DefaultOption(ID::AutoExpandSubsongs, true),
 				DefaultOption(ID::TaskbarProgress, static_cast<int>(UIElements::CompositeSeekBar::TaskbarProgressOption::Enabled)),
