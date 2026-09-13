@@ -704,11 +704,13 @@ void FramePlayer::ForceStopPlayback(PassKey<FramePrefs>)
     OnButtonStop();
 }
 
+static constexpr long UPDATE_CHECK_TIMEOUT_MS = 5000;
 static int requestUpdateLastId = 0;
 void FramePlayer::CheckUpdates()
 {
     ++requestUpdateLastId; // Workaround: can't cancel the previous wxWebRequest due to its problematic lifecycle on Linux (a known wxWidgets defect from the year 2024). Using the unique_ptr or vector of requests causes a segfault on Linux in wxWidgets v3.2.7 when the check is repeated or the app is closing.
     wxWebRequest requestUpdateCheck = wxWebSession::GetDefault().CreateRequest(this, "https://api.github.com/repos/bytespiller/sidplaywx/releases/latest", requestUpdateLastId);
+    requestUpdateCheck.SetTimeouts(UPDATE_CHECK_TIMEOUT_MS, UPDATE_CHECK_TIMEOUT_MS);
 
     requestUpdateCheck.SetHeader("User-Agent", "sidplaywx (update check)");
     //requestUpdateCheck.SetHeader("Accept-Encoding", "gzip"); // I never got the GitHub API to return compressed response (checked via headers).
