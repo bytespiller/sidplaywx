@@ -229,6 +229,38 @@ namespace UIElements
 			return *_model.entries.back().get();
 		}
 
+		std::vector<PlaylistTreeModelNode*> Playlist::AddMainSongs(const std::vector<MainSongData>& songs)
+		{
+			std::vector<PlaylistTreeModelNode*> result;
+			result.reserve(songs.size());
+
+			if (songs.empty())
+			{
+				return result;
+			}
+
+			_ResetColumnSortingIndicator();
+
+			_model.entries.reserve(_model.entries.size() + songs.size());
+
+			wxDataViewItemArray notifyItems;
+			const auto _ = _model.PrepareDirty([&]()
+			{
+				_model.ItemsAdded(wxDataViewItem(0), notifyItems); // Single notification for the whole batch (see the header comment on why this matters at scale).
+			});
+
+			for (const MainSongData& song : songs)
+			{
+				_model.entries.emplace_back(new PlaylistTreeModelNode(_NextFreeItemUid(), nullptr, song.title, song.filepath, song.defaultSubsong, song.duration, song.hvscPath, song.md5.c_str(), song.author, song.copyright, song.romRequirement, song.playable, song.musCompanionStrFilePath));
+
+				PlaylistTreeModelNode* const newNode = _model.entries.back().get();
+				notifyItems.Add(wxDataViewItem(newNode));
+				result.emplace_back(newNode);
+			}
+
+			return result;
+		}
+
 		void Playlist::AddSubsongs(const std::vector<uint_least32_t>& durations, const std::vector<wxString>& titles, PlaylistTreeModelNode& parent)
 		{
 			assert(durations.size() == titles.size());
@@ -252,6 +284,47 @@ namespace UIElements
 					++cnt;
 					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(_NextFreeItemUid(), &parent, titles.at(cnt - 1), parent.filepath, cnt, duration, parent.hvscPath, parent.md5, "", "", parent.romRequirement, parent.IsPlayable(), parent.musCompanionStrFilePath), {});
 					notifyItems.Add(wxDataViewItem(&newChildNode));
+
+					// Indicate if default subsong
+					if (parent.defaultSubsong == cnt)
+					{
+						newChildNode.SetIconId((newChildNode.musCompanionStrFilePath.IsEmpty()) ? PlaylistIconId::DefaultSubsongIndicator : PlaylistIconId::MusAndStr, {});
+					}
+				}
+			}
+		}
+
+		void Playlist::AddSubsongsBatch(const std::vector<SubsongBatchEntry>& batch)
+		{
+			if (batch.empty())
+			{
+				return;
+			}
+
+			// On GTK, PrepareDirty's AfterReset() (fired once, when "_" goes out of scope below) does a full model reset regardless of what the notifier lambda would do, so the per-parent ItemsAdded() calls below only actually matter/execute on MSW (see PrepareDirty). The lambda reads each parent's full current children list rather than an accumulated array, since by the time it runs (at scope exit) every parent in this batch already has all its subsongs attached by the loop beneath it.
+			const auto _ = _model.PrepareDirty([&]()
+			{
+				for (const SubsongBatchEntry& entry : batch)
+				{
+					wxDataViewItemArray notifyItems;
+					for (const PlaylistTreeModelNodePtr& child : entry.parent->GetChildren())
+					{
+						notifyItems.Add(wxDataViewItem(child.get()));
+					}
+					_model.ItemsAdded(wxDataViewItem(entry.parent), notifyItems); // Notify the wx base control of change (MSW).
+				}
+			});
+
+			for (const SubsongBatchEntry& entry : batch)
+			{
+				assert(entry.durations.size() == entry.titles.size());
+				PlaylistTreeModelNode& parent = *entry.parent;
+
+				int cnt = 0;
+				for (const uint_least32_t duration : entry.durations)
+				{
+					++cnt;
+					PlaylistTreeModelNode& newChildNode = parent.AddChild(new PlaylistTreeModelNode(_NextFreeItemUid(), &parent, entry.titles.at(cnt - 1), parent.filepath, cnt, duration, parent.hvscPath, parent.md5, "", "", parent.romRequirement, parent.IsPlayable(), parent.musCompanionStrFilePath), {});
 
 					// Indicate if default subsong
 					if (parent.defaultSubsong == cnt)

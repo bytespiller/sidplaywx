@@ -23,12 +23,37 @@
 #include <wx/dataview.h>
 
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace UIElements
 {
 	namespace Playlist
 	{
+		/// @brief Mirrors AddMainSong()'s parameters; used by the bulk AddMainSongs() below.
+		struct MainSongData
+		{
+			wxString title;
+			wxString filepath;
+			int defaultSubsong = 0;
+			uint_least32_t duration = 0;
+			wxString hvscPath;
+			std::string md5;
+			wxString author;
+			wxString copyright;
+			PlaylistTreeModelNode::RomRequirement romRequirement = PlaylistTreeModelNode::RomRequirement::None;
+			bool playable = false;
+			wxString musCompanionStrFilePath;
+		};
+
+		/// @brief One parent's worth of subsongs to add; used by the bulk AddSubsongsBatch() below.
+		struct SubsongBatchEntry
+		{
+			PlaylistTreeModelNode* parent = nullptr;
+			std::vector<uint_least32_t> durations;
+			std::vector<wxString> titles;
+		};
+
 		class Playlist : public wxDataViewCtrl
 		{
 		public:
@@ -40,8 +65,16 @@ namespace UIElements
 		public:
 			PlaylistTreeModelNode& AddMainSong(const wxString& title, const wxString& filepath, int defaultSubsong, uint_least32_t duration, const wxString& hvscPath, const char* md5, const wxString& author, const wxString& copyright, PlaylistTreeModelNode::RomRequirement romRequirement, bool playable, const wxString& musCompanionStrFilePath = wxEmptyString);
 
+			/// @brief Efficiently adds multiple main (top-level) songs at once via a single model-change notification for the whole batch.
+			/// @remark Critical for bulk-loading large playlists: repeated AddMainSong() calls are each O(current top-level song count) - wxDataViewCtrl (at least on wxGTK) recomputes the new item's sibling position from scratch on every single ItemAdded notification, making N sequential top-level insertions O(N^2) overall. Batching into one ItemsAdded() call avoids that.
+			std::vector<PlaylistTreeModelNode*> AddMainSongs(const std::vector<MainSongData>& songs);
+
 			/// @brief Efficiently adds multiple subsongs at once.
 			void AddSubsongs(const std::vector<uint_least32_t>& durations, const std::vector<wxString>& titles, PlaylistTreeModelNode& parent);
+
+			/// @brief Adds subsongs for potentially many different parent songs at once, via a single Before/AfterReset cycle for the whole batch.
+			/// @remark Critical for bulk-loading large playlists: on wxGTK, PlaylistTreeModel::PrepareDirty's Before/AfterReset bracket (which AddSubsongs() relies on for GTK stability) fully detaches and reattaches the underlying GtkTreeView model - an operation whose cost scales with the *entire* current playlist size, not just the subsongs being added. Calling AddSubsongs() once per song is therefore fine for a handful of songs, but becomes catastrophically slow (one full-list reset per multi-subsong song) once thousands of such songs already share a large playlist. Batching many parents' subsongs into one reset here avoids that.
+			void AddSubsongsBatch(const std::vector<SubsongBatchEntry>& batch);
 
 			/// @brief Removes a main song or a subsong item.
 			void Remove(PlaylistTreeModelNode* item);
