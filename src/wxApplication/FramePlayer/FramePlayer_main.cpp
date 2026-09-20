@@ -406,14 +406,12 @@ void FramePlayer::DeferredInit()
     // Show/hide STIL info
     EnableStilInfoDisplay(_app.currentSettings->GetOption(Settings::AppSettings::ID::StilInfoEnabled)->GetValueAsBool());
 
-#ifdef WIN32
-    // Apply window topmost preference
-    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->GetValueAsBool() != IsTopmost())
+    // Media keys (MSW) / MPRIS (Linux) support    
+    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::MediaKeys)->GetValueAsBool())
     {
-        ToggleTopmost();
+        TryRegisterMediaKeys();
     }
 
-    // Media keys support
     _ui->infoBarMediaKeysTaken->Bind(wxEVT_BUTTON, [&](wxCommandEvent& evt)
     {
         _ui->infoBarMediaKeysTaken->Dismiss();
@@ -422,15 +420,14 @@ void FramePlayer::DeferredInit()
             TryRegisterMediaKeys();
         }
     });
+    
+#ifdef WIN32
+    Bind(wxEVT_HOTKEY, &FramePlayer::OnGlobalHotkey, this);
 
-    for (int key : MEDIA_KEYS)
+    // Apply window topmost preference
+    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->GetValueAsBool() != IsTopmost())
     {
-        Bind(wxEVT_HOTKEY, &FramePlayer::OnGlobalHotkey, this);
-    }
-
-    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::MediaKeys)->GetValueAsBool())
-    {
-        TryRegisterMediaKeys();
+        ToggleTopmost();
     }
 #endif
 
@@ -509,7 +506,71 @@ bool FramePlayer::TryRegisterMediaKeys()
 
     return true;
 #else
-    return false;
+    if (_mpris = mpris::Server::make("sidplaywx")) // Reminder: don't use Strings::FramePlayer::WINDOW_TITLE due to " (debug)" being invalid name.
+    {
+        _mpris->set_identity(Strings::About::DESCRIPTION);
+
+        _mpris->set_supported_uri_schemes({ "file" });
+        _mpris->set_supported_mime_types
+        ({
+            "application/octet-stream", // generic MIME for PSID etc. files
+            "audio/mpegurl", // m3u8 playlist
+            "audio/x-mpegurl" // m3u8 playlist (fallback)
+        });
+        
+        _mpris->on_quit([&] { CloseApplication(); });
+
+        _mpris->on_next([&] { OnGlobalHotkey(WXK_MEDIA_NEXT_TRACK); });
+        _mpris->on_previous([&] { OnGlobalHotkey(WXK_MEDIA_PREV_TRACK); });
+        _mpris->on_play_pause([&] { OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE); });
+        _mpris->on_play([&]
+        {
+            switch (_app.GetPlaybackInfo().GetState())
+            {
+                case PlaybackController::State::Stopped:
+                case PlaybackController::State::Paused:
+                case PlaybackController::State::Seeking:
+                    OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE);
+                    break;
+            }
+        });
+
+        _mpris->on_pause([&]
+        {
+            switch (_app.GetPlaybackInfo().GetState())
+            {
+                case PlaybackController::State::Playing:
+                case PlaybackController::State::Seeking:
+                    OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE);
+                    break;
+            }
+        });
+
+        _mpris->on_stop([&] { OnGlobalHotkey(WXK_MEDIA_STOP); });
+        
+        _mpris->on_set_position([&](int64_t microsec) { _app.SeekTo(microsec / 1000); });
+        
+        // TODO: on_seek would be neat too (seek by received offset, need to clamp)
+        // TODO: on_open_uri (accept and strip the file:// prefix only)
+
+        _mpris->on_loop_status_changed([&] (mpris::LoopStatus status) { });
+        _mpris->on_rate_changed([&] (double rate) { });
+        _mpris->on_shuffle_changed([&] (bool shuffle) { });
+        _mpris->on_volume_changed([&] (double vol) { });
+
+        /*_mpris->set_minimum_rate(0.5);
+        _mpris->set_maximum_rate(2.0);*/
+
+        // TODO: set metadata as well (elsewhere)
+
+        _mpris->start_loop_async();
+    }
+    else
+    {
+        _ui->infoBarMediaKeysTaken->ShowMessage(Strings::FramePlayer::MSG_MEDIA_KEYS_TAKEN);
+    }
+    
+    return _mpris != nullptr;
 #endif
 }
 

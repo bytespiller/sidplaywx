@@ -23,6 +23,12 @@
     #include <wx/wx.h>
 #endif
 
+#ifdef WIN32
+#define MPRIS_SERVER_NO_IMPL
+#endif
+
+#include "../../../deps/include/linux/mpris-server/mpris_server.hpp"
+
 #include "ElementsPlayer.h"
 #include "../Theme/ThemeManager.h"
 #include "../../HvscSupport/Songlengths.h"
@@ -198,7 +204,9 @@ private:
     void OnMenuOpening(wxMenuEvent& evt);
     void OnMenuItemSelected(wxCommandEvent& evt);
 
+    void OnGlobalHotkey(wxKeyCode key);
     void OnGlobalHotkey(wxKeyEvent& evt);
+
     void OnTimerRefresh(wxTimerEvent& evt);
 
     void OnIconize(wxIconizeEvent& evt);
@@ -251,4 +259,6 @@ private:
 
     wxArrayString _enqueuedFiles;
     bool _addingFilesToPlaylist = false;
+
+    std::unique_ptr<mpris::Server> _mpris = nullptr;
 };

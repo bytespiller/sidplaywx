@@ -40,6 +40,7 @@
 /deps/include/**
 !/deps/include/**/
 !deps/include/**/*.txt
+!deps/include/**/*.hpp
 
 /deps/lib/**
 !/deps/lib/**/
