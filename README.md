@@ -100,6 +100,19 @@ If you intend to submit a PR, please see the [CONTRIBUTING.md](CONTRIBUTING.md) 
 			- https://docs.wxwidgets.org/3.2/overview_cmake.html
 2. Copy files from `/dist/include/` & `/dist/lib/` to the appropriate sidplaywx's `/deps/` folders.
 
+##### (sdbus-c++)
+This is needed for MPRIS support.
+0. Prerequisites: to install sd-bus dev files & headers if needed: `sudo apt update && sudo apt install libsystemd-dev pkg-config -y`
+1. Build & install the https://github.com/Kistler-Group/sdbus-cpp/
+	- The steps are as given:
+	```bash
+	$ mkdir build
+	$ cd build
+	$ cmake .. -DCMAKE_BUILD_TYPE=Release ${OTHER_CONFIG_FLAGS}
+	$ cmake --build .
+	$ sudo cmake --build . --target install
+	```
+
 #### Building the sidplaywx
 1. Copy contents of the `dev` folder (except the `icon_src` folder and the `SystemColorViewer.pyw`) to the `build` folder (create a `build` folder next to the `dev` folder)
 2. You can rename the `CMakeLists_linux.txt` to `CMakeLists.txt`

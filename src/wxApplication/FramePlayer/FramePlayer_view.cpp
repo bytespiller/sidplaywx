@@ -72,6 +72,12 @@ void FramePlayer::UpdateUiState()
 
             _ui->waveformVisualization->Clear();
 
+#ifdef __WXGTK__
+            if (_mpris)
+            {
+                _mpris->set_playback_status(mpris::PlaybackStatus::Stopped);
+            }
+#endif
             break;
         }
         case PlaybackController::State::Playing:
@@ -80,12 +86,26 @@ void FramePlayer::UpdateUiState()
             _ui->compositeSeekbar->ResetPlaybackPosition(GetEffectiveSongDuration(*_ui->treePlaylist->GetActiveSong()));
             _ui->compositeSeekbar->UpdatePlaybackPosition(_app.GetPlaybackInfo().GetTime());
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_NORMAL);
+
+#ifdef __WXGTK__
+            if (_mpris)
+            {
+                _mpris->set_playback_status(mpris::PlaybackStatus::Playing);
+            }
+#endif
             break;
         }
         case PlaybackController::State::Paused:
         {
             _ui->btnPlayPause->SetPlay();
             _ui->compositeSeekbar->SetTaskbarProgressState(wxTASKBAR_BUTTON_PAUSED);
+
+#ifdef __WXGTK__
+            if (_mpris)
+            {
+                _mpris->set_playback_status(mpris::PlaybackStatus::Paused);
+            }
+#endif
             break;
         }
         case PlaybackController::State::Seeking:
@@ -269,6 +289,13 @@ void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
     const PlaybackController& playback = _app.GetPlaybackInfo();
     _ui->compositeSeekbar->UpdatePlaybackPosition(static_cast<long>(playbackTimeMs), playback.GetPreRenderProgressFactor());
 
+#ifdef __WXGTK__
+    if (_mpris)
+    {
+        _mpris->set_position(playbackTimeMs * 1000);
+    }
+#endif
+
     // Time position label
     const long durationMs = _ui->compositeSeekbar->GetDurationValue();
     uint_least32_t displayTimeMs = playbackTimeMs;
@@ -368,6 +395,19 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
         _ui->labelStilNameTitle->SetText("");
         _ui->labelStilArtistAuthor->SetText("");
         _ui->labelStilComment->SetText("");
+
+#ifdef __WXGTK__
+        if (_mpris)
+        {
+            _mpris->set_metadata
+            ({
+                { mpris::Field::TrackId, sdbus::Variant("/") },
+                { mpris::Field::Title,   sdbus::Variant("") },
+                { mpris::Field::Artist,  sdbus::Variant("") },
+                { mpris::Field::Length,  sdbus::Variant(0) }
+            });
+        }
+#endif
     }
     else
     {
@@ -393,6 +433,20 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
             _ui->labelReleased->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released)));
             _ui->labelSubsong->SetLabelText(wxString::Format("%i / %i", subsong, playback.GetTotalSubsongs()));
         }
+
+        // MPRIS metadata labels
+#ifdef __WXGTK__
+        if (_mpris)
+        {
+            _mpris->set_metadata
+            ({
+                { mpris::Field::TrackId, sdbus::Variant("/" + std::to_string(node->uid)) },
+                { mpris::Field::Title, sdbus::Variant(std::string(_ui->labelTitle->GetLabelText().ToUTF8().data())) },
+                { mpris::Field::Artist, sdbus::Variant(std::vector<std::string>{ std::string(_ui->labelAuthor->GetLabelText().ToUTF8().data()) }) },
+                { mpris::Field::Length,  sdbus::Variant(node->duration * 1000) }
+            });
+        }
+#endif
 
         // Set STIL labels
         if (node)

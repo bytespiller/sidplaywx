@@ -477,7 +477,7 @@ void FramePrefs::OnPropertyGridChanging(wxPropertyGridEvent& evt)
     }
     else if (strcmp(cId, Settings::AppSettings::ID::RomKernalPath) == 0)
     {
-        const std::wstring pendingValue = evt.GetValue().GetString().ToStdWstring();
+        const std::filesystem::path pendingValue = evt.GetValue().GetString().utf8_string();
         const bool seemsOk = RomUtil::PreCheckRoms(pendingValue, L"", L"").IsValidated(RomUtil::RomType::Kernal);
         if (!seemsOk)
         {
@@ -492,7 +492,7 @@ void FramePrefs::OnPropertyGridChanging(wxPropertyGridEvent& evt)
     }
     else if (strcmp(cId, Settings::AppSettings::ID::RomBasicPath) == 0)
     {
-        const std::wstring pendingValue = evt.GetValue().GetString().ToStdWstring();
+        const std::filesystem::path pendingValue = evt.GetValue().GetString().utf8_string();
         const bool seemsOk = RomUtil::PreCheckRoms(L"", pendingValue, L"").IsValidated(RomUtil::RomType::Basic);
         if (!seemsOk)
         {
@@ -507,7 +507,7 @@ void FramePrefs::OnPropertyGridChanging(wxPropertyGridEvent& evt)
     }
     else if (strcmp(cId, Settings::AppSettings::ID::RomChargenPath) == 0)
     {
-        const std::wstring pendingValue = evt.GetValue().GetString().ToStdWstring();
+        const std::filesystem::path pendingValue = evt.GetValue().GetString().utf8_string();
         const bool seemsOk = RomUtil::PreCheckRoms(L"", L"", pendingValue).IsValidated(RomUtil::RomType::Chargen);
         if (!seemsOk)
         {
@@ -652,22 +652,22 @@ void FramePrefs::OnButtonApply(wxCommandEvent& /*evt*/)
                     if (prop.first == Settings::AppSettings::ID::AudioOutputDevice)
                     {
                         const wxString& deviceName = prop.second.property.GetChoices().Item(propertyValueInt).GetText();
-                        option.UpdateValue(deviceName.ToStdWstring());
+                        option.UpdateValue(deviceName.utf8_string());
                     }
                     else if (prop.first == Settings::AppSettings::ID::SonglengthsPath)
                     {
-                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
+                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString());
                         option.UpdateValue(relPath);
                     }
                     else if (prop.first == Settings::AppSettings::ID::StilPath)
                     {
-                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
+                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString());
                         option.UpdateValue(relPath);
                         _framePlayer.InitStilInfo({});
                     }
                     else if (prop.first == Settings::AppSettings::ID::RomKernalPath || prop.first == Settings::AppSettings::ID::RomBasicPath || prop.first == Settings::AppSettings::ID::RomChargenPath)
                     {
-                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString().ToStdWstring());
+                        const wxString& relPath = Helpers::Wx::Files::AsRelativePathIfPossible(prop.second.property.GetValue().GetString());
                         option.UpdateValue(relPath);
                     }
 

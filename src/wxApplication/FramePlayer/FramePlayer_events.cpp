@@ -548,10 +548,10 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
     }
 }
 
-void FramePlayer::OnGlobalHotkey(wxKeyEvent& evt)
+void FramePlayer::OnGlobalHotkey(wxKeyCode key)
 {
     PlaybackController::State cState = _app.GetPlaybackInfo().GetState();
-    switch(evt.GetKeyCode()) // Because the RegisterHotKey is only implemented under MSW, we use this universal solution for now.
+    switch(key)
     {
         case WXK_MEDIA_PLAY_PAUSE:
         {
@@ -590,6 +590,11 @@ void FramePlayer::OnGlobalHotkey(wxKeyEvent& evt)
             break;
         }
     }
+}
+
+void FramePlayer::OnGlobalHotkey(wxKeyEvent& evt)
+{
+    OnGlobalHotkey(static_cast<wxKeyCode>(evt.GetKeyCode()));
 }
 
 void FramePlayer::OnTimerRefresh(wxTimerEvent& /*evt*/)
@@ -802,6 +807,13 @@ void FramePlayer::OnSeekingCeased()
         //UpdatePeriodicDisplays(_app.GetPlaybackInfo().GetTime());
         UpdateUiState();
     }
+
+#ifdef __WXGTK__
+    if (_mpris)
+    {
+        _mpris->send_seeked_signal(_app.GetPlaybackInfo().GetTime() * 1000);
+    }
+#endif
 }
 
 void FramePlayer::OnRepeatModeExtraOptionToggled(ExtraOptionId extraOptionId)

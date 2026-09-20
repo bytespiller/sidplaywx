@@ -41,13 +41,12 @@
 
 #include <wx/aboutdlg.h>
 #include <wx/display.h>
+#include <wx/webrequest.h>
 
 #ifndef WIN32
 #include <wx/tooltip.h>
 #include "../../../dev/icon_src/sidplaywx_icon_64x64.xpm" // sidplaywx_icon_64px[_xpm]
 #endif
-
-#include <wx/webrequest.h>
 
 using RepeatMode = UIElements::RepeatModeButton::RepeatMode;
 
@@ -173,7 +172,7 @@ void FramePlayer::InitSonglengthsDatabase()
             continue;
         }
 
-        success = _sidDatabase.TryLoad(path.GetFullPath().ToStdWstring());
+        success = _sidDatabase.TryLoad(path.GetFullPath().utf8_string());
         if (success)
         {
             break;
@@ -240,7 +239,7 @@ void FramePlayer::InitStilInfo()
         }
 
         GetStatusBar()->PushStatusText(Strings::FramePlayer::STATUS_LOADING_STIL, 0);
-        success = _stilInfo.TryLoad(path.GetFullPath().ToStdWstring());
+        success = _stilInfo.TryLoad(path.GetFullPath().utf8_string());
         GetStatusBar()->PopStatusText(0);
 
         if (success)
@@ -406,14 +405,12 @@ void FramePlayer::DeferredInit()
     // Show/hide STIL info
     EnableStilInfoDisplay(_app.currentSettings->GetOption(Settings::AppSettings::ID::StilInfoEnabled)->GetValueAsBool());
 
-#ifdef WIN32
-    // Apply window topmost preference
-    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->GetValueAsBool() != IsTopmost())
+    // Media keys (MSW) / MPRIS (Linux) support
+    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::MediaKeys)->GetValueAsBool())
     {
-        ToggleTopmost();
+        TryRegisterMediaKeys();
     }
 
-    // Media keys support
     _ui->infoBarMediaKeysTaken->Bind(wxEVT_BUTTON, [&](wxCommandEvent& evt)
     {
         _ui->infoBarMediaKeysTaken->Dismiss();
@@ -423,14 +420,13 @@ void FramePlayer::DeferredInit()
         }
     });
 
-    for (int key : MEDIA_KEYS)
-    {
-        Bind(wxEVT_HOTKEY, &FramePlayer::OnGlobalHotkey, this);
-    }
+#ifdef WIN32
+    Bind(wxEVT_HOTKEY, &FramePlayer::OnGlobalHotkey, this);
 
-    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::MediaKeys)->GetValueAsBool())
+    // Apply window topmost preference
+    if (_app.currentSettings->GetOption(Settings::AppSettings::ID::StayTopmost)->GetValueAsBool() != IsTopmost())
     {
-        TryRegisterMediaKeys();
+        ToggleTopmost();
     }
 #endif
 
@@ -509,7 +505,73 @@ bool FramePlayer::TryRegisterMediaKeys()
 
     return true;
 #else
-    return false;
+    if (_mpris = mpris::Server::make("sidplaywx")) // Reminder: don't use Strings::FramePlayer::WINDOW_TITLE due to " (debug)" being invalid name.
+    {
+        _mpris->set_identity(_app.GetAppDisplayName().ToStdString());
+        _mpris->set_desktop_entry("org.bytespiller.sidplaywx"); // TODO: remove the org prefix from the desktop file
+
+        _mpris->set_supported_uri_schemes({ "file" });
+        _mpris->set_supported_mime_types
+        ({
+            "application/octet-stream", // generic MIME for PSID etc. files
+            "audio/mpegurl", // m3u8 playlist
+            "audio/x-mpegurl" // m3u8 playlist (fallback)
+        });
+
+        _mpris->on_quit([&] { CallAfter([&]{ CloseApplication(); }); });
+
+        _mpris->on_next([&] { CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_NEXT_TRACK); }); });
+        _mpris->on_previous([&] { CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_PREV_TRACK); }); });
+        _mpris->on_play_pause([&] { CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE); }); });
+        _mpris->on_play([&]
+        {
+            switch (_app.GetPlaybackInfo().GetState())
+            {
+                case PlaybackController::State::Stopped:
+                case PlaybackController::State::Paused:
+                case PlaybackController::State::Seeking:
+                    CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE); });
+                    break;
+            }
+        });
+
+        _mpris->on_pause([&]
+        {
+            switch (_app.GetPlaybackInfo().GetState())
+            {
+                case PlaybackController::State::Playing:
+                case PlaybackController::State::Seeking:
+                    CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE); });
+                    break;
+            }
+        });
+
+        _mpris->on_stop([&] { CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_STOP); }); });
+
+        _mpris->on_set_position([&](int64_t microsec) { CallAfter([&]{ _app.SeekTo(microsec / 1000); }); });
+        // TODO: on_seek would be neat too (seek by received offset, need to clamp)
+
+        _mpris->on_open_uri([&](std::string_view uri)
+        {
+            const wxString path = wxFileName::URLToFileName(wxString::FromUTF8(uri.data(), uri.size())).GetFullPath();
+            CallAfter([&, path]{ DiscoverFilesAndSendToPlaylist({path}); });
+        });
+
+        _mpris->on_loop_status_changed([&] (mpris::LoopStatus status) { }); // TODO (dummy must exist)
+        _mpris->on_shuffle_changed([&] (bool shuffle) { }); // TODO (dummy must exist)
+        _mpris->on_volume_changed([&] (double vol) { }); // TODO (dummy must exist)
+        _mpris->on_rate_changed([&] (double rate) { }); // TODO (dummy must exist)
+        /*_mpris->set_minimum_rate(0.5);
+        _mpris->set_maximum_rate(2.0);*/
+
+        _mpris->start_loop_async();
+    }
+    else
+    {
+        _ui->infoBarMediaKeysTaken->ShowMessage(Strings::FramePlayer::MSG_MEDIA_KEYS_TAKEN);
+    }
+
+    return _mpris != nullptr;
 #endif
 }
 
@@ -771,7 +833,7 @@ void FramePlayer::DisplayAboutBox()
     aboutInfo.SetName(Strings::FramePlayer::WINDOW_TITLE);
     aboutInfo.SetVersion(Strings::APP_VERSION_TAG); // Reminder: don't forget to increase.
     aboutInfo.SetDescription(Strings::About::DESCRIPTION);
-    aboutInfo.SetCopyright(L"(C) 2021-2026 Jasmin Rutić"); // Reminder: don't forget to bump.
+    aboutInfo.SetCopyright(L"(C) 2021-2026 Jasmin Rutić"); // Reminder: don't forget to bump the copyright year.
     aboutInfo.SetWebSite("https://github.com/bytespiller/sidplaywx");
 
     aboutInfo.SetLicense(Strings::About::LICENSE);
@@ -779,6 +841,10 @@ void FramePlayer::DisplayAboutBox()
     aboutInfo.AddDeveloper(wxString(Strings::About::DEVELOPER_LIBRARIES) + "\n" +
                            wxString::Format("%s %s (libresidfp %i.%i.%i)", _app.GetPlaybackInfo().GetEngineInfo().name(), _app.GetPlaybackInfo().GetEngineInfo().version(), LIBRESIDFP_VERSION_MAJ, LIBRESIDFP_VERSION_MIN, LIBRESIDFP_VERSION_LEV) + "\n" + // libsidplayfp
                            wxString(Pa_GetVersionInfo()->versionText) + "\n" + // PortAudio
+#ifdef __WXGTK__
+                            wxString("mpris_server.hpp commit fd7f052fef (codeberg.org/chrg/mpris-server)") + "\n" +
+                            wxString::Format("sdbus-c++ %s", wxString(SDBUS_CPP_VERSION)) + "\n" +
+#endif
                            wxVERSION_STRING // wxWidgets
                           );
 
