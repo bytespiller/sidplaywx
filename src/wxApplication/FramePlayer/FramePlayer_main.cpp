@@ -359,6 +359,10 @@ void FramePlayer::SetupUiElements()
     _timerRefresh = std::make_unique<wxTimer>(this);
     Bind(wxEVT_TIMER, &OnTimerRefresh, this, _timerRefresh->GetId());
 
+    // Drains SidFileParsePool results onto the playlist while a background playlist load is in progress (see SendFilesToPlaylist).
+    _timerBatchApply = std::make_unique<wxTimer>(this);
+    Bind(wxEVT_TIMER, &OnTimerBatchApply, this, _timerBatchApply->GetId());
+
     // Menu
     SetMenuBar(_ui->menuBar);
     Bind(wxEVT_MENU_OPEN, &OnMenuOpening, this);
@@ -533,6 +537,8 @@ void FramePlayer::CloseApplication()
     {
         _timerRefresh->Stop(); // Segfault can occur otherwise.
     }
+
+    AbortPlaylistLoad(); // Join any background parser threads before teardown.
 
     _app.StopPlayback();
     Hide();

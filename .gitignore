@@ -35,6 +35,8 @@
 /build/*
 /src/build/*
 /src/.vscode/*
+/build_test/
+/scratch/
 
 # Built dependencies
 /deps/include/**

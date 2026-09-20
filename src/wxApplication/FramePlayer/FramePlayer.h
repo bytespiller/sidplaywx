@@ -24,10 +24,13 @@
 #endif
 
 #include "ElementsPlayer.h"
+#include "PlaylistLoading/SidFileParsePool.h"
 #include "../Theme/ThemeManager.h"
 #include "../../HvscSupport/Songlengths.h"
 #include "../../HvscSupport/Stil/Stil.h"
 #include "../../Util/SimpleSignal/SimpleSignalListener.h"
+
+#include <chrono>
 
 class FramePlaybackMods;
 class FramePrefs;
@@ -144,7 +147,10 @@ private:
     void UpdateIgnoredSong(PlaylistTreeModelNode& mainSongNode);
     long GetEffectiveSongDuration(const PlaylistTreeModelNode& node) const;
 
-    Songlengths::HvscInfo TryGetHvscInfo(const char* md5, int subsong = 1) const;
+    // Background parsing (see PlaylistLoading/SidFileParsePool.h): SendFilesToPlaylist() dispatches to _parsePool and returns immediately; _timerBatchApply then periodically drains ready results on the GUI thread via DoBatchApplyParsedSongs(), in original file order, applying them with the same Playlist/model calls the old synchronous loop used to make inline.
+    void DoBatchApplyParsedSongs();
+    void OnPlaylistLoadFinished();
+    void AbortPlaylistLoad();
 
 #pragma endregion
 #pragma region *** input ***
@@ -200,6 +206,7 @@ private:
 
     void OnGlobalHotkey(wxKeyEvent& evt);
     void OnTimerRefresh(wxTimerEvent& evt);
+    void OnTimerBatchApply(wxTimerEvent& evt);
 
     void OnIconize(wxIconizeEvent& evt);
     void OnClose(wxCloseEvent& evt);
@@ -251,4 +258,13 @@ private:
 
     wxArrayString _enqueuedFiles;
     bool _addingFilesToPlaylist = false;
+
+    // Background parsing state for the in-progress (if any) SendFilesToPlaylist() call - see DoBatchApplyParsedSongs().
+    SidFileParsePool _parsePool;
+    std::unique_ptr<wxTimer> _timerBatchApply;
+    size_t _loadNextApplyIndex = 0;
+    int _loadPlayableTunesCount = 0;
+    bool _loadShouldAutoPlay = false;
+    bool _loadEnabledShortSongSkip = false;
+    std::chrono::steady_clock::time_point _loadLastProgressUiUpdate;
 };

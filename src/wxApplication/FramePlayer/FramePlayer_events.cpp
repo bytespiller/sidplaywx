@@ -483,6 +483,7 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             OnButtonStop();
             _enqueuedFiles.Clear(); // Clear any pending files.
             _addingFilesToPlaylist = false; // Break the loop.
+            AbortPlaylistLoad(); // Stop any in-progress background parsing immediately rather than waiting for the next batch-apply tick to notice.
             _ui->treePlaylist->Clear();
             UpdateUiState();
 

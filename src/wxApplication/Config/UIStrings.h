@@ -320,6 +320,9 @@ namespace Strings
 		inline constexpr const char* const ITEM_DRAGDROP_MODE_ENQUEUE("Always enqueue");
 		inline constexpr const char* const ITEM_DRAGDROP_MODE_DISABLED("Disabled");
 
+		inline constexpr const char* const OPT_MAX_PARSER_THREADS("Playlist loading threads");
+		inline constexpr const char* const DESC_MAX_PARSER_THREADS("Maximum number of background threads used to parse files when adding them to the playlist (e.g. dropping a large HVSC folder). Higher values load large playlists faster on multi-core systems but use more CPU while doing so; takes effect on the next files added.");
+
 		// Visual
 		inline constexpr const char* const CATEGORY_VISUAL_BEHAVIOR("Visual");
 

@@ -34,6 +34,9 @@ namespace
     constexpr int MIN_POP_SILENCER = 0;
     constexpr int MAX_POP_SILENCER = 1000;
 
+    constexpr int MIN_PARSER_THREADS = 1;
+    constexpr int MAX_PARSER_THREADS = 32;
+
     constexpr double MIN_FILTER_CURVE = 0.0;
     constexpr double MAX_FILTER_CURVE = 1.0;
 
@@ -266,6 +269,7 @@ void FramePrefs::FillPropertyGrid()
         AddWrappedPropToPage(Settings::AppSettings::ID::SongFallbackDuration, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_FALLBACK_DURATION), *page, Effective::Immediately, Strings::Preferences::DESC_FALLBACK_DURATION, 1, MAX_DURATION);
         AddWrappedPropToPage(Settings::AppSettings::ID::SkipShorter, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_SKIP_SHORTER), *page, Effective::Immediately, Strings::Preferences::DESC_SKIP_SHORTER, MIN_DURATION, MAX_DURATION);
         AddWrappedPropToPage(Settings::AppSettings::ID::PopSilencer, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_POP_SILENCER), *page, Effective::Immediately, Strings::Preferences::DESC_POP_SILENCER, MIN_POP_SILENCER, MAX_POP_SILENCER);
+        AddWrappedPropToPage(Settings::AppSettings::ID::MaxParserThreads, TypeSerialized::Int, new wxIntProperty(Strings::Preferences::OPT_MAX_PARSER_THREADS), *page, Effective::Immediately, Strings::Preferences::DESC_MAX_PARSER_THREADS, MIN_PARSER_THREADS, MAX_PARSER_THREADS);
 
         {
             const wxArrayString dragDropModeOptions =

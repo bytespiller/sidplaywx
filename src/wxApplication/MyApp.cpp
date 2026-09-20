@@ -17,6 +17,7 @@
  */
 
 #include "MyApp.h"
+#include <cstring> // For std::memcpy - not guaranteed to be transitively included, and newer libstdc++ versions are stricter about it.
 #include "Config/AppSettings.h"
 #include "Config/UIStrings.h"
 #include "Helpers/HelpersWx.h"

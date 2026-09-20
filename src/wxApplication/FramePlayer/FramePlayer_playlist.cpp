@@ -18,22 +18,17 @@
 
 #include "FramePlayer.h"
 #include "ElementsPlayer.h"
+#include "PlaylistLoading/PlaylistFileParser.h"
 #include "../MyApp.h"
 #include "../Config/AppSettings.h"
 #include "../Config/UIStrings.h"
 #include "../Helpers/HelpersWx.h"
 #include "../UIElements/Playlist/Components/PlaylistModel.h"
 #include "../../Util/Const.h"
-#include "../../PlaybackController/PlaybackWrappers/Input/SidDecoder/TuneUtil.h"
 
-namespace
-{
-    /// @brief └
-    constexpr int BOX_CHAR_L = 0x2514;
-
-    /// @brief ├
-    constexpr int BOX_CHAR_VERT_RIGHT = 0x251C;
-}
+#include <algorithm>
+#include <chrono>
+#include <unordered_set>
 
 std::vector<wxString> FramePlayer::GetCurrentPlaylistFilePaths(bool includeBlacklistedSongs)
 {
@@ -87,12 +82,16 @@ void FramePlayer::DiscoverFilesAndSendToPlaylist(const wxArrayString& rawPaths, 
     SetCursor(*wxSTANDARD_CURSOR); // Workaround the wx issue where the busy cursor doesn't properly update until the mouse is moved.
 }
 
+namespace
+{
+    constexpr int BATCH_APPLY_TIMER_INTERVAL_MS = 20;
+    constexpr int BATCH_APPLY_MAX_PER_TICK = 1000; // Caps how many already-parsed songs get inserted into the model per timer tick, so the GUI thread stays responsive even during the (cheap, thanks to Playlist::AddMainSongs's single-notification batching, but non-zero) insertion work itself.
+}
+
 void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrevious, bool autoPlayFirstImmediately)
 {
-    //wxWindowDisabler disabler;
-    //wxBusyCursor busyCursor;
-
     _addingFilesToPlaylist = true;
+    AbortPlaylistLoad(); // Defensive: make sure any previous (in practice, always already-finished) background load is fully stopped before starting a new one.
 
     if (clearPrevious)
     {
@@ -106,236 +105,231 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
         Update();
     }
 
-    const bool enabledShortSongSkip = _app.currentSettings->GetOption(Settings::AppSettings::ID::SkipShorter)->GetValueAsInt() > 0;
-    bool shouldAutoPlay = (autoPlayFirstImmediately) ? _app.currentSettings->GetOption(Settings::AppSettings::ID::AutoPlay)->GetValueAsBool() : false;
+    _loadEnabledShortSongSkip = _app.currentSettings->GetOption(Settings::AppSettings::ID::SkipShorter)->GetValueAsInt() > 0;
+    _loadShouldAutoPlay = (autoPlayFirstImmediately) ? _app.currentSettings->GetOption(Settings::AppSettings::ID::AutoPlay)->GetValueAsBool() : false;
+    _loadNextApplyIndex = 0;
+    _loadPlayableTunesCount = 0;
+    _loadLastProgressUiUpdate = std::chrono::steady_clock::time_point(); // Force the first tick's progress UI update through immediately.
 
-    int processedFilesCount = 0;
-    int lastPercentage = -1;
-    bool tuneIsValid = false;
-
-    int playableTunesCount = 0; // Not important if it rolls over.
-    const PlaybackController& playback = _app.GetPlaybackInfo();
-
-    uint8_t throttledYieldCounter = 0;
-
-    for (const wxString& filepath : files)
+    // Pre-pass: resolve MUS+STR companions up-front, order-independently, instead of the old sequential "is this the previous main song's companion?" check - this also lets us skip a companion .str file's own (would-be-redundant) background parse entirely, same as the original loop did for the sequential case.
+    // Reminder: "files" is already a flat list of absolute paths (from Helpers::Wx::Files::GetValidFiles), so a plain wxString::Lower() is enough for the lookup sets below - do NOT wrap every file in a wxFileName here just to call GetFullPath(): at 60k+ files that parsing cost alone is enough to freeze the GUI thread for many seconds with zero progress feedback, defeating the entire point of this background-parsing feature. wxFileName is only needed (and only used below) for the much smaller subset of actual .mus files, to cleanly swap the extension when computing a candidate companion path.
+    std::vector<SidFileParsePool::FileTask> tasks;
+    tasks.reserve(files.GetCount());
     {
-        ++processedFilesCount;
-
-        if (!_ui->treePlaylist->IsEmpty())
+        std::unordered_set<wxString> discoveredPathsLower;
+        discoveredPathsLower.reserve(files.GetCount());
+        for (const wxString& f : files)
         {
-            const wxString& lastMainSongmusCompanionStrFilePath = _ui->treePlaylist->GetSongs().at(_ui->treePlaylist->GetSongs().size() - 1)->musCompanionStrFilePath;
-            if (!lastMainSongmusCompanionStrFilePath.IsEmpty() && wxFileName(filepath).GetFullPath().IsSameAs(lastMainSongmusCompanionStrFilePath, false))
-            {
-                continue; // Skip the duplicate STR file (MUS+STR already loaded in pair).
-            }
+            discoveredPathsLower.insert(f.Lower());
         }
 
-        const int totalFiles = files.GetCount() + _enqueuedFiles.GetCount();
-        const float totalFilesFloat = static_cast<float>(totalFiles);
+        std::unordered_set<wxString> strPathsToSkipLower;
+        std::vector<wxString> musCompanionForFile(files.GetCount());
 
-        // Progress percentage display ------------------------
-        const int currentPercentage = static_cast<int>((processedFilesCount / totalFilesFloat) * 100.0f);
-        if (currentPercentage != lastPercentage) // SetStatusText calls are expensive.
+        for (size_t i = 0; i < files.GetCount(); ++i)
         {
-            const wxString textAddingFilesWithCount = wxString::Format(Strings::FramePlayer::STATUS_ADDING_FILES_WITH_COUNT, totalFiles);
-            SetStatusText(wxString::Format("%s (%i%%)", textAddingFilesWithCount, currentPercentage), 2);
-        }
-        lastPercentage = currentPercentage;
-
-        // Inspect the tune  -------
-        std::unique_ptr<SidTune> inspectTune = nullptr;
-
-        {
-            const std::unique_ptr<BufferHolder>& infoTuneBufferHolder = (Helpers::Wx::Files::IsWithinZipFile(filepath))
-                    ? Helpers::Wx::Files::GetFileContentFromZip(filepath)
-                    : Helpers::Wx::Files::GetFileContentFromDisk(filepath);
-
-            inspectTune = (infoTuneBufferHolder != nullptr) ? std::make_unique<SidTune>(infoTuneBufferHolder->buffer[0], infoTuneBufferHolder->size[0]) : nullptr;
-            tuneIsValid = inspectTune != nullptr && inspectTune->getStatus();
-        }
-
-        if (tuneIsValid)
-        {
-            // Tune title
-            wxString songTitle(TuneUtil::GetTuneInfoString(*inspectTune, TuneUtil::SongInfoCategory::Title));
+            const wxString& filepath = files[i];
+            if (!filepath.Lower().EndsWith(".mus"))
             {
-                if (songTitle.IsEmpty()) [[unlikely]] // Fallback/MUS file (rare situation)
-                {
-                    songTitle = wxFileNameFromPath(filepath);
-                }
-
-                const int sidsNeeded = inspectTune->getInfo()->sidChips();
-                const wxString& songTitleAddendum = (sidsNeeded > 1) ? wxString::Format(" [%iSID]", sidsNeeded) : wxGetEmptyString();
-                songTitle.Append(songTitleAddendum);
+                continue;
             }
 
-            // Subsongs count
-            const int defaultSubsong = inspectTune->getInfo()->startSong();
-            int totalSubsongs = inspectTune->getInfo()->songs();
+            // Check if the companion STR file exists as well, and load it in pair (MUS+STR)
+            wxFileName extraStrFilePath(filepath);
+            extraStrFilePath.SetExt("str");
 
-            // Tune ROM requirement
-            const TuneUtil::RomRequirement romRequirement = TuneUtil::GetTuneRomRequirement(*inspectTune);
-            const bool playable = playback.IsRomLoaded(romRequirement);
+            const bool exists =
+                (Helpers::Wx::Files::IsWithinZipFile(extraStrFilePath.GetFullPath()) && Helpers::Wx::Files::FileExistsInZipArchive(extraStrFilePath.GetFullPath())) ||
+                (extraStrFilePath.FileExists());
 
-            // Add main song node to playlist tree
-            PlaylistTreeModelNode* mainSongNodeNew = nullptr;
-
-            const Songlengths::HvscInfo& hvscInfoMain = TryGetHvscInfo(inspectTune->createMD5New());
-
+            if (exists)
             {
-                const wxString author = Helpers::Wx::StringFromWin1252(TuneUtil::GetTuneInfoString(*inspectTune, TuneUtil::SongInfoCategory::Author));
-                const wxString copyright = Helpers::Wx::StringFromWin1252(TuneUtil::GetTuneInfoString(*inspectTune, TuneUtil::SongInfoCategory::Released));
+                musCompanionForFile[i] = extraStrFilePath.GetFullPath();
 
-                // Determine ROM requirement
-                PlaylistTreeModelNode::RomRequirement nodeRom = PlaylistTreeModelNode::RomRequirement::None;
-                switch (romRequirement)
+                const wxString strPathLower = extraStrFilePath.GetFullPath().Lower();
+                if (discoveredPathsLower.count(strPathLower) != 0)
                 {
-                    case TuneUtil::RomRequirement::None:
-                        nodeRom = PlaylistTreeModelNode::RomRequirement::None;
-                        break;
-                    case TuneUtil::RomRequirement::BasicRom:
-                        nodeRom = PlaylistTreeModelNode::RomRequirement::BasicRom;
-                        break;
-                    case TuneUtil::RomRequirement::R64:
-                        nodeRom = PlaylistTreeModelNode::RomRequirement::R64;
-                        break;
-                    default:
-                        wxMessageBox(Strings::Internal::UNHANDLED_SWITCH_CASE); // throwing doesn't work properly with release mode wxWidgets
-                        throw(Strings::Internal::UNHANDLED_SWITCH_CASE);
-                }
-
-                #pragma region Detect MUS+STR pair
-
-                wxString musCompanionStrFilePath;
-
-                const bool musFileType = filepath.Lower().EndsWith(".mus");
-                if (musFileType)
-                {
-                    // Check if the companion STR file exists as well, and load it in pair (MUS+STR)
-                    wxFileName extraStrFilePath(filepath);
-                    extraStrFilePath.SetExt("str");
-
-                    const bool exists =
-                        (Helpers::Wx::Files::IsWithinZipFile(extraStrFilePath.GetFullPath()) && Helpers::Wx::Files::FileExistsInZipArchive(extraStrFilePath.GetFullPath())) ||
-                        (extraStrFilePath.FileExists());
-
-                    if (exists)
-                    {
-                        musCompanionStrFilePath = extraStrFilePath.GetFullPath();
-                        totalSubsongs = 3; // Add as fake subsongs so that individual MUS+STR components can be selected by the user if so desired.
-                    }
-                }
-
-                #pragma endregion
-
-                mainSongNodeNew = &_ui->treePlaylist->AddMainSong(Helpers::Wx::StringFromWin1252(songTitle.ToStdString()), filepath, defaultSubsong, hvscInfoMain.duration, hvscInfoMain.hvscPath, hvscInfoMain.md5, author, copyright, nodeRom, playable, musCompanionStrFilePath);
-            }
-
-            if (playable)
-            {
-                ++playableTunesCount;
-            }
-
-            // Add any subsongs to playlist tree
-            if (totalSubsongs > 1)
-            {
-                std::vector<uint_least32_t> subsongDurations;
-                subsongDurations.reserve(totalSubsongs);
-
-                // Determine durations
-                for (int i = 1; i <= totalSubsongs; ++i)
-                {
-                    subsongDurations.emplace_back(TryGetHvscInfo(hvscInfoMain.md5, i).duration);
-                }
-
-                // Determine subsong titles (from STIL where possible)
-                std::vector<wxString> subsongTitles;
-                subsongTitles.reserve(totalSubsongs);
-
-                const bool singleFileTune = mainSongNodeNew->musCompanionStrFilePath.IsEmpty();
-                if (singleFileTune) // Normal (or standalone MUS) tune
-                {
-                    const Stil::Info info(_stilInfo.Get(mainSongNodeNew->hvscPath.ToStdString())); // Blank if unavailable.
-                    for (int i = 1; i <= totalSubsongs; ++i)
-                    {
-                        const int boxChar = (i < totalSubsongs) ? BOX_CHAR_VERT_RIGHT : BOX_CHAR_L;
-                        const std::string& title = info.GetFieldAsString(info.names, i);
-
-                        if (!title.empty()) // STIL title
-                        {
-                            subsongTitles.emplace_back(wxString::Format("%c %s %i: %s", boxChar, Strings::PlaylistTree::SUBSONG, i, Helpers::Wx::StringFromWin1252(title)));
-                        }
-                        else // Generic subsong title
-                        {
-                            subsongTitles.emplace_back(wxString::Format("%c %s %i", boxChar, Strings::PlaylistTree::SUBSONG, i));
-                        }
-                    }
-                }
-                else // MUS+STR tune
-                {
-                    subsongTitles.emplace_back(wxString::Format("%c %s", BOX_CHAR_VERT_RIGHT, mainSongNodeNew->title.Mid(0, mainSongNodeNew->title.Length() - 4) + " [MUS+STR]"));
-                    subsongTitles.emplace_back(wxString::Format("%c %s", BOX_CHAR_VERT_RIGHT, mainSongNodeNew->title));
-                    subsongTitles.emplace_back(wxString::Format("%c %s", BOX_CHAR_L, mainSongNodeNew->title.Mid(0, mainSongNodeNew->title.Length() - 4) + ".str"));
-                }
-
-                // Add subsongs
-                _ui->treePlaylist->AddSubsongs(subsongDurations, subsongTitles, *mainSongNodeNew);
-
-                if (!singleFileTune) // MUS+STR tune
-                {
-                    _ui->treePlaylist->SetItemTag(mainSongNodeNew->GetSubsong(2), PlaylistTreeModelNode::ItemTag::MUS_StandaloneMus, {});
-                    _ui->treePlaylist->SetItemTag(mainSongNodeNew->GetSubsong(3), PlaylistTreeModelNode::ItemTag::MUS_StandaloneStr, {});
-                }
-            }
-
-            // One tune (with any subsongs) added -----------------
-
-            if (playable && enabledShortSongSkip) // Tag short songs
-            {
-                UpdateIgnoredSong(*mainSongNodeNew);
-            }
-            else // Apply Normal tag and ROM requirement icons/styling
-            {
-                _ui->treePlaylist->SetItemTag(*mainSongNodeNew, PlaylistTreeModelNode::ItemTag::Normal, true);
-            }
-
-            // Auto-play
-            if (shouldAutoPlay)
-            {
-                const PlaylistTreeModelNode* subsongItemData = _ui->treePlaylist->GetEffectiveInitialSubsong(*mainSongNodeNew);
-                if (subsongItemData != nullptr) // Can be nullptr if the main song is not playable (e.g., missing ROM).
-                {
-                    shouldAutoPlay = subsongItemData->GetTag() != PlaylistTreeModelNode::ItemTag::Normal || !TryPlayPlaylistItem(*mainSongNodeNew);
+                    strPathsToSkipLower.insert(strPathLower);
                 }
             }
         }
 
-        if (playableTunesCount == 2)
+        for (size_t i = 0; i < files.GetCount(); ++i)
         {
-            UpdateUiState(); // Simply to enable the "next song" button immediately while still adding lots of files.
-            wxYield();
-        }
+            const wxString& filepath = files[i];
 
-        // Update the UI in the interim (sparingly as the wxYield causes a tremendous slowdown)
-        {
-            if (throttledYieldCounter == 0 || throttledYieldCounter >= 100) // 255 max
+            if (strPathsToSkipLower.count(filepath.Lower()) != 0)
             {
-                throttledYieldCounter = 0;
-                UpdatePlaylistPositionLabel();
-                wxYield(); // Also must be before the HasFocus() call because not even that updates otherwise!
+                continue; // Skip the duplicate STR file (MUS+STR already paired with its MUS file above).
             }
 
-            ++throttledYieldCounter;
-        }
-
-        if (_exitingApplication || !_addingFilesToPlaylist) // In case the user clicked Close (or cleared the playlist) while adding lots of files. This should be checked immediately after any wxYield.
-        {
-            return;
+            SidFileParsePool::FileTask task;
+            task.filepathUtf8 = std::string(filepath.ToUTF8());
+            if (!musCompanionForFile[i].IsEmpty())
+            {
+                task.musCompanionStrFilePathUtf8 = std::string(musCompanionForFile[i].ToUTF8());
+            }
+            tasks.emplace_back(std::move(task));
         }
     }
 
-    // All tunes added ----------------------------------------
+    SetStatusText(wxString::Format(Strings::FramePlayer::STATUS_ADDING_FILES_WITH_COUNT, static_cast<int>(tasks.size())), 2);
+
+    const unsigned int workerCount = static_cast<unsigned int>(std::max(1, _app.currentSettings->GetOption(Settings::AppSettings::ID::MaxParserThreads)->GetValueAsInt()));
+    _parsePool.Start(std::move(tasks), workerCount, _sidDatabase, _stilInfo, _app.GetPlaybackInfo());
+
+    _timerBatchApply->Start(BATCH_APPLY_TIMER_INTERVAL_MS);
+    DoBatchApplyParsedSongs(); // Apply whatever's already available immediately (e.g. small playlists may finish parsing before the first timer tick even fires), rather than waiting a full tick.
+}
+
+void FramePlayer::DoBatchApplyParsedSongs()
+{
+    const size_t totalFiles = _parsePool.GetTotalCount();
+
+    // First pass: gather this tick's chunk of already-parsed, in-order results as plain data, without touching the model yet.
+    std::vector<std::unique_ptr<ParsedSongResult>> pendingResults;
+    std::vector<UIElements::Playlist::MainSongData> pendingMainSongs;
+    pendingResults.reserve(BATCH_APPLY_MAX_PER_TICK);
+    pendingMainSongs.reserve(BATCH_APPLY_MAX_PER_TICK);
+
+    int consideredThisTick = 0;
+    while (consideredThisTick < BATCH_APPLY_MAX_PER_TICK && _loadNextApplyIndex < totalFiles)
+    {
+        std::unique_ptr<ParsedSongResult> result = _parsePool.TryTakeResult(_loadNextApplyIndex);
+        if (result == nullptr)
+        {
+            break; // The next file (in original order) isn't parsed yet - wait for a later tick rather than applying out of order.
+        }
+
+        ++_loadNextApplyIndex;
+        ++consideredThisTick;
+
+        if (result->tuneIsValid)
+        {
+            UIElements::Playlist::MainSongData songData;
+            songData.title = wxString::FromUTF8(result->title);
+            songData.filepath = wxString::FromUTF8(result->filepath);
+            songData.defaultSubsong = result->defaultSubsong;
+            songData.duration = result->duration;
+            songData.hvscPath = wxString::FromUTF8(result->hvscPath);
+            songData.md5 = result->md5;
+            songData.author = wxString::FromUTF8(result->author);
+            songData.copyright = wxString::FromUTF8(result->copyright);
+            songData.romRequirement = result->romRequirement;
+            songData.playable = result->playable;
+            songData.musCompanionStrFilePath = wxString::FromUTF8(result->musCompanionStrFilePath);
+
+            pendingMainSongs.emplace_back(std::move(songData));
+            pendingResults.emplace_back(std::move(result));
+        }
+    }
+
+    // Bulk-insert this tick's main songs via a single model-change notification (see Playlist::AddMainSongs for why this matters at scale: repeated single AddMainSong() calls are each O(current top-level song count)).
+    const std::vector<PlaylistTreeModelNode*> newNodes = _ui->treePlaylist->AddMainSongs(pendingMainSongs);
+
+    // Second pass: gather subsongs for every song in this tick that has any, as plain data, without attaching them yet.
+    std::vector<UIElements::Playlist::SubsongBatchEntry> subsongBatch;
+    for (size_t i = 0; i < newNodes.size(); ++i)
+    {
+        const ParsedSongResult& result = *pendingResults[i];
+        if (result.subsongDurations.empty())
+        {
+            continue;
+        }
+
+        UIElements::Playlist::SubsongBatchEntry entry;
+        entry.parent = newNodes[i];
+        entry.durations = result.subsongDurations;
+        entry.titles.reserve(result.subsongTitles.size());
+        for (const std::string& subsongTitleUtf8 : result.subsongTitles)
+        {
+            entry.titles.emplace_back(wxString::FromUTF8(subsongTitleUtf8));
+        }
+
+        subsongBatch.emplace_back(std::move(entry));
+    }
+
+    // Bulk-attach this tick's subsongs via a single Before/AfterReset cycle for the whole batch (see Playlist::AddSubsongsBatch for why this matters at scale: on wxGTK, each individual AddSubsongs() call's Before/AfterReset bracket is a full model reset costing O(current total playlist size), not just O(that song's own subsongs)).
+    _ui->treePlaylist->AddSubsongsBatch(subsongBatch);
+
+    // Third pass: per-song post-processing (tags, auto-play) now that every song in this tick has its subsongs (if any) already attached. None of this touches the top-level list structure - SetItemTag() only ever affects a single item's value - so it stays cheap regardless of overall playlist size.
+    for (size_t i = 0; i < newNodes.size(); ++i)
+    {
+        PlaylistTreeModelNode& mainSongNodeNew = *newNodes[i];
+        const ParsedSongResult& result = *pendingResults[i];
+
+        if (result.playable)
+        {
+            ++_loadPlayableTunesCount;
+        }
+
+        if (!result.subsongDurations.empty() && !result.musCompanionStrFilePath.empty()) // MUS+STR tune
+        {
+            _ui->treePlaylist->SetItemTag(mainSongNodeNew.GetSubsong(2), PlaylistTreeModelNode::ItemTag::MUS_StandaloneMus, {});
+            _ui->treePlaylist->SetItemTag(mainSongNodeNew.GetSubsong(3), PlaylistTreeModelNode::ItemTag::MUS_StandaloneStr, {});
+        }
+
+        // One tune (with any subsongs) added -----------------
+
+        if (result.playable && _loadEnabledShortSongSkip) // Tag short songs
+        {
+            UpdateIgnoredSong(mainSongNodeNew);
+        }
+        else // Apply Normal tag and ROM requirement icons/styling
+        {
+            _ui->treePlaylist->SetItemTag(mainSongNodeNew, PlaylistTreeModelNode::ItemTag::Normal, true);
+        }
+
+        // Auto-play
+        if (_loadShouldAutoPlay)
+        {
+            const PlaylistTreeModelNode* subsongItemData = _ui->treePlaylist->GetEffectiveInitialSubsong(mainSongNodeNew);
+            if (subsongItemData != nullptr) // Can be nullptr if the main song is not playable (e.g., missing ROM).
+            {
+                _loadShouldAutoPlay = subsongItemData->GetTag() != PlaylistTreeModelNode::ItemTag::Normal || !TryPlayPlaylistItem(mainSongNodeNew);
+            }
+        }
+
+        if (_loadPlayableTunesCount == 2)
+        {
+            UpdateUiState(); // Simply to enable the "next song" button immediately while still adding lots of files.
+        }
+    }
+
+    if (_exitingApplication || !_addingFilesToPlaylist) // In case the user clicked Close (or cleared the playlist) while adding lots of files.
+    {
+        AbortPlaylistLoad();
+        return;
+    }
+
+    const bool finished = (_loadNextApplyIndex >= totalFiles);
+
+    // Progress UI (status text percentage + UpdatePlaylistPositionLabel()) is throttled to a fixed wall-clock cadence rather than updated on every tick.
+    // Reminder: UpdatePlaylistPositionLabel() (when a song is already playing, e.g. via auto-play) sums durations across every song currently in the playlist - an O(current song count) scan. The original synchronous loop already throttled its equivalent status/label updates (roughly once per 100 files) for exactly this reason; doing it unconditionally per tick here made it run thousands of times against an ever-growing tens-of-thousands-strong list, which (compounded with the app's own independent, similarly-frequent playback-refresh timer once auto-play kicks in) is expensive enough on its own to look like another freeze, even with the O(N^2) top-level-insertion bug (see Playlist::AddMainSongs) already fixed.
+    const std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    if (finished || now - _loadLastProgressUiUpdate >= std::chrono::milliseconds(250))
+    {
+        _loadLastProgressUiUpdate = now;
+
+        if (totalFiles > 0)
+        {
+            const wxString textAddingFilesWithCount = wxString::Format(Strings::FramePlayer::STATUS_ADDING_FILES_WITH_COUNT, static_cast<int>(totalFiles));
+            const int currentPercentage = static_cast<int>((static_cast<float>(_loadNextApplyIndex) / static_cast<float>(totalFiles)) * 100.0f);
+            SetStatusText(wxString::Format("%s (%i%%)", textAddingFilesWithCount, currentPercentage), 2);
+        }
+
+        UpdatePlaylistPositionLabel();
+    }
+
+    if (finished)
+    {
+        _timerBatchApply->Stop();
+        OnPlaylistLoadFinished();
+    }
+}
+
+void FramePlayer::OnPlaylistLoadFinished()
+{
     if (!_enqueuedFiles.IsEmpty())
     {
         wxArrayString moreFiles(_enqueuedFiles);
@@ -348,6 +342,21 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
         _addingFilesToPlaylist = false;
         PadColumnsWidth();
     }
+}
+
+void FramePlayer::AbortPlaylistLoad()
+{
+    if (_timerBatchApply != nullptr)
+    {
+        _timerBatchApply->Stop();
+    }
+
+    _parsePool.Abort();
+}
+
+void FramePlayer::OnTimerBatchApply(wxTimerEvent& WXUNUSED(evt))
+{
+    DoBatchApplyParsedSongs();
 }
 
 void FramePlayer::PadColumnsWidth()
@@ -430,13 +439,3 @@ long FramePlayer::GetEffectiveSongDuration(const PlaylistTreeModelNode& node) co
     return effectiveDuration;
 }
 
-Songlengths::HvscInfo FramePlayer::TryGetHvscInfo(const char* md5, int subsong) const
-{
-    if (!_sidDatabase.IsLoaded())
-    {
-        //throw std::runtime_error("Database wasn't loaded!");
-        return Songlengths::HvscInfo(); // Dummy
-    }
-
-    return _sidDatabase.GetHvscInfo(md5, subsong);
-}

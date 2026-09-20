@@ -22,6 +22,9 @@
 #include "../UIElements/CompositeSeekBar.h"
 #include "../UIElements/RepeatModeButton.h"
 
+#include <algorithm>
+#include <thread>
+
 namespace Settings
 {
 	static const bool DEFAULT = true;
@@ -57,6 +60,7 @@ namespace Settings
 			static constexpr const char* const SkipShorter = "SkipShorter";
 			static constexpr const char* const PopSilencer = "PopSilencer";
 			static constexpr const char* const DragDropMode = "DragDropMode";
+			static constexpr const char* const MaxParserThreads = "MaxParserThreads";
 
 			static constexpr const char* const RepeatMode = "RepeatMode";
 			static constexpr const char* const RepeatModeIncludeSubsongs = "RepeatModeIncludeSubsongs";
@@ -198,6 +202,7 @@ namespace Settings
 				DefaultOption(ID::SkipShorter, 0),
 				DefaultOption(ID::PopSilencer, 100),
 				DefaultOption(ID::DragDropMode, static_cast<int>(DragDropMode::Dual)),
+				DefaultOption(ID::MaxParserThreads, static_cast<int>(std::clamp(std::thread::hardware_concurrency(), 1u, 8u))), // Used when adding files/folders to the playlist (e.g. a big HVSC drop) - see SidFileParsePool.
 
 				DefaultOption(ID::SystemTheme, static_cast<int>(SystemTheme::ForceLight)), // TODO: make it default to Auto once this wxWidgets' feature is out of beta.
 				DefaultOption(ID::SelectionFollowsPlayback, true),
