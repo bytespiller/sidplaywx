@@ -1,6 +1,6 @@
 # <img src="../assets/screenshots/composite_spwx_title.png?raw=true"/>
 
-The **sidplaywx** is a GUI player for Commodore 64 SID chip tunes aiming to provide a modern & comfortable SID tune playback experience on the PC.
+The **sidplaywx** is a GUI player for Commodore 64 SID chip tunes aiming to provide a feature-rich & intuitive SID tune playback experience on the PC.
 
 The current alpha version is fully usable, supporting QoL features like seeking, drag & drop, unicode paths, DPI awareness and much more.
 
@@ -31,12 +31,14 @@ The current version of the sidplaywx is 0.x.x (alpha), so in addition to bugfixe
 
 ## Alternatives
 Some alternatives to sidplaywx for playing the SID tunes I've tried and liked are:
-* Windows: foobar2000 + foo_sid plugin
-* Linux: DeaDBeeF player (note: it uses older/no longer maintained libsidplay2)
-* Mac: I don't have a Mac so I haven't tried it, but this looks great: https://github.com/Alexco500/sidplay5
+* Windows: ultraSID, BZR2, Phosphor, foobar2000 + foo_sid plugin
+* Linux: ultraSID, BZR2, DeaDBeeF player (note: it uses older/no longer maintained libsidplay2)
+* Mac: I don't have a Mac so I haven't tried it, but this looks great: https://github.com/Alexco500/sidplay5. Also ultraSID is available for Mac as well.
 
 ## Contributing, ideas, comments, issues
 If you have an idea or a comment, feel free to post it in the [Discussions](https://github.com/bytespiller/sidplaywx/discussions). Issues can be reported [here](https://github.com/bytespiller/sidplaywx/issues). There is also an email address provided in the application's Help > About box.
+
+If you intend to submit a PR, please see the [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
 ## FAQ
 * Where can I get SID tunes?
