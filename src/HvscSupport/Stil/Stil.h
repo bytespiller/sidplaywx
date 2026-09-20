@@ -21,6 +21,7 @@
 #include "Common.h"
 #include <filesystem>
 #include <fstream>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -58,10 +59,13 @@ public:
 
 	bool IsLoaded() const;
 
+	/// @brief Thread-safe: opens its own local file stream per call, so it can be called concurrently (e.g., from multiple background parser threads and/or the GUI thread) and safely alongside TryLoad/Unload.
 	Info Get(const std::string& tuneHvscPath);
 
 private:
+	// Guards _stilFilepath and _hvscPathsIndex (both replaced wholesale by Unload()/TryLoad(), e.g. when the user changes the STIL path in Preferences while a background parse is in flight).
+	// Only the index lookup (fast) happens under the lock; the actual file I/O in Get() happens afterwards, unlocked, on a call-local stream.
+	mutable std::mutex _dataMutex;
 	std::filesystem::path _stilFilepath;
-	std::ifstream _stilDataStream;
 	HvscPathsIndex _hvscPathsIndex;
 };

@@ -112,12 +112,14 @@ bool Stil::TryLoad(const std::filesystem::path& stilFilepath)
 {
 	Unload();
 	std::string stilVersion;
+	HvscPathsIndex newIndex;
+	newIndex.rehash(0);
 
-	// Lock & load the STIL.txt file
+	// Lock & load the STIL.txt file (a call-local stream: TryLoad is only ever invoked from the GUI thread, one load at a time, so no locking is needed here).
+	std::ifstream stilDataStream(stilFilepath, std::ios::binary);
 	{
-		_stilDataStream.open(stilFilepath, std::ios::binary);
-		_stilDataStream.clear();
-		if (!_stilDataStream.good())
+		stilDataStream.clear();
+		if (!stilDataStream.good())
 		{
 			return false;
 		}
@@ -126,7 +128,7 @@ bool Stil::TryLoad(const std::filesystem::path& stilFilepath)
 		{
 			std::string line;
 			const size_t len = STIL_VERSION_PREFIX.length();
-			while (std::getline(_stilDataStream, line))
+			while (std::getline(stilDataStream, line))
 			{
 				if (line.substr(0, len) == STIL_VERSION_PREFIX)
 				{
@@ -144,59 +146,81 @@ bool Stil::TryLoad(const std::filesystem::path& stilFilepath)
 				return false; // Unknown STIL.txt version. Possibly corrupted file or not STIL.txt?
 			}
 
-			_stilDataStream.clear(); // Rewind & reset the stream.
+			stilDataStream.clear(); // Rewind & reset the stream.
 		}
 	}
 
 	// Load the pre-index file if valid
-	if (!PreIndex::TryLoadFromCache(stilVersion, _hvscPathsIndex))
+	if (!PreIndex::TryLoadFromCache(stilVersion, newIndex))
 	{
 		// Pre-index the positions of STIL tunes, so when we want to fetch data for any tune later, we can do so without having to parse the entire file again
-		PreIndex::RebuildIndexAndCache(stilVersion, _hvscPathsIndex, _stilDataStream);
+		PreIndex::RebuildIndexAndCache(stilVersion, newIndex, stilDataStream);
 	}
 
-	_stilFilepath = stilFilepath;
+	{
+		const std::lock_guard<std::mutex> lock(_dataMutex);
+		_hvscPathsIndex = std::move(newIndex);
+		_stilFilepath = stilFilepath;
+	}
 
 	return IsLoaded();
 }
 
 void Stil::Unload()
 {
+	const std::lock_guard<std::mutex> lock(_dataMutex);
 	_hvscPathsIndex.clear();
 	_stilFilepath.clear();
-	_stilDataStream.close();
 }
 
 bool Stil::IsLoaded() const
 {
+	const std::lock_guard<std::mutex> lock(_dataMutex);
 	return !_hvscPathsIndex.empty();
 }
 
 Stil::Info Stil::Get(const std::string& tuneHvscPath)
 {
 	Stil::Info data;
-	if (!IsLoaded())
-	{
-		return data; // STIL not loaded.
-	}
 
 	if (tuneHvscPath.empty())
 	{
 		return data; // Unknown SID tune.
 	}
 
-	// Parse info
+	// Look up the tune's byte offset and grab a local copy of the STIL file path, holding the lock only for this fast, bounded work.
+	// This is what makes Get() safe to call concurrently (from multiple background parser threads and/or the GUI thread) and safely alongside a Preferences-triggered Unload()/TryLoad() reload.
+	std::filesystem::path stilFilepath;
+	int offset = -1;
 	{
-		const auto& itStart = _hvscPathsIndex.find(tuneHvscPath);
-		if (itStart != _hvscPathsIndex.end())
+		const std::lock_guard<std::mutex> lock(_dataMutex);
+
+		if (_hvscPathsIndex.empty())
 		{
-			_stilDataStream.clear();
-			_stilDataStream.seekg(itStart->second);
+			return data; // STIL not loaded.
+		}
+
+		const auto& itStart = _hvscPathsIndex.find(tuneHvscPath);
+		if (itStart == _hvscPathsIndex.end())
+		{
+			return data; // No STIL entry for this tune.
+		}
+
+		offset = itStart->second;
+		stilFilepath = _stilFilepath;
+	}
+
+	// Parse info (using a call-local stream, unlocked, so concurrent Get() calls never contend with each other, only with the brief index lookup above).
+	{
+		std::ifstream stilDataStream(stilFilepath, std::ios::binary);
+		if (stilDataStream.good())
+		{
+			stilDataStream.seekg(offset);
 
 			int subsongKey = 1; // Reminder: this is not index, but an unordered dict key!
 			std::string line;
 
-			while (std::getline(_stilDataStream, line))
+			while (std::getline(stilDataStream, line))
 			{
 				ClipCarriageReturn(line); // Reminder: any existing "line" iterators are invalid now.
 
