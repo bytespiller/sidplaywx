@@ -77,7 +77,7 @@ void PreIndex::RebuildIndexAndCache(const std::string& stilVersion, HvscPathsInd
 		std::string line;
 		while (std::getline(stilDataStream, line))
 		{
-			if (line.front() == '/')
+			if (!line.empty() && line.front() == '/') // Reminder: STIL.txt entries are blank-line-separated, so line can legitimately be empty here.
 			{
 				ClipCarriageReturn(line); // Reminder: any existing "line" iterators are invalid now.
 				pathsIndex[line] = stilDataStream.tellg();
