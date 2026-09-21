@@ -41,13 +41,12 @@
 
 #include <wx/aboutdlg.h>
 #include <wx/display.h>
+#include <wx/webrequest.h>
 
 #ifndef WIN32
 #include <wx/tooltip.h>
 #include "../../../dev/icon_src/sidplaywx_icon_64x64.xpm" // sidplaywx_icon_64px[_xpm]
 #endif
-
-#include <wx/webrequest.h>
 
 using RepeatMode = UIElements::RepeatModeButton::RepeatMode;
 
@@ -406,7 +405,7 @@ void FramePlayer::DeferredInit()
     // Show/hide STIL info
     EnableStilInfoDisplay(_app.currentSettings->GetOption(Settings::AppSettings::ID::StilInfoEnabled)->GetValueAsBool());
 
-    // Media keys (MSW) / MPRIS (Linux) support    
+    // Media keys (MSW) / MPRIS (Linux) support
     if (_app.currentSettings->GetOption(Settings::AppSettings::ID::MediaKeys)->GetValueAsBool())
     {
         TryRegisterMediaKeys();
@@ -420,7 +419,7 @@ void FramePlayer::DeferredInit()
             TryRegisterMediaKeys();
         }
     });
-    
+
 #ifdef WIN32
     Bind(wxEVT_HOTKEY, &FramePlayer::OnGlobalHotkey, this);
 
@@ -517,7 +516,7 @@ bool FramePlayer::TryRegisterMediaKeys()
             "audio/mpegurl", // m3u8 playlist
             "audio/x-mpegurl" // m3u8 playlist (fallback)
         });
-        
+
         _mpris->on_quit([&] { CloseApplication(); });
 
         _mpris->on_next([&] { OnGlobalHotkey(WXK_MEDIA_NEXT_TRACK); });
@@ -547,9 +546,9 @@ bool FramePlayer::TryRegisterMediaKeys()
         });
 
         _mpris->on_stop([&] { OnGlobalHotkey(WXK_MEDIA_STOP); });
-        
+
         _mpris->on_set_position([&](int64_t microsec) { _app.SeekTo(microsec / 1000); });
-        
+
         // TODO: on_seek would be neat too (seek by received offset, need to clamp)
         // TODO: on_open_uri (accept and strip the file:// prefix only)
 
@@ -569,7 +568,7 @@ bool FramePlayer::TryRegisterMediaKeys()
     {
         _ui->infoBarMediaKeysTaken->ShowMessage(Strings::FramePlayer::MSG_MEDIA_KEYS_TAKEN);
     }
-    
+
     return _mpris != nullptr;
 #endif
 }
@@ -832,7 +831,7 @@ void FramePlayer::DisplayAboutBox()
     aboutInfo.SetName(Strings::FramePlayer::WINDOW_TITLE);
     aboutInfo.SetVersion(Strings::APP_VERSION_TAG); // Reminder: don't forget to increase.
     aboutInfo.SetDescription(Strings::About::DESCRIPTION);
-    aboutInfo.SetCopyright(L"(C) 2021-2026 Jasmin Rutić"); // Reminder: don't forget to bump.
+    aboutInfo.SetCopyright(L"(C) 2021-2026 Jasmin Rutić"); // Reminder: don't forget to bump the copyright year.
     aboutInfo.SetWebSite("https://github.com/bytespiller/sidplaywx");
 
     aboutInfo.SetLicense(Strings::About::LICENSE);
@@ -840,6 +839,10 @@ void FramePlayer::DisplayAboutBox()
     aboutInfo.AddDeveloper(wxString(Strings::About::DEVELOPER_LIBRARIES) + "\n" +
                            wxString::Format("%s %s (libresidfp %i.%i.%i)", _app.GetPlaybackInfo().GetEngineInfo().name(), _app.GetPlaybackInfo().GetEngineInfo().version(), LIBRESIDFP_VERSION_MAJ, LIBRESIDFP_VERSION_MIN, LIBRESIDFP_VERSION_LEV) + "\n" + // libsidplayfp
                            wxString(Pa_GetVersionInfo()->versionText) + "\n" + // PortAudio
+#ifdef __WXGTK__
+                            wxString("mpris_server.hpp commit fd7f052fef (codeberg.org/chrg/mpris-server)") + "\n" +
+                            wxString::Format("sdbus-c++ %s", wxString(SDBUS_CPP_VERSION)) + "\n" +
+#endif
                            wxVERSION_STRING // wxWidgets
                           );
 

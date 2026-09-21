@@ -808,10 +808,12 @@ void FramePlayer::OnSeekingCeased()
         UpdateUiState();
     }
 
+#ifdef __WXGTK__
     if (_mpris)
     {
         _mpris->send_seeked_signal(_app.GetPlaybackInfo().GetTime() * 1000);
     }
+#endif
 }
 
 void FramePlayer::OnRepeatModeExtraOptionToggled(ExtraOptionId extraOptionId)

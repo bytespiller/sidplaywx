@@ -57,7 +57,7 @@ FrameTuneInfo::FrameTuneInfo(wxWindow* parent, const wxString& title, const wxPo
 	{
 		if (_playbackInfo.IsValidSongLoaded())
 		{
-			const wxString& dir = wxPathOnly(wxString::FromUTF8(_playbackInfo.GetCurrentTuneFilePath()));
+			const wxString& dir = wxPathOnly(wxString::FromUTF8(_playbackInfo.GetCurrentTuneFilePath().generic_string().data()));
 			if (!dir.IsEmpty() && !wxLaunchDefaultApplication(dir))
 			{
 				wxMessageBox(dir, Strings::Common::GENERIC_NOT_FOUND, wxICON_WARNING);
@@ -119,7 +119,7 @@ void FrameTuneInfo::UpdateInfo(const PlaylistTreeModelNode* const node)
 	SetPropertyValue(Strings::TuneInfo::TUNE_RELEASED, _playbackInfo.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released));
 	SetPropertyValue(Strings::TuneInfo::TUNE_MUS_COMMENT, _playbackInfo.GetCurrentTuneMusComments());
 
-	_ui->propertyGrid->SetPropertyValue(Strings::TuneInfo::TUNE_PATH_FILE, wxString::FromUTF8(_playbackInfo.GetCurrentTuneFilePath()));
+	_ui->propertyGrid->SetPropertyValue(Strings::TuneInfo::TUNE_PATH_FILE, wxString::FromUTF8(_playbackInfo.GetCurrentTuneFilePath().generic_string().data()));
 	_ui->propertyGrid->GetProperty(Strings::TuneInfo::TUNE_PATH_FILE)->SetHelpString(_ui->propertyGrid->GetPropertyValue(Strings::TuneInfo::TUNE_PATH_FILE));
 
 	// Technical

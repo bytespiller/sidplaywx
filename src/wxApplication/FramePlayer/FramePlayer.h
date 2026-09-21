@@ -23,11 +23,10 @@
     #include <wx/wx.h>
 #endif
 
-#ifdef WIN32
-#define MPRIS_SERVER_NO_IMPL
+#ifdef __WXGTK__
+#include "../../../deps/include/linux/mpris-server/mpris_server.hpp"
 #endif
 
-#include "../../../deps/include/linux/mpris-server/mpris_server.hpp"
 
 #include "ElementsPlayer.h"
 #include "../Theme/ThemeManager.h"
@@ -260,5 +259,7 @@ private:
     wxArrayString _enqueuedFiles;
     bool _addingFilesToPlaylist = false;
 
+#ifdef __WXGTK__
     std::unique_ptr<mpris::Server> _mpris = nullptr;
+#endif
 };
