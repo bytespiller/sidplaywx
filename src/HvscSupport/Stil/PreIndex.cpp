@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2024-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2024-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #include "../../wxApplication/Helpers/HelpersWx.h"
 #include <filesystem>
 
-static const std::filesystem::path PRE_INDEX_FILE_PATH(Helpers::Wx::Files::GetConfigFilePath("stil.index").ToStdWstring());
+static const std::filesystem::path PRE_INDEX_FILE_PATH(Helpers::Wx::Files::GetConfigFilePath("stil.index").utf8_string());
 static constexpr const char* PRE_INDEX_FORMAT_VERSION = "1";
 static constexpr const char PRE_INDEX_NEWLINE = '\n';
 

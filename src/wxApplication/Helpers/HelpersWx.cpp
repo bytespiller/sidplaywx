@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,7 +119,7 @@ namespace Helpers
 					return relPath;
 				}
 
-				wxString absPath(std::filesystem::weakly_canonical(relPath.ToStdWstring()));
+				wxString absPath(std::filesystem::weakly_canonical(relPath.utf8_string()));
 				return (absPath.empty()) ? relPath : absPath; // If it doesn't exist, return the original path unchanged.
 			}
 
@@ -130,7 +130,7 @@ namespace Helpers
 					return absPath;
 				}
 
-				wxString relPath(std::filesystem::relative(absPath.ToStdWstring()));
+				wxString relPath(std::filesystem::relative(absPath.utf8_string()));
 				return (relPath.empty()) ? absPath : relPath; // If it doesn't exist, return the original path unchanged.
 			}
 

@@ -175,10 +175,10 @@ bool MyApp::OnInit()
         if (initSuccess)
         {
             // Load ROMs
-            const wxString& romPathKernal = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomKernalPath)->GetValueAsString().ToStdWstring());
-            const wxString& romPathBasic = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomBasicPath)->GetValueAsString().ToStdWstring());
-            const wxString& romPathChargen = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomChargenPath)->GetValueAsString().ToStdWstring());
-            const RomUtil::RomStatus& romStatus = _playback->TrySetRoms(romPathKernal.ToStdWstring(), romPathBasic.ToStdWstring(), romPathChargen.ToStdWstring());
+            const wxString& romPathKernal = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomKernalPath)->GetValueAsString());
+            const wxString& romPathBasic = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomBasicPath)->GetValueAsString());
+            const wxString& romPathChargen = Helpers::Wx::Files::AsAbsolutePathIfPossible(currentSettings->GetOption(Settings::AppSettings::ID::RomChargenPath)->GetValueAsString());
+            const RomUtil::RomStatus& romStatus = _playback->TrySetRoms(romPathKernal.utf8_string(), romPathBasic.utf8_string(), romPathChargen.utf8_string());
 
             if (!romPathKernal.empty() && !romStatus.IsValidated(RomUtil::RomType::Kernal))
             {
@@ -320,7 +320,7 @@ void MyApp::Play(const wxString& filename, unsigned int subsong, int preRenderDu
             bufferHolder->size[1] = temp->size[0];
         }
 
-        status = (bufferHolder == nullptr) ? PlaybackController::PlaybackAttemptStatus::InputError : _playback->TryPlayFromBuffer(filename.ToStdWstring(), bufferHolder, subsong, preRenderDurationMs);
+        status = (bufferHolder == nullptr) ? PlaybackController::PlaybackAttemptStatus::InputError : _playback->TryPlayFromBuffer(filename.utf8_string(), bufferHolder, subsong, preRenderDurationMs);
     }
 
     switch (status)

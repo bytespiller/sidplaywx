@@ -1,6 +1,6 @@
 /*
  * This file is part of sidplaywx, a GUI player for Commodore 64 SID music files.
- * Copyright (C) 2021-2025 Jasmin Rutic (bytespiller@gmail.com)
+ * Copyright (C) 2021-2026 Jasmin Rutic (bytespiller@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ bool FramePlayer::TryPlayPlaylistItem(const PlaylistTreeModelNode& activatedNode
     // Trigger playback
     wxString targetFilepath = nodeToPlay->filepath;
     const int preRenderDurationMs = (_app.currentSettings->GetOption(Settings::AppSettings::ID::PreRenderEnabled)->GetValueAsBool()) ? GetEffectiveSongDuration(*nodeToPlay) : 0;
-    const bool sameTune = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == targetFilepath.ToStdWstring();
+    const bool sameTune = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == targetFilepath.utf8_string();
     if (sameTune && nodeToPlay->musCompanionStrFilePath.IsEmpty())
     {
         _app.PlaySubsong(subsong, preRenderDurationMs); // Switch an already-loaded tune to subsong.
@@ -79,7 +79,7 @@ bool FramePlayer::TryPlayPlaylistItem(const PlaylistTreeModelNode& activatedNode
     }
 
     // Highlight the item in the playlist if the playback started successfully (file exists etc.)
-    const bool fileLoadedSuccessfully = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == targetFilepath.ToStdWstring();
+    const bool fileLoadedSuccessfully = _app.GetPlaybackInfo().GetCurrentTuneFilePath() == targetFilepath.utf8_string();
     const bool highlightable = fileLoadedSuccessfully && _ui->treePlaylist->TrySetActiveSong(*nodeToPlay, _app.currentSettings->GetOption(Settings::AppSettings::ID::AutoExpandSubsongs)->GetValueAsBool());
     UpdateUiState();
 

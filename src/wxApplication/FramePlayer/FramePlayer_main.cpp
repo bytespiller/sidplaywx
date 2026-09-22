@@ -172,7 +172,7 @@ void FramePlayer::InitSonglengthsDatabase()
             continue;
         }
 
-        success = _sidDatabase.TryLoad(path.GetFullPath().ToStdWstring());
+        success = _sidDatabase.TryLoad(path.GetFullPath().utf8_string());
         if (success)
         {
             break;
@@ -239,7 +239,7 @@ void FramePlayer::InitStilInfo()
         }
 
         GetStatusBar()->PushStatusText(Strings::FramePlayer::STATUS_LOADING_STIL, 0);
-        success = _stilInfo.TryLoad(path.GetFullPath().ToStdWstring());
+        success = _stilInfo.TryLoad(path.GetFullPath().utf8_string());
         GetStatusBar()->PopStatusText(0);
 
         if (success)
