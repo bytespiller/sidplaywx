@@ -507,7 +507,8 @@ bool FramePlayer::TryRegisterMediaKeys()
 #else
     if (_mpris = mpris::Server::make("sidplaywx")) // Reminder: don't use Strings::FramePlayer::WINDOW_TITLE due to " (debug)" being invalid name.
     {
-        _mpris->set_identity(Strings::About::DESCRIPTION);
+        _mpris->set_identity(_app.GetAppDisplayName().ToStdString());
+        _mpris->set_desktop_entry("org.bytespiller.sidplaywx"); // TODO: remove the org prefix from the desktop file
 
         _mpris->set_supported_uri_schemes({ "file" });
         _mpris->set_supported_mime_types
@@ -517,11 +518,11 @@ bool FramePlayer::TryRegisterMediaKeys()
             "audio/x-mpegurl" // m3u8 playlist (fallback)
         });
 
-        _mpris->on_quit([&] { CloseApplication(); });
+        _mpris->on_quit([&] { CallAfter([&]{ CloseApplication(); }); });
 
-        _mpris->on_next([&] { OnGlobalHotkey(WXK_MEDIA_NEXT_TRACK); });
-        _mpris->on_previous([&] { OnGlobalHotkey(WXK_MEDIA_PREV_TRACK); });
-        _mpris->on_play_pause([&] { OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE); });
+        _mpris->on_next([&] { CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_NEXT_TRACK); }); });
+        _mpris->on_previous([&] { CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_PREV_TRACK); }); });
+        _mpris->on_play_pause([&] { CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE); }); });
         _mpris->on_play([&]
         {
             switch (_app.GetPlaybackInfo().GetState())
@@ -529,7 +530,7 @@ bool FramePlayer::TryRegisterMediaKeys()
                 case PlaybackController::State::Stopped:
                 case PlaybackController::State::Paused:
                 case PlaybackController::State::Seeking:
-                    OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE);
+                    CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE); });
                     break;
             }
         });
@@ -540,27 +541,28 @@ bool FramePlayer::TryRegisterMediaKeys()
             {
                 case PlaybackController::State::Playing:
                 case PlaybackController::State::Seeking:
-                    OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE);
+                    CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_PLAY_PAUSE); });
                     break;
             }
         });
 
-        _mpris->on_stop([&] { OnGlobalHotkey(WXK_MEDIA_STOP); });
+        _mpris->on_stop([&] { CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_STOP); }); });
 
-        _mpris->on_set_position([&](int64_t microsec) { _app.SeekTo(microsec / 1000); });
-
+        _mpris->on_set_position([&](int64_t microsec) { CallAfter([&]{ _app.SeekTo(microsec / 1000); }); });
         // TODO: on_seek would be neat too (seek by received offset, need to clamp)
-        // TODO: on_open_uri (accept and strip the file:// prefix only)
 
-        _mpris->on_loop_status_changed([&] (mpris::LoopStatus status) { });
-        _mpris->on_rate_changed([&] (double rate) { });
-        _mpris->on_shuffle_changed([&] (bool shuffle) { });
-        _mpris->on_volume_changed([&] (double vol) { });
+        _mpris->on_open_uri([&](std::string_view uri)
+        {
+            const wxString path = wxFileName::URLToFileName(wxString::FromUTF8(uri.data(), uri.size())).GetFullPath();
+            CallAfter([&, path]{ DiscoverFilesAndSendToPlaylist({path}); });
+        });
 
+        _mpris->on_loop_status_changed([&] (mpris::LoopStatus status) { }); // TODO (dummy must exist)
+        _mpris->on_shuffle_changed([&] (bool shuffle) { }); // TODO (dummy must exist)
+        _mpris->on_volume_changed([&] (double vol) { }); // TODO (dummy must exist)
+        _mpris->on_rate_changed([&] (double rate) { }); // TODO (dummy must exist)
         /*_mpris->set_minimum_rate(0.5);
         _mpris->set_maximum_rate(2.0);*/
-
-        // TODO: set metadata as well (elsewhere)
 
         _mpris->start_loop_async();
     }
