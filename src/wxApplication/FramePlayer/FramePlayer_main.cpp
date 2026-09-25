@@ -549,7 +549,19 @@ bool FramePlayer::TryRegisterMediaKeys()
         _mpris->on_stop([&] { CallAfter([&]{ OnGlobalHotkey(WXK_MEDIA_STOP); }); });
 
         _mpris->on_set_position([&](int64_t microsec) { CallAfter([&]{ _app.SeekTo(microsec / 1000); }); });
-        // TODO: on_seek would be neat too (seek by received offset, need to clamp)
+        /*_mpris->on_seek([&](int64_t microsec)
+        {
+            // TODO: find a way to emit D-BUS position to be the before-seek current one (send_seeked_signal doesn't work here for this, nothing happens)
+            CallAfter([&]
+            {
+                const PlaybackController::State state = _app.GetPlaybackInfo().GetState();
+                if (state == PlaybackController::State::Stopped || state == PlaybackController::State::Undefined)
+                {
+                    return;
+                }
+                _app.SeekTo(_app.GetPlaybackInfo().GetTime() + (microsec / 1000));
+            }); 
+        });*/
 
         _mpris->on_open_uri([&](std::string_view uri)
         {
@@ -557,10 +569,10 @@ bool FramePlayer::TryRegisterMediaKeys()
             CallAfter([&, path]{ DiscoverFilesAndSendToPlaylist({path}); });
         });
 
-        _mpris->on_loop_status_changed([&] (mpris::LoopStatus status) { }); // TODO (dummy must exist)
-        _mpris->on_shuffle_changed([&] (bool shuffle) { }); // TODO (dummy must exist)
-        _mpris->on_volume_changed([&] (double vol) { }); // TODO (dummy must exist)
-        _mpris->on_rate_changed([&] (double rate) { }); // TODO (dummy must exist)
+        _mpris->on_loop_status_changed([&] (mpris::LoopStatus status) { }); // TODO (dummy, but also disabled in mpris_server.hpp)
+        _mpris->on_shuffle_changed([&] (bool shuffle) { }); // TODO (dummy, but also disabled in mpris_server.hpp)
+        _mpris->on_volume_changed([&] (double vol) { }); // TODO (dummy, but also disabled in mpris_server.hpp)
+        _mpris->on_rate_changed([&] (double rate) { }); // TODO (dummy, but also disabled in mpris_server.hpp)
         /*_mpris->set_minimum_rate(0.5);
         _mpris->set_maximum_rate(2.0);*/
 
@@ -582,6 +594,8 @@ void FramePlayer::UnregisterMediaKeys()
     {
         UnregisterHotKey(key);
     }
+#else
+    _mpris = nullptr;
 #endif
 }
 
@@ -842,7 +856,7 @@ void FramePlayer::DisplayAboutBox()
                            wxString::Format("%s %s (libresidfp %i.%i.%i)", _app.GetPlaybackInfo().GetEngineInfo().name(), _app.GetPlaybackInfo().GetEngineInfo().version(), LIBRESIDFP_VERSION_MAJ, LIBRESIDFP_VERSION_MIN, LIBRESIDFP_VERSION_LEV) + "\n" + // libsidplayfp
                            wxString(Pa_GetVersionInfo()->versionText) + "\n" + // PortAudio
 #ifdef __WXGTK__
-                            wxString("mpris_server.hpp commit fd7f052fef (codeberg.org/chrg/mpris-server)") + "\n" +
+                            wxString("mpris_server.hpp (codeberg.org/chrg/mpris-server)") + "\n" +
                             wxString::Format("sdbus-c++ %s", wxString(SDBUS_CPP_VERSION)) + "\n" +
 #endif
                            wxVERSION_STRING // wxWidgets

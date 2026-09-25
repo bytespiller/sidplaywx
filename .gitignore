@@ -39,8 +39,9 @@
 # Built dependencies
 /deps/include/**
 !/deps/include/**/
-!deps/include/**/*.txt
 !deps/include/**/*.hpp
+!deps/include/**/*.txt
+!deps/include/**/*.md
 
 /deps/lib/**
 !/deps/lib/**/

@@ -296,7 +296,14 @@ void FramePrefs::FillPropertyGrid()
 
             const char* SettingId = Settings::AppSettings::ID::SystemTheme;
             wxPGProperty* prop = new wxEnumProperty(Strings::Preferences::OPT_SYSTEM_THEME, SettingId, systemThemeOptions);
-            AddWrappedPropToPage(SettingId, TypeSerialized::Int, prop, *page, Effective::AfterRestart, Strings::Preferences::DESC_SYSTEM_THEME);
+
+#ifdef __WXGTK
+            const wxString FLAVOR_DESC_SYSTEM_THEME = wxString::Format("%s\n\n%s\n", Strings::Preferences::DESC_SYSTEM_THEME, Strings::Preferences::DESC_SYSTEM_THEME_LINUX_CAVEAT);
+#else
+            constexpr const char* const FLAVOR_DESC_SYSTEM_THEME = Strings::Preferences::DESC_SYSTEM_THEME;
+#endif
+            AddWrappedPropToPage(SettingId, TypeSerialized::Int, prop, *page, Effective::AfterRestart, FLAVOR_DESC_SYSTEM_THEME);
+
             const int selection = _app.currentSettings->GetOption(SettingId)->GetValueAsInt();
             prop->SetChoiceSelection(selection);
         }
@@ -442,9 +449,16 @@ void FramePrefs::FillPropertyGrid()
     page->Append(new wxPropertyCategory(Strings::Preferences::CATEGORY_APPLICATION));
     {
         AddWrappedPropToPage(Settings::AppSettings::ID::RememberPlaylist, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_REMEMBER_PLAYLIST), *page, Effective::Immediately, Strings::Preferences::DESC_REMEMBER_PLAYLIST);
-#ifdef WIN32
-        AddWrappedPropToPage(Settings::AppSettings::ID::MediaKeys, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_MEDIA_KEYS), *page, Effective::Immediately, Strings::Preferences::DESC_MEDIA_KEYS);
+
+        #ifdef WIN32
+        constexpr const char* const FLAVOR_OPT_MEDIA_KEYS = Strings::Preferences::OPT_MEDIA_KEYS_MSW;
+        constexpr const char* const FLAVOR_DESC_MEDIA_KEYS = Strings::Preferences::DESC_MEDIA_KEYS_MSW;
+#else
+        constexpr const char* const FLAVOR_OPT_MEDIA_KEYS = Strings::Preferences::OPT_MEDIA_KEYS_MPRIS;
+        constexpr const char* const FLAVOR_DESC_MEDIA_KEYS = Strings::Preferences::DESC_MEDIA_KEYS_MPRIS;
 #endif
+        AddWrappedPropToPage(Settings::AppSettings::ID::MediaKeys, TypeSerialized::Int, new wxBoolProperty(FLAVOR_OPT_MEDIA_KEYS), *page, Effective::Immediately, FLAVOR_DESC_MEDIA_KEYS);
+
         AddWrappedPropToPage(Settings::AppSettings::ID::SingleInstance, TypeSerialized::Int, new wxBoolProperty(Strings::Preferences::OPT_SINGLE_INSTANCE), *page, Effective::Immediately, Strings::Preferences::DESC_SINGLE_INSTANCE);
 
         wxString descRestoreDefaultsStr(Strings::Preferences::DESC_RESTORE_DEFAULTS);

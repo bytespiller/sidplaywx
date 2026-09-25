@@ -146,7 +146,7 @@ namespace
 
 bool MyApp::OnInit()
 {
-    wxApp::SetVendorName("bytespiller"); // Important: if this is a fork, please change this!
+    //wxApp::SetVendorName("bytespiller"); // TODO: would setting this make previous user-settings orphaned on Linux? // Important: if this is a fork, please change this!
     wxApp::SetAppName("sidplaywx");
 
     _instanceManager = std::make_unique<SingleInstanceManager>();
