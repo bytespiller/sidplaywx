@@ -1,1 +1,3 @@
 https://codeberg.org/chrg/mpris-server/
+
+// NOTE: this is not the original file, it was modified to not register some extra buttons.

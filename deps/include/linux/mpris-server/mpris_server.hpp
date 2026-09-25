@@ -1,3 +1,5 @@
+// NOTE: this is not the original file, it was modified to not register some extra buttons.
+
 #ifndef MPRIS_SERVER_HPP_INCLUDED
 #define MPRIS_SERVER_HPP_INCLUDED
 
@@ -125,8 +127,8 @@ class Server {
     void prop_changed(const std::string &interface, const std::string &name, sdbus::Variant value);
     void control_props_changed(auto&&... args);
 
-    bool can_control()     const { return bool(loop_status_changed_fn) && bool(shuffle_changed_fn)
-                                       && bool(volume_changed_fn)      && bool(stop_fn);                }
+    bool can_control()     const { return true; /*bool(loop_status_changed_fn) && bool(shuffle_changed_fn)
+                                       && bool(volume_changed_fn)      && bool(stop_fn);*/                }
     bool can_go_next()     const { return can_control() && bool(next_fn);                               }
     bool can_go_previous() const { return can_control() && bool(previous_fn);                           }
     bool can_play()        const { return can_control() && bool(play_fn)      && bool(play_pause_fn);   }
@@ -352,11 +354,11 @@ inline Server::Server(std::string_view name)
                     , sdbus::registerMethod("OpenUri")    .implementedAs(M(open_uri))                                    .withInputParamNames("Uri")
 
                     , sdbus::registerProperty("PlaybackStatus").withGetter([&] { return detail::playback_status_to_string(playback_status); })
-                    , sdbus::registerProperty("LoopStatus")    .withGetter([&] { return detail::loop_status_to_string(loop_status); }).withSetter(M(set_loop_status_external))
-                    , sdbus::registerProperty("Rate")          .withGetter([&] { return rate; }).withSetter(M(set_rate_external))
-                    , sdbus::registerProperty("Shuffle")       .withGetter([&] { return shuffle; }).withSetter(M(set_shuffle_external))
+                    //, sdbus::registerProperty("LoopStatus")    .withGetter([&] { return detail::loop_status_to_string(loop_status); }).withSetter(M(set_loop_status_external))
+                    //, sdbus::registerProperty("Rate")          .withGetter([&] { return rate; }).withSetter(M(set_rate_external))
+                    //, sdbus::registerProperty("Shuffle")       .withGetter([&] { return shuffle; }).withSetter(M(set_shuffle_external))
                     , sdbus::registerProperty("Metadata")      .withGetter([&] { return metadata; })
-                    , sdbus::registerProperty("Volume")        .withGetter([&] { return volume; }).withSetter(M(set_volume_external))
+                    //, sdbus::registerProperty("Volume")        .withGetter([&] { return volume; }).withSetter(M(set_volume_external))
                     , sdbus::registerProperty("Position")      .withGetter([&] { return position; })
                     , sdbus::registerProperty("MinimumRate")   .withGetter([&] { return minimum_rate; })
                     , sdbus::registerProperty("MaximumRate")   .withGetter([&] { return maximum_rate; })

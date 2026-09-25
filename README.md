@@ -67,7 +67,7 @@ If you intend to submit a PR, please see the [CONTRIBUTING.md](CONTRIBUTING.md) 
 ### Linux
 
 #### Prerequisites
-- GCC version with C++17 support is required (minimum I've tried is gcc-12).
+- GCC version with C++20 support is required.
 - Don't forget the `sudo apt-get update` and `sudo apt-get install build-essential` as well as `sudo apt-get install cmake`
 
 ##### (libsidplayfp)

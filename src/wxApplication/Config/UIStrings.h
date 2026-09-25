@@ -325,6 +325,7 @@ namespace Strings
 
 		inline constexpr const char* const OPT_SYSTEM_THEME("System theme");
 		inline constexpr const char* const DESC_SYSTEM_THEME("Theme to apply on app startup.");
+		inline constexpr const char* const DESC_SYSTEM_THEME_LINUX_CAVEAT("Known issue: theme override may not work on some desktop environments."); // Kubuntu
 		inline constexpr const char* const ITEM_SYSTEM_THEME_AUTO("Auto");
 		inline constexpr const char* const ITEM_SYSTEM_THEME_LIGHT("Light");
 		inline constexpr const char* const ITEM_SYSTEM_THEME_DARK("Dark");
@@ -425,8 +426,11 @@ namespace Strings
 		inline constexpr const char* const OPT_REMEMBER_PLAYLIST("Remember playlist");
 		inline constexpr const char* const DESC_REMEMBER_PLAYLIST("Restore the previous song list on app launch.");
 
-		inline constexpr const char* const OPT_MEDIA_KEYS("Use Media keys");
-		inline constexpr const char* const DESC_MEDIA_KEYS("Use the Media keys to control the playback.\nIf you don't have Media keys on your keyboard, you can use an utility such as AutoHotkey to emulate them with hotkeys of your choice.");
+		inline constexpr const char* const OPT_MEDIA_KEYS_MSW("Use Media keys");
+		inline constexpr const char* const DESC_MEDIA_KEYS_MSW("Use the Media keys to control the playback.\nIf you don't have Media keys on your keyboard, you can use an utility such as AutoHotkey to emulate them with hotkeys of your choice.");
+
+		inline constexpr const char* const OPT_MEDIA_KEYS_MPRIS("Enable MPRIS");
+		inline constexpr const char* const DESC_MEDIA_KEYS_MPRIS("System wide playback control.");
 
 		inline constexpr const char* const OPT_SINGLE_INSTANCE("Single instance");
 		inline constexpr const char* const DESC_SINGLE_INSTANCE("Do not spawn multiple instances of the app, reuse an existing instance whenever possible.");

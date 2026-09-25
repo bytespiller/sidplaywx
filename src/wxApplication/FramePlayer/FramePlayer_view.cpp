@@ -292,7 +292,7 @@ void FramePlayer::UpdatePeriodicDisplays(const uint_least32_t playbackTimeMs)
 #ifdef __WXGTK__
     if (_mpris)
     {
-        _mpris->set_position(playbackTimeMs * 1000);
+        _mpris->set_position(playbackTimeMs * 1000); // Just updates the internal value, doesn't broadcast over D-BUS here.
     }
 #endif
 
