@@ -14,9 +14,4 @@
         <category>Player</category>
         <category>GTK</category>
     </categories>
-
-    <supports>
-        <!-- the software explicitly supports running offline (but may also be able to use online features) -->
-        <internet>offline-only</internet>
-    </supports>
 </component>

@@ -6,4 +6,4 @@ Exec=sidplaywx
 Terminal=false
 Icon=sidplaywx_icon
 Type=Application
-Categories=Audio;Player;GTK;
+Categories=AudioVideo;Audio;Player;GTK;
