@@ -83,7 +83,7 @@ bool PortAudioOutput::PreInitPortAudioLibrary()
     }
 
     bool failed = LogAnyError("TryInit: Pa_Initialize", Pa_Initialize());
-    _paInitialized = !failed;
+    _paInitialized = !failed && Pa_GetDefaultOutputDevice() != paNoDevice;
     return _paInitialized;
 }
 

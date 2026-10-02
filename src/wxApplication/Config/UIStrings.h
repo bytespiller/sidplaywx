@@ -450,7 +450,7 @@ namespace Strings
 
 	namespace Error
 	{
-		inline constexpr const char* const ERR_INIT_PLAYBACK("Fatal error: failed to initialize playback subsystems.");
+		inline constexpr const char* const ERR_INIT_PLAYBACK("Error: no audio output devices detected.");
 
 		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_RECOVERY("Critical init failure.\nDo you want to reset all settings to defaults?\n\n(Selecting \"No\" will close the application so you can retry with saved settings.)");
 		inline constexpr const char* const MSG_ERR_RESET_DEFAULTS_EXIT("Critical init failure.\nDo you want to reset all settings to defaults?\n(Note: you will have to relaunch the application.)");

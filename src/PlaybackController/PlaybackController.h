@@ -137,6 +137,7 @@ public:
     ~PlaybackController();
 
 public:
+    bool IsAudioOutputPossible() const;
     bool TryInit(const SyncedPlaybackConfig& config);
     SwitchAudioDeviceResult TrySwitchPlaybackConfiguration(const SyncedPlaybackConfig& newConfig);
 

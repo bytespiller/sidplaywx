@@ -99,6 +99,11 @@ PlaybackController::~PlaybackController()
     }
 }
 
+bool PlaybackController::IsAudioOutputPossible() const
+{
+    return _portAudioOutput != nullptr;
+}
+
 bool PlaybackController::TryInit(const SyncedPlaybackConfig& config)
 {
     if (_state != State::Undefined)

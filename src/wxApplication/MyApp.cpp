@@ -169,10 +169,10 @@ bool MyApp::OnInit()
         _playback = std::make_unique<PlaybackController>(); // Must be pre-init here in order for Pa_* methods to be usable immediately.
 
         const bool useNtscForMus = currentSettings->GetOption(Settings::AppSettings::ID::UseNtscForMus)->GetValueAsBool();
-        const bool initSuccess = _playback->TryInit(PlaybackController::SyncedPlaybackConfig(LoadAudioConfig(*currentSettings),
-                                                                                             LoadSidConfig(SidConfig(), *currentSettings),
-                                                                                             LoadFilterConfig(*currentSettings),
-                                                                                             useNtscForMus)
+        const bool initSuccess = _playback->IsAudioOutputPossible() && _playback->TryInit(PlaybackController::SyncedPlaybackConfig(LoadAudioConfig(*currentSettings),
+                                                                                                                                   LoadSidConfig(SidConfig(), *currentSettings),
+                                                                                                                                   LoadFilterConfig(*currentSettings),
+                                                                                                                                   useNtscForMus)
         );
 
         if (initSuccess)
