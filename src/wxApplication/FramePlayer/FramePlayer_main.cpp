@@ -508,7 +508,7 @@ bool FramePlayer::TryRegisterMediaKeys()
     if (_mpris = mpris::Server::make("sidplaywx")) // Reminder: don't use Strings::FramePlayer::WINDOW_TITLE due to " (debug)" being invalid name.
     {
         _mpris->set_identity(_app.GetAppDisplayName().ToStdString());
-        _mpris->set_desktop_entry("org.bytespiller.sidplaywx"); // TODO: remove the org prefix from the desktop file
+        _mpris->set_desktop_entry("io.github.bytespiller.sidplaywx");
 
         _mpris->set_supported_uri_schemes({ "file" });
         _mpris->set_supported_mime_types
