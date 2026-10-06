@@ -68,11 +68,13 @@ void FramePlayer::BrowseFoldersAndAddToPlaylist(bool enqueue)
 
 void FramePlayer::OpenNewPlaylist(bool autoPlayFirstImmediately)
 {
-    wxFileDialog openFileDialog(this);
-    openFileDialog.SetWindowStyle(wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-    openFileDialog.SetWildcard(wxString::Format("%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_M3U8, WILDCARD_M3U8, WILDCARD_M3U8) +\
-                               wxString::Format("|%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_ALL, WILDCARD_ALL, WILDCARD_ALL)
-                               );
+    const wxString wildcards
+    (
+        wxString::Format("%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_M3U8, WILDCARD_M3U8, WILDCARD_M3U8) +\
+        wxString::Format("|%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_ALL, WILDCARD_ALL, WILDCARD_ALL)
+    );
+
+    wxFileDialog openFileDialog(this, wxFileSelectorPromptStr, wxEmptyString, wxEmptyString, wildcards, wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
     if (openFileDialog.ShowModal() == wxID_CANCEL)
     {
