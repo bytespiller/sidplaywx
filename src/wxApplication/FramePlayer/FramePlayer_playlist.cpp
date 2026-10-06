@@ -260,11 +260,15 @@ void FramePlayer::SendFilesToPlaylist(const wxArrayString& files, bool clearPrev
                     for (int i = 1; i <= totalSubsongs; ++i)
                     {
                         const int boxChar = (i < totalSubsongs) ? BOX_CHAR_VERT_RIGHT : BOX_CHAR_L;
-                        const std::string& title = info.GetFieldAsString(info.names, i);
 
-                        if (!title.empty()) // STIL title
+                        const std::string& __name = info.GetFieldAsString(info.names, i);
+                        const std::string& nameOrTitle = (!__name.empty())
+                            ? __name  // STIL name if available (preferred, shorter)
+                            : info.GetFieldAsString(info.titles, i); // STIL title (when available)
+
+                        if (!nameOrTitle.empty())
                         {
-                            subsongTitles.emplace_back(wxString::Format("%c %s %i: %s", boxChar, Strings::PlaylistTree::SUBSONG, i, Helpers::Wx::StringFromWin1252(title)));
+                            subsongTitles.emplace_back(wxString::Format("%c %s %i: %s", boxChar, Strings::PlaylistTree::SUBSONG, i, Helpers::Wx::StringFromWin1252(nameOrTitle)));
                         }
                         else // Generic subsong title
                         {
