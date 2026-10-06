@@ -86,16 +86,23 @@ void FramePlayer::OpenNewPlaylist(bool autoPlayFirstImmediately)
 
 bool FramePlayer::TrySaveCurrentPlaylist()
 {
-    wxFileDialog saveFileDialog(this);
-    saveFileDialog.SetWindowStyle(wxFD_SAVE);
-    saveFileDialog.SetWildcard(wxString::Format("%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_M3U8, WILDCARD_M3U8, WILDCARD_M3U8));
+    wxFileDialog saveFileDialog(this, wxFileSelectorPromptStr, wxEmptyString, wxEmptyString,
+        wxString::Format("%s (%s)|%s", Strings::FramePlayer::BROWSE_FILES_M3U8, WILDCARD_M3U8, WILDCARD_M3U8),
+        wxFD_SAVE
+    );
 
     if (saveFileDialog.ShowModal() == wxID_CANCEL)
     {
         return true;
     }
 
-    const wxString& playlistSavePath = saveFileDialog.GetPath();
+    wxString playlistSavePath = saveFileDialog.GetPath();
+
+    if (!playlistSavePath.EndsWith(Helpers::Wx::Files::FILE_EXTENSION_PLAYLIST)) // wxGTK doesn't auto-append extensions
+    {
+        playlistSavePath.Append(Helpers::Wx::Files::FILE_EXTENSION_PLAYLIST);
+    }
+
     const std::vector<wxString>& filePaths = GetCurrentPlaylistFilePaths(false);
     return Helpers::Wx::Files::TrySavePlaylist(playlistSavePath, filePaths);
 }
