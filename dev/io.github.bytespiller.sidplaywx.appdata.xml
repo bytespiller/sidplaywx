@@ -31,8 +31,9 @@
     </developer>
 
     <categories>
+        <category>AudioVideo</category>
         <category>Audio</category>
+        <category>Music</category>
         <category>Player</category>
-        <category>GTK</category>
     </categories>
 </component>
