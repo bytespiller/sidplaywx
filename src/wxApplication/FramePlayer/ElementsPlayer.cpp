@@ -147,6 +147,8 @@ namespace FrameElements // Player class
 				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistSave), Strings::FramePlayer::MENU_ITEM_PLAYLIST_SAVE);
 				playlistSubMenu->AppendSeparator();
 				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistShuffle), wxString::Format("%s\tCtrl+R", Strings::FramePlayer::MENU_ITEM_PLAYLIST_SHUFFLE));
+				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistShuffleUndo), Strings::FramePlayer::MENU_ITEM_PLAYLIST_SHUFFLE_UNDO);
+				playlistSubMenu->AppendSeparator();
 				playlistSubMenu->Append(static_cast<int>(MenuItemId_Player::PlaylistClear), Strings::FramePlayer::MENU_ITEM_PLAYLIST_CLEAR);
 #ifndef WIN32
 				playlistSubMenu->AppendSeparator();

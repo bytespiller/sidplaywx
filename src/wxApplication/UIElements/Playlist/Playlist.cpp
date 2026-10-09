@@ -139,24 +139,31 @@ namespace UIElements
 			col->SetWidth(newWidth);
 		}
 
-		void Playlist::Shuffle()
+		void Playlist::Shuffle(bool shuffle)
 		{
 			// Shuffle the model
 			if (_model.entries.size() > 1)
 			{
-				// Snapshot the current items' order
-				std::vector<unsigned int> prevOrder(_model.entries.size());
-				std::transform(_model.entries.cbegin(), _model.entries.cend(), prevOrder.begin(), [](const PlaylistTreeModelNodePtr& node) { return node->uid; });
-
-				// Do the shuffle (Mersenne Twister)
-				std::shuffle(_model.entries.begin(), _model.entries.end(), std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
-
-				// Detect if shuffle resulted in unchanged order (can often happen with less items)
-				const bool unchangedOrder = std::equal(prevOrder.cbegin(), prevOrder.cend(), _model.entries.cbegin(), [](unsigned int uid, const PlaylistTreeModelNodePtr& node) { return uid == node->uid; } );
-				if (unchangedOrder)
+				if (shuffle)
 				{
-					Shuffle(); // Re-shuffle
-					return;
+					// Snapshot the current items' order
+					std::vector<unsigned int> prevOrder(_model.entries.size());
+					std::transform(_model.entries.cbegin(), _model.entries.cend(), prevOrder.begin(), [](const PlaylistTreeModelNodePtr& node) { return node->uid; });
+
+					// Do the shuffle (Mersenne Twister)
+					std::shuffle(_model.entries.begin(), _model.entries.end(), std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
+
+					// Detect if shuffle resulted in unchanged order (can often happen with less items)
+					const bool unchangedOrder = std::equal(prevOrder.cbegin(), prevOrder.cend(), _model.entries.cbegin(), [](unsigned int uid, const PlaylistTreeModelNodePtr& node) { return uid == node->uid; } );
+					if (unchangedOrder)
+					{
+						Shuffle(); // Re-shuffle
+						return;
+					}
+				}
+				else // Undo shuffle
+				{
+					std::sort(_model.entries.begin(), _model.entries.end(), [](const PlaylistTreeModelNodePtr& a, const PlaylistTreeModelNodePtr& b) { return a->uid < b->uid; });
 				}
 			}
 

@@ -41,10 +41,11 @@ namespace Strings
 		inline constexpr const char* const MENU_ITEM_ENQUEUE_FILES("&Enqueue Files...");
 		inline constexpr const char* const MENU_ITEM_ENQUEUE_FOLDERS("En&queue Folders...");
 
-		inline constexpr const char* const MENU_ITEM_SUBMENU_PLAYLIST("Playlist");
+		inline constexpr const char* const MENU_ITEM_SUBMENU_PLAYLIST("&Playlist");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_OPEN("Open...");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_SAVE("Save As...");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_SHUFFLE("Shuffle");
+		inline constexpr const char* const MENU_ITEM_PLAYLIST_SHUFFLE_UNDO("&Reset Order");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_CLEAR("Clear");
 		inline constexpr const char* const MENU_ITEM_PLAYLIST_RESET_DEMO("Demo songs");
 

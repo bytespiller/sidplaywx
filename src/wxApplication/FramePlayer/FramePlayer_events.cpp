@@ -421,6 +421,7 @@ void FramePlayer::OnMenuOpening(wxMenuEvent& evt)
     {
         menu->Enable(static_cast<int>(MenuItemId_Player::PlaylistSave), !playlistEmpty);
         menu->Enable(static_cast<int>(MenuItemId_Player::PlaylistShuffle), _ui->treePlaylist->GetSongs().size() > 1);
+        menu->Enable(static_cast<int>(MenuItemId_Player::PlaylistShuffleUndo), _ui->treePlaylist->GetSongs().size() > 1);
         menu->Enable(static_cast<int>(MenuItemId_Player::PlaylistClear), !playlistEmpty);
     }
     else if (menu->GetTitle().IsSameAs(Strings::FramePlayer::MENU_EDIT))
@@ -475,6 +476,10 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
 
         case MenuItemId_Player::PlaylistShuffle:
             _ui->treePlaylist->Shuffle();
+            break;
+
+        case MenuItemId_Player::PlaylistShuffleUndo:
+            _ui->treePlaylist->Shuffle(false);
             break;
 
         case MenuItemId_Player::PlaylistResetDemo:

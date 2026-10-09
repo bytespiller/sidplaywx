@@ -121,8 +121,8 @@ namespace UIElements
 			/// @brief Use this for auto-fitting the **text** columns, since the GetBestColumnWidth is unavailable on Linux (wxGTK).
 			void AutoFitTextColumn(PlaylistTreeModel::ColumnId column);
 
-			/// @brief Shuffles the main songs.
-			void Shuffle();
+			/// @brief Shuffles or unshuffles the main songs.
+			void Shuffle(bool shuffle = true);
 
 		private:
 			/// @brief There is no GetBestColumnWidth on Linux for some reason, so we've rolled our own here that should work everywhere for text columns at least.

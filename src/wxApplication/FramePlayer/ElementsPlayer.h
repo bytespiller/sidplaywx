@@ -75,6 +75,7 @@ namespace FrameElements
 			PlaylistOpen,
 			PlaylistSave,
 			PlaylistShuffle,
+			PlaylistShuffleUndo,
 			PlaylistClear,
 			PlaylistResetDemo,
 			// ----------------
