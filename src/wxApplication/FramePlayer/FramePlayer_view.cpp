@@ -411,100 +411,100 @@ void FramePlayer::DisplayCurrentSongInfo(bool justClear)
     }
     else
     {
-        const PlaybackController& playback = _app.GetPlaybackInfo();
-        PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong();
-        const int subsong = (node != nullptr) ? playback.GetCurrentSubsong() : 1;
-
-        // Set song info labels
-        if (node)
+        if (PlaylistTreeModelNode* const node = _ui->treePlaylist->GetActiveSong())
         {
-            if (node->musCompanionStrFilePath.IsEmpty()) // Normal one-file tune (e.g., PSID, MUS etc.)
+            const PlaybackController& playback = _app.GetPlaybackInfo();
+            const int subsong = playback.GetCurrentSubsong();
+
+            // Set song info labels
             {
-                _ui->labelTitle->SetLabelText((playback.GetTotalSubsongs() <= 1)
-                    ? Helpers::Wx::StringFromWin1252(node->title.ToStdString()).Trim(false) // Tune without subsongs.
-                    : wxString::Format("%s: %s %i", playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Title), Strings::PlaylistTree::SUBSONG, subsong)); // Subsong
-            }
-            else // MUS+STR tune
-            {
-                _ui->labelTitle->SetLabel(node->title.Mid(2)); // Simply strip the boxchar prefix.
-            }
-
-            _ui->labelAuthor->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author)));
-            _ui->labelReleased->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released)));
-            _ui->labelSubsong->SetLabelText(wxString::Format("%i / %i", subsong, playback.GetTotalSubsongs()));
-        }
-
-        // MPRIS metadata labels
-#ifdef __WXGTK__
-        if (_mpris)
-        {
-            _mpris->set_metadata
-            ({
-                { mpris::Field::TrackId, sdbus::Variant("/" + std::to_string(node->uid)) },
-                { mpris::Field::Title, sdbus::Variant(std::string(_ui->labelTitle->GetLabelText().ToUTF8().data())) },
-                { mpris::Field::Artist, sdbus::Variant(std::vector<std::string>{ std::string(_ui->labelAuthor->GetLabelText().ToUTF8().data()) }) },
-                { mpris::Field::Length,  sdbus::Variant(node->duration * 1000) }
-            });
-        }
-#endif
-
-        // Set STIL labels
-        if (node)
-        {
-            const std::string& NONE("/");
-            const std::string& SEPARATOR("  |  ");
-
-            const Stil::Info& stil = _stilInfo.Get(node->hvscPath.ToStdString());
-
-            // "Name - Title"
-            {
-                std::string namesTitles = stil.GetFieldAsString(stil.names, subsong, SEPARATOR, true);
-                const std::string& titles = stil.GetFieldAsString(stil.titles, subsong, SEPARATOR, true);
-                if (!namesTitles.empty() && !titles.empty())
+                if (node->musCompanionStrFilePath.IsEmpty()) // Normal one-file tune (e.g., PSID, MUS etc.)
                 {
-                    namesTitles.append(" - ");
+                    _ui->labelTitle->SetLabelText((playback.GetTotalSubsongs() <= 1)
+                        ? Helpers::Wx::StringFromWin1252(node->title.ToStdString()).Trim(false) // Tune without subsongs.
+                        : wxString::Format("%s: %s %i", playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Title), Strings::PlaylistTree::SUBSONG, subsong)); // Subsong
+                }
+                else // MUS+STR tune
+                {
+                    _ui->labelTitle->SetLabel(node->title.Mid(2)); // Simply strip the boxchar prefix.
                 }
 
-                const wxString& final = Helpers::Wx::StringFromWin1252(namesTitles.append(titles));
-                _ui->labelStilNameTitle->SetText((final.empty()) ? NONE : final);
+                _ui->labelAuthor->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Author)));
+                _ui->labelReleased->SetLabelText(Helpers::Wx::StringFromWin1252(playback.GetCurrentTuneInfoString(PlaybackController::SongInfoCategory::Released)));
+                _ui->labelSubsong->SetLabelText(wxString::Format("%i / %i", subsong, playback.GetTotalSubsongs()));
             }
 
-            // "Artist (Author)"
+            // MPRIS metadata labels
+    #ifdef __WXGTK__
+            if (_mpris)
             {
-                std::string artistsAuthors = stil.GetFieldAsString(stil.artists, subsong, SEPARATOR, true);
-                const std::string& authors = stil.GetFieldAsString(stil.authors, subsong, SEPARATOR, true);
-
-                const bool bothPresent = !artistsAuthors.empty() && !authors.empty();
-                if (bothPresent)
-                {
-                    artistsAuthors.append(" (");
-                }
-
-                artistsAuthors.append(authors);
-
-                if (bothPresent)
-                {
-                    artistsAuthors.append(")");
-                }
-
-                _ui->labelStilArtistAuthor->SetText((artistsAuthors.empty()) ? NONE : Helpers::Wx::StringFromWin1252(artistsAuthors));
+                _mpris->set_metadata
+                ({
+                    { mpris::Field::TrackId, sdbus::Variant("/" + std::to_string(node->uid)) },
+                    { mpris::Field::Title, sdbus::Variant(std::string(_ui->labelTitle->GetLabelText().ToUTF8().data())) },
+                    { mpris::Field::Artist, sdbus::Variant(std::vector<std::string>{ std::string(_ui->labelAuthor->GetLabelText().ToUTF8().data()) }) },
+                    { mpris::Field::Length,  sdbus::Variant(node->duration * 1000) }
+                });
             }
+    #endif
 
-            // Comment(s)
+            // Set STIL labels
             {
-                std::string comments = stil.GetFieldAsString(stil.comments, subsong, SEPARATOR, true);
+                const std::string& NONE("/");
+                const std::string& SEPARATOR("  |  ");
 
-                if (comments.empty())
+                const Stil::Info& stil = _stilInfo.Get(node->hvscPath.ToStdString());
+
+                // "Name - Title"
                 {
-                    // Try to get MUS comments instead
-                    const std::string& musComments = playback.GetCurrentTuneMusComments();
-                    if (!musComments.empty())
+                    std::string namesTitles = stil.GetFieldAsString(stil.names, subsong, SEPARATOR, true);
+                    const std::string& titles = stil.GetFieldAsString(stil.titles, subsong, SEPARATOR, true);
+                    if (!namesTitles.empty() && !titles.empty())
                     {
-                        comments = musComments;
+                        namesTitles.append(" - ");
                     }
+
+                    const wxString& final = Helpers::Wx::StringFromWin1252(namesTitles.append(titles));
+                    _ui->labelStilNameTitle->SetText((final.empty()) ? NONE : final);
                 }
 
-                _ui->labelStilComment->SetText((comments.empty()) ? NONE : Helpers::Wx::StringFromWin1252(comments));
+                // "Artist (Author)"
+                {
+                    std::string artistsAuthors = stil.GetFieldAsString(stil.artists, subsong, SEPARATOR, true);
+                    const std::string& authors = stil.GetFieldAsString(stil.authors, subsong, SEPARATOR, true);
+
+                    const bool bothPresent = !artistsAuthors.empty() && !authors.empty();
+                    if (bothPresent)
+                    {
+                        artistsAuthors.append(" (");
+                    }
+
+                    artistsAuthors.append(authors);
+
+                    if (bothPresent)
+                    {
+                        artistsAuthors.append(")");
+                    }
+
+                    _ui->labelStilArtistAuthor->SetText((artistsAuthors.empty()) ? NONE : Helpers::Wx::StringFromWin1252(artistsAuthors));
+                }
+
+                // Comment(s)
+                {
+                    std::string comments = stil.GetFieldAsString(stil.comments, subsong, SEPARATOR, true);
+
+                    if (comments.empty())
+                    {
+                        // Try to get MUS comments instead
+                        const std::string& musComments = playback.GetCurrentTuneMusComments();
+                        if (!musComments.empty())
+                        {
+                            comments = musComments;
+                        }
+                    }
+
+                    _ui->labelStilComment->SetText((comments.empty()) ? NONE : Helpers::Wx::StringFromWin1252(comments));
+                }
             }
         }
     }
