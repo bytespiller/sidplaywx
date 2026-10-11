@@ -91,7 +91,7 @@ If you intend to submit a PR, please see the [CONTRIBUTING.md](CONTRIBUTING.md) 
 
 ##### (wxWidgets)
 0. Prerequisites: if needed, install the `libgtk-3-dev` and `libcurl-dev` (the last one is needed for our "Check for updates" function).
-1. `cmake -G "Unix Makefiles" -DwxUSE_WEBVIEW=OFF -DCMAKE_BUILD_TYPE=Release -S . -B dist && cmake --build dist`
+1. `cmake -G "Unix Makefiles" -DwxBUILD_COMPATIBILITY=NONE -DwxUSE_AUI=OFF -DwxUSE_MDI=OFF -DwxUSE_MDI_ARCHITECTURE=OFF -DwxUSE_DOC_VIEW_ARCHITECTURE=OFF -DwxUSE_GLCANVAS=OFF -DwxUSE_JOYSTICK=OFF -DwxUSE_PRINTING_ARCHITECTURE=OFF -DwxUSE_REGEX=OFF -DwxUSE_RIBBON=OFF -DwxUSE_RICHTEXT=OFF -DwxUSE_SOUND=OFF -DwxUSE_STC=OFF -DwxUSE_LIBJPEG=OFF -DwxUSE_LIBTIFF=OFF -DwxUSE_LIBWEBP=OFF -DwxUSE_TREELISTCTRL=OFF -DwxUSE_WEBVIEW=OFF -DCMAKE_BUILD_TYPE=Release -S . -B dist && cmake --build dist`
 	- Exceptional cases (if you get an `#include` error when building the sidplaywx):
 		- You may need to call the `wx-config --cxxflags` to get necessary flags and update the equivalent variable in our sidplaywx CMakeLists.txt
 		- May also be of interest:
@@ -156,10 +156,10 @@ Once installed you need to **first-time configure** it like so:
 3. Copy files from `/dist/include/` folder & the `libportaudio.a` file to the appropriate sidplaywx's `/deps/` folders.
 	
 ##### (wxWidgets)
-1. Simply [download](https://www.wxwidgets.org/downloads/) the appropriate pre-built binaries for your compiler (e.g., GCC v14).
+1. Simply [download](https://www.wxwidgets.org/downloads/) the appropriate pre-built binaries for your compiler (e.g., GCC v15).
 2. Copy headers & libs to the appropriate sidplaywx's `/deps/` folders.
 3. IMPORTANT: additionally, in order to actually run the sidplaywx application after it's built, you need to copy the following wxWidgets' `.dll` files into the sidplaywx's **build** folder: `wxbaseVER_SUFFIX.dll`, `wxbaseVER_xml_SUFFIX.dll`, `wxmswVER_core_SUFFIX.dll`, `wxmswVER_propgrid_SUFFIX.dll` (the exact `VER` version and `_SUFFIX` suffix differs depending on wxWidgets & gcc version etc.).
-4. TIP: You can also build the wxWidgets yourself in the similar manner to building the PortAudio (in case you want to use a specific GCC version not offered among pre-built binaries).
+4. TIP: You can also build the wxWidgets yourself (see Linux instructions above) for more control over binary size & compiler.
 
 #### Building the sidplaywx
 1. The main `CMakeLists.txt` should do the trick (I myself use the Visual Studio Code).

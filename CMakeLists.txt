@@ -41,8 +41,8 @@ target_link_libraries(${PROJECT_NAME}
     -mwindows # WxWidgets, don't open console/terminal
     liboleacc.a # WxWidgets MSW, must be defined BEFORE the wxWidgets_core
     wxWidgets_propgrid wxWidgets_adv # prefs window (must be included before others)
-    wxWidgets_core wxWidgets_base wxWidgets_regex
-    wxWidgets_jpeg wxWidgets_tiff wxWidgets_png wxWidgets_zlib
+    wxWidgets_core wxWidgets_base
+    wxWidgets_png wxWidgets_zlib
     wxWidgets_xml wxWidgets_libwxexpat # wx XML support
     wxWidgets_net # for "Check for updates" support
 

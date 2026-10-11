@@ -38,8 +38,8 @@ target_link_libraries(${PROJECT_NAME}
     SDBusCpp::sdbus-c++
 
     wxWidgets_propgrid wxWidgets_adv # prefs window (must be included before others)
-    wxWidgets_core wxWidgets_base #wxWidgets_regex
-    #wxWidgets_jpeg wxWidgets_tiff wxWidgets_png wxWidgets_zlib
+    wxWidgets_core wxWidgets_base
+    #wxWidgets_png wxWidgets_zlib
     wxWidgets_xml # wx XML support (except: wxWidgets_libwxexpat)
     wxWidgets_net # for "Check for updates" support
 )
