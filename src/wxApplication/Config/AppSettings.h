@@ -81,7 +81,6 @@ namespace Settings
 
 			static constexpr const char* const CombinedWaveformsStrength = "CombinedWaveformsStrength";
 			static constexpr const char* const DacLeakage = "DacLeakage";
-			static constexpr const char* const DcbOffset = "DcbOffset";
 			static constexpr const char* const WaveOffset6581 = "WaveOffset6581";
 
 			static constexpr const char* const Old6581caps = "Old6581caps";
@@ -230,7 +229,6 @@ namespace Settings
 				DefaultOption(ID::FilterCurve8580, 0.5),
 
 				DefaultOption(ID::DacLeakage, 1.0),
-				DefaultOption(ID::DcbOffset, 0.0),
 				DefaultOption(ID::WaveOffset6581, 0.0),
 
 				DefaultOption(ID::Old6581caps, false),

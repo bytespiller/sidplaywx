@@ -153,7 +153,6 @@ bool SidDecoder::TryInitEmulation(const SidConfig& sidConfig, const FilterConfig
 
     _rs.combinedWaveformsStrength(_filterConfigCache->combinedWaveformsStrength);
     _rs.dacLeakage(_filterConfigCache->dacLeakage);
-    _rs.dcbRes(_filterConfigCache->dcbOffset);
     _rs.offset6581(_filterConfigCache->waveOffset6581);
 
     _rs.enableOld6581caps(_filterConfigCache->enableOld6581caps);

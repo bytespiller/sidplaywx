@@ -513,7 +513,8 @@ bool FramePlayer::TryRegisterMediaKeys()
         _mpris->set_supported_uri_schemes({ "file" });
         _mpris->set_supported_mime_types
         ({
-            "application/octet-stream", // generic MIME for PSID etc. files
+            "audio/prs.sid", // PSID/RSID file (should work in e.g., Ubuntu derivatives at least)
+            "application/octet-stream", // generic catch-all for PSID etc. files
             "audio/mpegurl", // m3u8 playlist
             "audio/x-mpegurl" // m3u8 playlist (fallback)
         });

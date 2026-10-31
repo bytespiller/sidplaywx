@@ -27,7 +27,6 @@
 #include "SingleInstanceManager/SingleInstanceManager.h"
 #include "FramePlayer/FramePlayer.h"
 #include "../PlaybackController/PlaybackController.h"
-#include "../Util/Profiling.h"
 #include "../Util/SimpleTimer.h"
 #include "../Util/SimpleSignal/SimpleSignalProvider.h"
 #include "../Util/SimpleSignal/SimpleSignalListener.h"

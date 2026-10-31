@@ -142,7 +142,6 @@ PlaybackController::SwitchAudioDeviceResult PlaybackController::TrySwitchPlaybac
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter6581Range, _sidDecoder->GetFilterConfig().filter6581Range)) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.filter8580Curve, _sidDecoder->GetFilterConfig().filter8580Curve)) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.dacLeakage, _sidDecoder->GetFilterConfig().dacLeakage)) ||
-                                     (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.dcbOffset, _sidDecoder->GetFilterConfig().dcbOffset)) ||
                                      (!Helpers::General::AreFloatsEqual(newConfig.filterConfig.waveOffset6581, _sidDecoder->GetFilterConfig().waveOffset6581)) ||
                                      (newConfig.filterConfig.enableOld6581caps != _sidDecoder->GetFilterConfig().enableOld6581caps);
 

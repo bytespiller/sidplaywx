@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.20.1"); // Reminder: don't forget to increase. Also, don't forget the final zero for x.y.0 versions.
+	inline constexpr const char* const APP_VERSION_TAG("0.20.2"); // Reminder: don't forget to increase. Also, don't forget the final zero for x.y.0 versions.
 
 	namespace FramePlayer
 	{
@@ -188,8 +188,8 @@ namespace Strings
 		inline constexpr const char* const TUNE_PATH_FILE("File");
 
 		inline constexpr const char* const CATEGORY_TECHNICAL("Technical");
-		inline constexpr const char* const TUNE_ADDR_DRIVER("Driver address");
-		inline constexpr const char* const TUNE_ADDR_LOAD("Load address");
+		inline constexpr const char* const TUNE_ADDR_DRIVER("Driver range");
+		inline constexpr const char* const TUNE_ADDR_LOAD("Load range");
 		inline constexpr const char* const TUNE_ADDR_INIT("Init address");
 		inline constexpr const char* const TUNE_ADDR_PLAY("Play address");
 		inline constexpr const char* const TUNE_SIZE("Size data / file");
@@ -399,9 +399,6 @@ namespace Strings
 
 		inline constexpr const char* const OPT_DAC_LEAKAGE("DAC leakage level");
 		inline constexpr const char* const DESC_DAC_LEAKAGE("Affects the envelope and waveforms.\n\nLevel range can be adjusted from 0.0 (no leakage) to 1.0 (default leakage).\n\nNote: ongoing playback will stop when changing this setting.");
-
-		inline constexpr const char* const OPT_DCB_OFFSET("DC-Blocker resistance");
-		inline constexpr const char* const DESC_DCB_OFFSET("Affects the highpass cutoff frequency of the external filter.\n\nThe resistance value can be adjusted from 0.0 (1k ohm, default) to 1.0 (10k ohm).\n\nNote: ongoing playback will stop when changing this setting.");
 
 		inline constexpr const char* const OPT_WAVE_OFFSET_6581("Wave offset (SID 6581)");
 		inline constexpr const char* const DESC_WAVE_OFFSET_6581("Affects the volume of digi samples.\n\nRange can be adjusted from 0.0 (faint digis, default) to 1.0 (loud digis).\n\nNote: ongoing playback will stop when changing this setting.");

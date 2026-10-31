@@ -409,7 +409,6 @@ void FramePrefs::FillPropertyGrid()
 
             // New tunables
             AddWrappedPropToPage(Settings::AppSettings::ID::DacLeakage, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_DAC_LEAKAGE), *page, Effective::Immediately, Strings::Preferences::DESC_DAC_LEAKAGE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
-            AddWrappedPropToPage(Settings::AppSettings::ID::DcbOffset, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_DCB_OFFSET), *page, Effective::Immediately, Strings::Preferences::DESC_DCB_OFFSET, MIN_FILTER_CURVE, MAX_FILTER_CURVE);
 
             // Filter
             AddWrappedPropToPage(Settings::AppSettings::ID::FilterCurve6581, TypeSerialized::Double, new wxFloatProperty(Strings::Preferences::OPT_FILTER_CURVE_6581), *page, Effective::Immediately, Strings::Preferences::DESC_FILTER_CURVE, MIN_FILTER_CURVE, MAX_FILTER_CURVE);

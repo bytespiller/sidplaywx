@@ -74,13 +74,12 @@ public:
     struct FilterConfig
     {
         FilterConfig() = delete;
-        FilterConfig(SidConfig::sid_cw_t aCombinedWaveformsStrength, double aFilter6581Curve, double aFilter6581Range, double aFilter8580Curve, double aDacLeakage, double aDcbOffset, double aWaveOffset6581, bool aEnableOld6581caps) :
+        FilterConfig(SidConfig::sid_cw_t aCombinedWaveformsStrength, double aFilter6581Curve, double aFilter6581Range, double aFilter8580Curve, double aDacLeakage, double aWaveOffset6581, bool aEnableOld6581caps) :
             combinedWaveformsStrength(aCombinedWaveformsStrength),
             filter6581Curve(aFilter6581Curve),
             filter6581Range(aFilter6581Range),
             filter8580Curve(aFilter8580Curve),
             dacLeakage(aDacLeakage),
-            dcbOffset(aDcbOffset),
             waveOffset6581(aWaveOffset6581),
             enableOld6581caps(aEnableOld6581caps)
         {
@@ -91,7 +90,6 @@ public:
         const double filter6581Range;
         const double filter8580Curve;
         const double dacLeakage;
-        const double dcbOffset;
         const double waveOffset6581;
         const bool enableOld6581caps;
     };
