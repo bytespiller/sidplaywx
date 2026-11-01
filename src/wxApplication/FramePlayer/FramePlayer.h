@@ -34,6 +34,7 @@
 #include "../../HvscSupport/Stil/Stil.h"
 #include "../../Util/SimpleSignal/SimpleSignalListener.h"
 
+class FrameEmuPresets;
 class FramePlaybackMods;
 class FramePrefs;
 class FrameTuneInfo;
@@ -104,7 +105,8 @@ private:
 
     // Edit
     void OpenSearchBar();
-    void OpenPlaybackModFrame();
+    void OpenEmuPresetsFrame();
+    void OpenPlaybackModsFrame();
     void OpenPrefsFrame();
 
     // View
@@ -252,6 +254,7 @@ private:
     std::unique_ptr<wxTimer> _timerRefresh;
     int _canonicalTimerRefreshInterval = TIMER_REFRESH_INTERVAL_IDLE;
 
+    FrameEmuPresets* _frameEmuPresets = nullptr;
     FramePlaybackMods* _framePlaybackMods = nullptr;
     FramePrefs* _framePrefs = nullptr;
     FrameTuneInfo* _frameTuneInfo = nullptr;

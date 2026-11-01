@@ -82,6 +82,7 @@ namespace FrameElements
 			Exit,
 
 			// Edit
+			EmuPresets,
 			PlaybackMods,
 			Preferences,
 			Find,

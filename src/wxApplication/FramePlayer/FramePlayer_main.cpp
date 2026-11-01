@@ -35,6 +35,7 @@
 #include "../Config/UIStrings.h"
 #include "../Helpers/DpiSize.h"
 #include "../Helpers/HelpersWx.h"
+#include "../FrameChildren/FrameEmuPresets/FrameEmuPresets.h"
 #include "../FrameChildren/FramePlaybackMods/FramePlaybackMods.h"
 #include "../FrameChildren/FramePrefs/FramePrefs.h"
 #include "../FrameChildren/FrameTuneInfo/FrameTuneInfo.h"
@@ -657,7 +658,29 @@ void FramePlayer::OpenSearchBar()
     _ui->searchBar->ToggleVisibility();
 }
 
-void FramePlayer::OpenPlaybackModFrame()
+void FramePlayer::OpenEmuPresetsFrame()
+{
+    // Toggle open-close (if exists)
+    if (_frameEmuPresets != nullptr)
+    {
+        if (_frameEmuPresets->IsVisible())
+        {
+            _frameEmuPresets->Hide();
+        }
+        else
+        {
+            _frameEmuPresets->Show();
+        }
+
+        return;
+    }
+
+    // First-time create
+    _frameEmuPresets = new FrameEmuPresets(this, Strings::EmuPresets::WINDOW_TITLE, wxDefaultPosition, DpiSize(600, 400), _app);
+    _frameEmuPresets->Show();
+}
+
+void FramePlayer::OpenPlaybackModsFrame()
 {
     // Toggle open-close (if exists)
     if (_framePlaybackMods != nullptr)

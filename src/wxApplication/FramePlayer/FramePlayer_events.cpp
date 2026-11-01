@@ -83,7 +83,7 @@ void FramePlayer::OnButtonTunePrev(wxCommandEvent& /*evt*/)
 
 void FramePlayer::OnButtonPlaybackMod(wxCommandEvent& /*evt*/)
 {
-    OpenPlaybackModFrame();
+    OpenPlaybackModsFrame();
 }
 
 void FramePlayer::OnButtonTuneInfo(wxCommandEvent& /*evt*/)
@@ -512,8 +512,12 @@ void FramePlayer::OnMenuItemSelected(wxCommandEvent& evt)
             OnFindSong(UIElements::SignalsSearchBar::SIGNAL_FIND_PREV);
             break;
 
+        case MenuItemId_Player::EmuPresets:
+            OpenEmuPresetsFrame();
+            break;
+
         case MenuItemId_Player::PlaybackMods:
-            OpenPlaybackModFrame();
+            OpenPlaybackModsFrame();
             break;
 
         case MenuItemId_Player::Preferences:

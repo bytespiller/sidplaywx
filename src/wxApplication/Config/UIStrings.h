@@ -23,7 +23,7 @@
 
 namespace Strings
 {
-	inline constexpr const char* const APP_VERSION_TAG("0.20.2"); // Reminder: don't forget to increase. Also, don't forget the final zero for x.y.0 versions.
+	inline constexpr const char* const APP_VERSION_TAG("0.21.0"); // Reminder: don't forget to increase. Also, don't forget the final zero for x.y.0 versions.
 
 	namespace FramePlayer
 	{
@@ -56,6 +56,7 @@ namespace Strings
 		inline constexpr const char* const MENU_ITEM_FIND_NEXT("Find &Next");
 		inline constexpr const char* const MENU_ITEM_FIND_PREV("Find &Prev");
 		inline constexpr const char* const MENU_ITEM_PLAYBACK_MODS("&Modify Playback");
+		inline constexpr const char* const MENU_ITEM_EMU_PRESETS("&Emulation Presets");
 		inline constexpr const char* const MENU_ITEM_PREFERENCES("&Preferences");
 
 		inline constexpr const char* const MENU_VIEW("&View");
@@ -173,6 +174,11 @@ namespace Strings
 
 		inline constexpr const char* const SPEED_SLIDER("Playback Speed (%)");
 		inline constexpr const char* const SPEED_SLIDER_MENU_ITEM_RESET("Reset to 100%");
+	}
+
+	namespace EmuPresets
+	{
+		inline constexpr const char* const WINDOW_TITLE("Emulation Presets");
 	}
 
 	namespace TuneInfo

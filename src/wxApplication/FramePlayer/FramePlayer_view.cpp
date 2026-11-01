@@ -21,7 +21,6 @@
 #include "../Config/AppSettings.h"
 #include "../Config/UIStrings.h"
 #include "../Helpers/HelpersWx.h"
-#include "../FrameChildren/FramePlaybackMods/FramePlaybackMods.h"
 #include "../../Util/Const.h"
 
 #include <wx/tooltip.h>

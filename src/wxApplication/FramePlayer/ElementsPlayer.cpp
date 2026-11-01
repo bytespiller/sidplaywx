@@ -171,6 +171,7 @@ namespace FrameElements // Player class
 				editMenu->Append(static_cast<int>(MenuItemId_Player::FindNext), wxString::Format("%s\tF3", Strings::FramePlayer::MENU_ITEM_FIND_NEXT));
 				editMenu->Append(static_cast<int>(MenuItemId_Player::FindPrev), wxString::Format("%s\tShift+F3", Strings::FramePlayer::MENU_ITEM_FIND_PREV));
 				editMenu->AppendSeparator();
+				editMenu->Append(static_cast<int>(MenuItemId_Player::EmuPresets), wxString::Format("%s\tF4", Strings::FramePlayer::MENU_ITEM_EMU_PRESETS));
 				editMenu->Append(static_cast<int>(MenuItemId_Player::PlaybackMods), wxString::Format("%s\tF5", Strings::FramePlayer::MENU_ITEM_PLAYBACK_MODS));
 				editMenu->Append(static_cast<int>(MenuItemId_Player::Preferences), Strings::FramePlayer::MENU_ITEM_PREFERENCES);
 
