@@ -18,6 +18,7 @@
 
 #include "ElementsEmuPresets.h"
 #include "../../Config/UIStrings.h"
+#include <wx/spinctrl.h>
 #include <wx/splitter.h>
 //#include <wx/statline.h>
 
@@ -30,8 +31,11 @@ namespace
 		"Chris Huelsbeck",
 		"Lasse Oorni"
 	};
+}
 
-	static wxSlider* AddSlider(const wxString& label, const wxString& tooltip, wxBoxSizer* sizer, wxWindow* parent)
+namespace FrameElements
+{
+	DoubleSlider::DoubleSlider(const wxString& label, const wxString& tooltip, wxBoxSizer* sizer, wxWindow* parent, double initialValue)
 	{
 		const wxString tooltipText = wxString::Format("%s: %s", label, tooltip);
 
@@ -41,21 +45,62 @@ namespace
 		caption->SetCursor(wxCURSOR_QUESTION_ARROW);
 		sizer->Add(caption, 0, wxLEFT | wxRIGHT | wxTOP, 5);
 
-		// Slider
-		wxSlider* const slider = static_cast<wxSlider*>(sizer->Add(new wxSlider(parent, wxID_ANY, 25, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_VALUE_LABEL), 1, wxEXPAND, 0)->GetWindow());
-		slider->SetToolTip(tooltipText);
+		// Sizer
+		wxBoxSizer* widgetSizer = new wxBoxSizer(wxHORIZONTAL);
+		sizer->Add(widgetSizer, 1, wxEXPAND | wxALL, 0);
 
-		slider->Bind(wxEVT_MOUSEWHEEL, [](wxMouseEvent& event)
+		// Slider
+		_slider = static_cast<wxSlider*>(widgetSizer->Add(new wxSlider(parent, wxID_ANY, initialValue / 100, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL), 1, wxEXPAND, 0)->GetWindow());
+		_slider->SetToolTip(tooltipText);
+
+		_slider->Bind(wxEVT_MOUSEWHEEL, [](wxMouseEvent& event)
 		{
 			// Prevent scroll wheel altering the slider, and allow the parent scrollable container to scroll instead
 			if (wxWindow* const parent = dynamic_cast<wxWindow*>(event.GetEventObject())->GetParent())
 			{
 				wxMouseEvent parentEvent(event);
-        		parent->GetEventHandler()->ProcessEvent(parentEvent);
+				parent->GetEventHandler()->ProcessEvent(parentEvent);
 			}
 		});
 
-		return slider;
+		_slider->Bind(wxEVT_SLIDER, [this](wxCommandEvent& event)
+		{
+			_spinCtrl->SetValue(event.GetInt() / 100.0);
+		});
+
+		// Spin ctrl
+		static constexpr double MIN = 0.0;
+		static constexpr double MAX = 1.0;
+		static constexpr double STEP = 0.01;
+
+		_spinCtrl = static_cast<wxSpinCtrlDouble*>(widgetSizer->Add(new wxSpinCtrlDouble(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS | wxTE_PROCESS_ENTER, MIN, MAX, initialValue, STEP))->GetWindow());
+		_spinCtrl->SetDigits(2);
+		_spinCtrl->SetToolTip(tooltipText);
+
+		_spinCtrl->Bind(wxEVT_SPINCTRLDOUBLE, [this](wxSpinDoubleEvent& event)
+		{
+			_slider->SetValue(event.GetValue() * 100);
+		});
+
+		_spinCtrl->Bind(wxEVT_TEXT_ENTER, [this](wxCommandEvent&)
+		{
+			double val = 0.0;
+			if (_spinCtrl->GetTextValue().ToDouble(&val)) // The spin control gets updated internally on focus loss only, so we have to use this workaround (or fake the focus loss).
+			{
+				SetValue(val); // Update both the spinCtrl internally and the slider.
+			}
+		});
+	}
+
+	double DoubleSlider::GetValue() const
+	{
+		return _spinCtrl->GetValue();
+	}
+
+	void DoubleSlider::SetValue(double value)
+	{
+		_spinCtrl->SetValue(value);
+		_slider->SetValue(_spinCtrl->GetValue() * 100);
 	}
 }
 
@@ -87,16 +132,16 @@ namespace FrameElements
 		wxBoxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
 		scrollPanel->SetSizer(sizerControls);
 
-		AddSlider("Title 1", "Tooltip helptext", sizerControls, scrollPanel);
-		AddSlider("Title 2", "Tooltip helptext", sizerControls, scrollPanel);
-		AddSlider("Title 3", "Tooltip helptext", sizerControls, scrollPanel);
-		AddSlider("Title 4", "Tooltip helptext", sizerControls, scrollPanel);
-		AddSlider("Title 5", "Tooltip helptext", sizerControls, scrollPanel);
-		AddSlider("Title 6", "Tooltip helptext", sizerControls, scrollPanel);
-		AddSlider("Title 7", "Tooltip helptext", sizerControls, scrollPanel);
-		AddSlider("Title 8", "Tooltip helptext", sizerControls, scrollPanel);
-		AddSlider("Title 9", "Tooltip helptext", sizerControls, scrollPanel);
-		AddSlider("Title 10", "Tooltip helptext", sizerControls, scrollPanel);
+		_sliderTest = std::make_unique<DoubleSlider>("Title 1", "Tooltip helptext", sizerControls, scrollPanel);
+		new DoubleSlider("Title 2", "Tooltip helptext", sizerControls, scrollPanel);
+		new DoubleSlider("Title 3", "Tooltip helptext", sizerControls, scrollPanel);
+		new DoubleSlider("Title 4", "Tooltip helptext", sizerControls, scrollPanel);
+		new DoubleSlider("Title 5", "Tooltip helptext", sizerControls, scrollPanel);
+		new DoubleSlider("Title 6", "Tooltip helptext", sizerControls, scrollPanel);
+		new DoubleSlider("Title 7", "Tooltip helptext", sizerControls, scrollPanel);
+		new DoubleSlider("Title 8", "Tooltip helptext", sizerControls, scrollPanel);
+		new DoubleSlider("Title 9", "Tooltip helptext", sizerControls, scrollPanel);
+		new DoubleSlider("Title 10", "Tooltip helptext", sizerControls, scrollPanel);
 
 		scrollPanel->SetScrollRate(0, wxSystemSettings::GetMetric(wxSYS_VSCROLL_ARROW_Y, &_parentPanel)); // Enable vertical scrolling.
 

@@ -23,8 +23,27 @@
     #include <wx/wx.h>
 #endif
 
+#include <memory>
+
+class wxSpinCtrlDouble;
+
 namespace FrameElements
 {
+	class DoubleSlider
+	{
+	public:
+		DoubleSlider() = delete;
+		DoubleSlider(const wxString& label, const wxString& tooltip, wxBoxSizer* sizer, wxWindow* parent, double initialValue = 0.0);
+
+	public:
+		double GetValue() const;
+		void SetValue(double value);
+
+	private:
+		wxSlider* _slider;
+		wxSpinCtrlDouble* _spinCtrl;
+	};
+
 	class ElementsEmuPresets
 	{
 	public:
@@ -39,6 +58,8 @@ namespace FrameElements
 
 	private:
 		wxPanel& _parentPanel;
-		wxListBox* _presetsList;
+		wxListBox* _presetsList = nullptr;
+
+		std::unique_ptr<DoubleSlider> _sliderTest;
 	};
 }
