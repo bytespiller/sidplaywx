@@ -33,10 +33,11 @@ namespace FrameElements
 	{
 	public:
 		FilterWidgetBase() = delete;
-		FilterWidgetBase(const wxString& label, const wxString& tooltip, wxWindow* parent);
+		FilterWidgetBase(const char* uid, const wxString& label, const wxString& tooltip, wxWindow* parent);
 
 	public:
 		bool IsEnabled() const;
+		const char* GetUid() const;
 
 	protected:
 		virtual void Enable(bool enabled = true);
@@ -45,6 +46,7 @@ namespace FrameElements
 		wxCheckBox* _chkEnabled;
 
 	private:
+		const char* const _uid;
 		wxWindow* _parent;
 	};
 }

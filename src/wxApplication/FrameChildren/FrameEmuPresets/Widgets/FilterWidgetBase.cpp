@@ -22,8 +22,9 @@ namespace FrameElements
 {
 	wxDEFINE_EVENT(wxEVT_FILTER_WIDGET_TOGGLED, wxCommandEvent);
 
-	FilterWidgetBase::FilterWidgetBase(const wxString& label, const wxString& tooltip, wxWindow* parent) :
+	FilterWidgetBase::FilterWidgetBase(const char* uid, const wxString& label, const wxString& tooltip, wxWindow* parent) :
 		wxEvtHandler(),
+		_uid(uid),
 		_parent(parent)
 	{
 		wxBoxSizer* sizerTitle = new wxBoxSizer(wxHORIZONTAL);
@@ -42,6 +43,11 @@ namespace FrameElements
 	bool FilterWidgetBase::IsEnabled() const
 	{
 		return _chkEnabled->IsChecked();
+	}
+
+	const char* FilterWidgetBase::GetUid() const
+	{
+		return _uid;
 	}
 
 	void FilterWidgetBase::Enable(bool enabled)

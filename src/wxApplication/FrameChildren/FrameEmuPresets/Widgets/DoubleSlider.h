@@ -33,7 +33,7 @@ namespace FrameElements
 	{
 	public:
 		DoubleSlider() = delete;
-		DoubleSlider(const wxString& label, const wxString& tooltip, wxWindow* parent, double initialValue = 0.0);
+		DoubleSlider(const char* uid, const wxString& label, const wxString& tooltip, wxWindow* parent, double initialValue = 0.0);
 
 	public:
 		void Enable(bool enabled = true) override;

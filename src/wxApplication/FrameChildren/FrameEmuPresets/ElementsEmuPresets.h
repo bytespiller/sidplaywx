@@ -41,20 +41,6 @@ namespace FrameElements
 	public:
 		wxListBox* presetsList = nullptr;
 
-		// TODO: C64 model (PAL/NTSC/etc.)
-		// TODO: SID model
-		// TODO: Combined waveforms strength (W/A*/S)
-		std::unique_ptr<DoubleSlider> sliderDacLeakage;
-
-		std::unique_ptr<DoubleSlider> sliderFilterCurve6581; // 0.5
-		std::unique_ptr<DoubleSlider> sliderFilterRange6581; // 0.5
-		std::unique_ptr<DoubleSlider> sliderWaveOffset6581; // 0
-		// TODO: Early model caps 6581 (true/false)
-
-		std::unique_ptr<DoubleSlider> sliderFilterCurve8580; // 0.5
-
-		// TODO: DigiBoost 8580 (true/false)
-
 	private:
 		wxPanel& _parentPanel;
 	};

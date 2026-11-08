@@ -29,8 +29,8 @@ namespace
 
 namespace FrameElements
 {
-	DoubleSlider::DoubleSlider(const wxString& label, const wxString& tooltip, wxWindow* parent, double initialValue)
-		: FilterWidgetBase(label, tooltip, parent)
+	DoubleSlider::DoubleSlider(const char* uid, const wxString& label, const wxString& tooltip, wxWindow* parent, double initialValue) :
+		FilterWidgetBase(uid, label, tooltip, parent)
 	{
 		// Widget sizer
 		wxBoxSizer* sizerWidget = new wxBoxSizer(wxHORIZONTAL);
