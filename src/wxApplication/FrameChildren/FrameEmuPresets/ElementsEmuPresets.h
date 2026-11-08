@@ -25,25 +25,10 @@
 
 #include <memory>
 
-class wxSpinCtrlDouble;
+#include "Widgets/DoubleSlider.h"
 
 namespace FrameElements
 {
-	class DoubleSlider
-	{
-	public:
-		DoubleSlider() = delete;
-		DoubleSlider(const wxString& label, const wxString& tooltip, wxBoxSizer* sizer, wxWindow* parent, double initialValue = 0.0);
-
-	public:
-		double GetValue() const;
-		void SetValue(double value);
-
-	private:
-		wxSlider* _slider;
-		wxSpinCtrlDouble* _spinCtrl;
-	};
-
 	class ElementsEmuPresets
 	{
 	public:
@@ -54,12 +39,23 @@ namespace FrameElements
 	    explicit ElementsEmuPresets(wxPanel& panel);
 
 	public:
-		// TODO
+		wxListBox* presetsList = nullptr;
+
+		// TODO: C64 model (PAL/NTSC/etc.)
+		// TODO: SID model
+		// TODO: Combined waveforms strength (W/A*/S)
+		std::unique_ptr<DoubleSlider> sliderDacLeakage;
+
+		std::unique_ptr<DoubleSlider> sliderFilterCurve6581; // 0.5
+		std::unique_ptr<DoubleSlider> sliderFilterRange6581; // 0.5
+		std::unique_ptr<DoubleSlider> sliderWaveOffset6581; // 0
+		// TODO: Early model caps 6581 (true/false)
+
+		std::unique_ptr<DoubleSlider> sliderFilterCurve8580; // 0.5
+
+		// TODO: DigiBoost 8580 (true/false)
 
 	private:
 		wxPanel& _parentPanel;
-		wxListBox* _presetsList = nullptr;
-
-		std::unique_ptr<DoubleSlider> _sliderTest;
 	};
 }

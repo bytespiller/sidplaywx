@@ -18,89 +18,52 @@
 
 #include "ElementsEmuPresets.h"
 #include "../../Config/UIStrings.h"
-#include <wx/spinctrl.h>
+#include <wx/collpane.h>
 #include <wx/splitter.h>
-//#include <wx/statline.h>
 
 namespace
 {
-	static constexpr int BOX_BORDER_SIZE = 2;
-
-	static const wxArrayString items =  // TEMP TEST
+	const wxArrayString items =  // TEMP TEST
 	{
 		"Chris Huelsbeck",
 		"Lasse Oorni"
 	};
-}
 
-namespace FrameElements
-{
-	DoubleSlider::DoubleSlider(const wxString& label, const wxString& tooltip, wxBoxSizer* sizer, wxWindow* parent, double initialValue)
+	struct CollapsiblePane
 	{
-		const wxString tooltipText = wxString::Format("%s: %s", label, tooltip);
+		wxCollapsiblePane* object = nullptr;
+		wxWindow* pane = nullptr;
+		wxPanel* content = nullptr;
+		wxString captionText;
+	};
 
-		// Title
-		wxStaticText* caption = new wxStaticText(parent, wxID_ANY, label);
-		caption->SetToolTip(tooltipText);
-		caption->SetCursor(wxCURSOR_QUESTION_ARROW);
-		sizer->Add(caption, 0, wxLEFT | wxRIGHT | wxTOP, 5);
+	constexpr int PANE_SPACER = 10;
 
-		// Sizer
-		wxBoxSizer* widgetSizer = new wxBoxSizer(wxHORIZONTAL);
-		sizer->Add(widgetSizer, 1, wxEXPAND | wxALL, 0);
-
-		// Slider
-		_slider = static_cast<wxSlider*>(widgetSizer->Add(new wxSlider(parent, wxID_ANY, initialValue / 100, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL), 1, wxEXPAND, 0)->GetWindow());
-		_slider->SetToolTip(tooltipText);
-
-		_slider->Bind(wxEVT_MOUSEWHEEL, [](wxMouseEvent& event)
-		{
-			// Prevent scroll wheel altering the slider, and allow the parent scrollable container to scroll instead
-			if (wxWindow* const parent = dynamic_cast<wxWindow*>(event.GetEventObject())->GetParent())
-			{
-				wxMouseEvent parentEvent(event);
-				parent->GetEventHandler()->ProcessEvent(parentEvent);
-			}
-		});
-
-		_slider->Bind(wxEVT_SLIDER, [this](wxCommandEvent& event)
-		{
-			_spinCtrl->SetValue(event.GetInt() / 100.0);
-		});
-
-		// Spin ctrl
-		static constexpr double MIN = 0.0;
-		static constexpr double MAX = 1.0;
-		static constexpr double STEP = 0.01;
-
-		_spinCtrl = static_cast<wxSpinCtrlDouble*>(widgetSizer->Add(new wxSpinCtrlDouble(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS | wxTE_PROCESS_ENTER, MIN, MAX, initialValue, STEP))->GetWindow());
-		_spinCtrl->SetDigits(2);
-		_spinCtrl->SetToolTip(tooltipText);
-
-		_spinCtrl->Bind(wxEVT_SPINCTRLDOUBLE, [this](wxSpinDoubleEvent& event)
-		{
-			_slider->SetValue(event.GetValue() * 100);
-		});
-
-		_spinCtrl->Bind(wxEVT_TEXT_ENTER, [this](wxCommandEvent&)
-		{
-			double val = 0.0;
-			if (_spinCtrl->GetTextValue().ToDouble(&val)) // The spin control gets updated internally on focus loss only, so we have to use this workaround (or fake the focus loss).
-			{
-				SetValue(val); // Update both the spinCtrl internally and the slider.
-			}
-		});
-	}
-
-	double DoubleSlider::GetValue() const
+	CollapsiblePane CreateCollapsiblePane(const wxString& caption, wxSizer* sizer, wxWindow* parent)
 	{
-		return _spinCtrl->GetValue();
-	}
+		static constexpr int LABEL_OFFSET = 25; // 25 on MSW, have to check others
 
-	void DoubleSlider::SetValue(double value)
-	{
-		_spinCtrl->SetValue(value);
-		_slider->SetValue(_spinCtrl->GetValue() * 100);
+		wxCollapsiblePane* collpane = new wxCollapsiblePane(parent, wxID_ANY, caption);
+		sizer->Add(collpane, 0, wxEXPAND | wxALL);
+
+		collpane->Bind(wxEVT_COLLAPSIBLEPANE_CHANGED, [parent](wxCollapsiblePaneEvent &) { parent->Layout(); });
+		collpane->GetPane()->SetSizer(new wxBoxSizer(wxVERTICAL));
+
+		// Add internal padding
+		wxPanel* contentPanel = new wxPanel(collpane->GetPane(), wxID_ANY);
+		wxBoxSizer* panelSizer = new wxBoxSizer(wxVERTICAL);
+		contentPanel->SetSizer(panelSizer);
+		collpane->GetPane()->GetSizer()->Add(contentPanel, 1, wxEXPAND | wxLEFT, LABEL_OFFSET);
+
+		collpane->Expand();
+
+		return CollapsiblePane
+		{
+			.object = collpane,
+			.pane = collpane->GetPane(),
+			.content = contentPanel,
+			.captionText = caption
+		};
 	}
 }
 
@@ -117,8 +80,8 @@ namespace FrameElements
 		// Presets (left)
         wxPanel* leftPane = new wxPanel(splitter, wxID_ANY);
 		wxBoxSizer* sizerLeftPane = new wxBoxSizer(wxVERTICAL);
-		_presetsList = new wxListBox(leftPane, wxID_ANY, wxDefaultPosition, wxDefaultSize, items, wxLB_SINGLE);
-		sizerLeftPane->Add(_presetsList, 1, wxEXPAND | wxALL, 0);
+		presetsList = new wxListBox(leftPane, wxID_ANY, wxDefaultPosition, wxDefaultSize, items, wxLB_SINGLE);
+		sizerLeftPane->Add(presetsList, 1, wxEXPAND | wxALL, 0);
 		leftPane->SetSizer(sizerLeftPane);
 
 		// Controls (right)
@@ -127,21 +90,40 @@ namespace FrameElements
 		rightPane->SetSizer(sizerRightPane);
 
 		wxScrolled<wxPanel>* scrollPanel = new wxScrolled<wxPanel>(rightPane, wxID_ANY);
-		sizerRightPane->Add(scrollPanel, 1, wxEXPAND | wxALL, BOX_BORDER_SIZE);
+		sizerRightPane->Add(scrollPanel, 1, wxEXPAND | wxALL, 0);
 
 		wxBoxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
 		scrollPanel->SetSizer(sizerControls);
 
-		_sliderTest = std::make_unique<DoubleSlider>("Title 1", "Tooltip helptext", sizerControls, scrollPanel);
-		new DoubleSlider("Title 2", "Tooltip helptext", sizerControls, scrollPanel);
-		new DoubleSlider("Title 3", "Tooltip helptext", sizerControls, scrollPanel);
-		new DoubleSlider("Title 4", "Tooltip helptext", sizerControls, scrollPanel);
-		new DoubleSlider("Title 5", "Tooltip helptext", sizerControls, scrollPanel);
-		new DoubleSlider("Title 6", "Tooltip helptext", sizerControls, scrollPanel);
-		new DoubleSlider("Title 7", "Tooltip helptext", sizerControls, scrollPanel);
-		new DoubleSlider("Title 8", "Tooltip helptext", sizerControls, scrollPanel);
-		new DoubleSlider("Title 9", "Tooltip helptext", sizerControls, scrollPanel);
-		new DoubleSlider("Title 10", "Tooltip helptext", sizerControls, scrollPanel);
+		#pragma region Filter settings
+
+		// Common
+		CollapsiblePane collpaneCommon = CreateCollapsiblePane("Common overrides", sizerControls, scrollPanel);
+		sliderDacLeakage = std::make_unique<DoubleSlider>(Strings::Preferences::OPT_DAC_LEAKAGE, Strings::Preferences::DESC_DAC_LEAKAGE, collpaneCommon.content, 1.0);
+
+		collpaneCommon.pane->GetSizer()->AddSpacer(PANE_SPACER);
+
+		sliderDacLeakage->Bind(wxEVT_FILTER_WIDGET_TOGGLED, [collpaneCommon](wxCommandEvent& event)
+		{
+			collpaneCommon.object->SetLabelText(wxString::Format("%s (%i) (TEST)", collpaneCommon.captionText, event.GetInt())); // TEST, REMOVE ME
+			collpaneCommon.object->Refresh();
+		});
+
+		// 6581
+		CollapsiblePane collpane6581 = CreateCollapsiblePane("6581 overrides", sizerControls, scrollPanel);
+		sliderFilterCurve6581 = std::make_unique<DoubleSlider>(Strings::Preferences::OPT_FILTER_CURVE_6581, Strings::Preferences::DESC_FILTER_CURVE, collpane6581.content, 0.5);
+		sliderFilterRange6581 = std::make_unique<DoubleSlider>(Strings::Preferences::OPT_FILTER_RANGE_6581, Strings::Preferences::DESC_FILTER_RANGE, collpane6581.content, 0.5);
+		sliderWaveOffset6581 = std::make_unique<DoubleSlider>(Strings::Preferences::OPT_WAVE_OFFSET_6581, Strings::Preferences::DESC_WAVE_OFFSET_6581, collpane6581.content, 0);
+
+		collpane6581.pane->GetSizer()->AddSpacer(PANE_SPACER);
+
+		// 8580
+		CollapsiblePane collpane8580 = CreateCollapsiblePane("8580 overrides", sizerControls, scrollPanel);
+		sliderFilterCurve8580 = std::make_unique<DoubleSlider>(Strings::Preferences::OPT_FILTER_CURVE_8580, Strings::Preferences::DESC_FILTER_CURVE, collpane8580.content, 0.5);
+
+		collpane8580.pane->GetSizer()->AddSpacer(PANE_SPACER);
+
+		#pragma endregion
 
 		scrollPanel->SetScrollRate(0, wxSystemSettings::GetMetric(wxSYS_VSCROLL_ARROW_Y, &_parentPanel)); // Enable vertical scrolling.
 
