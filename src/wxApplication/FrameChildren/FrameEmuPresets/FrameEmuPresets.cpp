@@ -17,9 +17,12 @@
  */
 
 #include "FrameEmuPresets.h"
+#include <wx/filedlg.h>
 #include "../../MyApp.h"
 #include "../../../Util/HelpersGeneral.h"
-#include <wx/filedlg.h>
+#include "../../../wxApplication/Helpers/HelpersWx.h"
+
+static const wxString DIR_USER_PRESETS("UserPresets");
 
 FrameEmuPresets::FrameEmuPresets(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, MyApp& app)
     : wxDialog(parent, wxID_ANY, title, pos, size, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxSTAY_ON_TOP),
@@ -34,8 +37,7 @@ FrameEmuPresets::FrameEmuPresets(wxWindow* parent, const wxString& title, const 
     UpdateUiState();
 
     // *** Bindings ***
-    //_ui->sliderPlaybackSpeed->Bind(wxEVT_SCROLL_CHANGED, &OnSpeedSlider, this);
-    //_ui->sliderPlaybackSpeed->Bind(wxEVT_SCROLL_THUMBRELEASE , &OnSpeedSlider, this);
+    _ui->btnPresetAdd->Bind(wxEVT_BUTTON, [this](wxCommandEvent& /*evt*/) { SaveAs(); });
 
     Bind(wxEVT_CHAR_HOOK, &OnCharHook, this);
 }
@@ -67,4 +69,49 @@ void FrameEmuPresets::OnCharHook(wxKeyEvent& evt)
     }
 
     evt.Skip();
+}
+
+void FrameEmuPresets::SaveAs()
+{
+    wxTextEntryDialog dlg
+    (
+        this,
+        "Preset name", // TODO: UIStrings
+        wxGetStockLabel(wxID_SAVEAS, wxSTOCK_NOFLAGS),
+        "Custom" // TODO: pre-fill
+    );
+
+    if (dlg.ShowModal() != wxID_OK)
+    {
+        return;
+    }
+
+    wxString filename = Helpers::Wx::Files::SanitizedFileName(dlg.GetValue());
+    if (filename.IsEmpty()) // Completely invalid filename.
+    {
+        CallAfter([this](){ SaveAs(); });
+        return;
+    }
+
+    if (!filename.EndsWith(Helpers::Wx::Files::FILE_EXTENSION_INI))
+    {
+        filename += Helpers::Wx::Files::FILE_EXTENSION_INI;
+    }
+
+    wxFileName filepath(Helpers::Wx::Files::GetConfigFilePath(wxEmptyString));
+    filepath.AppendDir(DIR_USER_PRESETS);
+    filepath.SetFullName(filename);
+
+    if (filepath.Exists())
+    {
+        const wxString prompt = wxString::Format("Overwrite %s?", filename.Mid(0, filename.Length() - Helpers::Wx::Files::FILE_EXTENSION_INI.length())); // TODO: UIStrings
+        const int answer = wxMessageBox(prompt, wxGetStockLabel(wxID_SAVEAS, wxSTOCK_NOFLAGS), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, this);
+        if (answer != wxYES)
+        {
+            CallAfter([this](){ SaveAs(); });
+            return;
+        }
+    }
+
+    // TODO: save filepath to disk
 }

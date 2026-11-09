@@ -111,6 +111,7 @@ namespace Helpers
 		namespace Files
 		{
 			static const std::string FILE_EXTENSION_ZIP = ".zip";
+			static const std::string FILE_EXTENSION_INI = ".ini";
 			static const std::string FILE_EXTENSION_PLAYLIST = ".m3u8";
 			static const std::string DEFAULT_PLAYLIST_NAME = "default" + FILE_EXTENSION_PLAYLIST;
 
@@ -159,6 +160,9 @@ namespace Helpers
 				#error "Please define a config file path logic for this platform." // Possibly OSX (~/Library/Application Support/sidplaywx/$filename)?
 #endif
 			}
+
+			/// @brief Returns a trimmed sanitized string with illegal characters stripped.
+			wxString SanitizedFileName(const wxString& filename);
 		}
 
 		namespace Audio

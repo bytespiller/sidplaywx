@@ -41,7 +41,8 @@ public:
 private:
     void UpdateUiState();
 	void OnCharHook(wxKeyEvent& evt);
-    //void OnSlider(wxCommandEvent& evt);
+
+    void SaveAs();
 
 private:
     MyApp& _app;

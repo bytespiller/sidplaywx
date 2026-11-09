@@ -17,6 +17,7 @@
  */
 
 #include "ElementsEmuPresets.h"
+#include <wx/artprov.h>
 #include <wx/splitter.h>
 
 #include "../../Config/AppSettings.h"
@@ -51,6 +52,18 @@ namespace FrameElements
 		presetsList = new wxListBox(leftPane, wxID_ANY, wxDefaultPosition, wxDefaultSize, items, wxLB_SINGLE);
 		sizerLeftPane->Add(presetsList, 1, wxEXPAND | wxALL, 0);
 		leftPane->SetSizer(sizerLeftPane);
+
+		wxBoxSizer* sizerPresetsButtons = new wxBoxSizer(wxHORIZONTAL);
+		sizerLeftPane->Add(sizerPresetsButtons, 0);
+
+		btnPresetAdd = new wxButton(leftPane, wxID_ANY);
+		btnPresetAdd->SetBitmapCurrent(wxArtProvider::GetBitmap(wxART_PLUS, wxART_BUTTON));
+		sizerPresetsButtons->Add(btnPresetAdd);
+
+		btnPresetRemove = new wxButton(leftPane, wxID_ANY);
+		btnPresetRemove->SetBitmapCurrent(wxArtProvider::GetBitmap(wxART_MINUS, wxART_BUTTON));
+		btnPresetRemove->Disable();
+		sizerPresetsButtons->Add(btnPresetRemove);
 
 		// Controls (right)
         wxPanel* rightPane = new wxPanel(splitter, wxID_ANY);

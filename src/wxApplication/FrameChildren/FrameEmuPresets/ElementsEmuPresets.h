@@ -40,6 +40,8 @@ namespace FrameElements
 
 	public:
 		wxListBox* presetsList = nullptr;
+		wxButton* btnPresetAdd = nullptr;
+		wxButton* btnPresetRemove = nullptr;
 
 	private:
 		wxPanel& _parentPanel;

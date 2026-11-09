@@ -335,6 +335,19 @@ namespace Helpers
 
 				return retFileList;
 			}
+
+			wxString SanitizedFileName(const wxString& filename)
+			{
+				const wxString& forbidden = wxFileName::GetForbiddenChars();
+				wxString cleanString = filename;
+
+				for (wxUniChar illegalChar : forbidden)
+				{
+					cleanString.Replace(wxString(illegalChar), wxEmptyString);
+				}
+
+				return cleanString.Trim(true).Trim(false);
+			}
 		}
 
 		namespace Audio
