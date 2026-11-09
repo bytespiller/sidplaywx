@@ -74,11 +74,6 @@ namespace FrameElements
 		}
 		collpaneCommon->GetContentPanel()->GetSizer()->AddSpacer(PANE_SPACER);
 
-		collpaneCommon->TryGetWidget(Settings::AppSettings::ID::DacLeakage)->Bind(wxEVT_FILTER_WIDGET_TOGGLED, [collpaneCommon](wxCommandEvent& event)
-		{
-			collpaneCommon->SetCaption(wxString::Format("%s (%i) (TEST)", collpaneCommon->GetCanonicalCaption(), event.GetInt())); // TEST, REMOVE ME
-		});
-
 		// 6581
 		CollapsiblePane* const collpane6581 = new CollapsiblePane("6581 overrides", sizerControls, scrollPanel);
 		{

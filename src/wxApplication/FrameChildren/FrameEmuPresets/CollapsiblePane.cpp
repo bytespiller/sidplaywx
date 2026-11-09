@@ -17,6 +17,7 @@
  */
 
 #include "CollapsiblePane.h"
+#include <numeric>
 
 namespace FrameElements
 {
@@ -47,6 +48,18 @@ namespace FrameElements
 		for (auto& widget : widgets)
 		{
 			_widgets.emplace_back(std::move(widget));
+			_widgets.back()->Bind(wxEVT_FILTER_WIDGET_TOGGLED, [this](wxCommandEvent& /*event*/)
+			{
+				const int sum = GetEnabledWidgetsCount();
+				if (sum == 0)
+				{
+					SetCaption(GetCanonicalCaption());
+				}
+				else
+				{
+					SetCaption(wxString::Format("%s (%i)", GetCanonicalCaption(), sum));
+				}
+			});
 		}
 
 		widgets.clear();
@@ -60,11 +73,6 @@ namespace FrameElements
 		});
 
 		return (it != _widgets.cend()) ? it->get() : nullptr;
-	}
-
-	wxCollapsiblePane* CollapsiblePane::GetProxy() const
-	{
-		return _collpane;
 	}
 
 	wxWindow* CollapsiblePane::GetPane() const
@@ -91,5 +99,30 @@ namespace FrameElements
 	{
 		GetProxy()->SetLabelText(caption);
 		GetProxy()->Refresh();
+	}
+
+	void CollapsiblePane::AutoExpandOrCollapse()
+	{
+		if (GetEnabledWidgetsCount() == 0)
+		{
+			GetProxy()->Collapse();
+		}
+		else
+		{
+			GetProxy()->Expand();
+		}
+	}
+
+	wxCollapsiblePane* CollapsiblePane::GetProxy() const
+	{
+		return _collpane;
+	}
+
+	int CollapsiblePane::GetEnabledWidgetsCount() const
+	{
+		return std::accumulate(_widgets.begin(), _widgets.end(), 0, [](int cSum, const std::unique_ptr<FilterWidgetBase>& widget)
+		{
+			return cSum + static_cast<int>(widget->IsEnabled());
+		});
 	}
 }

@@ -43,10 +43,7 @@ namespace FrameElements
 		/// @return Widget with specified uid or nullptr.
 		FilterWidgetBase* TryGetWidget(const char* uid);
 
-		/// @return The control proxy. You probably don't need this.
-		wxCollapsiblePane* GetProxy() const;
-
-		/// @brief Alias for GetProxy()->GetPane()
+		/// @return Root window on which the wxPanel and widgets on it are attached.
 		wxWindow* GetPane() const;
 
 		/// @return The panel on which the widgets are attached to.
@@ -55,12 +52,21 @@ namespace FrameElements
 		/// @return The collapsible pane's initial caption text (from its creation).
 		const wxString& GetCanonicalCaption() const;
 
-		/// @brief Alias for GetProxy()->GetLabelText()
 		/// @return The collapsible pane's current caption text.
 		wxString GetCurrentCaption() const;
 
 		/// @brief Sets collapsible pane's caption.
 		void SetCaption(const wxString& caption) const;
+
+		/// @brief Expands this pane if any of its widgets are enabled, otherwise collapses it (useful after restoring widgets' settings).
+		void AutoExpandOrCollapse();
+
+	private:
+		/// @return The control proxy.
+		wxCollapsiblePane* GetProxy() const;
+
+		/// @return Count of enabled widgets.
+		int GetEnabledWidgetsCount() const;
 
 	private:
 		std::vector< std::unique_ptr<FilterWidgetBase> > _widgets;
