@@ -17,10 +17,10 @@
  */
 
 #include "FrameEmuPresets.h"
-#include <wx/filedlg.h>
 #include "../../MyApp.h"
 #include "../../../Util/HelpersGeneral.h"
 #include "../../../wxApplication/Helpers/HelpersWx.h"
+#include <wx/filedlg.h>
 
 static const wxString DIR_USER_PRESETS("UserPresets");
 
@@ -78,7 +78,7 @@ void FrameEmuPresets::SaveAs()
         this,
         "Preset name", // TODO: UIStrings
         wxGetStockLabel(wxID_SAVEAS, wxSTOCK_NOFLAGS),
-        "Custom" // TODO: pre-fill
+        "Custom" // TODO: UIStrings
     );
 
     if (dlg.ShowModal() != wxID_OK)
@@ -93,18 +93,22 @@ void FrameEmuPresets::SaveAs()
         return;
     }
 
-    if (!filename.EndsWith(Helpers::Wx::Files::FILE_EXTENSION_INI))
+    if (!filename.EndsWith(Helpers::Wx::Files::FILE_EXTENSION_XML))
     {
-        filename += Helpers::Wx::Files::FILE_EXTENSION_INI;
+        filename += Helpers::Wx::Files::FILE_EXTENSION_XML;
     }
 
     wxFileName filepath(Helpers::Wx::Files::GetConfigFilePath(wxEmptyString));
+    if (!filepath.DirExists(DIR_USER_PRESETS))
+    {
+        filepath.Mkdir(DIR_USER_PRESETS);
+    }
     filepath.AppendDir(DIR_USER_PRESETS);
     filepath.SetFullName(filename);
 
     if (filepath.Exists())
     {
-        const wxString prompt = wxString::Format("Overwrite %s?", filename.Mid(0, filename.Length() - Helpers::Wx::Files::FILE_EXTENSION_INI.length())); // TODO: UIStrings
+        const wxString prompt = wxString::Format("Overwrite %s?", filename.Mid(0, filename.Length() - Helpers::Wx::Files::FILE_EXTENSION_XML.length())); // TODO: UIStrings
         const int answer = wxMessageBox(prompt, wxGetStockLabel(wxID_SAVEAS, wxSTOCK_NOFLAGS), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, this);
         if (answer != wxYES)
         {
@@ -113,5 +117,12 @@ void FrameEmuPresets::SaveAs()
         }
     }
 
-    // TODO: save filepath to disk
+    // Save to disk
+    Settings::CustomPresetSettings settings(filepath.GetFullPath());
+    for (const FrameElements::FilterWidgetBase* const widget : _ui->GetAllWidgets())
+    {
+        settings.AddOption(Settings::Option(widget->GetUid(), widget->GetValue()));
+    }
+
+    settings.TrySave();
 }

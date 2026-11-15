@@ -27,7 +27,7 @@ namespace Settings
 	class SettingsBase
 	{
 	public:
-		explicit SettingsBase(const char* const filename);
+		explicit SettingsBase(const wxString& filename);
 
 	public:
 		virtual std::vector<Option> GetDefaultSettings() const = 0;

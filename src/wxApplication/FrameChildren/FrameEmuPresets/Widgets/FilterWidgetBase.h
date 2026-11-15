@@ -23,6 +23,7 @@
     #include <wx/wx.h>
 #endif
 
+#include "../../../Settings/Option.h"
 #include <wx/event.h>
 
 namespace FrameElements
@@ -38,6 +39,9 @@ namespace FrameElements
 	public:
 		bool IsEnabled() const;
 		const char* GetUid() const;
+
+	public:
+		virtual Settings::Option::Var GetValue() const = 0;
 
 	protected:
 		virtual void Enable(bool enabled = true);

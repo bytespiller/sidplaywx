@@ -75,6 +75,19 @@ namespace FrameElements
 		return (it != _widgets.cend()) ? it->get() : nullptr;
 	}
 
+	std::vector<FilterWidgetBase*> CollapsiblePane::GetAllWidgets()
+	{
+		std::vector<FilterWidgetBase*> result;
+		result.reserve(_widgets.size());
+
+		for (const auto& widget : _widgets)
+		{
+			result.push_back(widget.get());
+		}
+
+		return result;
+	}
+
 	wxWindow* CollapsiblePane::GetPane() const
 	{
 		return GetProxy()->GetPane();

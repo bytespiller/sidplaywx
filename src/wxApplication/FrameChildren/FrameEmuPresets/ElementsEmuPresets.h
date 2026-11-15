@@ -23,12 +23,13 @@
     #include <wx/wx.h>
 #endif
 
-#include <memory>
-
-#include "Widgets/DoubleSlider.h"
+#include "Widgets/FilterWidgetBase.h"
+#include <vector>
 
 namespace FrameElements
 {
+	class CollapsiblePane;
+
 	class ElementsEmuPresets
 	{
 	public:
@@ -39,11 +40,20 @@ namespace FrameElements
 	    explicit ElementsEmuPresets(wxPanel& panel);
 
 	public:
+		FilterWidgetBase* TryGetWidget(const char* uid);
+		std::vector<FrameElements::FilterWidgetBase*> GetAllWidgets();
+
+	public:
 		wxListBox* presetsList = nullptr;
 		wxButton* btnPresetAdd = nullptr;
 		wxButton* btnPresetRemove = nullptr;
 
 	private:
+		/// @brief Helper to remember the pane pointer & return it in one line.
+		CollapsiblePane* RememberCollapsiblePane(CollapsiblePane* newPanePtr);
+
+	private:
 		wxPanel& _parentPanel;
+		std::vector<CollapsiblePane*> _widgetHolders;
 	};
 }

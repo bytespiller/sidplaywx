@@ -43,6 +43,9 @@ namespace FrameElements
 		/// @return Widget with specified uid or nullptr.
 		FilterWidgetBase* TryGetWidget(const char* uid);
 
+		/// @return Raw pointers to all attached widgets.
+		std::vector<FilterWidgetBase*> GetAllWidgets();
+
 		/// @return Root window on which the wxPanel and widgets on it are attached.
 		wxWindow* GetPane() const;
 

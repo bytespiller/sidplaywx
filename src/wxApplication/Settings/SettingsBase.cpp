@@ -60,7 +60,7 @@ namespace Settings
 
 	// Main class -------------------------------------------------
 
-	SettingsBase::SettingsBase(const char* const filename) :
+	SettingsBase::SettingsBase(const wxString& filename) :
 		_filepath(Helpers::Wx::Files::GetConfigFilePath(filename))
 	{
 	}

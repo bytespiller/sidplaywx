@@ -24,7 +24,7 @@
 
 namespace Settings
 {
-	static const bool DEFAULT = true;
+	static constexpr bool DEFAULT = true;
 
 	class AppSettings : public SettingsBase
 	{

@@ -20,10 +20,10 @@
 #include <wx/artprov.h>
 #include <wx/splitter.h>
 
+#include "CollapsiblePane.h"
+#include "Widgets/DoubleSlider.h"
 #include "../../Config/AppSettings.h"
 #include "../../Config/UIStrings.h"
-
-#include "CollapsiblePane.h"
 
 namespace
 {
@@ -79,7 +79,7 @@ namespace FrameElements
 		#pragma region Filter settings
 
 		// Common
-		CollapsiblePane* const collpaneCommon = new CollapsiblePane("Common overrides", sizerControls, scrollPanel);
+		CollapsiblePane* const collpaneCommon = RememberCollapsiblePane(new CollapsiblePane("Common overrides", sizerControls, scrollPanel)); // TODO: UIStrings
 		{
 			std::vector<std::unique_ptr<FilterWidgetBase>> widgets;
 			widgets.emplace_back(std::make_unique<DoubleSlider>(Settings::AppSettings::ID::DacLeakage, Strings::Preferences::OPT_DAC_LEAKAGE, Strings::Preferences::DESC_DAC_LEAKAGE, collpaneCommon->GetContentPanel(), 1.0));
@@ -88,10 +88,10 @@ namespace FrameElements
 		collpaneCommon->GetContentPanel()->GetSizer()->AddSpacer(PANE_SPACER);
 
 		// 6581
-		CollapsiblePane* const collpane6581 = new CollapsiblePane("6581 overrides", sizerControls, scrollPanel);
+		CollapsiblePane* const collpane6581 = RememberCollapsiblePane(new CollapsiblePane("6581 overrides", sizerControls, scrollPanel)); // TODO: UIStrings
 		{
 			std::vector<std::unique_ptr<FilterWidgetBase>> widgets;
-			widgets.emplace_back(std::make_unique<DoubleSlider>(Settings::AppSettings::ID::FilterRange6581, Strings::Preferences::OPT_FILTER_CURVE_6581, Strings::Preferences::DESC_FILTER_CURVE, collpane6581->GetContentPanel(), 0.5));
+			widgets.emplace_back(std::make_unique<DoubleSlider>(Settings::AppSettings::ID::FilterCurve6581, Strings::Preferences::OPT_FILTER_CURVE_6581, Strings::Preferences::DESC_FILTER_CURVE, collpane6581->GetContentPanel(), 0.5));
 			widgets.emplace_back(std::make_unique<DoubleSlider>(Settings::AppSettings::ID::FilterRange6581, Strings::Preferences::OPT_FILTER_RANGE_6581, Strings::Preferences::DESC_FILTER_RANGE, collpane6581->GetContentPanel(), 0.5));
 			widgets.emplace_back(std::make_unique<DoubleSlider>(Settings::AppSettings::ID::WaveOffset6581, Strings::Preferences::OPT_WAVE_OFFSET_6581, Strings::Preferences::DESC_WAVE_OFFSET_6581, collpane6581->GetContentPanel(), 0));
 			collpane6581->AdoptWidgets(widgets);
@@ -99,7 +99,7 @@ namespace FrameElements
 		collpane6581->GetPane()->GetSizer()->AddSpacer(PANE_SPACER);
 
 		// 8580
-		CollapsiblePane* const collpane8580 = new CollapsiblePane("8580 overrides", sizerControls, scrollPanel);
+		CollapsiblePane* const collpane8580 = RememberCollapsiblePane(new CollapsiblePane("8580 overrides", sizerControls, scrollPanel)); // TODO: UIStrings
 		{
 			std::vector<std::unique_ptr<FilterWidgetBase>> widgets;
 			widgets.emplace_back(std::make_unique<DoubleSlider>(Settings::AppSettings::ID::FilterCurve8580, Strings::Preferences::OPT_FILTER_CURVE_8580, Strings::Preferences::DESC_FILTER_CURVE, collpane8580->GetContentPanel(), 0.5));
@@ -120,5 +120,34 @@ namespace FrameElements
 		sizerPadding->Add(sizerParent, 1, wxEXPAND | wxALL);
 	    _parentPanel.SetSizer(sizerPadding);
 	    _parentPanel.Layout();
+	}
+
+	FilterWidgetBase* ElementsEmuPresets::TryGetWidget(const char* uid)
+	{
+		for (FrameElements::CollapsiblePane* pane : _widgetHolders)
+		{
+			if (FrameElements::FilterWidgetBase* widget = pane->TryGetWidget(uid))
+			{
+				return widget;
+			}
+		}
+		return nullptr;
+	}
+
+	std::vector<FrameElements::FilterWidgetBase*> ElementsEmuPresets::GetAllWidgets()
+	{
+		std::vector<FrameElements::FilterWidgetBase*> widgets;
+		for (FrameElements::CollapsiblePane* pane : _widgetHolders)
+		{
+			auto paneWidgets = pane->GetAllWidgets();
+			widgets.insert(widgets.end(), paneWidgets.begin(), paneWidgets.end());
+		}
+		return widgets;
+	}
+
+	CollapsiblePane* ElementsEmuPresets::RememberCollapsiblePane(CollapsiblePane* newPanePtr)
+	{
+		_widgetHolders.push_back(newPanePtr);
+		return newPanePtr;
 	}
 }

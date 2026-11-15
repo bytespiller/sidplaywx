@@ -24,6 +24,7 @@
 #endif
 
 #include "ElementsEmuPresets.h"
+#include "CustomPresetSettings.h"
 
 #include <memory>
 

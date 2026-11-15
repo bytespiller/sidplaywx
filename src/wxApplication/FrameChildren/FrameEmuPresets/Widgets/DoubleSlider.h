@@ -39,7 +39,7 @@ namespace FrameElements
 		void Enable(bool enabled = true) override;
 
 	public:
-		double GetValue() const;
+		Settings::Option::Var GetValue() const override;
 		void SetValue(double value);
 
 	private:

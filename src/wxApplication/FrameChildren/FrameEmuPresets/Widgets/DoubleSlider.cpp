@@ -77,7 +77,7 @@ namespace FrameElements
 		Enable(_chkEnabled->GetValue());
 	}
 
-	double DoubleSlider::GetValue() const
+	Settings::Option::Var DoubleSlider::GetValue() const
 	{
 		return _spinCtrl->GetValue();
 	}
