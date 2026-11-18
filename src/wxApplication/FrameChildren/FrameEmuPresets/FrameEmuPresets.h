@@ -43,7 +43,13 @@ private:
     void UpdateUiState();
 	void OnCharHook(wxKeyEvent& evt);
 
+    void RefreshPresetsList();
     void SaveAs();
+
+    /// @brief Loads preset from disk if name is not empty, otherwise resets the controls to default values.
+    void LoadOrResetPreset(const wxString& name = wxEmptyString);
+
+    void RemovePreset();
 
 private:
     MyApp& _app;

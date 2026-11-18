@@ -82,6 +82,11 @@ namespace FrameElements
 		return _spinCtrl->GetValue();
 	}
 
+	void DoubleSlider::SetValue(Settings::Option::Var value)
+	{
+		SetValue(std::get<double>(value));
+	}
+
 	void DoubleSlider::SetValue(double value)
 	{
 		_spinCtrl->SetValue(value);

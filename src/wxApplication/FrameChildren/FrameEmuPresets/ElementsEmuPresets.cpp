@@ -25,16 +25,7 @@
 #include "../../Config/AppSettings.h"
 #include "../../Config/UIStrings.h"
 
-namespace
-{
-	const wxArrayString items =  // TEMP TEST
-	{
-		"Chris Huelsbeck",
-		"Lasse Oorni"
-	};
-
-	constexpr int PANE_SPACER = 10;
-}
+static constexpr int PANE_SPACER = 10;
 
 namespace FrameElements
 {
@@ -49,7 +40,7 @@ namespace FrameElements
 		// Presets (left)
         wxPanel* leftPane = new wxPanel(splitter, wxID_ANY);
 		wxBoxSizer* sizerLeftPane = new wxBoxSizer(wxVERTICAL);
-		presetsList = new wxListBox(leftPane, wxID_ANY, wxDefaultPosition, wxDefaultSize, items, wxLB_SINGLE);
+		presetsList = new wxListBox(leftPane, wxID_ANY, wxDefaultPosition, wxDefaultSize, {}, wxLB_SINGLE | wxWANTS_CHARS);
 		sizerLeftPane->Add(presetsList, 1, wxEXPAND | wxALL, 0);
 		leftPane->SetSizer(sizerLeftPane);
 

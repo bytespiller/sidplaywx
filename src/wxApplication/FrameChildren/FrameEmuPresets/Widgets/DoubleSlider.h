@@ -40,6 +40,8 @@ namespace FrameElements
 
 	public:
 		Settings::Option::Var GetValue() const override;
+
+		void SetValue(Settings::Option::Var value) override;
 		void SetValue(double value);
 
 	private:

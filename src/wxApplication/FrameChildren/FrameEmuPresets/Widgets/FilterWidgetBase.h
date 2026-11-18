@@ -41,10 +41,11 @@ namespace FrameElements
 		const char* GetUid() const;
 
 	public:
-		virtual Settings::Option::Var GetValue() const = 0;
-
-	protected:
 		virtual void Enable(bool enabled = true);
+
+	public:
+		virtual Settings::Option::Var GetValue() const = 0;
+		virtual void SetValue(Settings::Option::Var) = 0;
 
 	protected:
 		wxCheckBox* _chkEnabled;
