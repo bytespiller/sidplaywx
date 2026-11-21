@@ -36,18 +36,20 @@ namespace Settings
 		{
 			return // TODO: migrate
 			{
+				// Common
 				DefaultOption(AppSettings::ID::DefaultC64Model, static_cast<int>(AppSettings::DefaultC64Model::Prefer_PAL)),
 				DefaultOption(AppSettings::ID::DefaultSidModel, static_cast<int>(AppSettings::DefaultSidModel::Prefer_MOS6581)),
 				DefaultOption(AppSettings::ID::CombinedWaveformsStrength, static_cast<int>(AppSettings::CombinedWaveformsStrength::AVERAGE)),
+				DefaultOption(AppSettings::ID::DacLeakage, 1.0),
 
+				// 6581
 				DefaultOption(AppSettings::ID::FilterCurve6581, 0.5),
 				DefaultOption(AppSettings::ID::FilterRange6581, 0.5),
-				DefaultOption(AppSettings::ID::FilterCurve8580, 0.5),
-
-				DefaultOption(AppSettings::ID::DacLeakage, 1.0),
 				DefaultOption(AppSettings::ID::WaveOffset6581, 0.0),
-
 				DefaultOption(AppSettings::ID::Old6581caps, false),
+
+				// 8580
+				DefaultOption(AppSettings::ID::FilterCurve8580, 0.5),
 				DefaultOption(AppSettings::ID::DigiBoost, false),
 			};
 		}

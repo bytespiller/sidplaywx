@@ -31,7 +31,12 @@ namespace FrameElements
 		parent->GetSizer()->Add(sizerTitle, 1, wxEXPAND | wxALL);
 
 		_chkEnabled = new wxCheckBox(parent, wxID_ANY, label);
-		_chkEnabled->SetToolTip(wxString::Format("%s: %s", label, tooltip));
+
+		if (!tooltip.IsEmpty())
+		{
+			_chkEnabled->SetToolTip(wxString::Format("%s\n%s", label, tooltip));
+		}
+
 		sizerTitle->Add(_chkEnabled, 1, wxEXPAND | wxALL);
 
 		_chkEnabled->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent& event)

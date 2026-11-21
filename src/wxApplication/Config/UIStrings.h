@@ -179,6 +179,13 @@ namespace Strings
 	namespace EmuPresets
 	{
 		inline constexpr const char* const WINDOW_TITLE("Emulation Presets");
+
+		inline constexpr const char* const CAT_COMMON("Common overrides");
+		inline constexpr const char* const CAT_6581("6581 overrides");
+		inline constexpr const char* const CAT_8580("8580 overrides");
+
+		inline constexpr const char* const OPT_DISABLED("Disabled"); // 0
+		inline constexpr const char* const OPT_ENABLED("Enabled");   // 1
 	}
 
 	namespace TuneInfo
