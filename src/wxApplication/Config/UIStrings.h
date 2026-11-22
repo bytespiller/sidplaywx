@@ -179,6 +179,7 @@ namespace Strings
 	namespace EmuPresets
 	{
 		inline constexpr const char* const WINDOW_TITLE("Emulation Presets");
+		inline constexpr const char* const BTN_RESET("Reset");
 
 		inline constexpr const char* const CAT_COMMON("Common overrides");
 		inline constexpr const char* const CAT_6581("6581 overrides");

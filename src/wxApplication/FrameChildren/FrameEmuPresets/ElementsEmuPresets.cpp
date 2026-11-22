@@ -26,7 +26,9 @@
 
 #include <wx/artprov.h>
 #include <wx/splitter.h>
+#include <wx/statline.h>
 
+static constexpr int BORDER = 10;
 static constexpr int VERTICAL_SPACER = 10;
 
 namespace FrameElements
@@ -37,7 +39,7 @@ namespace FrameElements
 	    wxBoxSizer* sizerParent = new wxBoxSizer(wxHORIZONTAL);
 
 		wxSplitterWindow* splitter = new wxSplitterWindow(&_parentPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
-		sizerParent->Add(splitter, 1, wxEXPAND | wxALL, 0);
+		sizerParent->Add(splitter, 1, wxEXPAND | wxALL);
 
 		// Presets (left)
         wxPanel* leftPane = new wxPanel(splitter, wxID_ANY);
@@ -45,18 +47,6 @@ namespace FrameElements
 		presetsList = new wxListBox(leftPane, wxID_ANY, wxDefaultPosition, wxDefaultSize, {}, wxLB_SINGLE | wxWANTS_CHARS);
 		sizerLeftPane->Add(presetsList, 1, wxEXPAND | wxALL, 0);
 		leftPane->SetSizer(sizerLeftPane);
-
-		wxBoxSizer* sizerPresetsButtons = new wxBoxSizer(wxHORIZONTAL);
-		sizerLeftPane->Add(sizerPresetsButtons, 0);
-
-		btnPresetAdd = new wxButton(leftPane, wxID_ANY);
-		btnPresetAdd->SetBitmapCurrent(wxArtProvider::GetBitmap(wxART_PLUS, wxART_BUTTON));
-		sizerPresetsButtons->Add(btnPresetAdd);
-
-		btnPresetRemove = new wxButton(leftPane, wxID_ANY);
-		btnPresetRemove->SetBitmapCurrent(wxArtProvider::GetBitmap(wxART_MINUS, wxART_BUTTON));
-		btnPresetRemove->Disable();
-		sizerPresetsButtons->Add(btnPresetRemove);
 
 		// Controls (right)
         wxPanel* rightPane = new wxPanel(splitter, wxID_ANY);
@@ -72,7 +62,7 @@ namespace FrameElements
 		#pragma region Filter settings
 
 		// Common
-		CollapsiblePane* const collpaneCommon = RememberCollapsiblePane(new CollapsiblePane(Strings::EmuPresets::CAT_COMMON, sizerControls, scrollPanel));
+		CollapsiblePane* const collpaneCommon = RememberCollapsiblePane(new CollapsiblePane(Strings::EmuPresets::CAT_COMMON, sizerControls, scrollPanel), rightPane);
 		{
 			wxPanel* const parent = collpaneCommon->GetContentPanel();
 			std::vector<std::unique_ptr<FilterWidgetBase>> widgets;
@@ -115,7 +105,7 @@ namespace FrameElements
 		}
 
 		// 6581
-		CollapsiblePane* const collpane6581 = RememberCollapsiblePane(new CollapsiblePane(Strings::EmuPresets::CAT_6581, sizerControls, scrollPanel));
+		CollapsiblePane* const collpane6581 = RememberCollapsiblePane(new CollapsiblePane(Strings::EmuPresets::CAT_6581, sizerControls, scrollPanel), rightPane);
 		{
 			wxPanel* const parent = collpane6581->GetContentPanel();
 			std::vector<std::unique_ptr<FilterWidgetBase>> widgets;
@@ -142,7 +132,7 @@ namespace FrameElements
 		}
 
 		// 8580
-		CollapsiblePane* const collpane8580 = RememberCollapsiblePane(new CollapsiblePane(Strings::EmuPresets::CAT_8580, sizerControls, scrollPanel));
+		CollapsiblePane* const collpane8580 = RememberCollapsiblePane(new CollapsiblePane(Strings::EmuPresets::CAT_8580, sizerControls, scrollPanel), rightPane);
 		{
 			wxPanel* const parent = collpane8580->GetContentPanel();
 			std::vector<std::unique_ptr<FilterWidgetBase>> widgets;
@@ -172,7 +162,32 @@ namespace FrameElements
 
 		// Setup
 		wxBoxSizer* sizerPadding = new wxBoxSizer(wxVERTICAL);
-		sizerPadding->Add(sizerParent, 1, wxEXPAND | wxALL);
+		sizerPadding->Add(sizerParent, 1, wxEXPAND);
+
+		// Buttons
+    	{
+			sizerPadding->Add(new wxStaticLine(&_parentPanel), 0, wxEXPAND | wxLEFT | wxRIGHT);
+			wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
+			sizerPadding->Add(sizerButtons, 0, wxEXPAND | wxALL, BORDER);
+
+			// Preset buttons
+			btnPresetAdd = new wxBitmapButton(&_parentPanel, wxID_ANY, wxArtProvider::GetBitmap(wxART_PLUS, wxART_BUTTON));
+			sizerButtons->Add(btnPresetAdd, wxSizerFlags().Center().Border(wxRIGHT));
+
+			btnPresetRemove = new wxBitmapButton(&_parentPanel, wxID_ANY, wxArtProvider::GetBitmap(wxART_MINUS, wxART_BUTTON));
+			btnPresetRemove->Disable();
+			sizerButtons->Add(btnPresetRemove, wxSizerFlags().Center());
+
+			sizerButtons->AddStretchSpacer(1);
+
+			// Dialog buttons
+			btnReset = new wxButton(&_parentPanel, wxID_RESET, Strings::EmuPresets::BTN_RESET);
+			sizerButtons->Add(btnReset, wxSizerFlags().Center().Border(wxRIGHT));
+
+			btnApply = new wxButton(&_parentPanel, wxID_APPLY);
+			sizerButtons->Add(btnApply, wxSizerFlags().Center());
+    	}
+
 	    _parentPanel.SetSizer(sizerPadding);
 	    _parentPanel.Layout();
 	}
@@ -200,9 +215,10 @@ namespace FrameElements
 		return widgets;
 	}
 
-	CollapsiblePane* ElementsEmuPresets::RememberCollapsiblePane(CollapsiblePane* newPanePtr)
+	CollapsiblePane* ElementsEmuPresets::RememberCollapsiblePane(CollapsiblePane* newPanePtr, wxPanel* rightPane)
 	{
 		_widgetHolders.push_back(newPanePtr);
+		newPanePtr->GetProxy()->Bind(wxEVT_COLLAPSIBLEPANE_CHANGED, [rightPane](wxCollapsiblePaneEvent&) { rightPane->Layout(); }); // Update scroll area on collapse/expand
 		return newPanePtr;
 	}
 }

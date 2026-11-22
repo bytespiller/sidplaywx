@@ -48,9 +48,12 @@ namespace FrameElements
 		wxButton* btnPresetAdd = nullptr;
 		wxButton* btnPresetRemove = nullptr;
 
+		wxButton* btnApply = nullptr;
+		wxButton* btnReset = nullptr;
+
 	private:
 		/// @brief Helper to remember the pane pointer & return it in one line.
-		CollapsiblePane* RememberCollapsiblePane(CollapsiblePane* newPanePtr);
+		CollapsiblePane* RememberCollapsiblePane(CollapsiblePane* newPanePtr, wxPanel* rightPane);
 
 	private:
 		wxPanel& _parentPanel;

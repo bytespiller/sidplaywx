@@ -44,7 +44,7 @@ FrameEmuPresets::FrameEmuPresets(wxWindow* parent, const wxString& title, const 
     _ui = std::make_unique<FrameElements::ElementsEmuPresets>(*_panel);
 
     // Configure UI
-    UpdateUiState();
+    UpdateUiState(); // TODO: get rid of this if unused
 
     // *** Bindings ***
     _ui->btnPresetAdd->Bind(wxEVT_BUTTON, [this](wxCommandEvent& /*evt*/) { SaveAs(); });

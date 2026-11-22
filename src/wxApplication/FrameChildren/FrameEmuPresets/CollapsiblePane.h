@@ -64,10 +64,10 @@ namespace FrameElements
 		/// @brief Expands this pane if any of its widgets are enabled, otherwise collapses it (useful after restoring widgets' settings).
 		void AutoExpandOrCollapse();
 
-	private:
 		/// @return The control proxy.
 		wxCollapsiblePane* GetProxy() const;
 
+	private:
 		/// @return Count of enabled widgets.
 		int GetEnabledWidgetsCount() const;
 
